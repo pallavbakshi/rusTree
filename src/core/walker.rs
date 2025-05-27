@@ -7,6 +7,32 @@ use std::path::Path;
 use std::fs;
 use walkdir::WalkDir;
 
+/// Traverses a directory structure starting from `root_path` and collects information
+/// about each entry based on the provided `config`.
+///
+/// This function uses `walkdir::WalkDir` for traversal and populates `NodeInfo`
+/// structs for each valid entry encountered. It applies filtering (e.g., `max_depth`,
+/// `show_hidden`) and performs analysis (e.g., size, line/word counts, custom functions)
+/// as specified in the `config`.
+///
+/// # Arguments
+///
+/// * `root_path` - The [`Path`] to the root directory to start scanning from.
+/// * `config` - The [`RustreeLibConfig`] containing options for traversal and analysis.
+///
+/// # Returns
+///
+/// A `Result` containing a `Vec<NodeInfo>` on success, where each `NodeInfo`
+/// represents a file system entry. Returns a [`RustreeError`] on failure, such as
+/// I/O errors or issues during traversal.
+///
+/// # Notes
+///
+/// - The `root_path` itself is not included in the returned list of nodes; traversal
+///   starts with its children (due to `min_depth(1)`).
+/// - Hidden file filtering and max depth are applied. For more efficient skipping of
+///   deep or hidden directories, `WalkDir`'s `filter_entry` or `max_depth` methods
+///   could be used directly in future enhancements.
 pub fn walk_directory(
     root_path: &Path,
     config: &RustreeLibConfig,
