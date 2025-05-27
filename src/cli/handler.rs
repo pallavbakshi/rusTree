@@ -6,7 +6,18 @@ use rustree::core::sorter::SortKey as LibSortKey;
 use rustree::core::analyzer::apply_fn::BuiltInFunction as LibBuiltInFunction;
 
 pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
+    let root_display_name = if cli_args.path.to_string_lossy() == "." {
+        ".".to_string()
+    } else {
+        cli_args.path
+            .file_name()
+            .unwrap_or_else(|| cli_args.path.as_os_str()) // Fallback for paths like "/" or "C:\"
+            .to_string_lossy()
+            .into_owned()
+    };
+
     RustreeLibConfig {
+        root_display_name,
         max_depth: cli_args.max_depth,
         show_hidden: cli_args.show_hidden,
         report_sizes: cli_args.report_sizes,

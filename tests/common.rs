@@ -29,7 +29,7 @@ pub mod common_test_utils {
         Ok(dir)
     }
 
-    // New helper function
+    #[allow(dead_code)] // This function is used by other test files, but not within common.rs tests
     pub fn create_file_with_content(dir_path: &Path, file_name: &str, content: &str) -> Result<()> {
         let mut file = File::create(dir_path.join(file_name))?;
         file.write_all(content.as_bytes())?;
