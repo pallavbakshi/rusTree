@@ -1,0 +1,5 @@
+/target
+context/
+
+# For supercat
+.hide
