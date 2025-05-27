@@ -7,6 +7,9 @@ use std::fmt::Write;
 use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
+/// A formatter that generates a plain text, tree-like representation of the directory structure.
+///
+/// This is similar to the output of the standard `tree` command.
 pub struct TextTreeFormatter;
 
 impl TextTreeFormatter {

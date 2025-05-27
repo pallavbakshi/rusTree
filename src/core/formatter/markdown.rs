@@ -4,6 +4,10 @@ use crate::core::node::NodeInfo;
 use crate::core::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
 
+/// A formatter that generates a Markdown list representation of the directory structure.
+///
+/// The output is a nested Markdown list.
+/// (Note: Current implementation is a placeholder).
 pub struct MarkdownFormatter;
 
 impl TreeFormatter for MarkdownFormatter {

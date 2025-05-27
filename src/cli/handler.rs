@@ -5,6 +5,17 @@ use rustree::core::formatter::OutputFormat as LibOutputFormat;
 use rustree::core::sorter::SortKey as LibSortKey;
 use rustree::core::analyzer::apply_fn::BuiltInFunction as LibBuiltInFunction;
 
+/// Maps command-line arguments (`CliArgs`) to the library's configuration structure (`RustreeLibConfig`).
+///
+/// This function translates CLI flags and options into the format expected by the `rustree` core library.
+///
+/// # Arguments
+///
+/// * `cli_args` - A reference to the parsed command-line arguments.
+///
+/// # Returns
+///
+/// A `RustreeLibConfig` instance populated from the `cli_args`.
 pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
     let root_display_name = if cli_args.path.to_string_lossy() == "." {
         ".".to_string()
@@ -40,6 +51,15 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
     }
 }
 
+/// Maps the CLI output format enum (`CliOutputFormat`) to the library's output format enum (`LibOutputFormat`).
+///
+/// # Arguments
+///
+/// * `cli_output_format` - An `Option` containing the output format specified via CLI.
+///
+/// # Returns
+///
+/// The corresponding `LibOutputFormat`. Defaults to `LibOutputFormat::Text` if `None` is provided.
 pub fn map_cli_to_lib_output_format(cli_output_format: Option<CliOutputFormat>) -> LibOutputFormat {
     match cli_output_format {
         Some(CliOutputFormat::Markdown) => LibOutputFormat::Markdown,

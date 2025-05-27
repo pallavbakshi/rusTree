@@ -1,0 +1,65 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main # Or your default branch name (e.g., master)
+    paths:
+      - 'src/**'        # Trigger on library code changes
+      - 'docs/src/**'   # Trigger on mdBook source changes
+      - 'docs/book.toml'
+      - 'Cargo.toml'    # Trigger if crate metadata or dependencies change
+      - 'Cargo.lock'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Allow peaceiris/actions-gh-pages to push to the gh-pages branch
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        components: rustfmt, clippy # Optional: for linting/formatting if needed in other steps
+
+    - name: Install mdBook
+      run: |
+        if ! command -v mdbook &> /dev/null
+        then
+            cargo install mdbook --no-default-features --features output
+        else
+            echo "mdBook already installed"
+        fi
+
+    - name: Build rustdoc
+      run: cargo doc --no-deps
+      # Output will be in target/doc/
+
+    - name: Build mdBook
+      # Assumes your mdBook source is in the 'docs' directory relative to the repo root
+      # and book.toml specifies build-dir = "book" (so output is docs/book)
+      run: mdbook build docs
+
+    - name: Copy rustdoc to mdBook output
+      # Ensure the destination directory exists within the mdBook build output
+      # The crate name is 'rustree', so rustdoc files are in target/doc/rustree/
+      run: |
+        mkdir -p docs/book/api-docs/
+        cp -r target/doc/* docs/book/api-docs/
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4 # Use v4 for Node 20 compatibility
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/book # This is the directory that GitHub Pages will serve
+        # Default publish_branch is gh-pages, which is fine.
+        # Configure GitHub Pages to serve from the 'gh-pages' branch, root directory.
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy documentation to GitHub Pages'

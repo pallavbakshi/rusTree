@@ -1,0 +1,28 @@
+[book]
+authors = ["Your Name"]
+language = "en"
+multilingual = false
+src = "src"
+title = "RusTree Documentation"
+
+[build]
+build-dir = "book" # Output directory for mdbook build, relative to 'docs'
+
+[output.html]
+theme = "light"
+default-theme = "light"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/yourusername/rustree" # Optional: Link to your repo
+edit-url-template = "https://github.com/yourusername/rustree/edit/main/{path}" # Optional
+site-url = "/rustree/" # Optional: if hosted in a subdirectory on GitHub Pages
+
+[output.html.search]
+enable = true
+limit-results = 20
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = true
+boost-hierarchy = true
+boost-paragraph = true
+expand = true
+heading-split-level = 2

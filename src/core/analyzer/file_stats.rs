@@ -1,10 +1,36 @@
 // src/core/analyzer/file_stats.rs
 
 // For easier unit testing, you might have internal pure functions:
+
+/// Counts the number of lines in a string.
+///
+/// This function treats each occurrence of a newline character (`\n`) as
+/// terminating a line. The behavior for trailing newlines or empty strings
+/// depends on the `str::lines()` method.
+///
+/// # Arguments
+///
+/// * `content` - The string content whose lines are to be counted.
+///
+/// # Returns
+///
+/// The total number of lines.
 pub fn count_lines_from_string(content: &str) -> usize {
     content.lines().count()
 }
 
+/// Counts the number of words in a string.
+///
+/// Words are defined as sequences of non-whitespace characters separated by
+/// whitespace.
+///
+/// # Arguments
+///
+/// * `content` - The string content whose words are to be counted.
+///
+/// # Returns
+///
+/// The total number of words.
 pub fn count_words_from_string(content: &str) -> usize {
     content.split_whitespace().count()
 }

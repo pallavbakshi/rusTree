@@ -2,17 +2,36 @@
 use crate::core::node::NodeInfo;
 use std::cmp::Ordering;
 
-
+/// Defines the keys by which directory entries can be sorted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SortKey {
+    /// Sort by entry name (alphabetically).
     Name,
+    /// Sort by entry size (files only, typically smallest to largest).
+    /// Directories are usually grouped separately or sorted by name as a tie-breaker.
     Size,
+    /// Sort by last modification time (oldest to newest).
     MTime,
+    /// Sort by word count (files only, typically fewest to most).
     Words,
+    /// Sort by line count (files only, typically fewest to most).
     Lines,
+    /// Sort by the output of a custom applied function (if applicable and sortable).
     Custom,
 }
 
+/// Sorts a vector of `NodeInfo` entries in place.
+///
+/// The sorting behavior is as follows:
+/// - Entries are primarily sorted to maintain the directory structure (parent before child).
+/// - Siblings (entries at the same depth with the same parent) are sorted according to the `key`.
+/// - If `reverse` is true, the sibling sort order is reversed.
+///
+/// # Arguments
+///
+/// * `nodes` - A mutable reference to a vector of `NodeInfo` to be sorted.
+/// * `key` - The [`SortKey`] specifying the attribute to sort siblings by.
+/// * `reverse` - A boolean indicating whether to reverse the sort order for siblings.
 pub fn sort_nodes(nodes: &mut Vec<NodeInfo>, key: &SortKey, reverse: bool) {
     nodes.sort_by(|a, b| {
         // Check if nodes are siblings (same parent and same depth)

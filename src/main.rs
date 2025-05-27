@@ -1,4 +1,12 @@
 // src/main.rs
+
+//! The `rustree` command-line application.
+//!
+//! This binary provides a CLI interface to the `rustree` library, allowing users
+//! to generate directory tree listings with various analysis and formatting options.
+//! It parses command-line arguments, translates them into library configurations,
+//! invokes the library's core logic, and prints the results to standard output.
+
 mod cli; // Make cli module (and its submodules) available
 
 use clap::Parser;
