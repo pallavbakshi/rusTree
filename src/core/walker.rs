@@ -83,7 +83,7 @@ pub fn walk_directory(
                             node.line_count = Some(file_stats::count_lines_from_string(&content));
                         }
                         if config.calculate_word_count {
-                            // node.word_count = Some(file_stats::count_words_from_string(&content)); // Not implemented in tests yet
+                            node.word_count = Some(file_stats::count_words_from_string(&content));
                         }
                         if let Some(func_type) = &config.apply_function {
                             node.custom_function_output = Some(apply_fn::apply_function_to_content(&content, func_type));

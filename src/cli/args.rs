@@ -10,23 +10,23 @@ pub struct CliArgs {
     pub path: PathBuf,
 
     /// Maximum depth to scan
-    #[arg(short, long)]
+    #[arg(short = 'L', long)]
     pub max_depth: Option<usize>,
 
-    /// Show hidden files and directories
-    #[arg(short = 'H', long)]
+    /// Show hidden files and directories (equivalent to original tree -a)
+    #[arg(short = 'a', long = "all")]
     pub show_hidden: bool,
 
     /// Report sizes of files
     #[arg(short = 's', long)]
     pub report_sizes: bool,
 
-    /// Report modification times
-    #[arg(short = 't', long)]
+    /// Report modification times (equivalent to original tree -D)
+    #[arg(short = 'D', long)]
     pub report_mtime: bool,
 
     /// Calculate line counts for files
-    #[arg(short = 'l', long)]
+    #[arg(long)]
     pub calculate_lines: bool,
 
     /// Calculate word counts for files (placeholder, not fully implemented in lib)
@@ -46,7 +46,7 @@ pub struct CliArgs {
     pub apply_function: Option<CliBuiltInFunction>,
 
     /// Output format
-    #[arg(short = 'o', long, default_value = "text")]
+    #[arg(long, default_value = "text")]
     pub output_format: Option<CliOutputFormat>, // clap will parse "text" or "markdown"
 
     /// Ask a question to an LLM (output will be formatted for piping)

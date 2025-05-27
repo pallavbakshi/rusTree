@@ -6,6 +6,7 @@ use anyhow::Result;
 
 pub mod common_test_utils {
     use super::*; // To bring fs, File, Write, TempDir, Result into this module's scope
+    use std::path::Path; // Add this
 
     pub fn setup_test_directory() -> Result<TempDir> {
         let dir = tempdir()?;
@@ -22,9 +23,16 @@ pub mod common_test_utils {
             .write_all(b"another file")?;
         fs::create_dir(dir.path().join("sub_dir"))?;
         File::create(dir.path().join("sub_dir/file3.dat"))?
-            .write_all(b"data\nplus+plus")?;
+            .write_all(b"data\nplus++plus")?; // Changed to have two '+' characters
         File::create(dir.path().join("sub_dir/.hidden_file"))?
             .write_all(b"secret")?;
         Ok(dir)
+    }
+
+    // New helper function
+    pub fn create_file_with_content(dir_path: &Path, file_name: &str, content: &str) -> Result<()> {
+        let mut file = File::create(dir_path.join(file_name))?;
+        file.write_all(content.as_bytes())?;
+        Ok(())
     }
 }
