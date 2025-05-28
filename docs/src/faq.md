@@ -19,7 +19,13 @@ A: Please open an issue on the [GitHub repository](https://github.com/youruserna
 
 **Q: Is there a way to ignore certain files or directories (like `.gitignore`)?**
 
-A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like `grep` to filter the output if needed, or rely on the `--show-hidden` (`-a`) flag. The new `-P`/`--match-pattern` options provide powerful built-in filtering.
+A: Yes, RusTree now offers several ways to ignore files and directories:
+*   **`--use-gitignore`**: This flag tells RusTree to respect standard gitignore behavior. It will look for `.gitignore` files in the current directory and parent directories, as well as global gitignore configurations (e.g., `~/.config/git/ignore` or `$XDG_CONFIG_HOME/git/ignore`) and repository-specific exclude files (e.g., `.git/info/exclude`).
+*   **`-I <PATTERN>` or `--ignore-path <PATTERN>`**: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the `-P` option. For example, `rustree -I "*.log" -I "tmp/"` will ignore all `.log` files and any directory named `tmp`.
+*   **`--git-ignore-files <FILE>`**: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.
+*   **`--ignore-case`**: This flag makes all pattern matching (from `-P`, `-I`, `--use-gitignore`, and `--git-ignore-files`) case-insensitive.
+
+These options can be combined. For example, you can use `--use-gitignore` and also add specific `-I` patterns.
 
 **Q: How does the `-P pattern` / `--match-pattern pattern` feature work?**
 
@@ -28,8 +34,18 @@ A: This feature allows you to list only files and directories whose names match 
     *   Multiple patterns can be provided (e.g., `-P "*.rs" -P "*.toml"`) or combined with `|` (e.g., `-P "*.rs|*.toml"`).
     *   Supported wildcards include `*`, `**`, `?`, `[...]`, and `[^...]`.
     *   A `/` at the end of a pattern (e.g., `mydir/`) specifically matches directories.
-    *   To include hidden files (starting with `.`) in the pattern matching process, you must also use the `-a` (or `--all`) option.
+    *   To match hidden files (starting with `.`) with general patterns like `*`, you must also use the `-a` (or `--all`) option. If `-a` is not used, `*` will not match hidden entries. Patterns explicitly starting with `.` (e.g., `.*`) will match hidden files regardless of `-a`.
+    *   The matching can be made case-insensitive using the `--ignore-case` flag.
     *   The summary line (number of directories and files) will reflect only the listed items.
+
+**Q: How does `--ignore-case` work?**
+
+A: The `--ignore-case` flag makes all pattern matching operations case-insensitive. This applies to:
+    *   Patterns specified with `-P` or `--match-pattern`.
+    *   Patterns specified with `-I` or `--ignore-path`.
+    *   Patterns found in `.gitignore` files when `--use-gitignore` is active.
+    *   Patterns found in custom ignore files specified with `--git-ignore-files`.
+    For example, if `--ignore-case` is used, a pattern like `-P "*.JPG"` would match `image.jpg`, `image.JPG`, and `image.Jpg`. Similarly, an ignore pattern like `-I "README.MD"` would ignore `readme.md`.
 
 **Q: Can I customize the output format further?**
 

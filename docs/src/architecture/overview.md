@@ -5,10 +5,15 @@ RusTree is designed with a modular approach, separating concerns into different 
 1.  **Configuration (`RustreeLibConfig`)**: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur.
 
 2.  **Walking (`core::walker`)**:
-    *   The `walk_directory` function traverses the file system starting from a root path.
-    *   It respects configuration settings like `max_depth`, `show_hidden`, `list_directories_only`, and `match_patterns`.
-    *   If `list_directories_only` is true, files are filtered out.
-    *   If `match_patterns` are provided, entries are filtered based on wildcard matching.
+    *   The `walk_directory` function, using the `ignore` crate, traverses the file system starting from a root path.
+    *   It respects configuration settings from `RustreeLibConfig`:
+        *   `max_depth`, `show_hidden`.
+        *   `use_gitignore` and `git_ignore_files` for respecting standard and custom gitignore rules.
+        *   `ignore_patterns` (CLI `-I`) to exclude entries matching specified glob patterns. These are applied early to prune the walk.
+        *   `ignore_case_for_patterns` to control case sensitivity for all pattern matching.
+    *   After initial filtering by the `ignore` crate (based on hidden status, gitignore rules, and `-I` patterns), further filtering is applied:
+        *   `match_patterns` (CLI `-P`): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.
+        *   `list_directories_only`: If true, only effective directories are kept.
     *   For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.
 
 3.  **Analysis (`core::analyzer`)**:

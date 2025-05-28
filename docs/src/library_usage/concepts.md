@@ -16,6 +16,10 @@ This struct is central to controlling how `rustree` behaves. You create an insta
 *   `reverse_sort`: Whether to reverse the sort order.
 *   `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
 *   `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--match-pattern` options.
+*   `ignore_patterns`: `Option<Vec<String>>` containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI `-I`/`--ignore-path` options.
+*   `use_gitignore`: If `true`, standard gitignore files (`.gitignore`, global gitignore, etc.) will be used for filtering.
+*   `git_ignore_files`: `Option<Vec<PathBuf>>` specifying paths to custom files to be used as additional gitignore files.
+*   `ignore_case_for_patterns`: If `true`, all pattern matching (`match_patterns`, `ignore_patterns`, and gitignore processing) will be case-insensitive.
 *   `root_node_size`: Optional size of the root node itself, used by formatters if `report_sizes` is true.
 *   `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
 
@@ -23,6 +27,7 @@ This struct is central to controlling how `rustree` behaves. You create an insta
 
 ```rust
 use rustree::{RustreeLibConfig, SortKey};
+use std::path::PathBuf;
 
 let config = RustreeLibConfig {
     root_display_name: "MyProject".to_string(),
@@ -32,7 +37,11 @@ let config = RustreeLibConfig {
     sort_by: Some(SortKey::Size),
     reverse_sort: true,
     list_directories_only: false,
-    match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example patterns
+    match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example -P patterns
+    ignore_patterns: Some(vec!["*.log".to_string(), "target/".to_string()]), // Example -I patterns
+    use_gitignore: true,
+    git_ignore_files: Some(vec![PathBuf::from(".customignore")]),
+    ignore_case_for_patterns: false,
     root_node_size: None, // Typically set by the CLI handler or by checking metadata
     root_is_directory: true, // Typically set by the CLI handler or by checking metadata
     ..Default::default() // Use defaults for other fields

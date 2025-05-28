@@ -95,4 +95,38 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "docs/**" ./project_root
     ```
 
+18. **Ignore all `.log` files:**
+    ```bash
+    rustree -I "*.log" ./my_project
+    ```
+
+19. **Ignore the `target/` directory and all `*.tmp` files:**
+    ```bash
+    rustree -I "target/" -I "*.tmp" ./my_project
+    ```
+
+20. **Use `.gitignore` files to filter the output:**
+    ```bash
+    rustree --use-gitignore ./my_git_repo
+    ```
+
+21. **Use a custom ignore file in addition to (or instead of) `.gitignore`:**
+    ```bash
+    rustree --git-ignore-files ./.my_custom_ignores ./my_project
+    ```
+    If you also want standard `.gitignore` behavior, add `--use-gitignore`:
+    ```bash
+    rustree --use-gitignore --git-ignore-files ./.my_custom_ignores ./my_project
+    ```
+
+22. **List only `.TXT` files, case-insensitively (matching `file.txt`, `FILE.TXT`, etc.):**
+    ```bash
+    rustree -P "*.TXT" --ignore-case ./my_project
+    ```
+
+23. **Ignore all files ending with `.bak`, case-insensitively, using `-I`:**
+    ```bash
+    rustree -I "*.bak" --ignore-case ./my_project
+    ```
+
 Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.
