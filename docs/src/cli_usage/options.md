@@ -25,6 +25,19 @@ This page lists the command-line options available for `rustree`. You can also v
     *   Description: List directories only. Files will be excluded from the output. (Original `tree` flag: `-d`)
     *   Example: `rustree -d`
 
+*   `-P, --match-pattern <PATTERN>`
+    *   Description: List only those files and directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is listed. (Original `tree` flag: `-P`)
+    *   Wildcard operators:
+        *   `*`: any zero or more characters.
+        *   `**`: any zero or more characters, including path separators (`/`).
+        *   `?`: any single character.
+        *   `[...]`: any single character listed (e.g., `[abc]`, `[a-z]`).
+        *   `[^...]`: any single character *not* listed.
+        *   `|`: separates alternate patterns within a single pattern string (e.g., `*.txt|*.log`).
+    *   A `/` at the end of a pattern (e.g., `mydir/`) specifically matches directories.
+    *   Note: To match hidden files (starting with `.`), you must also use the `-a` or `--all` option.
+    *   Example: `rustree -P "*.rs"`, `rustree -P "*.txt|*.md" -P "docs/"`
+
 ### Metadata Reporting
 
 *   `-s, --report-sizes`

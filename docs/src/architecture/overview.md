@@ -6,7 +6,9 @@ RusTree is designed with a modular approach, separating concerns into different 
 
 2.  **Walking (`core::walker`)**:
     *   The `walk_directory` function traverses the file system starting from a root path.
-    *   It respects configuration settings like `max_depth`, `show_hidden`, and `list_directories_only`. If `list_directories_only` is true, files are filtered out, and symlinks pointing to directories are treated as directories.
+    *   It respects configuration settings like `max_depth`, `show_hidden`, `list_directories_only`, and `match_patterns`.
+    *   If `list_directories_only` is true, files are filtered out.
+    *   If `match_patterns` are provided, entries are filtered based on wildcard matching.
     *   For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.
 
 3.  **Analysis (`core::analyzer`)**:

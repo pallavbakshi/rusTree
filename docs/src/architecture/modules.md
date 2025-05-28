@@ -3,7 +3,7 @@
 The `rustree` library (`src/core/`) is organized into several modules, each with a specific responsibility:
 
 *   **`config.rs`**:
-    *   Defines `RustreeLibConfig`, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, and new options like `list_directories_only`, `root_node_size`, and `root_is_directory`.
+    *   Defines `RustreeLibConfig`, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, pattern matching (`match_patterns`), and options like `list_directories_only`, `root_node_size`, and `root_is_directory`.
 
 *   **`node.rs`**:
     *   Defines `NodeInfo`, the struct representing a single file system entry (file, directory, symlink) and its collected data.
@@ -12,8 +12,11 @@ The `rustree` library (`src/core/`) is organized into several modules, each with
 *   **`walker.rs`**:
     *   Contains the `walk_directory` function responsible for traversing the file system.
     *   Uses the `walkdir` crate for efficient directory walking.
-    *   Implements filtering logic, such as `list_directories_only` (where only directories, including symlinks pointing to directories, are processed).
-    *   Handles symlink resolution to determine the effective type of an entry (e.g., a symlink to a directory is treated as a directory for filtering purposes when `list_directories_only` is active).
+    *   Implements filtering logic, including:
+        *   `list_directories_only`: Only directories (including symlinks to directories) are processed.
+        *   Pattern matching: Based on `config.match_patterns`, filters entries using glob patterns. It handles various wildcard operators and directory-specific matching (e.g., `pattern/`).
+        *   Hidden file visibility based on `config.show_hidden` and its interaction with pattern matching.
+    *   Handles symlink resolution to determine the effective type of an entry.
     *   Populates `NodeInfo` structs with basic metadata (including size for directories if `report_sizes` is enabled) and triggers analysis for files based on `RustreeLibConfig`.
 
 *   **`analyzer/`**: This sub-module handles file content analysis.

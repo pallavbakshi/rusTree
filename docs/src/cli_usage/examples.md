@@ -61,6 +61,38 @@ Here are some practical examples of how to use `rustree` from the command line.
     ```bash
     rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
     ```
-    *(Replace `ollama run mistral` with your actual LLM tool and model).*
+    ```
+
+12. **List only Rust source files (`*.rs`):**
+    ```bash
+    rustree -P "*.rs" ./my_project
+    ```
+
+13. **List only Markdown (`*.md`) or text (`*.txt`) files:**
+    ```bash
+    rustree -P "*.md|*.txt" ./notes
+    # or equivalently
+    rustree -P "*.md" -P "*.txt" ./notes
+    ```
+
+14. **List only directories named `build` or `target`:**
+    ```bash
+    rustree -P "build/|target/" ./my_project
+    ```
+
+15. **List all Markdown files, including hidden ones (e.g., in `.github/`):**
+    ```bash
+    rustree -a -P "*.md"
+    ```
+
+16. **List files starting with `test_` followed by any single character and then `.py`:**
+    ```bash
+    rustree -P "test_?.py" ./tests
+    ```
+
+17. **List all files within any subdirectory named `docs`:**
+    ```bash
+    rustree -P "docs/**" ./project_root
+    ```
 
 Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.
