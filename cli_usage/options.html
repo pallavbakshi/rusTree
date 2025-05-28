@@ -206,6 +206,9 @@
 <li>Example: <code>rustree -d</code></li>
 </ul>
 </li>
+</ul>
+<h3 id="filtering-and-ignoring"><a class="header" href="#filtering-and-ignoring">Filtering and Ignoring</a></h3>
+<ul>
 <li>
 <p><code>-P, --match-pattern &lt;PATTERN&gt;</code></p>
 <ul>
@@ -221,8 +224,41 @@
 </ul>
 </li>
 <li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
-<li>Note: To match hidden files (starting with <code>.</code>), you must also use the <code>-a</code> or <code>--all</code> option.</li>
+<li>Note: To match hidden files (starting with <code>.</code>) with patterns like <code>*</code>, you must also use the <code>-a</code> or <code>--all</code> option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
+<li>This option is affected by <code>--ignore-case</code>.</li>
 <li>Example: <code>rustree -P "*.rs"</code>, <code>rustree -P "*.txt|*.md" -P "docs/"</code></li>
+</ul>
+</li>
+<li>
+<p><code>-I, --ignore-path &lt;PATTERN&gt;</code></p>
+<ul>
+<li>Description: Do not list those files or directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is excluded. (Original <code>tree</code> flag: <code>-I</code>)</li>
+<li>Uses the same wildcard pattern syntax as <code>-P, --match-pattern</code>.</li>
+<li>This option is affected by <code>--ignore-case</code>.</li>
+<li>Example: <code>rustree -I "*.log"</code>, <code>rustree -I "target/" -I "*.tmp"</code></li>
+</ul>
+</li>
+<li>
+<p><code>--use-gitignore</code></p>
+<ul>
+<li>Description: Respects gitignore rules for filtering files and directories. This includes checking <code>.gitignore</code> files in the scanned directories and their parents, the global gitignore file (e.g., <code>~/.config/git/ignore</code>), and repository-specific exclude files (e.g., <code>$GIT_DIR/info/exclude</code>).</li>
+<li>This option is affected by <code>--ignore-case</code>.</li>
+<li>Example: <code>rustree --use-gitignore</code></li>
+</ul>
+</li>
+<li>
+<p><code>--git-ignore-files &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: Use the specified file(s) as additional sources of gitignore patterns. Patterns in these files are matched as if the specified file was located at the root of the scan. This option can be specified multiple times.</li>
+<li>This option is affected by <code>--ignore-case</code>.</li>
+<li>Example: <code>rustree --git-ignore-files ./.customignore --git-ignore-files ./project.ignores</code></li>
+</ul>
+</li>
+<li>
+<p><code>--ignore-case</code></p>
+<ul>
+<li>Description: Perform case-insensitive matching for all patterns provided via <code>-P</code> (<code>--match-pattern</code>), <code>-I</code> (<code>--ignore-path</code>), <code>--use-gitignore</code>, and <code>--git-ignore-files</code>.</li>
+<li>Example: <code>rustree -P "*.TXT" --ignore-case</code> (would match <code>file.txt</code>)</li>
 </ul>
 </li>
 </ul>

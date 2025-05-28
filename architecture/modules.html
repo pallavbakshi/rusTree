@@ -172,7 +172,7 @@
 <li>
 <p><strong><code>config.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, pattern matching (<code>match_patterns</code>), and options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
+<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences. It also includes filtering options such as pattern matching (<code>match_patterns</code>), pattern ignoring (<code>ignore_patterns</code>), use of gitignore files (<code>use_gitignore</code>, <code>git_ignore_files</code>), case sensitivity for patterns (<code>ignore_case_for_patterns</code>), and options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
 </ul>
 </li>
 <li>
@@ -186,16 +186,25 @@
 <p><strong><code>walker.rs</code></strong>:</p>
 <ul>
 <li>Contains the <code>walk_directory</code> function responsible for traversing the file system.</li>
-<li>Uses the <code>walkdir</code> crate for efficient directory walking.</li>
-<li>Implements filtering logic, including:
+<li>Uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking, which provides powerful filtering capabilities including gitignore processing.</li>
+<li>Implements filtering logic based on <code>RustreeLibConfig</code>:
 <ul>
-<li><code>list_directories_only</code>: Only directories (including symlinks to directories) are processed.</li>
-<li>Pattern matching: Based on <code>config.match_patterns</code>, filters entries using glob patterns. It handles various wildcard operators and directory-specific matching (e.g., <code>pattern/</code>).</li>
-<li>Hidden file visibility based on <code>config.show_hidden</code> and its interaction with pattern matching.</li>
+<li><strong>Hidden Files</strong>: Controlled by <code>config.show_hidden</code> via <code>WalkBuilder::hidden()</code>.</li>
+<li><strong>Max Depth</strong>: Controlled by <code>config.max_depth</code> via <code>WalkBuilder::max_depth()</code>.</li>
+<li><strong>Gitignore Processing</strong>:
+<ul>
+<li><code>config.use_gitignore</code>: Enables processing of standard <code>.gitignore</code> files, global gitignore, and repository-specific exclude files.</li>
+<li><code>config.git_ignore_files</code>: Allows specifying custom ignore files.</li>
 </ul>
 </li>
-<li>Handles symlink resolution to determine the effective type of an entry.</li>
-<li>Populates <code>NodeInfo</code> structs with basic metadata (including size for directories if <code>report_sizes</code> is enabled) and triggers analysis for files based on <code>RustreeLibConfig</code>.</li>
+<li><strong>Ignore Patterns (<code>-I</code>)</strong>: <code>config.ignore_patterns</code> are compiled into glob patterns and used with <code>WalkBuilder::filter_entry()</code> to prune the traversal, excluding matching files and directories.</li>
+<li><strong>Case Insensitivity</strong>: <code>config.ignore_case_for_patterns</code> affects all pattern matching, including gitignore, <code>-I</code>, and <code>-P</code> patterns.</li>
+<li><strong>Match Patterns (<code>-P</code>)</strong>: <code>config.match_patterns</code> are compiled into glob patterns. After the <code>ignore</code> crate yields an entry (i.e., it wasn't filtered by gitignore or <code>-I</code> patterns), these <code>-P</code> patterns are applied. Files and symlinks must match one of these patterns to be included. Directories are generally included if they might contain matching children (they are not filtered out by <code>-P</code> at this stage if they passed previous filters).</li>
+<li><code>list_directories_only</code>: If true, only entries that are effectively directories (including symlinks to directories) are processed further.</li>
+</ul>
+</li>
+<li>Handles symlink resolution to determine the effective type of an entry (file, directory, or symlink) for filtering and metadata.</li>
+<li>Populates <code>NodeInfo</code> structs with metadata (path, name, type, depth, size, mtime) and triggers content analysis for files based on <code>RustreeLibConfig</code>.</li>
 </ul>
 </li>
 <li>
@@ -224,7 +233,7 @@
 <li>
 <p><strong><code>error.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeError</code>, the common error type used throughout the library.</li>
+<li>Defines <code>RustreeError</code>, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, and errors from the <code>ignore</code> crate (<code>IgnoreError</code>).</li>
 </ul>
 </li>
 </ul>

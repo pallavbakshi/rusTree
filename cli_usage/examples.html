@@ -227,8 +227,6 @@
 <p>Then, you would typically pipe this entire output to your LLM command-line tool. For example:</p>
 <pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
 </code></pre>
-<pre><code>
-</code></pre>
 </li>
 <li>
 <p><strong>List only Rust source files (<code>*.rs</code>):</strong></p>
@@ -260,6 +258,39 @@ rustree -P "*.md" -P "*.txt" ./notes
 <li>
 <p><strong>List all files within any subdirectory named <code>docs</code>:</strong></p>
 <pre><code class="language-bash">rustree -P "docs/**" ./project_root
+</code></pre>
+</li>
+<li>
+<p><strong>Ignore all <code>.log</code> files:</strong></p>
+<pre><code class="language-bash">rustree -I "*.log" ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>Ignore the <code>target/</code> directory and all <code>*.tmp</code> files:</strong></p>
+<pre><code class="language-bash">rustree -I "target/" -I "*.tmp" ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>Use <code>.gitignore</code> files to filter the output:</strong></p>
+<pre><code class="language-bash">rustree --use-gitignore ./my_git_repo
+</code></pre>
+</li>
+<li>
+<p><strong>Use a custom ignore file in addition to (or instead of) <code>.gitignore</code>:</strong></p>
+<pre><code class="language-bash">rustree --git-ignore-files ./.my_custom_ignores ./my_project
+</code></pre>
+<p>If you also want standard <code>.gitignore</code> behavior, add <code>--use-gitignore</code>:</p>
+<pre><code class="language-bash">rustree --use-gitignore --git-ignore-files ./.my_custom_ignores ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List only <code>.TXT</code> files, case-insensitively (matching <code>file.txt</code>, <code>FILE.TXT</code>, etc.):</strong></p>
+<pre><code class="language-bash">rustree -P "*.TXT" --ignore-case ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>Ignore all files ending with <code>.bak</code>, case-insensitively, using <code>-I</code>:</strong></p>
+<pre><code class="language-bash">rustree -I "*.bak" --ignore-case ./my_project
 </code></pre>
 </li>
 </ol>

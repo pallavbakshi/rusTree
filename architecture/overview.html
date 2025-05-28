@@ -175,10 +175,21 @@
 <li>
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
 <ul>
-<li>The <code>walk_directory</code> function traverses the file system starting from a root path.</li>
-<li>It respects configuration settings like <code>max_depth</code>, <code>show_hidden</code>, <code>list_directories_only</code>, and <code>match_patterns</code>.</li>
-<li>If <code>list_directories_only</code> is true, files are filtered out.</li>
-<li>If <code>match_patterns</code> are provided, entries are filtered based on wildcard matching.</li>
+<li>The <code>walk_directory</code> function, using the <code>ignore</code> crate, traverses the file system starting from a root path.</li>
+<li>It respects configuration settings from <code>RustreeLibConfig</code>:
+<ul>
+<li><code>max_depth</code>, <code>show_hidden</code>.</li>
+<li><code>use_gitignore</code> and <code>git_ignore_files</code> for respecting standard and custom gitignore rules.</li>
+<li><code>ignore_patterns</code> (CLI <code>-I</code>) to exclude entries matching specified glob patterns. These are applied early to prune the walk.</li>
+<li><code>ignore_case_for_patterns</code> to control case sensitivity for all pattern matching.</li>
+</ul>
+</li>
+<li>After initial filtering by the <code>ignore</code> crate (based on hidden status, gitignore rules, and <code>-I</code> patterns), further filtering is applied:
+<ul>
+<li><code>match_patterns</code> (CLI <code>-P</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
+<li><code>list_directories_only</code>: If true, only effective directories are kept.</li>
+</ul>
+</li>
 <li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
 </li>

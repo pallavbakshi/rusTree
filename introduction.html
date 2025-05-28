@@ -172,7 +172,14 @@
 <h2 id="what-can-rustree-do"><a class="header" href="#what-can-rustree-do">What can RusTree do?</a></h2>
 <ul>
 <li><strong>Visualize Directory Structures:</strong> Clearly see the hierarchy of files and folders.</li>
-<li><strong>Filter Entries:</strong> List only files and directories matching specific wildcard patterns using the <code>-P</code> or <code>--match-pattern</code> options.</li>
+<li><strong>Filter and Ignore Entries:</strong>
+<ul>
+<li>List only files/directories matching specific wildcard patterns (<code>-P</code>).</li>
+<li>Exclude files/directories using glob patterns (<code>-I</code>).</li>
+<li>Respect <code>.gitignore</code> files (<code>--use-gitignore</code>) and custom ignore files (<code>--git-ignore-files</code>).</li>
+<li>Perform case-insensitive pattern matching (<code>--ignore-case</code>).</li>
+</ul>
+</li>
 <li><strong>Analyze Content:</strong> Get insights like file sizes, modification dates, line counts, and word counts.</li>
 <li><strong>Apply Custom Logic:</strong> Use built-in functions (or extend with your own) to process file contents and report results.</li>
 <li><strong>Sort Entries:</strong> Organize the tree output by name, size, modification time, or other criteria.</li>
