@@ -13,22 +13,20 @@ pub struct CliArgs {
     #[arg(default_value = ".")]
     pub path: PathBuf,
 
-    /// Maximum depth to scan into the directory tree.
+    /// Maximum depth to scan into the directory tree. (Original tree: -L)
     /// E.g., `-L 1` shows only direct children.
     #[arg(short = 'L', long)]
     pub max_depth: Option<usize>,
 
-    /// Show hidden files and directories (those starting with a `.`).
-    /// Equivalent to `tree -a`.
+    /// Show hidden files and directories (those starting with a `.`). (Original tree: -a)
     #[arg(short = 'a', long = "all")]
     pub show_hidden: bool,
 
-    /// Report sizes of files in the output.
+    /// Report sizes of files in the output. (Original tree: -s)
     #[arg(short = 's', long)]
     pub report_sizes: bool,
 
-    /// Report last modification times for files and directories.
-    /// Equivalent to `tree -D`.
+    /// Report last modification times for files and directories. (Original tree: -D)
     #[arg(short = 'D', long)]
     pub report_mtime: bool,
 
@@ -40,12 +38,24 @@ pub struct CliArgs {
     #[arg(short = 'w', long)]
     pub calculate_words: bool,
 
-    /// Specifies the key for sorting directory entries.
-    /// If not provided, defaults to sorting by name.
-    #[arg(long)]
+    /// Sort by modification time. (Original tree: -t)
+    /// Conflicts with --sort-key and -U/--unsorted.
+    #[arg(short = 't', long = "sort-by-mtime", conflicts_with_all = ["sort_key", "unsorted_flag"])]
+    pub sort_by_mtime_flag: bool,
+
+    /// Do not sort; list files in directory order. (Original tree: -U)
+    /// Conflicts with --sort-key, -t/--sort-by-mtime, and -r/--reverse-sort.
+    #[arg(short = 'U', long, conflicts_with_all = ["sort_key", "sort_by_mtime_flag", "reverse_sort"])]
+    pub unsorted_flag: bool,
+
+    /// Specifies the key for sorting directory entries (e.g., name, size, mtime).
+    /// Conflicts with -t/--sort-by-mtime and -U/--unsorted.
+    /// If no sort option (-t, -U, --sort-key) is given, defaults to sorting by name.
+    #[arg(long, conflicts_with_all = ["sort_by_mtime_flag", "unsorted_flag"])]
     pub sort_key: Option<CliSortKey>,
 
-    /// Reverse the order of the sort specified by `sort_key`.
+    /// Reverse the order of the active sort. (Original tree: -r)
+    /// Incompatible with -U/--unsorted.
     #[arg(short = 'r', long)]
     pub reverse_sort: bool,
 

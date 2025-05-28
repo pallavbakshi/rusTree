@@ -9,11 +9,11 @@ This page lists the command-line options available for `rustree`. You can also v
     *   Default: `.` (current directory)
 
 *   `-L, --max-depth <DEPTH>`
-    *   Description: Maximum depth to scan into the directory tree.
+    *   Description: Maximum depth to scan into the directory tree. (Original `tree` flag: `-L`)
     *   Example: `rustree -L 2`
 
 *   `-a, --all`
-    *   Description: Show hidden files and directories (those starting with a `.`).
+    *   Description: Show hidden files and directories (those starting with a `.`). (Original `tree` flag: `-a`)
 
 *   `--output-format <FORMAT>`
     *   Description: Specifies the output format for the tree.
@@ -24,10 +24,10 @@ This page lists the command-line options available for `rustree`. You can also v
 ### Metadata Reporting
 
 *   `-s, --report-sizes`
-    *   Description: Report sizes of files in the output.
+    *   Description: Report sizes of files in the output. (Original `tree` flag: `-s`)
 
 *   `-D, --report-mtime`
-    *   Description: Report last modification times for files and directories.
+    *   Description: Report last modification times for files and directories. (Original `tree` flag: `-D`)
 
 ### Content Analysis
 
@@ -44,14 +44,23 @@ This page lists the command-line options available for `rustree`. You can also v
 
 ### Sorting
 
+*   `-t, --sort-by-mtime`
+    *   Description: Sort the output by last modification time instead of alphabetically. (Original `tree` flag: `-t`)
+    *   This option is mutually exclusive with `-U` and `--sort-key`.
+
+*   `-U, --unsorted`
+    *   Description: Do not sort. Lists files in directory order. (Original `tree` flag: `-U`)
+    *   This option is mutually exclusive with `-t`, `--sort-key`, and `-r`.
+
 *   `--sort-key <KEY>`
-    *   Description: Specifies the key for sorting directory entries.
-    *   Possible values: `name`, `size`, `m-time`, `words`, `lines`, `custom`
-    *   Default (if not specified): `name`
+    *   Description: Specifies the key for sorting directory entries. If no sorting option (`-t`, `-U`, or `--sort-key`) is provided, `rustree` defaults to sorting by `name`.
+    *   Possible values: `name`, `size`, `m-time` (equivalent to `-t`), `words`, `lines`, `custom`
+    *   This option is mutually exclusive with `-t` and `-U`.
     *   Example: `rustree --sort-key size`
 
 *   `-r, --reverse-sort`
-    *   Description: Reverse the order of the sort specified by `sort_key`.
+    *   Description: Reverse the order of the active sort. (Original `tree` flag: `-r`)
+    *   This option is ignored if `-U` (unsorted) is used.
 
 ### LLM Integration
 

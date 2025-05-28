@@ -39,14 +39,20 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         apply_function: cli_args.apply_function.as_ref().map(|f| match f {
             CliBuiltInFunction::CountPluses => LibBuiltInFunction::CountPluses,
         }),
-        sort_by: cli_args.sort_key.as_ref().map(|sk| match sk {
-            CliSortKey::Name => LibSortKey::Name,
-            CliSortKey::Size => LibSortKey::Size,
-            CliSortKey::MTime => LibSortKey::MTime,
-            CliSortKey::Words => LibSortKey::Words,
-            CliSortKey::Lines => LibSortKey::Lines,
-            CliSortKey::Custom => LibSortKey::Custom,
-        }),
+        sort_by: if cli_args.unsorted_flag {
+            None // -U means no sorting
+        } else if cli_args.sort_by_mtime_flag {
+            Some(LibSortKey::MTime) // -t means sort by MTime
+        } else {
+            cli_args.sort_key.as_ref().map(|sk| match sk { // --sort-key
+                CliSortKey::Name => LibSortKey::Name,
+                CliSortKey::Size => LibSortKey::Size,
+                CliSortKey::MTime => LibSortKey::MTime,
+                CliSortKey::Words => LibSortKey::Words,
+                CliSortKey::Lines => LibSortKey::Lines,
+                CliSortKey::Custom => LibSortKey::Custom,
+            }).or(Some(LibSortKey::Name)) // Default to sort by Name if no sort option is specified
+        },
         reverse_sort: cli_args.reverse_sort,
     }
 }

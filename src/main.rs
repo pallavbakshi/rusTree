@@ -17,12 +17,7 @@ fn main() -> ExitCode {
     let cli_args = CliArgs::parse();
 
     // 1. Map CLI args to Library config
-    let mut lib_config = handler::map_cli_to_lib_config(&cli_args); // Made mutable
-
-    // Default to sorting by name if no sort option is specified by the user
-    if lib_config.sort_by.is_none() {
-        lib_config.sort_by = Some(rustree::SortKey::Name);
-    }
+    let lib_config = handler::map_cli_to_lib_config(&cli_args);
 
     let lib_output_format = handler::map_cli_to_lib_output_format(cli_args.output_format.clone());
 
