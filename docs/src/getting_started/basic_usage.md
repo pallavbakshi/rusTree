@@ -51,12 +51,12 @@ Here are a few common options to get you started:
 
 *   **Sort by size (ascending):**
     ```bash
-    rustree --sort-key Size
+    rustree --sort-key size
     ```
 
 *   **Sort by size (descending):**
     ```bash
-    rustree --sort-key Size -r
+    rustree --sort-key size -r
     ```
 
 ### Getting Help

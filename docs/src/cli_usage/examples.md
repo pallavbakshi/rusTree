@@ -14,12 +14,12 @@ Here are some practical examples of how to use `rustree` from the command line.
 
 3.  **List files in `~/Documents`, showing sizes and modification times, sorted by modification time (newest first):**
     ```bash
-    rustree -s -D --sort-key MTime -r ~/Documents
+    rustree -s -D --sort-key m-time -r ~/Documents
     ```
 
 4.  **Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):**
     ```bash
-    rustree --calculate-lines --calculate-words --sort-key Lines -r ./my_project_src
+    rustree --calculate-lines --calculate-words --sort-key lines -r ./my_project_src
     ```
 
 5.  **Output the tree structure as Markdown:**
@@ -29,7 +29,7 @@ Here are some practical examples of how to use `rustree` from the command line.
 
 6.  **Apply the `CountPluses` function to files and sort by its custom output:**
     ```bash
-    rustree --apply-function CountPluses --sort-key Custom ./config_files
+    rustree --apply-function CountPluses --sort-key custom ./config_files
     ```
     *(This assumes `CountPluses` is a meaningful function for your files, e.g., counting '+' characters).*
 

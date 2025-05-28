@@ -46,9 +46,9 @@ This page lists the command-line options available for `rustree`. You can also v
 
 *   `--sort-key <KEY>`
     *   Description: Specifies the key for sorting directory entries.
-    *   Possible values: `Name`, `Size`, `MTime`, `Words`, `Lines`, `Custom`
-    *   Default (if not specified): `Name`
-    *   Example: `rustree --sort-key Size`
+    *   Possible values: `name`, `size`, `m-time`, `words`, `lines`, `custom`
+    *   Default (if not specified): `name`
+    *   Example: `rustree --sort-key size`
 
 *   `-r, --reverse-sort`
     *   Description: Reverse the order of the sort specified by `sort_key`.
