@@ -16,6 +16,9 @@ pub enum RustreeError {
     /// An error related to glob pattern compilation or matching.
     #[error("Glob pattern error: {0}")]
     GlobPattern(#[from] glob::PatternError),
+    /// An error originating from the `ignore` crate during directory traversal or gitignore processing.
+    #[error("Ignore crate error: {0}")]
+    IgnoreError(#[from] ignore::Error),
     // Add other specific error types as needed
     /// An unspecified or unknown error.
     #[error("Unknown error")]
