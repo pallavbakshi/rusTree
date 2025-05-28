@@ -42,6 +42,82 @@ fn test_pattern_no_patterns() -> Result<()> {
     Ok(())
 }
 
+// --- -P Pattern Matching with --ignore-case ---
+
+#[test]
+fn test_p_pattern_with_ignore_case_txt_extension() -> Result<()> {
+    let temp_dir = common_test_utils::setup_complex_test_directory()?; // Has image.JPG
+    let config = RustreeLibConfig {
+        match_patterns: Some(vec!["*.jpg".to_string()]),
+        ignore_case_for_patterns: true, // --ignore-case
+        max_depth: Some(1),
+        ..Default::default()
+    };
+    let nodes = get_tree_nodes(temp_dir.path(), &config)?;
+    let names = get_node_names(&nodes);
+
+    let mut expected = HashSet::new();
+    expected.insert("image.JPG".to_string()); // Matched due to ignore case
+    // Directories are traversed if there's a general pattern
+    expected.insert("sub_dir".to_string());
+    expected.insert("another_dir".to_string());
+    expected.insert("empty_dir".to_string());
+    if cfg!(unix) || cfg!(windows) {
+        // symlink_to_sub_dir is not *.jpg
+    }
+    assert_eq!(names, expected, "image.JPG should be matched with -P \"*.jpg\" --ignore-case");
+    Ok(())
+}
+
+#[test]
+fn test_p_pattern_with_ignore_case_exact_filename() -> Result<()> {
+    let temp_dir = common_test_utils::setup_complex_test_directory()?; // Has file_a.txt
+    let config = RustreeLibConfig {
+        match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
+        ignore_case_for_patterns: true, // --ignore-case
+        max_depth: Some(1),
+        ..Default::default()
+    };
+    let nodes = get_tree_nodes(temp_dir.path(), &config)?;
+    let names = get_node_names(&nodes);
+
+    let mut expected = HashSet::new();
+    expected.insert("file_a.txt".to_string()); // Matched due to ignore case
+    expected.insert("sub_dir".to_string());
+    expected.insert("another_dir".to_string());
+    expected.insert("empty_dir".to_string());
+    if cfg!(unix) || cfg!(windows) {
+        // symlink_to_file_a.txt would match if pattern was "*.txt"
+        // but pattern is "FILE_A.TXT", symlink name is "symlink_to_file_a.txt"
+    }
+    assert_eq!(names, expected, "file_a.txt should be matched with -P \"FILE_A.TXT\" --ignore-case");
+    Ok(())
+}
+
+#[test]
+fn test_p_pattern_without_ignore_case_is_sensitive() -> Result<()> {
+    let temp_dir = common_test_utils::setup_complex_test_directory()?; // Has file_a.txt
+    let config = RustreeLibConfig {
+        match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
+        ignore_case_for_patterns: false, // NO --ignore-case (default)
+        max_depth: Some(1),
+        ..Default::default()
+    };
+    let nodes = get_tree_nodes(temp_dir.path(), &config)?;
+    let names = get_node_names(&nodes);
+
+    let mut expected = HashSet::new(); // file_a.txt should NOT be matched
+    // Directories are traversed because "FILE_A.TXT" is a general pattern
+    expected.insert("sub_dir".to_string());
+    expected.insert("another_dir".to_string());
+    expected.insert("empty_dir".to_string());
+    if cfg!(unix) || cfg!(windows) {
+        // symlink_to_sub_dir is not matched
+    }
+    assert_eq!(names, expected, "file_a.txt should NOT be matched by -P \"FILE_A.TXT\" (case sensitive)");
+    Ok(())
+}
+
 #[test]
 fn test_pattern_single_exact_match_file() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;

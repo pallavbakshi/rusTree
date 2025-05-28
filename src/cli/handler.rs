@@ -68,6 +68,11 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         },
         reverse_sort: cli_args.reverse_sort,
         list_directories_only: cli_args.list_directories_only,
+        // Map ignore feature args
+        ignore_patterns: cli_args.ignore_patterns.clone(),
+        use_gitignore: cli_args.use_gitignore,
+        git_ignore_files: cli_args.git_ignore_files.clone(),
+        ignore_case_for_patterns: cli_args.ignore_case_for_patterns,
     }
 }
 

@@ -80,4 +80,40 @@ pub mod common_test_utils {
 
         Ok(dir)
     }
+
+    #[allow(dead_code)]
+    pub fn setup_gitignore_test_dir() -> Result<TempDir> {
+        let dir = tempfile::tempdir()?;
+        let base = dir.path();
+
+        // Root files and dirs
+        create_file_with_content(base, "file.txt", "content")?;
+        create_file_with_content(base, "file.log", "log content")?;
+        fs::create_dir(base.join("docs"))?;
+        create_file_with_content(&base.join("docs"), "api.md", "api docs")?;
+        fs::create_dir(base.join("target"))?;
+        create_file_with_content(&base.join("target"), "app.exe", "binary")?;
+        create_file_with_content(base, "image.PNG", "image data")?;
+        create_file_with_content(base, "image.png", "image data lowercase")?;
+
+        // .gitignore at root
+        let mut root_gitignore = File::create(base.join(".gitignore"))?;
+        writeln!(root_gitignore, "*.log")?;
+        writeln!(root_gitignore, "target/")?;
+        writeln!(root_gitignore, "IMAGE.PNG")?; // Test case sensitivity for gitignore
+
+        // Nested dir with its own .gitignore
+        fs::create_dir(base.join("src"))?;
+        create_file_with_content(&base.join("src"), "main.rs", "rust code")?;
+        create_file_with_content(&base.join("src"), "module.temp", "temp file")?;
+        let mut src_gitignore = File::create(base.join("src/.gitignore"))?;
+        writeln!(src_gitignore, "*.temp")?;
+
+        // Hidden files/dirs
+        create_file_with_content(base, ".secret_file", "secret")?;
+        fs::create_dir(base.join(".hidden_dir"))?;
+        create_file_with_content(&base.join(".hidden_dir"), "content.txt", "hidden dir content")?;
+
+        Ok(dir)
+    }
 }

@@ -17,6 +17,7 @@ rustree [OPTIONS] [PATH]
 - [Examples](./cli_usage/examples.md): Practical examples demonstrating various use cases.
 
 To see all available options directly from your terminal, run:
+
 ```bash
 rustree --help
 ```

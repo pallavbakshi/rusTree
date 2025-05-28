@@ -42,8 +42,12 @@ fn test_get_nodes_basic_structure() -> Result<()> {
     assert_eq!(subdir_node.node_type, rustree::NodeType::Directory);
 
     let file3_node = nodes.iter().find(|n| n.name == "file3.dat").expect("file3.dat not found");
+    println!("root_path: {:?}", root_path);
+    println!("expected_parent: {:?}", root_path.join("sub_dir"));
+    println!("file3_node.path: {:?}", file3_node.path);
     assert_eq!(file3_node.line_count, Some(2)); // "data\nplus+plus" -> 2 lines
-    assert!(file3_node.path.starts_with(root_path.join("sub_dir")));
+    let expected_parent_canonical = std::fs::canonicalize(root_path.join("sub_dir"))?;
+    assert!(file3_node.path.starts_with(&expected_parent_canonical));
 
     Ok(())
 }

@@ -84,6 +84,25 @@ pub struct CliArgs {
     /// A `/` at the end of a pattern matches directories only, e.g., "docs/".
     #[arg(short = 'P', long = "match-pattern", action = clap::ArgAction::Append)]
     pub match_patterns: Option<Vec<String>>,
+
+    /// Do not list those files/directories that match the wild-card pattern. (Original tree: -I)
+    /// Can be specified multiple times. Uses glob pattern syntax (see -P).
+    #[arg(short = 'I', long = "ignore-path", action = clap::ArgAction::Append)]
+    pub ignore_patterns: Option<Vec<String>>,
+
+    /// Uses git .gitignore files for filtering.
+    /// Also respects global gitignore and $GIT_DIR/info/exclude.
+    #[arg(long)]
+    pub use_gitignore: bool,
+
+    /// Use file explicitly as a gitignore file.
+    /// Can be specified multiple times.
+    #[arg(long, value_name = "FILE", action = clap::ArgAction::Append)]
+    pub git_ignore_files: Option<Vec<PathBuf>>,
+
+    /// Ignore case for -P, -I, --gitignore, and --gitfile patterns.
+    #[arg(long = "ignore-case")]
+    pub ignore_case_for_patterns: bool,
 }
 
 /// Defines the possible keys for sorting directory entries via the CLI.

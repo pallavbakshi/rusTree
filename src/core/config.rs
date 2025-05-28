@@ -1,7 +1,7 @@
 // src/core/config.rs
 use crate::core::sorter::SortKey;
 use crate::core::analyzer::apply_fn::BuiltInFunction;
-// Potentially other necessary imports, e.g., for ignore patterns
+use std::path::PathBuf; // Added for PathBuf
 
 /// Configuration for the `rustree` library.
 ///
@@ -47,7 +47,17 @@ pub struct RustreeLibConfig {
     pub root_node_size: Option<u64>,
     /// Indicates if the root path itself is a directory.
     pub root_is_directory: bool,
-    // Add any other options the library logic needs
+
+    // Ignore feature fields
+    /// Patterns to ignore entries by. Entries matching any pattern will be excluded.
+    /// Corresponds to CLI -I/--ignore-path.
+    pub ignore_patterns: Option<Vec<String>>,
+    /// If `true`, use .gitignore files for filtering.
+    pub use_gitignore: bool,
+    /// List of custom files to use as gitignore files.
+    pub git_ignore_files: Option<Vec<PathBuf>>,
+    /// If `true`, all pattern matching (-P, -I, gitignore) is case-insensitive.
+    pub ignore_case_for_patterns: bool,
 }
 
 impl Default for RustreeLibConfig {
@@ -68,6 +78,11 @@ impl Default for RustreeLibConfig {
             list_directories_only: false,
             root_node_size: None,
             root_is_directory: false, // Default to false, will be set by handler
+            // Defaults for ignore features
+            ignore_patterns: None,
+            use_gitignore: false,
+            git_ignore_files: None,
+            ignore_case_for_patterns: false,
         }
     }
 }
