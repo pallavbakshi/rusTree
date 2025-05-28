@@ -176,23 +176,24 @@
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
 <ul>
 <li>The <code>walk_directory</code> function traverses the file system starting from a root path.</li>
-<li>It respects configuration settings like <code>max_depth</code> and <code>show_hidden</code>.</li>
-<li>For each encountered file system entry (file, directory, symlink), it gathers initial metadata.</li>
+<li>It respects configuration settings like <code>max_depth</code>, <code>show_hidden</code>, and <code>list_directories_only</code>. If <code>list_directories_only</code> is true, files are filtered out, and symlinks pointing to directories are treated as directories.</li>
+<li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
 </li>
 <li>
 <p><strong>Analysis (<code>core::analyzer</code>)</strong>:</p>
 <ul>
-<li>As the walker processes files, it can invoke analysis functions based on the configuration.</li>
-<li><code>file_stats</code>: Calculates line counts and word counts.</li>
+<li>As the walker processes entries that are effectively files (i.e., not filtered out by <code>list_directories_only</code>), it can invoke analysis functions based on the configuration.</li>
+<li><code>file_stats</code>: Calculates line counts and word counts for files.</li>
 <li><code>apply_fn</code>: Applies a selected built-in function to file content.</li>
-<li>The results of these analyses are stored in <code>NodeInfo</code> objects.</li>
+<li>The results of these analyses are stored in <code>NodeInfo</code> objects. This step is skipped for directories or when <code>list_directories_only</code> is active.</li>
 </ul>
 </li>
 <li>
 <p><strong>Node Representation (<code>NodeInfo</code>)</strong>:</p>
 <ul>
-<li>Each file system entry is represented by a <code>NodeInfo</code> struct. This struct holds its path, name, type, depth, metadata (size, mtime), and any analysis results.</li>
+<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct. This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
+<li>The <code>size</code> field can be populated for directories if <code>report_sizes</code> is enabled.</li>
 <li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
 </ul>
 </li>
@@ -208,9 +209,9 @@
 <ul>
 <li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is then passed to a formatter.</li>
 <li>The <code>TreeFormatter</code> trait defines the interface for formatters.</li>
-<li><code>TextTreeFormatter</code>: Generates a plain text, <code>tree</code>-like output.</li>
+<li><code>TextTreeFormatter</code>: Generates a plain text, <code>tree</code>-like output. It adapts its output based on <code>list_directories_only</code> (e.g., summary line, metadata shown).</li>
 <li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>
-<li>The formatter produces the final string output.</li>
+<li>The formatter produces the final string output, considering configuration like <code>root_node_size</code> and <code>root_is_directory</code> for accurate root display.</li>
 </ul>
 </li>
 </ol>

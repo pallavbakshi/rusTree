@@ -190,6 +190,17 @@
 <pre><code class="language-bash">rustree --llm-ask "Summarize this project structure" | ollama run mistral
 </code></pre>
 <p>This pipes the tree output and your question to the <code>ollama</code> tool running the <code>mistral</code> model.</p>
+<p><strong>Q: How does the <code>-d</code> (or <code>--dirs-only</code>) flag work?</strong></p>
+<p>A: When <code>-d</code> is used, RusTree will only list directories. All files will be excluded from the output.
+*   Symlinks pointing to directories are treated as directories and will be listed.
+*   Symlinks pointing to files (or broken symlinks) will be excluded.
+*   The summary line will reflect "X directories, 0 files".
+*   File-specific analysis options (like <code>--calculate-lines</code>, <code>--calculate-words</code>, <code>--apply-function</code>) will effectively be ignored as there are no files to analyze in the output.
+*   Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</p>
+<p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
+<p>A: Yes. When <code>-d</code> and <code>-s</code> are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
+<p>A: Since <code>-d</code> excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
 <p><strong>Q: Where can I find the API documentation for the library?</strong></p>
 <p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 

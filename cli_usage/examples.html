@@ -190,6 +190,16 @@
 </code></pre>
 </li>
 <li>
+<p><strong>List directories only in the current path:</strong></p>
+<pre><code class="language-bash">rustree -d
+</code></pre>
+</li>
+<li>
+<p><strong>List directories only in <code>./src</code>, showing sizes, up to depth 1:</strong></p>
+<pre><code class="language-bash">rustree -d -s -L 1 ./src
+</code></pre>
+</li>
+<li>
 <p><strong>Output the tree structure as Markdown:</strong></p>
 <pre><code class="language-bash">rustree --output-format markdown &gt; project_structure.md
 </code></pre>
