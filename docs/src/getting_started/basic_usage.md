@@ -30,34 +30,39 @@ rustree ../some/other/folder
 
 Here are a few common options to get you started:
 
-*   **Show all files (including hidden):**
-    ```bash
-    rustree -a
-    # or
-    rustree --all
-    ```
+- **Show all files (including hidden):**
 
-*   **Limit depth:**
-    ```bash
-    rustree -L 2  # Show current directory and its direct children (depth 1 and 2)
-    ```
+  ```bash
+  rustree -a
+  # or
+  rustree --all
+  ```
 
-*   **Show file sizes:**
-    ```bash
-    rustree -s
-    # or
-    rustree --report-sizes
-    ```
+- **Limit depth:**
 
-*   **Sort by size (ascending):**
-    ```bash
-    rustree --sort-key size
-    ```
+  ```bash
+  rustree -L 2  # Show current directory and its direct children (depth 1 and 2)
+  ```
 
-*   **Sort by size (descending):**
-    ```bash
-    rustree --sort-key size -r
-    ```
+- **Show file sizes:**
+
+  ```bash
+  rustree -s
+  # or
+  rustree --report-sizes
+  ```
+
+- **Sort by size (ascending):**
+
+  ```bash
+  rustree --sort-key size
+  ```
+
+- **Sort by size (descending):**
+
+  ```bash
+  rustree --sort-key size -r
+  ```
 
 ### Getting Help
 

@@ -20,21 +20,26 @@ This will download the source code, compile it, and place the `rustree` executab
 
 If you want to build from the latest source code (e.g., from a Git repository):
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/rustree.git # Replace with actual URL
-    cd rustree
-    ```
+1. Clone the repository:
 
-2.  Build and install the binary:
-    ```bash
-    cargo install --path .
-    ```
-    Alternatively, to just build for development:
-    ```bash
-    cargo build --release
-    ```
-    The executable will be located at `target/release/rustree`.
+   ```bash
+   git clone https://github.com/yourusername/rustree.git # Replace with actual URL
+   cd rustree
+   ```
+
+1. Build and install the binary:
+
+   ```bash
+   cargo install --path .
+   ```
+
+   Alternatively, to just build for development:
+
+   ```bash
+   cargo build --release
+   ```
+
+   The executable will be located at `target/release/rustree`.
 
 ### Verifying Installation
 

@@ -15,11 +15,11 @@ rustree = "0.1.0" # Replace with the desired version
 
 The library revolves around a few key components:
 
--   [`RustreeLibConfig`](./library_usage/concepts.md#rustreelibconfig): A struct to configure the behavior of the tree generation (depth, hidden files, analysis options, sorting, etc.).
--   [`NodeInfo`](./library_usage/concepts.md#nodeinfo): A struct representing a single entry (file or directory) in the tree, containing its metadata and analysis results.
--   [`get_tree_nodes()`](./library_usage/concepts.md#get_tree_nodes): The main function to walk a directory, analyze entries, and return a `Vec<NodeInfo>`.
--   [`format_nodes()`](./library_usage/concepts.md#format_nodes): A function to format a `Vec<NodeInfo>` into a string representation (e.g., text tree, Markdown).
--   Enums for options like [`SortKey`](./library_usage/concepts.md#sortkey), [`LibOutputFormat`](./library_usage/concepts.md#liboutputformat), etc.
+- [`RustreeLibConfig`](./library_usage/concepts.md#rustreelibconfig): A struct to configure the behavior of the tree generation (depth, hidden files, analysis options, sorting, etc.).
+- [`NodeInfo`](./library_usage/concepts.md#nodeinfo): A struct representing a single entry (file or directory) in the tree, containing its metadata and analysis results.
+- [`get_tree_nodes()`](./library_usage/concepts.md#get_tree_nodes): The main function to walk a directory, analyze entries, and return a `Vec<NodeInfo>`.
+- [`format_nodes()`](./library_usage/concepts.md#format_nodes): A function to format a `Vec<NodeInfo>` into a string representation (e.g., text tree, Markdown).
+- Enums for options like [`SortKey`](./library_usage/concepts.md#sortkey), [`LibOutputFormat`](./library_usage/concepts.md#liboutputformat), etc.
 
 ## Sub-sections:
 

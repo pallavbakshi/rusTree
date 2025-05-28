@@ -14,11 +14,11 @@
   - [Overview](architecture/overview.md)
   - [Core Modules](architecture/modules.md)
 
----
+______________________________________________________________________
 
 - [**API Reference (rustdoc)**](api-docs/index.html)
 
----
+______________________________________________________________________
 
 - [Contributing](contributing.md)
 - [FAQ](faq.md)

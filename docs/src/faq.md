@@ -3,11 +3,12 @@
 **Q: How is RusTree different from the standard `tree` command?**
 
 A: While inspired by `tree`, RusTree aims to offer more:
-*   **Extensibility:** Built in Rust, allowing for easier addition of new features.
-*   **Analysis Features:** Built-in capabilities like line/word counts and potential for custom function application on file contents.
-*   **Multiple Output Formats:** Starting with text and Markdown, with potential for more (e.g., JSON).
-*   **Sorting Options:** More granular control over sorting.
-*   **Library Usage:** Can be used as a Rust library in other projects.
+
+- **Extensibility:** Built in Rust, allowing for easier addition of new features.
+- **Analysis Features:** Built-in capabilities like line/word counts and potential for custom function application on file contents.
+- **Multiple Output Formats:** Starting with text and Markdown, with potential for more (e.g., JSON).
+- **Sorting Options:** More granular control over sorting.
+- **Library Usage:** Can be used as a Rust library in other projects.
 
 **Q: What are the system requirements?**
 
@@ -20,32 +21,36 @@ A: Please open an issue on the [GitHub repository](https://github.com/youruserna
 **Q: Is there a way to ignore certain files or directories (like `.gitignore`)?**
 
 A: Yes, RusTree now offers several ways to ignore files and directories:
-*   **`--use-gitignore`**: This flag tells RusTree to respect standard gitignore behavior. It will look for `.gitignore` files in the current directory and parent directories, as well as global gitignore configurations (e.g., `~/.config/git/ignore` or `$XDG_CONFIG_HOME/git/ignore`) and repository-specific exclude files (e.g., `.git/info/exclude`).
-*   **`-I <PATTERN>` or `--ignore-path <PATTERN>`**: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the `-P` option. For example, `rustree -I "*.log" -I "tmp/"` will ignore all `.log` files and any directory named `tmp`.
-*   **`--git-ignore-files <FILE>`**: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.
-*   **`--ignore-case`**: This flag makes all pattern matching (from `-P`, `-I`, `--use-gitignore`, and `--git-ignore-files`) case-insensitive.
+
+- **`--use-gitignore`**: This flag tells RusTree to respect standard gitignore behavior. It will look for `.gitignore` files in the current directory and parent directories, as well as global gitignore configurations (e.g., `~/.config/git/ignore` or `$XDG_CONFIG_HOME/git/ignore`) and repository-specific exclude files (e.g., `.git/info/exclude`).
+- **`-I <PATTERN>` or `--ignore-path <PATTERN>`**: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the `-P` option. For example, `rustree -I "*.log" -I "tmp/"` will ignore all `.log` files and any directory named `tmp`.
+- **`--git-ignore-files <FILE>`**: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.
+- **`--ignore-case`**: This flag makes all pattern matching (from `-P`, `-I`, `--use-gitignore`, and `--git-ignore-files`) case-insensitive.
 
 These options can be combined. For example, you can use `--use-gitignore` and also add specific `-I` patterns.
 
 **Q: How does the `-P pattern` / `--match-pattern pattern` feature work?**
 
 A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.
-    *   You can use options like `-P "*.txt"` to show only text files, or `-P "docs/"` to show only a directory named `docs`.
-    *   Multiple patterns can be provided (e.g., `-P "*.rs" -P "*.toml"`) or combined with `|` (e.g., `-P "*.rs|*.toml"`).
-    *   Supported wildcards include `*`, `**`, `?`, `[...]`, and `[^...]`.
-    *   A `/` at the end of a pattern (e.g., `mydir/`) specifically matches directories.
-    *   To match hidden files (starting with `.`) with general patterns like `*`, you must also use the `-a` (or `--all`) option. If `-a` is not used, `*` will not match hidden entries. Patterns explicitly starting with `.` (e.g., `.*`) will match hidden files regardless of `-a`.
-    *   The matching can be made case-insensitive using the `--ignore-case` flag.
-    *   The summary line (number of directories and files) will reflect only the listed items.
+
+- You can use options like `-P "*.txt"` to show only text files, or `-P "docs/"` to show only a directory named `docs`.
+- Multiple patterns can be provided (e.g., `-P "*.rs" -P "*.toml"`) or combined with `|` (e.g., `-P "*.rs|*.toml"`).
+- Supported wildcards include `*`, `**`, `?`, `[...]`, and `[^...]`.
+- A `/` at the end of a pattern (e.g., `mydir/`) specifically matches directories.
+- To match hidden files (starting with `.`) with general patterns like `*`, you must also use the `-a` (or `--all`) option. If `-a` is not used, `*` will not match hidden entries. Patterns explicitly starting with `.` (e.g., `.*`) will match hidden files regardless of `-a`.
+- The matching can be made case-insensitive using the `--ignore-case` flag.
+- The summary line (number of directories and files) will reflect only the listed items.
 
 **Q: How does `--ignore-case` work?**
 
 A: The `--ignore-case` flag makes all pattern matching operations case-insensitive. This applies to:
-    *   Patterns specified with `-P` or `--match-pattern`.
-    *   Patterns specified with `-I` or `--ignore-path`.
-    *   Patterns found in `.gitignore` files when `--use-gitignore` is active.
-    *   Patterns found in custom ignore files specified with `--git-ignore-files`.
-    For example, if `--ignore-case` is used, a pattern like `-P "*.JPG"` would match `image.jpg`, `image.JPG`, and `image.Jpg`. Similarly, an ignore pattern like `-I "README.MD"` would ignore `readme.md`.
+
+- Patterns specified with `-P` or `--match-pattern`.
+- Patterns specified with `-I` or `--ignore-path`.
+- Patterns found in `.gitignore` files when `--use-gitignore` is active.
+- Patterns found in custom ignore files specified with `--git-ignore-files`.
+
+For example, if `--ignore-case` is used, a pattern like `-P "*.JPG"` would match `image.jpg`, `image.JPG`, and `image.Jpg`. Similarly, an ignore pattern like `-I "README.MD"` would ignore `readme.md`.
 
 **Q: Can I customize the output format further?**
 
@@ -56,19 +61,22 @@ A: Currently, RusTree supports "text" and "markdown" formats. The text format ha
 A: The `--llm-ask` option formats the `rustree` output along with your question in a way that is convenient to pipe directly into a command-line Large Language Model (LLM) tool (like `ollama`, or scripts using OpenAI/Anthropic APIs). RusTree itself does not make any API calls to LLMs. It simply prepares the text.
 
 Example:
+
 ```bash
 rustree --llm-ask "Summarize this project structure" | ollama run mistral
 ```
+
 This pipes the tree output and your question to the `ollama` tool running the `mistral` model.
 
 **Q: How does the `-d` (or `--dirs-only`) flag work?**
 
 A: When `-d` is used, RusTree will only list directories. All files will be excluded from the output.
-    *   Symlinks pointing to directories are treated as directories and will be listed.
-    *   Symlinks pointing to files (or broken symlinks) will be excluded.
-    *   The summary line will reflect "X directories, 0 files".
-    *   File-specific analysis options (like `--calculate-lines`, `--calculate-words`, `--apply-function`) will effectively be ignored as there are no files to analyze in the output.
-    *   Metadata like size (`-s`) and modification time (`-D`) will apply to the listed directories.
+
+- Symlinks pointing to directories are treated as directories and will be listed.
+- Symlinks pointing to files (or broken symlinks) will be excluded.
+- The summary line will reflect "X directories, 0 files".
+- File-specific analysis options (like `--calculate-lines`, `--calculate-words`, `--apply-function`) will effectively be ignored as there are no files to analyze in the output.
+- Metadata like size (`-s`) and modification time (`-D`) will apply to the listed directories.
 
 **Q: If I use `-d` with `-s` (report sizes), will it show directory sizes?**
 
