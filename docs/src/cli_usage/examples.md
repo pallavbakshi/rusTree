@@ -22,28 +22,38 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --calculate-lines --calculate-words --sort-key lines -r ./my_project_src
     ```
 
-5.  **Output the tree structure as Markdown:**
+5.  **List directories only in the current path:**
+    ```bash
+    rustree -d
+    ```
+
+6.  **List directories only in `./src`, showing sizes, up to depth 1:**
+    ```bash
+    rustree -d -s -L 1 ./src
+    ```
+
+7.  **Output the tree structure as Markdown:**
     ```bash
     rustree --output-format markdown > project_structure.md
     ```
 
-6.  **Sort by modification time (oldest first using `-t`):**
+8.  **Sort by modification time (oldest first using `-t`):**
     ```bash
     rustree -t ./my_project
     ```
 
-7.  **List files in directory order (unsorted using `-U`):**
+9.  **List files in directory order (unsorted using `-U`):**
     ```bash
     rustree -U ./my_project
     ```
 
-8.  **Apply the `CountPluses` function to files and sort by its custom output:**
+10. **Apply the `CountPluses` function to files and sort by its custom output:**
     ```bash
     rustree --apply-function CountPluses --sort-key custom ./config_files
     ```
     *(This assumes `CountPluses` is a meaningful function for your files, e.g., counting '+' characters).*
 
-9.  **Pipe `rustree` output to an LLM for summarization:**
+11. **Pipe `rustree` output to an LLM for summarization:**
     ```bash
     rustree -L 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
     ```

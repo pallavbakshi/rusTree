@@ -35,6 +35,23 @@ rustree --llm-ask "Summarize this project structure" | ollama run mistral
 ```
 This pipes the tree output and your question to the `ollama` tool running the `mistral` model.
 
+**Q: How does the `-d` (or `--dirs-only`) flag work?**
+
+A: When `-d` is used, RusTree will only list directories. All files will be excluded from the output.
+    *   Symlinks pointing to directories are treated as directories and will be listed.
+    *   Symlinks pointing to files (or broken symlinks) will be excluded.
+    *   The summary line will reflect "X directories, 0 files".
+    *   File-specific analysis options (like `--calculate-lines`, `--calculate-words`, `--apply-function`) will effectively be ignored as there are no files to analyze in the output.
+    *   Metadata like size (`-s`) and modification time (`-D`) will apply to the listed directories.
+
+**Q: If I use `-d` with `-s` (report sizes), will it show directory sizes?**
+
+A: Yes. When `-d` and `-s` are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).
+
+**Q: What happens if I use `-d` with file-specific sorting keys like `lines` or `words`?**
+
+A: Since `-d` excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., `name`, `m-time`, `size` if `-s` is also used) when `-d` is active.
+
 **Q: Where can I find the API documentation for the library?**
 
 A: You can generate it locally by running `cargo doc --open` in the project's root directory. If the crate is published to `crates.io`, the API documentation will also be available on `docs.rs`.

@@ -9,11 +9,14 @@ This struct is central to controlling how `rustree` behaves. You create an insta
 *   `root_display_name`: How the root directory is named in the output.
 *   `max_depth`: The maximum depth of traversal.
 *   `show_hidden`: Whether to include hidden files/directories.
-*   `report_sizes`, `report_mtime`: Whether to collect and report file sizes and modification times.
+*   `report_sizes`, `report_mtime`: Whether to collect and report file sizes and modification times. `report_sizes` also applies to directories.
 *   `calculate_line_count`, `calculate_word_count`: Whether to perform these analyses on files.
 *   `apply_function`: An optional `BuiltInFunction` to apply to file contents.
 *   `sort_by`: An optional `SortKey` to sort sibling entries.
 *   `reverse_sort`: Whether to reverse the sort order.
+*   `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
+*   `root_node_size`: Optional size of the root node itself, used by formatters if `report_sizes` is true.
+*   `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
 
 **Example:**
 
@@ -27,6 +30,9 @@ let config = RustreeLibConfig {
     report_sizes: true,
     sort_by: Some(SortKey::Size),
     reverse_sort: true,
+    list_directories_only: false,
+    root_node_size: None, // Typically set by the CLI handler or by checking metadata
+    root_is_directory: true, // Typically set by the CLI handler or by checking metadata
     ..Default::default() // Use defaults for other fields
 };
 ```
@@ -37,11 +43,11 @@ Each file or directory encountered during the scan is represented by a `NodeInfo
 
 *   `path`: The full `PathBuf` to the entry.
 *   `name`: The file or directory name as a `String`.
-*   `node_type`: A `NodeType` enum (`File`, `Directory`, `Symlink`).
+*   `node_type`: A `NodeType` enum (`File`, `Directory`, `Symlink`). When `list_directories_only` is active, symlinks pointing to directories will have `NodeType::Directory`.
 *   `depth`: The entry's depth in the tree.
-*   `size`: `Option<u64>` for file size.
+*   `size`: `Option<u64>` for file or directory size (if `report_sizes` is enabled).
 *   `mtime`: `Option<SystemTime>` for modification time.
-*   `line_count`, `word_count`: `Option<usize>` for analysis results.
+*   `line_count`, `word_count`: `Option<usize>` for analysis results (applicable to files only).
 *   `custom_function_output`: `Option<Result<String, ApplyFnError>>` for results of `apply_function`.
 
 You typically receive a `Vec<NodeInfo>` from `get_tree_nodes()`.
@@ -61,6 +67,7 @@ fn list_directory_contents(path_str: &str, config: &RustreeLibConfig) -> Result<
 ```
 
 It takes the root path and a `RustreeLibConfig` and returns a `Result<Vec<NodeInfo>, RustreeError>`.
+The returned `Vec<NodeInfo>` will only contain directories if `config.list_directories_only` is true.
 
 ### `format_nodes()`
 
