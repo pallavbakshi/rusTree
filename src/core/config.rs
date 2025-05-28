@@ -38,6 +38,12 @@ pub struct RustreeLibConfig {
     pub sort_by: Option<SortKey>,
     /// If `true`, reverses the sort order specified by `sort_by`.
     pub reverse_sort: bool,
+    /// If `true`, only directories will be listed.
+    pub list_directories_only: bool,
+    /// Optional size of the root node itself, used by formatters if `report_sizes` is true.
+    pub root_node_size: Option<u64>,
+    /// Indicates if the root path itself is a directory.
+    pub root_is_directory: bool,
     // Add any other options the library logic needs
 }
 
@@ -55,6 +61,9 @@ impl Default for RustreeLibConfig {
             apply_function: None,
             sort_by: None,
             reverse_sort: false,
+            list_directories_only: false,
+            root_node_size: None,
+            root_is_directory: false, // Default to false, will be set by handler
         }
     }
 }

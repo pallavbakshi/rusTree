@@ -16,16 +16,20 @@ impl TextTreeFormatter {
     fn format_metadata(node: &NodeInfo, config: &RustreeLibConfig) -> String {
         let mut metadata_str = String::new();
 
-        if node.node_type == NodeType::File {
-            if config.report_sizes {
-                if let Some(size) = node.size {
-                    write!(metadata_str, "[{:>7}B] ", size).unwrap();
-                } else {
-                    write!(metadata_str, "[       B] ").unwrap(); // Placeholder if size is None
-                }
+        // FR7: Interaction with Metadata Flags
+        // Size: applies to files and directories if config.report_sizes is true.
+        // node.size is populated for directories by the walker.
+        if config.report_sizes {
+            if let Some(size) = node.size {
+                write!(metadata_str, "[{:>7}B] ", size).unwrap();
+            } else {
+                // This case should ideally not be hit if report_sizes is true,
+                // as walker populates size. But as a fallback:
+                write!(metadata_str, "[       B] ").unwrap();
             }
         }
 
+        // MTime: applies to all node types if config.report_mtime is true.
         if config.report_mtime {
             if let Some(mtime) = node.mtime {
                 match mtime.duration_since(UNIX_EPOCH) {
@@ -37,19 +41,21 @@ impl TextTreeFormatter {
             }
         }
 
+        // File-specific metadata: only show if the node is a file.
+        // When -d is active, node.node_type will be Directory, so these won't be shown.
         if node.node_type == NodeType::File {
             if config.calculate_line_count {
                 if let Some(lc) = node.line_count {
                     write!(metadata_str, "[L:{:>4}] ", lc).unwrap();
                 } else {
-                    write!(metadata_str, "[L:    ] ").unwrap();
+                    write!(metadata_str, "[L:    ] ").unwrap(); // Placeholder if None
                 }
             }
             if config.calculate_word_count {
                 if let Some(wc) = node.word_count {
                     write!(metadata_str, "[W:{:>4}] ", wc).unwrap();
                 } else {
-                    write!(metadata_str, "[W:    ] ").unwrap();
+                    write!(metadata_str, "[W:    ] ").unwrap(); // Placeholder if None
                 }
             }
             if config.apply_function.is_some() {
@@ -57,9 +63,8 @@ impl TextTreeFormatter {
                     Some(Ok(val)) => write!(metadata_str, "[F: \"{}\"] ", val).unwrap(),
                     Some(Err(_)) => write!(metadata_str, "[F: error] ").unwrap(),
                     None => {
-                        if config.apply_function.is_some() {
-                            write!(metadata_str, "[F: N/A] ").unwrap();
-                        }
+                        // If apply_function was requested but output is None (e.g. read error before apply_fn)
+                        write!(metadata_str, "[F: N/A] ").unwrap();
                     }
                 }
             }
@@ -123,8 +128,24 @@ impl TreeFormatter for TextTreeFormatter {
         config: &RustreeLibConfig,
     ) -> Result<String, RustreeError> {
         let mut output = String::new();
-        writeln!(output, "{}", config.root_display_name)?;
 
+        // Handle root display name with optional size prefix
+        if config.report_sizes {
+            if let Some(size) = config.root_node_size {
+                write!(output, "[{:>7}B] ", size)?;
+            }
+            // If report_sizes is true but root_node_size is None (e.g. metadata error for root),
+            // we could print a placeholder like "[       B] ", but original tree doesn't show
+            // anything for the root if its size isn't available/applicable.
+            // For now, if size is None, we just print the name.
+            // The original `tree` command shows size for the root only if -s is active.
+        }
+        if config.root_is_directory {
+            writeln!(output, "{}/", config.root_display_name)?;
+        } else {
+            writeln!(output, "{}", config.root_display_name)?;
+        }
+    
         let mut last_sibling_cache = HashMap::<PathBuf, bool>::new();
 
         // Determine the effective root path from the nodes themselves
@@ -184,16 +205,25 @@ impl TreeFormatter for TextTreeFormatter {
             writeln!(output)?;
         }
 
-        // FR7: Summary Line
-        let mut dir_count = 0;
-        let mut file_count = 0;
-        for node in nodes {
-            match node.node_type {
-                NodeType::Directory => dir_count += 1,
-                NodeType::File => file_count += 1,
-                NodeType::Symlink => {} // Symlinks are not explicitly counted as files/dirs in summary by default tree
+        // FR4 & FR7: Summary Line
+        let (dir_count, file_count) = if config.list_directories_only {
+            // If -d is active, nodes contains child directories.
+            // The total directory count includes these children plus the root if it's a directory.
+            let child_dir_count = nodes.len();
+            let root_dir_increment = if config.root_is_directory { 1 } else { 0 };
+            (child_dir_count + root_dir_increment, 0)
+        } else {
+            let mut dc = 0;
+            let mut fc = 0;
+            for node in nodes {
+                match node.node_type {
+                    NodeType::Directory => dc += 1,
+                    NodeType::File => fc += 1,
+                    NodeType::Symlink => { /* Symlinks are not explicitly counted in summary */ }
+                }
             }
-        }
+            (dc, fc)
+        };
         // FR8: Handling Empty Directories (covered by walker providing them)
 
         // Add a blank line after the tree content (or root name if tree is empty)
@@ -205,7 +235,7 @@ impl TreeFormatter for TextTreeFormatter {
             "{} director{}, {} file{}",
             dir_count,
             if dir_count == 1 { "y" } else { "ies" },
-            file_count,
+            file_count, // Will be 0 if config.list_directories_only is true
             if file_count == 1 { "" } else { "s" }
         )?;
 

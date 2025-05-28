@@ -72,6 +72,10 @@ pub struct CliArgs {
     /// The output will be specially formatted for easy piping to an LLM tool.
     #[arg(long)]
     pub llm_ask: Option<String>,
+
+    /// List directories only. (Original tree: -d)
+    #[arg(short = 'd', long = "dirs-only")]
+    pub list_directories_only: bool,
 }
 
 /// Defines the possible keys for sorting directory entries via the CLI.
