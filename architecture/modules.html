@@ -172,7 +172,7 @@
 <li>
 <p><strong><code>config.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, and new options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
+<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, pattern matching (<code>match_patterns</code>), and options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
 </ul>
 </li>
 <li>
@@ -187,8 +187,14 @@
 <ul>
 <li>Contains the <code>walk_directory</code> function responsible for traversing the file system.</li>
 <li>Uses the <code>walkdir</code> crate for efficient directory walking.</li>
-<li>Implements filtering logic, such as <code>list_directories_only</code> (where only directories, including symlinks pointing to directories, are processed).</li>
-<li>Handles symlink resolution to determine the effective type of an entry (e.g., a symlink to a directory is treated as a directory for filtering purposes when <code>list_directories_only</code> is active).</li>
+<li>Implements filtering logic, including:
+<ul>
+<li><code>list_directories_only</code>: Only directories (including symlinks to directories) are processed.</li>
+<li>Pattern matching: Based on <code>config.match_patterns</code>, filters entries using glob patterns. It handles various wildcard operators and directory-specific matching (e.g., <code>pattern/</code>).</li>
+<li>Hidden file visibility based on <code>config.show_hidden</code> and its interaction with pattern matching.</li>
+</ul>
+</li>
+<li>Handles symlink resolution to determine the effective type of an entry.</li>
 <li>Populates <code>NodeInfo</code> structs with basic metadata (including size for directories if <code>report_sizes</code> is enabled) and triggers analysis for files based on <code>RustreeLibConfig</code>.</li>
 </ul>
 </li>

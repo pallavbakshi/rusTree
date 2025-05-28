@@ -206,6 +206,25 @@
 <li>Example: <code>rustree -d</code></li>
 </ul>
 </li>
+<li>
+<p><code>-P, --match-pattern &lt;PATTERN&gt;</code></p>
+<ul>
+<li>Description: List only those files and directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is listed. (Original <code>tree</code> flag: <code>-P</code>)</li>
+<li>Wildcard operators:
+<ul>
+<li><code>*</code>: any zero or more characters.</li>
+<li><code>**</code>: any zero or more characters, including path separators (<code>/</code>).</li>
+<li><code>?</code>: any single character.</li>
+<li><code>[...]</code>: any single character listed (e.g., <code>[abc]</code>, <code>[a-z]</code>).</li>
+<li><code>[^...]</code>: any single character <em>not</em> listed.</li>
+<li><code>|</code>: separates alternate patterns within a single pattern string (e.g., <code>*.txt|*.log</code>).</li>
+</ul>
+</li>
+<li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
+<li>Note: To match hidden files (starting with <code>.</code>), you must also use the <code>-a</code> or <code>--all</code> option.</li>
+<li>Example: <code>rustree -P "*.rs"</code>, <code>rustree -P "*.txt|*.md" -P "docs/"</code></li>
+</ul>
+</li>
 </ul>
 <h3 id="metadata-reporting"><a class="header" href="#metadata-reporting">Metadata Reporting</a></h3>
 <ul>

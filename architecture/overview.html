@@ -176,7 +176,9 @@
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
 <ul>
 <li>The <code>walk_directory</code> function traverses the file system starting from a root path.</li>
-<li>It respects configuration settings like <code>max_depth</code>, <code>show_hidden</code>, and <code>list_directories_only</code>. If <code>list_directories_only</code> is true, files are filtered out, and symlinks pointing to directories are treated as directories.</li>
+<li>It respects configuration settings like <code>max_depth</code>, <code>show_hidden</code>, <code>list_directories_only</code>, and <code>match_patterns</code>.</li>
+<li>If <code>list_directories_only</code> is true, files are filtered out.</li>
+<li>If <code>match_patterns</code> are provided, entries are filtered based on wildcard matching.</li>
 <li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
 </li>

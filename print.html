@@ -173,6 +173,7 @@
 <h2 id="what-can-rustree-do"><a class="header" href="#what-can-rustree-do">What can RusTree do?</a></h2>
 <ul>
 <li><strong>Visualize Directory Structures:</strong> Clearly see the hierarchy of files and folders.</li>
+<li><strong>Filter Entries:</strong> List only files and directories matching specific wildcard patterns using the <code>-P</code> or <code>--match-pattern</code> options.</li>
 <li><strong>Analyze Content:</strong> Get insights like file sizes, modification dates, line counts, and word counts.</li>
 <li><strong>Apply Custom Logic:</strong> Use built-in functions (or extend with your own) to process file contents and report results.</li>
 <li><strong>Sort Entries:</strong> Organize the tree output by name, size, modification time, or other criteria.</li>
@@ -337,6 +338,25 @@ rustree --report-sizes
 <li>Example: <code>rustree -d</code></li>
 </ul>
 </li>
+<li>
+<p><code>-P, --match-pattern &lt;PATTERN&gt;</code></p>
+<ul>
+<li>Description: List only those files and directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is listed. (Original <code>tree</code> flag: <code>-P</code>)</li>
+<li>Wildcard operators:
+<ul>
+<li><code>*</code>: any zero or more characters.</li>
+<li><code>**</code>: any zero or more characters, including path separators (<code>/</code>).</li>
+<li><code>?</code>: any single character.</li>
+<li><code>[...]</code>: any single character listed (e.g., <code>[abc]</code>, <code>[a-z]</code>).</li>
+<li><code>[^...]</code>: any single character <em>not</em> listed.</li>
+<li><code>|</code>: separates alternate patterns within a single pattern string (e.g., <code>*.txt|*.log</code>).</li>
+</ul>
+</li>
+<li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
+<li>Note: To match hidden files (starting with <code>.</code>), you must also use the <code>-a</code> or <code>--all</code> option.</li>
+<li>Example: <code>rustree -P "*.rs"</code>, <code>rustree -P "*.txt|*.md" -P "docs/"</code></li>
+</ul>
+</li>
 </ul>
 <h3 id="metadata-reporting"><a class="header" href="#metadata-reporting">Metadata Reporting</a></h3>
 <ul>
@@ -494,7 +514,40 @@ rustree --report-sizes
 <p>Then, you would typically pipe this entire output to your LLM command-line tool. For example:</p>
 <pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
 </code></pre>
-<p><em>(Replace <code>ollama run mistral</code> with your actual LLM tool and model).</em></p>
+<pre><code>
+</code></pre>
+</li>
+<li>
+<p><strong>List only Rust source files (<code>*.rs</code>):</strong></p>
+<pre><code class="language-bash">rustree -P "*.rs" ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List only Markdown (<code>*.md</code>) or text (<code>*.txt</code>) files:</strong></p>
+<pre><code class="language-bash">rustree -P "*.md|*.txt" ./notes
+# or equivalently
+rustree -P "*.md" -P "*.txt" ./notes
+</code></pre>
+</li>
+<li>
+<p><strong>List only directories named <code>build</code> or <code>target</code>:</strong></p>
+<pre><code class="language-bash">rustree -P "build/|target/" ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List all Markdown files, including hidden ones (e.g., in <code>.github/</code>):</strong></p>
+<pre><code class="language-bash">rustree -a -P "*.md"
+</code></pre>
+</li>
+<li>
+<p><strong>List files starting with <code>test_</code> followed by any single character and then <code>.py</code>:</strong></p>
+<pre><code class="language-bash">rustree -P "test_?.py" ./tests
+</code></pre>
+</li>
+<li>
+<p><strong>List all files within any subdirectory named <code>docs</code>:</strong></p>
+<pre><code class="language-bash">rustree -P "docs/**" ./project_root
+</code></pre>
 </li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
@@ -534,6 +587,7 @@ rustree = "0.1.0" # Replace with the desired version
 <li><code>sort_by</code>: An optional <code>SortKey</code> to sort sibling entries.</li>
 <li><code>reverse_sort</code>: Whether to reverse the sort order.</li>
 <li><code>list_directories_only</code>: If <code>true</code>, only directories (including symlinks to directories) are included in the results.</li>
+<li><code>match_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI <code>-P</code>/<code>--match-pattern</code> options.</li>
 <li><code>root_node_size</code>: Optional size of the root node itself, used by formatters if <code>report_sizes</code> is true.</li>
 <li><code>root_is_directory</code>: Indicates if the root path itself is a directory, used by formatters.</li>
 </ul>
@@ -550,6 +604,7 @@ let config = RustreeLibConfig {
     sort_by: Some(SortKey::Size),
     reverse_sort: true,
     list_directories_only: false,
+    match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example patterns
     root_node_size: None, // Typically set by the CLI handler or by checking metadata
     root_is_directory: true, // Typically set by the CLI handler or by checking metadata
     ..Default::default() // Use defaults for other fields
@@ -700,7 +755,9 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
 <ul>
 <li>The <code>walk_directory</code> function traverses the file system starting from a root path.</li>
-<li>It respects configuration settings like <code>max_depth</code>, <code>show_hidden</code>, and <code>list_directories_only</code>. If <code>list_directories_only</code> is true, files are filtered out, and symlinks pointing to directories are treated as directories.</li>
+<li>It respects configuration settings like <code>max_depth</code>, <code>show_hidden</code>, <code>list_directories_only</code>, and <code>match_patterns</code>.</li>
+<li>If <code>list_directories_only</code> is true, files are filtered out.</li>
+<li>If <code>match_patterns</code> are provided, entries are filtered based on wildcard matching.</li>
 <li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
 </li>
@@ -761,7 +818,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>config.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, and new options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
+<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences, pattern matching (<code>match_patterns</code>), and options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
 </ul>
 </li>
 <li>
@@ -776,8 +833,14 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <ul>
 <li>Contains the <code>walk_directory</code> function responsible for traversing the file system.</li>
 <li>Uses the <code>walkdir</code> crate for efficient directory walking.</li>
-<li>Implements filtering logic, such as <code>list_directories_only</code> (where only directories, including symlinks pointing to directories, are processed).</li>
-<li>Handles symlink resolution to determine the effective type of an entry (e.g., a symlink to a directory is treated as a directory for filtering purposes when <code>list_directories_only</code> is active).</li>
+<li>Implements filtering logic, including:
+<ul>
+<li><code>list_directories_only</code>: Only directories (including symlinks to directories) are processed.</li>
+<li>Pattern matching: Based on <code>config.match_patterns</code>, filters entries using glob patterns. It handles various wildcard operators and directory-specific matching (e.g., <code>pattern/</code>).</li>
+<li>Hidden file visibility based on <code>config.show_hidden</code> and its interaction with pattern matching.</li>
+</ul>
+</li>
+<li>Handles symlink resolution to determine the effective type of an entry.</li>
 <li>Populates <code>NodeInfo</code> structs with basic metadata (including size for directories if <code>report_sizes</code> is enabled) and triggers analysis for files based on <code>RustreeLibConfig</code>.</li>
 </ul>
 </li>
@@ -897,7 +960,15 @@ mdbook serve docs
 <p><strong>Q: How do I report a bug or suggest a feature?</strong></p>
 <p>A: Please open an issue on the <a href="https://github.com/yourusername/rustree">GitHub repository</a> (replace with the actual link).</p>
 <p><strong>Q: Is there a way to ignore certain files or directories (like <code>.gitignore</code>)?</strong></p>
-<p>A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like <code>grep</code> to filter the output if needed, or rely on the <code>--show-hidden</code> (<code>-a</code>) flag.</p>
+<p>A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like <code>grep</code> to filter the output if needed, or rely on the <code>--show-hidden</code> (<code>-a</code>) flag. The new <code>-P</code>/<code>--match-pattern</code> options provide powerful built-in filtering.</p>
+<p><strong>Q: How does the <code>-P pattern</code> / <code>--match-pattern pattern</code> feature work?</strong></p>
+<p>A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.
+*   You can use options like <code>-P "*.txt"</code> to show only text files, or <code>-P "docs/"</code> to show only a directory named <code>docs</code>.
+*   Multiple patterns can be provided (e.g., <code>-P "*.rs" -P "*.toml"</code>) or combined with <code>|</code> (e.g., <code>-P "*.rs|*.toml"</code>).
+*   Supported wildcards include <code>*</code>, <code>**</code>, <code>?</code>, <code>[...]</code>, and <code>[^...]</code>.
+*   A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.
+*   To include hidden files (starting with <code>.</code>) in the pattern matching process, you must also use the <code>-a</code> (or <code>--all</code>) option.
+*   The summary line (number of directories and files) will reflect only the listed items.</p>
 <p><strong>Q: Can I customize the output format further?</strong></p>
 <p>A: Currently, RusTree supports "text" and "markdown" formats. The text format has some implicit styling. More advanced customization (e.g., custom colors, icons, or entirely new formats like JSON) could be considered for future development. If you have specific needs, please open a feature request.</p>
 <p><strong>Q: How does the <code>--llm-ask</code> feature work?</strong></p>

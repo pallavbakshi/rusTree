@@ -181,7 +181,15 @@
 <p><strong>Q: How do I report a bug or suggest a feature?</strong></p>
 <p>A: Please open an issue on the <a href="https://github.com/yourusername/rustree">GitHub repository</a> (replace with the actual link).</p>
 <p><strong>Q: Is there a way to ignore certain files or directories (like <code>.gitignore</code>)?</strong></p>
-<p>A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like <code>grep</code> to filter the output if needed, or rely on the <code>--show-hidden</code> (<code>-a</code>) flag.</p>
+<p>A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like <code>grep</code> to filter the output if needed, or rely on the <code>--show-hidden</code> (<code>-a</code>) flag. The new <code>-P</code>/<code>--match-pattern</code> options provide powerful built-in filtering.</p>
+<p><strong>Q: How does the <code>-P pattern</code> / <code>--match-pattern pattern</code> feature work?</strong></p>
+<p>A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.
+*   You can use options like <code>-P "*.txt"</code> to show only text files, or <code>-P "docs/"</code> to show only a directory named <code>docs</code>.
+*   Multiple patterns can be provided (e.g., <code>-P "*.rs" -P "*.toml"</code>) or combined with <code>|</code> (e.g., <code>-P "*.rs|*.toml"</code>).
+*   Supported wildcards include <code>*</code>, <code>**</code>, <code>?</code>, <code>[...]</code>, and <code>[^...]</code>.
+*   A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.
+*   To include hidden files (starting with <code>.</code>) in the pattern matching process, you must also use the <code>-a</code> (or <code>--all</code>) option.
+*   The summary line (number of directories and files) will reflect only the listed items.</p>
 <p><strong>Q: Can I customize the output format further?</strong></p>
 <p>A: Currently, RusTree supports "text" and "markdown" formats. The text format has some implicit styling. More advanced customization (e.g., custom colors, icons, or entirely new formats like JSON) could be considered for future development. If you have specific needs, please open a feature request.</p>
 <p><strong>Q: How does the <code>--llm-ask</code> feature work?</strong></p>

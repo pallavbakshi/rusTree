@@ -227,7 +227,40 @@
 <p>Then, you would typically pipe this entire output to your LLM command-line tool. For example:</p>
 <pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
 </code></pre>
-<p><em>(Replace <code>ollama run mistral</code> with your actual LLM tool and model).</em></p>
+<pre><code>
+</code></pre>
+</li>
+<li>
+<p><strong>List only Rust source files (<code>*.rs</code>):</strong></p>
+<pre><code class="language-bash">rustree -P "*.rs" ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List only Markdown (<code>*.md</code>) or text (<code>*.txt</code>) files:</strong></p>
+<pre><code class="language-bash">rustree -P "*.md|*.txt" ./notes
+# or equivalently
+rustree -P "*.md" -P "*.txt" ./notes
+</code></pre>
+</li>
+<li>
+<p><strong>List only directories named <code>build</code> or <code>target</code>:</strong></p>
+<pre><code class="language-bash">rustree -P "build/|target/" ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List all Markdown files, including hidden ones (e.g., in <code>.github/</code>):</strong></p>
+<pre><code class="language-bash">rustree -a -P "*.md"
+</code></pre>
+</li>
+<li>
+<p><strong>List files starting with <code>test_</code> followed by any single character and then <code>.py</code>:</strong></p>
+<pre><code class="language-bash">rustree -P "test_?.py" ./tests
+</code></pre>
+</li>
+<li>
+<p><strong>List all files within any subdirectory named <code>docs</code>:</strong></p>
+<pre><code class="language-bash">rustree -P "docs/**" ./project_root
+</code></pre>
 </li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
