@@ -311,14 +311,14 @@ rustree --report-sizes
 <li>
 <p><code>-L, --max-depth &lt;DEPTH&gt;</code></p>
 <ul>
-<li>Description: Maximum depth to scan into the directory tree.</li>
+<li>Description: Maximum depth to scan into the directory tree. (Original <code>tree</code> flag: <code>-L</code>)</li>
 <li>Example: <code>rustree -L 2</code></li>
 </ul>
 </li>
 <li>
 <p><code>-a, --all</code></p>
 <ul>
-<li>Description: Show hidden files and directories (those starting with a <code>.</code>).</li>
+<li>Description: Show hidden files and directories (those starting with a <code>.</code>). (Original <code>tree</code> flag: <code>-a</code>)</li>
 </ul>
 </li>
 <li>
@@ -336,13 +336,13 @@ rustree --report-sizes
 <li>
 <p><code>-s, --report-sizes</code></p>
 <ul>
-<li>Description: Report sizes of files in the output.</li>
+<li>Description: Report sizes of files in the output. (Original <code>tree</code> flag: <code>-s</code>)</li>
 </ul>
 </li>
 <li>
 <p><code>-D, --report-mtime</code></p>
 <ul>
-<li>Description: Report last modification times for files and directories.</li>
+<li>Description: Report last modification times for files and directories. (Original <code>tree</code> flag: <code>-D</code>)</li>
 </ul>
 </li>
 </ul>
@@ -372,18 +372,33 @@ rustree --report-sizes
 <h3 id="sorting"><a class="header" href="#sorting">Sorting</a></h3>
 <ul>
 <li>
+<p><code>-t, --sort-by-mtime</code></p>
+<ul>
+<li>Description: Sort the output by last modification time instead of alphabetically. (Original <code>tree</code> flag: <code>-t</code>)</li>
+<li>This option is mutually exclusive with <code>-U</code> and <code>--sort-key</code>.</li>
+</ul>
+</li>
+<li>
+<p><code>-U, --unsorted</code></p>
+<ul>
+<li>Description: Do not sort. Lists files in directory order. (Original <code>tree</code> flag: <code>-U</code>)</li>
+<li>This option is mutually exclusive with <code>-t</code>, <code>--sort-key</code>, and <code>-r</code>.</li>
+</ul>
+</li>
+<li>
 <p><code>--sort-key &lt;KEY&gt;</code></p>
 <ul>
-<li>Description: Specifies the key for sorting directory entries.</li>
-<li>Possible values: <code>name</code>, <code>size</code>, <code>m-time</code>, <code>words</code>, <code>lines</code>, <code>custom</code></li>
-<li>Default (if not specified): <code>name</code></li>
+<li>Description: Specifies the key for sorting directory entries. If no sorting option (<code>-t</code>, <code>-U</code>, or <code>--sort-key</code>) is provided, <code>rustree</code> defaults to sorting by <code>name</code>.</li>
+<li>Possible values: <code>name</code>, <code>size</code>, <code>m-time</code> (equivalent to <code>-t</code>), <code>words</code>, <code>lines</code>, <code>custom</code></li>
+<li>This option is mutually exclusive with <code>-t</code> and <code>-U</code>.</li>
 <li>Example: <code>rustree --sort-key size</code></li>
 </ul>
 </li>
 <li>
 <p><code>-r, --reverse-sort</code></p>
 <ul>
-<li>Description: Reverse the order of the sort specified by <code>sort_key</code>.</li>
+<li>Description: Reverse the order of the active sort. (Original <code>tree</code> flag: <code>-r</code>)</li>
+<li>This option is ignored if <code>-U</code> (unsorted) is used.</li>
 </ul>
 </li>
 </ul>
@@ -425,8 +440,8 @@ rustree --report-sizes
 </code></pre>
 </li>
 <li>
-<p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first):</strong></p>
-<pre><code class="language-bash">rustree -s -D --sort-key m-time -r ~/Documents
+<p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first using <code>-t</code> and <code>-r</code>):</strong></p>
+<pre><code class="language-bash">rustree -s -D -t -r ~/Documents
 </code></pre>
 </li>
 <li>
@@ -437,6 +452,16 @@ rustree --report-sizes
 <li>
 <p><strong>Output the tree structure as Markdown:</strong></p>
 <pre><code class="language-bash">rustree --output-format markdown &gt; project_structure.md
+</code></pre>
+</li>
+<li>
+<p><strong>Sort by modification time (oldest first using <code>-t</code>):</strong></p>
+<pre><code class="language-bash">rustree -t ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List files in directory order (unsorted using <code>-U</code>):</strong></p>
+<pre><code class="language-bash">rustree -U ./my_project
 </code></pre>
 </li>
 <li>

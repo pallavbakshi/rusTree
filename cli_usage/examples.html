@@ -180,8 +180,8 @@
 </code></pre>
 </li>
 <li>
-<p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first):</strong></p>
-<pre><code class="language-bash">rustree -s -D --sort-key m-time -r ~/Documents
+<p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first using <code>-t</code> and <code>-r</code>):</strong></p>
+<pre><code class="language-bash">rustree -s -D -t -r ~/Documents
 </code></pre>
 </li>
 <li>
@@ -192,6 +192,16 @@
 <li>
 <p><strong>Output the tree structure as Markdown:</strong></p>
 <pre><code class="language-bash">rustree --output-format markdown &gt; project_structure.md
+</code></pre>
+</li>
+<li>
+<p><strong>Sort by modification time (oldest first using <code>-t</code>):</strong></p>
+<pre><code class="language-bash">rustree -t ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>List files in directory order (unsorted using <code>-U</code>):</strong></p>
+<pre><code class="language-bash">rustree -U ./my_project
 </code></pre>
 </li>
 <li>
