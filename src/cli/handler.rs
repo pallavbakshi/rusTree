@@ -27,8 +27,20 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             .into_owned()
     };
 
+    let root_node_size = if cli_args.report_sizes {
+        std::fs::metadata(&cli_args.path).ok().map(|meta| meta.len())
+    } else {
+        None
+    };
+
+    let root_is_directory = std::fs::metadata(&cli_args.path)
+        .map(|meta| meta.is_dir())
+        .unwrap_or(false); // Default to false if metadata fails or it's not a dir
+
     RustreeLibConfig {
         root_display_name,
+        root_node_size,
+        root_is_directory,
         max_depth: cli_args.max_depth,
         show_hidden: cli_args.show_hidden,
         report_sizes: cli_args.report_sizes,
@@ -54,6 +66,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             }).or(Some(LibSortKey::Name)) // Default to sort by Name if no sort option is specified
         },
         reverse_sort: cli_args.reverse_sort,
+        list_directories_only: cli_args.list_directories_only,
     }
 }
 

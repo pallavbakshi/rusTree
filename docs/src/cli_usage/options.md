@@ -21,6 +21,10 @@ This page lists the command-line options available for `rustree`. You can also v
     *   Default: `text`
     *   Example: `rustree --output-format markdown`
 
+*   `-d, --dirs-only`
+    *   Description: List directories only. Files will be excluded from the output. (Original `tree` flag: `-d`)
+    *   Example: `rustree -d`
+
 ### Metadata Reporting
 
 *   `-s, --report-sizes`

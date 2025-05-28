@@ -6,17 +6,18 @@ RusTree is designed with a modular approach, separating concerns into different 
 
 2.  **Walking (`core::walker`)**:
     *   The `walk_directory` function traverses the file system starting from a root path.
-    *   It respects configuration settings like `max_depth` and `show_hidden`.
-    *   For each encountered file system entry (file, directory, symlink), it gathers initial metadata.
+    *   It respects configuration settings like `max_depth`, `show_hidden`, and `list_directories_only`. If `list_directories_only` is true, files are filtered out, and symlinks pointing to directories are treated as directories.
+    *   For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.
 
 3.  **Analysis (`core::analyzer`)**:
-    *   As the walker processes files, it can invoke analysis functions based on the configuration.
-    *   `file_stats`: Calculates line counts and word counts.
+    *   As the walker processes entries that are effectively files (i.e., not filtered out by `list_directories_only`), it can invoke analysis functions based on the configuration.
+    *   `file_stats`: Calculates line counts and word counts for files.
     *   `apply_fn`: Applies a selected built-in function to file content.
-    *   The results of these analyses are stored in `NodeInfo` objects.
+    *   The results of these analyses are stored in `NodeInfo` objects. This step is skipped for directories or when `list_directories_only` is active.
 
 4.  **Node Representation (`NodeInfo`)**:
-    *   Each file system entry is represented by a `NodeInfo` struct. This struct holds its path, name, type, depth, metadata (size, mtime), and any analysis results.
+    *   Each qualifying file system entry is represented by a `NodeInfo` struct. This struct holds its path, name, effective `node_type` (e.g., a symlink to a directory might be stored as `NodeType::Directory` if `list_directories_only` is active), depth, metadata (size, mtime), and any analysis results.
+    *   The `size` field can be populated for directories if `report_sizes` is enabled.
     *   The walker produces a `Vec<NodeInfo>`.
 
 5.  **Sorting (`core::sorter`)**:
@@ -26,9 +27,9 @@ RusTree is designed with a modular approach, separating concerns into different 
 6.  **Formatting (`core::formatter`)**:
     *   The sorted (or unsorted) `Vec<NodeInfo>` is then passed to a formatter.
     *   The `TreeFormatter` trait defines the interface for formatters.
-    *   `TextTreeFormatter`: Generates a plain text, `tree`-like output.
+    *   `TextTreeFormatter`: Generates a plain text, `tree`-like output. It adapts its output based on `list_directories_only` (e.g., summary line, metadata shown).
     *   `MarkdownFormatter`: Generates a Markdown list.
-    *   The formatter produces the final string output.
+    *   The formatter produces the final string output, considering configuration like `root_node_size` and `root_is_directory` for accurate root display.
 
 ### CLI Layer
 

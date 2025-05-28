@@ -8,6 +8,7 @@ pub mod common_test_utils {
     use super::*; // To bring fs, File, Write, TempDir, Result into this module's scope
     use std::path::Path; // Add this
 
+    #[allow(dead_code)] // This function is used by other test files
     pub fn setup_test_directory() -> Result<TempDir> {
         let dir = tempdir()?;
         // Create a structure:
