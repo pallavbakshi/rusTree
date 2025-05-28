@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ApplyFnError","BuiltInFunction"],"fn":["apply_function_to_content"]};

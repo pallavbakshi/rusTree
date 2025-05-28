@@ -1,0 +1,903 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>RusTree Documentation</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">RusTree Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction-to-rustree"><a class="header" href="#introduction-to-rustree">Introduction to RusTree</a></h1>
+<p>Welcome to RusTree!</p>
+<p>RusTree is a command-line tool and Rust library designed to display directory structures in a tree-like format, similar to the classic <code>tree</code> command, but with enhanced features for analysis and output customization.</p>
+<h2 id="what-can-rustree-do"><a class="header" href="#what-can-rustree-do">What can RusTree do?</a></h2>
+<ul>
+<li><strong>Visualize Directory Structures:</strong> Clearly see the hierarchy of files and folders.</li>
+<li><strong>Analyze Content:</strong> Get insights like file sizes, modification dates, line counts, and word counts.</li>
+<li><strong>Apply Custom Logic:</strong> Use built-in functions (or extend with your own) to process file contents and report results.</li>
+<li><strong>Sort Entries:</strong> Organize the tree output by name, size, modification time, or other criteria.</li>
+<li><strong>Flexible Output:</strong> Choose between plain text tree format or Markdown.</li>
+<li><strong>Cross-Platform:</strong> Built with Rust, aiming for compatibility across different operating systems.</li>
+</ul>
+<h2 id="who-is-this-for"><a class="header" href="#who-is-this-for">Who is this for?</a></h2>
+<ul>
+<li><strong>Developers:</strong> Who need to quickly understand the layout of a project or directory.</li>
+<li><strong>System Administrators:</strong> For inspecting directory contents and sizes.</li>
+<li><strong>Anyone working with files:</strong> Who wants a more powerful alternative to basic <code>ls</code> or <code>dir</code> commands.</li>
+<li><strong>Rustaceans:</strong> Who want to use or contribute to a Rust-based utility.</li>
+</ul>
+<p>This documentation will guide you through installing RusTree, using its command-line interface, and leveraging its capabilities as a Rust library in your own projects.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
+<p>This section will help you get RusTree up and running.</p>
+<p>We'll cover:</p>
+<ul>
+<li><a href="./getting_started/installation.html">Installation</a>: How to install the RusTree command-line tool.</li>
+<li><a href="./getting_started/basic_usage.html">Basic Usage</a>: A quick tour of how to use RusTree from your terminal.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>RusTree is a Rust application and can be installed using Cargo, Rust's package manager.</p>
+<h3 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h3>
+<p>Ensure you have Rust and Cargo installed. If not, please visit <a href="https://rustup.rs/">rustup.rs</a> to install them.</p>
+<h3 id="installing-from-cratesio-recommended"><a class="header" href="#installing-from-cratesio-recommended">Installing from Crates.io (Recommended)</a></h3>
+<p>Once RusTree is published to <a href="https://crates.io/">crates.io</a>, you can install it directly using:</p>
+<pre><code class="language-bash">cargo install rustree
+</code></pre>
+<p>This will download the source code, compile it, and place the <code>rustree</code> executable in your Cargo binary directory (usually <code>~/.cargo/bin/</code>). Make sure this directory is in your system's <code>PATH</code>.</p>
+<h3 id="building-from-source"><a class="header" href="#building-from-source">Building from Source</a></h3>
+<p>If you want to build from the latest source code (e.g., from a Git repository):</p>
+<ol>
+<li>
+<p>Clone the repository:</p>
+<pre><code class="language-bash">git clone https://github.com/yourusername/rustree.git # Replace with actual URL
+cd rustree
+</code></pre>
+</li>
+<li>
+<p>Build and install the binary:</p>
+<pre><code class="language-bash">cargo install --path .
+</code></pre>
+<p>Alternatively, to just build for development:</p>
+<pre><code class="language-bash">cargo build --release
+</code></pre>
+<p>The executable will be located at <code>target/release/rustree</code>.</p>
+</li>
+</ol>
+<h3 id="verifying-installation"><a class="header" href="#verifying-installation">Verifying Installation</a></h3>
+<p>After installation, you should be able to run:</p>
+<pre><code class="language-bash">rustree --version
+</code></pre>
+<p>This command should print the installed version of RusTree. If you see an error, ensure <code>~/.cargo/bin</code> is in your <code>PATH</code> or try opening a new terminal session.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h2>
+<p>Once RusTree is installed, you can use it from your command line.</p>
+<h3 id="displaying-the-current-directory"><a class="header" href="#displaying-the-current-directory">Displaying the Current Directory</a></h3>
+<p>The simplest way to use RusTree is to navigate to the directory you want to inspect and run:</p>
+<pre><code class="language-bash">rustree
+</code></pre>
+<p>This will display the tree structure of the current directory (<code>.</code>).</p>
+<h3 id="specifying-a-path"><a class="header" href="#specifying-a-path">Specifying a Path</a></h3>
+<p>You can also specify a path to a directory:</p>
+<pre><code class="language-bash">rustree /path/to/your/directory
+</code></pre>
+<p>Or a relative path:</p>
+<pre><code class="language-bash">rustree ../some/other/folder
+</code></pre>
+<h3 id="common-options"><a class="header" href="#common-options">Common Options</a></h3>
+<p>Here are a few common options to get you started:</p>
+<ul>
+<li>
+<p><strong>Show all files (including hidden):</strong></p>
+<pre><code class="language-bash">rustree -a
+# or
+rustree --all
+</code></pre>
+</li>
+<li>
+<p><strong>Limit depth:</strong></p>
+<pre><code class="language-bash">rustree -L 2  # Show current directory and its direct children (depth 1 and 2)
+</code></pre>
+</li>
+<li>
+<p><strong>Show file sizes:</strong></p>
+<pre><code class="language-bash">rustree -s
+# or
+rustree --report-sizes
+</code></pre>
+</li>
+<li>
+<p><strong>Sort by size (ascending):</strong></p>
+<pre><code class="language-bash">rustree --sort-key Size
+</code></pre>
+</li>
+<li>
+<p><strong>Sort by size (descending):</strong></p>
+<pre><code class="language-bash">rustree --sort-key Size -r
+</code></pre>
+</li>
+</ul>
+<h3 id="getting-help"><a class="header" href="#getting-help">Getting Help</a></h3>
+<p>For a full list of options and commands, use the help flag:</p>
+<pre><code class="language-bash">rustree --help
+</code></pre>
+<p>This will display all available arguments and their descriptions.</p>
+<p>Explore the <a href="getting_started/../cli_usage.html">Command-Line Interface (CLI)</a> section for more detailed information on all options.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="command-line-interface-cli"><a class="header" href="#command-line-interface-cli">Command-Line Interface (CLI)</a></h1>
+<p>This section details the usage of the <code>rustree</code> command-line tool.</p>
+<p>The basic syntax is:</p>
+<pre><code class="language-bash">rustree [OPTIONS] [PATH]
+</code></pre>
+<ul>
+<li><code>[OPTIONS]</code>: Various flags to control behavior (e.g., depth, sorting, output format).</li>
+<li><code>[PATH]</code>: Optional path to the directory to scan. Defaults to the current directory (<code>.</code>).</li>
+</ul>
+<h2 id="sub-sections"><a class="header" href="#sub-sections">Sub-sections:</a></h2>
+<ul>
+<li><a href="./cli_usage/options.html">Options and Flags</a>: A comprehensive list of all available command-line options.</li>
+<li><a href="./cli_usage/examples.html">Examples</a>: Practical examples demonstrating various use cases.</li>
+</ul>
+<p>To see all available options directly from your terminal, run:</p>
+<pre><code class="language-bash">rustree --help
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="options-and-flags"><a class="header" href="#options-and-flags">Options and Flags</a></h2>
+<p>This page lists the command-line options available for <code>rustree</code>. You can also view this information by running <code>rustree --help</code>.</p>
+<h3 id="general-options"><a class="header" href="#general-options">General Options</a></h3>
+<ul>
+<li>
+<p><code>[PATH]</code></p>
+<ul>
+<li>Description: The root path to start scanning from.</li>
+<li>Default: <code>.</code> (current directory)</li>
+</ul>
+</li>
+<li>
+<p><code>-L, --max-depth &lt;DEPTH&gt;</code></p>
+<ul>
+<li>Description: Maximum depth to scan into the directory tree.</li>
+<li>Example: <code>rustree -L 2</code></li>
+</ul>
+</li>
+<li>
+<p><code>-a, --all</code></p>
+<ul>
+<li>Description: Show hidden files and directories (those starting with a <code>.</code>).</li>
+</ul>
+</li>
+<li>
+<p><code>--output-format &lt;FORMAT&gt;</code></p>
+<ul>
+<li>Description: Specifies the output format for the tree.</li>
+<li>Possible values: <code>text</code>, <code>markdown</code></li>
+<li>Default: <code>text</code></li>
+<li>Example: <code>rustree --output-format markdown</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="metadata-reporting"><a class="header" href="#metadata-reporting">Metadata Reporting</a></h3>
+<ul>
+<li>
+<p><code>-s, --report-sizes</code></p>
+<ul>
+<li>Description: Report sizes of files in the output.</li>
+</ul>
+</li>
+<li>
+<p><code>-D, --report-mtime</code></p>
+<ul>
+<li>Description: Report last modification times for files and directories.</li>
+</ul>
+</li>
+</ul>
+<h3 id="content-analysis"><a class="header" href="#content-analysis">Content Analysis</a></h3>
+<ul>
+<li>
+<p><code>--calculate-lines</code></p>
+<ul>
+<li>Description: Calculate and display line counts for files.</li>
+</ul>
+</li>
+<li>
+<p><code>-w, --calculate-words</code></p>
+<ul>
+<li>Description: Calculate and display word counts for files.</li>
+</ul>
+</li>
+<li>
+<p><code>--apply-function &lt;FUNCTION_NAME&gt;</code></p>
+<ul>
+<li>Description: Apply a built-in function to file contents and display the result.</li>
+<li>Possible values: <code>CountPluses</code> (more can be added)</li>
+<li>Example: <code>rustree --apply-function CountPluses</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="sorting"><a class="header" href="#sorting">Sorting</a></h3>
+<ul>
+<li>
+<p><code>--sort-key &lt;KEY&gt;</code></p>
+<ul>
+<li>Description: Specifies the key for sorting directory entries.</li>
+<li>Possible values: <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code></li>
+<li>Default (if not specified): <code>Name</code></li>
+<li>Example: <code>rustree --sort-key Size</code></li>
+</ul>
+</li>
+<li>
+<p><code>-r, --reverse-sort</code></p>
+<ul>
+<li>Description: Reverse the order of the sort specified by <code>sort_key</code>.</li>
+</ul>
+</li>
+</ul>
+<h3 id="llm-integration"><a class="header" href="#llm-integration">LLM Integration</a></h3>
+<ul>
+<li><code>--llm-ask &lt;QUESTION&gt;</code>
+<ul>
+<li>Description: Ask a question to an LLM, providing the <code>rustree</code> output as context. The output will be specially formatted for easy piping to an LLM tool.</li>
+<li>Example: <code>rustree --llm-ask "Summarize the Go files in this project." | your-llm-cli-tool</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="help-and-version"><a class="header" href="#help-and-version">Help and Version</a></h3>
+<ul>
+<li>
+<p><code>-h, --help</code></p>
+<ul>
+<li>Description: Print help information.</li>
+</ul>
+</li>
+<li>
+<p><code>-V, --version</code></p>
+<ul>
+<li>Description: Print version information.</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>Here are some practical examples of how to use <code>rustree</code> from the command line.</p>
+<ol>
+<li>
+<p><strong>Basic tree of the current directory:</strong></p>
+<pre><code class="language-bash">rustree
+</code></pre>
+</li>
+<li>
+<p><strong>Tree of a specific directory, showing hidden files and up to depth 2:</strong></p>
+<pre><code class="language-bash">rustree -a -L 2 /var/log
+</code></pre>
+</li>
+<li>
+<p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first):</strong></p>
+<pre><code class="language-bash">rustree -s -D --sort-key MTime -r ~/Documents
+</code></pre>
+</li>
+<li>
+<p><strong>Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):</strong></p>
+<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-key Lines -r ./my_project_src
+</code></pre>
+</li>
+<li>
+<p><strong>Output the tree structure as Markdown:</strong></p>
+<pre><code class="language-bash">rustree --output-format markdown &gt; project_structure.md
+</code></pre>
+</li>
+<li>
+<p><strong>Apply the <code>CountPluses</code> function to files and sort by its custom output:</strong></p>
+<pre><code class="language-bash">rustree --apply-function CountPluses --sort-key Custom ./config_files
+</code></pre>
+<p><em>(This assumes <code>CountPluses</code> is a meaningful function for your files, e.g., counting '+' characters).</em></p>
+</li>
+<li>
+<p><strong>Pipe <code>rustree</code> output to an LLM for summarization:</strong></p>
+<pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+</code></pre>
+<p>Then, you would typically pipe this entire output to your LLM command-line tool. For example:</p>
+<pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
+</code></pre>
+<p><em>(Replace <code>ollama run mistral</code> with your actual LLM tool and model).</em></p>
+</li>
+</ol>
+<p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="library-usage-api"><a class="header" href="#library-usage-api">Library Usage (API)</a></h1>
+<p>Beyond the command-line tool, <code>rustree</code> can be used as a library in your own Rust projects. This allows you to programmatically generate and process directory tree information.</p>
+<h2 id="adding-rustree-as-a-dependency"><a class="header" href="#adding-rustree-as-a-dependency">Adding RusTree as a Dependency</a></h2>
+<p>To use <code>rustree</code> in your project, add it to your <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+rustree = "0.1.0" # Replace with the desired version
+</code></pre>
+<h2 id="core-concepts"><a class="header" href="#core-concepts">Core Concepts</a></h2>
+<p>The library revolves around a few key components:</p>
+<ul>
+<li><a href="./library_usage/concepts.html#rustreelibconfig"><code>RustreeLibConfig</code></a>: A struct to configure the behavior of the tree generation (depth, hidden files, analysis options, sorting, etc.).</li>
+<li><a href="./library_usage/concepts.html#nodeinfo"><code>NodeInfo</code></a>: A struct representing a single entry (file or directory) in the tree, containing its metadata and analysis results.</li>
+<li><a href="./library_usage/concepts.html#get_tree_nodes"><code>get_tree_nodes()</code></a>: The main function to walk a directory, analyze entries, and return a <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li><a href="./library_usage/concepts.html#format_nodes"><code>format_nodes()</code></a>: A function to format a <code>Vec&lt;NodeInfo&gt;</code> into a string representation (e.g., text tree, Markdown).</li>
+<li>Enums for options like <a href="./library_usage/concepts.html#sortkey"><code>SortKey</code></a>, <a href="./library_usage/concepts.html#liboutputformat"><code>LibOutputFormat</code></a>, etc.</li>
+</ul>
+<h2 id="sub-sections-1"><a class="header" href="#sub-sections-1">Sub-sections:</a></h2>
+<ul>
+<li><a href="./library_usage/concepts.html">Core Concepts</a>: Detailed explanation of the main types and functions.</li>
+<li><a href="./library_usage/examples.html">Examples</a>: Code examples demonstrating how to use the library.</li>
+</ul>
+<p>The API documentation generated by <code>cargo doc</code> (and available on <code>docs.rs</code> if published) provides the most detailed reference for all public items.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="core-library-concepts"><a class="header" href="#core-library-concepts">Core Library Concepts</a></h2>
+<p>Understanding these core components will help you effectively use the <code>rustree</code> library.</p>
+<h3 id="rustreelibconfig"><a class="header" href="#rustreelibconfig"><code>RustreeLibConfig</code></a></h3>
+<p>This struct is central to controlling how <code>rustree</code> behaves. You create an instance of <code>RustreeLibConfig</code> and set its fields to specify:</p>
+<ul>
+<li><code>root_display_name</code>: How the root directory is named in the output.</li>
+<li><code>max_depth</code>: The maximum depth of traversal.</li>
+<li><code>show_hidden</code>: Whether to include hidden files/directories.</li>
+<li><code>report_sizes</code>, <code>report_mtime</code>: Whether to collect and report file sizes and modification times.</li>
+<li><code>calculate_line_count</code>, <code>calculate_word_count</code>: Whether to perform these analyses on files.</li>
+<li><code>apply_function</code>: An optional <code>BuiltInFunction</code> to apply to file contents.</li>
+<li><code>sort_by</code>: An optional <code>SortKey</code> to sort sibling entries.</li>
+<li><code>reverse_sort</code>: Whether to reverse the sort order.</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use rustree::{RustreeLibConfig, SortKey};
+
+let config = RustreeLibConfig {
+    root_display_name: "MyProject".to_string(),
+    max_depth: Some(3),
+    show_hidden: false,
+    report_sizes: true,
+    sort_by: Some(SortKey::Size),
+    reverse_sort: true,
+    ..Default::default() // Use defaults for other fields
+};
+<span class="boring">}</span></code></pre></pre>
+<h3 id="nodeinfo"><a class="header" href="#nodeinfo"><code>NodeInfo</code></a></h3>
+<p>Each file or directory encountered during the scan is represented by a <code>NodeInfo</code> struct. It contains:</p>
+<ul>
+<li><code>path</code>: The full <code>PathBuf</code> to the entry.</li>
+<li><code>name</code>: The file or directory name as a <code>String</code>.</li>
+<li><code>node_type</code>: A <code>NodeType</code> enum (<code>File</code>, <code>Directory</code>, <code>Symlink</code>).</li>
+<li><code>depth</code>: The entry's depth in the tree.</li>
+<li><code>size</code>: <code>Option&lt;u64&gt;</code> for file size.</li>
+<li><code>mtime</code>: <code>Option&lt;SystemTime&gt;</code> for modification time.</li>
+<li><code>line_count</code>, <code>word_count</code>: <code>Option&lt;usize&gt;</code> for analysis results.</li>
+<li><code>custom_function_output</code>: <code>Option&lt;Result&lt;String, ApplyFnError&gt;&gt;</code> for results of <code>apply_function</code>.</li>
+</ul>
+<p>You typically receive a <code>Vec&lt;NodeInfo&gt;</code> from <code>get_tree_nodes()</code>.</p>
+<h3 id="get_tree_nodes"><a class="header" href="#get_tree_nodes"><code>get_tree_nodes()</code></a></h3>
+<p>This is the primary function for generating the tree data.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use rustree::{get_tree_nodes, RustreeLibConfig, NodeInfo, RustreeError};
+use std::path::Path;
+
+fn list_directory_contents(path_str: &amp;str, config: &amp;RustreeLibConfig) -&gt; Result&lt;Vec&lt;NodeInfo&gt;, RustreeError&gt; {
+    let root_path = Path::new(path_str);
+    get_tree_nodes(root_path, config)
+}
+<span class="boring">}</span></code></pre></pre>
+<p>It takes the root path and a <code>RustreeLibConfig</code> and returns a <code>Result&lt;Vec&lt;NodeInfo&gt;, RustreeError&gt;</code>.</p>
+<h3 id="format_nodes"><a class="header" href="#format_nodes"><code>format_nodes()</code></a></h3>
+<p>Once you have the <code>Vec&lt;NodeInfo&gt;</code>, you can format it into a string.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use rustree::{format_nodes, NodeInfo, LibOutputFormat, RustreeLibConfig, RustreeError};
+
+fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;RustreeLibConfig) -&gt; Result&lt;String, RustreeError&gt; {
+    format_nodes(nodes, format, config)
+}
+<span class="boring">}</span></code></pre></pre>
+<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code> or <code>Markdown</code>), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
+<h3 id="key-enums"><a class="header" href="#key-enums">Key Enums</a></h3>
+<ul>
+<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>. Used in <code>RustreeLibConfig</code> to specify sorting.</li>
+<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Used with <code>format_nodes()</code>.</li>
+<li><strong><code>BuiltInFunction</code></strong>: e.g., <code>CountPluses</code>. Used in <code>RustreeLibConfig</code> for <code>apply_function</code>.</li>
+<li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Found in <code>NodeInfo</code>.</li>
+<li><strong><code>RustreeError</code></strong>: The error type returned by library functions.</li>
+</ul>
+<p>Refer to the API documentation (generated by <code>cargo doc</code>) for the full details of these types and their variants/fields.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="library-usage-examples"><a class="header" href="#library-usage-examples">Library Usage Examples</a></h2>
+<p>Here are some examples of how to use <code>rustree</code> as a library in your Rust code.</p>
+<h3 id="example-1-basic-tree-listing"><a class="header" href="#example-1-basic-tree-listing">Example 1: Basic Tree Listing</a></h3>
+<p>This example shows how to get a simple text tree of a directory.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "."; // Current directory
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        root_display_name: path_obj.file_name().unwrap_or_default().to_string_lossy().into_owned(),
+        max_depth: Some(2), // Limit depth to 2 levels
+        ..Default::default()
+    };
+
+    // 1. Get the tree nodes
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+
+    // 2. Format the nodes into a string
+    let output_string = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+
+    // 3. Print the output
+    println!("{}", output_string);
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-2-reporting-sizes-and-sorting"><a class="header" href="#example-2-reporting-sizes-and-sorting">Example 2: Reporting Sizes and Sorting</a></h3>
+<p>This example demonstrates reporting file sizes and sorting by size in descending order.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey, RustreeError};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        root_display_name: "Source Files".to_string(),
+        report_sizes: true,
+        sort_by: Some(SortKey::Size),
+        reverse_sort: true, // Largest files first
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output_string = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    println!("{}", output_string);
+
+    Ok(())
+}
+</code></pre></pre>
+<h3 id="example-3-using-markdown-output-and-line-counts"><a class="header" href="#example-3-using-markdown-output-and-line-counts">Example 3: Using Markdown Output and Line Counts</a></h3>
+<p>This example shows how to calculate line counts and output in Markdown format.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey, RustreeError};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        root_display_name: "Project Source (Markdown)".to_string(),
+        calculate_line_count: true,
+        sort_by: Some(SortKey::Lines), // Sort by line count
+        reverse_sort: true,            // Most lines first
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    
+    // Output as Markdown
+    let markdown_output = format_nodes(&amp;nodes, LibOutputFormat::Markdown, &amp;config)?;
+    println!("\n--- Markdown Output ---");
+    println!("{}", markdown_output);
+    // You could write this string to a .md file
+
+    Ok(())
+}</code></pre></pre>
+<p>These examples should give you a good starting point for integrating <code>rustree</code> into your applications. Remember to handle the <code>Result</code> types appropriately in production code.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="architecture"><a class="header" href="#architecture">Architecture</a></h1>
+<p>This section provides an overview of RusTree's internal architecture.</p>
+<p>Understanding the architecture can be helpful if you plan to contribute to RusTree or want a deeper understanding of how it works.</p>
+<h2 id="sub-sections-2"><a class="header" href="#sub-sections-2">Sub-sections:</a></h2>
+<ul>
+<li><a href="./architecture/overview.html">Overview</a>: A high-level look at the components and data flow.</li>
+<li><a href="./architecture/modules.html">Core Modules</a>: Details about the main modules within the <code>rustree</code> library.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="architectural-overview"><a class="header" href="#architectural-overview">Architectural Overview</a></h2>
+<p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
+<ol>
+<li>
+<p><strong>Configuration (<code>RustreeLibConfig</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur.</p>
+</li>
+<li>
+<p><strong>Walking (<code>core::walker</code>)</strong>:</p>
+<ul>
+<li>The <code>walk_directory</code> function traverses the file system starting from a root path.</li>
+<li>It respects configuration settings like <code>max_depth</code> and <code>show_hidden</code>.</li>
+<li>For each encountered file system entry (file, directory, symlink), it gathers initial metadata.</li>
+</ul>
+</li>
+<li>
+<p><strong>Analysis (<code>core::analyzer</code>)</strong>:</p>
+<ul>
+<li>As the walker processes files, it can invoke analysis functions based on the configuration.</li>
+<li><code>file_stats</code>: Calculates line counts and word counts.</li>
+<li><code>apply_fn</code>: Applies a selected built-in function to file content.</li>
+<li>The results of these analyses are stored in <code>NodeInfo</code> objects.</li>
+</ul>
+</li>
+<li>
+<p><strong>Node Representation (<code>NodeInfo</code>)</strong>:</p>
+<ul>
+<li>Each file system entry is represented by a <code>NodeInfo</code> struct. This struct holds its path, name, type, depth, metadata (size, mtime), and any analysis results.</li>
+<li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Sorting (<code>core::sorter</code>)</strong>:</p>
+<ul>
+<li>If a sort key is specified in the configuration, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure.</li>
+</ul>
+</li>
+<li>
+<p><strong>Formatting (<code>core::formatter</code>)</strong>:</p>
+<ul>
+<li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is then passed to a formatter.</li>
+<li>The <code>TreeFormatter</code> trait defines the interface for formatters.</li>
+<li><code>TextTreeFormatter</code>: Generates a plain text, <code>tree</code>-like output.</li>
+<li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>
+<li>The formatter produces the final string output.</li>
+</ul>
+</li>
+</ol>
+<h3 id="cli-layer"><a class="header" href="#cli-layer">CLI Layer</a></h3>
+<p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
+<ul>
+<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments.</li>
+<li><strong>Handler (<code>cli::handler</code>)</strong>: Maps parsed CLI arguments (<code>CliArgs</code>) to the library's <code>RustreeLibConfig</code> and <code>LibOutputFormat</code>.</li>
+<li><strong>Orchestration (<code>main.rs</code>)</strong>:
+<ol>
+<li>Parses CLI args.</li>
+<li>Maps CLI args to library config.</li>
+<li>Calls <code>rustree::get_tree_nodes()</code> to get processed nodes.</li>
+<li>Calls <code>rustree::format_nodes()</code> to get the output string.</li>
+<li>Prints the string to the console, potentially with special formatting for LLM piping.</li>
+</ol>
+</li>
+</ul>
+<p>This separation allows the core library to be used independently of the CLI.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="core-library-modules"><a class="header" href="#core-library-modules">Core Library Modules</a></h2>
+<p>The <code>rustree</code> library (<code>src/core/</code>) is organized into several modules, each with a specific responsibility:</p>
+<ul>
+<li>
+<p><strong><code>config.rs</code></strong>:</p>
+<ul>
+<li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>node.rs</code></strong>:</p>
+<ul>
+<li>Defines <code>NodeInfo</code>, the struct representing a single file system entry (file, directory, symlink) and its collected data.</li>
+<li>Defines <code>NodeType</code>, an enum for the type of file system entry.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>walker.rs</code></strong>:</p>
+<ul>
+<li>Contains the <code>walk_directory</code> function responsible for traversing the file system.</li>
+<li>Uses the <code>walkdir</code> crate for efficient directory walking.</li>
+<li>Populates <code>NodeInfo</code> structs with basic metadata and triggers analysis based on <code>RustreeLibConfig</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>analyzer/</code></strong>: This sub-module handles file content analysis.</p>
+<ul>
+<li><code>file_stats.rs</code>: Provides functions like <code>count_lines_from_string</code> and <code>count_words_from_string</code>.</li>
+<li><code>apply_fn.rs</code>: Defines <code>BuiltInFunction</code> enum, <code>ApplyFnError</code>, and the <code>apply_function_to_content</code> logic for applying custom functions to file content.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>sorter.rs</code></strong>:</p>
+<ul>
+<li>Defines the <code>SortKey</code> enum.</li>
+<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified key and order, primarily acting on sibling nodes.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>formatter/</code></strong>: This sub-module is responsible for generating the final output string.</p>
+<ul>
+<li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
+<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output.</li>
+<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists (currently a placeholder).</li>
+<li><code>mod.rs</code> (in <code>formatter</code>): Defines the <code>OutputFormat</code> enum (re-exported as <code>LibOutputFormat</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong><code>error.rs</code></strong>:</p>
+<ul>
+<li>Defines <code>RustreeError</code>, the common error type used throughout the library.</li>
+</ul>
+</li>
+</ul>
+<h3 id="top-level-library-file-srclibrs"><a class="header" href="#top-level-library-file-srclibrs">Top-Level Library File (<code>src/lib.rs</code>)</a></h3>
+<ul>
+<li>Re-exports key public types from the core modules to form the library's public API.</li>
+<li>Provides the main entry-point functions:
+<ul>
+<li><code>get_tree_nodes()</code>: Orchestrates walking, analysis, and sorting.</li>
+<li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter.</li>
+</ul>
+</li>
+</ul>
+<p>This modular structure aims to make the codebase maintainable and extensible. For example, adding a new output format would involve creating a new struct that implements the <code>TreeFormatter</code> trait and updating the <code>format_nodes</code> function and relevant enums. Similarly, new analysis functions or sort keys can be added by extending their respective modules.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="api-reference-rustdoc"><a class="header" href="#api-reference-rustdoc">API Reference (rustdoc)</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
+<p>Contributions to RusTree are welcome! Whether it's bug reports, feature requests, documentation improvements, or code contributions, your help is appreciated.</p>
+<h2 id="ways-to-contribute"><a class="header" href="#ways-to-contribute">Ways to Contribute</a></h2>
+<ul>
+<li><strong>Reporting Bugs:</strong> If you find a bug, please open an issue on the GitHub repository. Include steps to reproduce, expected behavior, and actual behavior.</li>
+<li><strong>Suggesting Enhancements:</strong> Have an idea for a new feature or an improvement to an existing one? Open an issue to discuss it.</li>
+<li><strong>Improving Documentation:</strong> If you find parts of the documentation unclear or missing, feel free to suggest changes or submit a pull request.</li>
+<li><strong>Writing Code:</strong> If you'd like to contribute code, please follow the guidelines below.</li>
+</ul>
+<h2 id="code-contributions"><a class="header" href="#code-contributions">Code Contributions</a></h2>
+<ol>
+<li><strong>Fork the Repository:</strong> Start by forking the official RusTree repository on GitHub.</li>
+<li><strong>Clone Your Fork:</strong> Clone your forked repository to your local machine.
+<pre><code class="language-bash">git clone https://github.com/your-username/rustree.git
+cd rustree
+</code></pre>
+</li>
+<li><strong>Create a Branch:</strong> Create a new branch for your feature or bug fix.
+<pre><code class="language-bash">git checkout -b my-new-feature
+</code></pre>
+</li>
+<li><strong>Make Changes:</strong> Implement your changes.
+<ul>
+<li>Follow the existing code style. Consider using <code>rustfmt</code> to format your code (<code>cargo fmt</code>).</li>
+<li>Add tests for any new functionality or bug fixes.</li>
+<li>Ensure all tests pass (<code>cargo test</code>).</li>
+<li>Update documentation (both <code>rustdoc</code> comments and <code>mdBook</code> if applicable).</li>
+</ul>
+</li>
+<li><strong>Commit Your Changes:</strong> Commit your changes with a clear and descriptive commit message.
+<pre><code class="language-bash">git commit -am "Add some feature"
+</code></pre>
+</li>
+<li><strong>Push to Your Fork:</strong> Push your changes to your forked repository.
+<pre><code class="language-bash">git push origin my-new-feature
+</code></pre>
+</li>
+<li><strong>Submit a Pull Request:</strong> Open a pull request from your branch on your fork to the <code>main</code> branch of the official RusTree repository.
+<ul>
+<li>Provide a clear title and description for your pull request.</li>
+<li>Reference any related issues.</li>
+</ul>
+</li>
+</ol>
+<h2 id="development-setup"><a class="header" href="#development-setup">Development Setup</a></h2>
+<ul>
+<li>Ensure you have Rust installed (see <a href="https://rustup.rs/">rustup.rs</a>).</li>
+<li>To build the project: <code>cargo build</code></li>
+<li>To run tests: <code>cargo test</code></li>
+<li>To format code: <code>cargo fmt</code></li>
+<li>To run linters (clippy): <code>cargo clippy</code></li>
+<li>To build and view <code>rustdoc</code> API documentation: <code>cargo doc --open</code></li>
+<li>To build and view <code>mdBook</code> documentation (from the project root):
+<pre><code class="language-bash"># Install mdbook if you haven't already: cargo install mdbook
+mdbook serve docs
+</code></pre>
+</li>
+</ul>
+<p>Thank you for considering contributing to RusTree!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="frequently-asked-questions-faq"><a class="header" href="#frequently-asked-questions-faq">Frequently Asked Questions (FAQ)</a></h1>
+<p><strong>Q: How is RusTree different from the standard <code>tree</code> command?</strong></p>
+<p>A: While inspired by <code>tree</code>, RusTree aims to offer more:</p>
+<ul>
+<li><strong>Extensibility:</strong> Built in Rust, allowing for easier addition of new features.</li>
+<li><strong>Analysis Features:</strong> Built-in capabilities like line/word counts and potential for custom function application on file contents.</li>
+<li><strong>Multiple Output Formats:</strong> Starting with text and Markdown, with potential for more (e.g., JSON).</li>
+<li><strong>Sorting Options:</strong> More granular control over sorting.</li>
+<li><strong>Library Usage:</strong> Can be used as a Rust library in other projects.</li>
+</ul>
+<p><strong>Q: What are the system requirements?</strong></p>
+<p>A: RusTree is built with Rust. To build it from source or install via <code>cargo install</code>, you'll need a Rust compiler and Cargo installed (see <a href="https://rustup.rs/">rustup.rs</a>). Once compiled, the binary should be relatively portable across systems supported by Rust.</p>
+<p><strong>Q: How do I report a bug or suggest a feature?</strong></p>
+<p>A: Please open an issue on the <a href="https://github.com/yourusername/rustree">GitHub repository</a> (replace with the actual link).</p>
+<p><strong>Q: Is there a way to ignore certain files or directories (like <code>.gitignore</code>)?</strong></p>
+<p>A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like <code>grep</code> to filter the output if needed, or rely on the <code>--show-hidden</code> (<code>-a</code>) flag.</p>
+<p><strong>Q: Can I customize the output format further?</strong></p>
+<p>A: Currently, RusTree supports "text" and "markdown" formats. The text format has some implicit styling. More advanced customization (e.g., custom colors, icons, or entirely new formats like JSON) could be considered for future development. If you have specific needs, please open a feature request.</p>
+<p><strong>Q: How does the <code>--llm-ask</code> feature work?</strong></p>
+<p>A: The <code>--llm-ask</code> option formats the <code>rustree</code> output along with your question in a way that is convenient to pipe directly into a command-line Large Language Model (LLM) tool (like <code>ollama</code>, or scripts using OpenAI/Anthropic APIs). RusTree itself does not make any API calls to LLMs. It simply prepares the text.</p>
+<p>Example:</p>
+<pre><code class="language-bash">rustree --llm-ask "Summarize this project structure" | ollama run mistral
+</code></pre>
+<p>This pipes the tree output and your question to the <code>ollama</code> tool running the <code>mistral</code> model.</p>
+<p><strong>Q: Where can I find the API documentation for the library?</strong></p>
+<p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

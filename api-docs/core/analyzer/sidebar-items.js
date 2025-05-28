@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["apply_fn","file_stats"]};

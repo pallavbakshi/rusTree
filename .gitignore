@@ -1,9 +1,0 @@
-target/
-context/
-prd*
-tests*.md
-tree.txt
-diff.txt
-
-# For supercat
-.hide
