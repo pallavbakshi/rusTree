@@ -181,12 +181,12 @@
 </li>
 <li>
 <p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first):</strong></p>
-<pre><code class="language-bash">rustree -s -D --sort-key MTime -r ~/Documents
+<pre><code class="language-bash">rustree -s -D --sort-key m-time -r ~/Documents
 </code></pre>
 </li>
 <li>
 <p><strong>Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):</strong></p>
-<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-key Lines -r ./my_project_src
+<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-key lines -r ./my_project_src
 </code></pre>
 </li>
 <li>
@@ -196,7 +196,7 @@
 </li>
 <li>
 <p><strong>Apply the <code>CountPluses</code> function to files and sort by its custom output:</strong></p>
-<pre><code class="language-bash">rustree --apply-function CountPluses --sort-key Custom ./config_files
+<pre><code class="language-bash">rustree --apply-function CountPluses --sort-key custom ./config_files
 </code></pre>
 <p><em>(This assumes <code>CountPluses</code> is a meaningful function for your files, e.g., counting '+' characters).</em></p>
 </li>
