@@ -13,6 +13,9 @@ pub enum RustreeError {
     /// An error related to formatting output.
     #[error("Formatting error: {0}")]
     Fmt(#[from] std::fmt::Error),
+    /// An error related to glob pattern compilation or matching.
+    #[error("Glob pattern error: {0}")]
+    GlobPattern(#[from] glob::PatternError),
     // Add other specific error types as needed
     /// An unspecified or unknown error.
     #[error("Unknown error")]

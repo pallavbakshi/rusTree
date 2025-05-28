@@ -12,6 +12,9 @@ pub struct RustreeLibConfig {
     /// The name to display for the root of the scanned directory.
     /// Typically the directory name itself or "." for the current directory.
     pub root_display_name: String,
+    /// Patterns to filter entries by. Only entries matching any pattern will be shown.
+    /// Corresponds to CLI -P/--match-pattern.
+    pub match_patterns: Option<Vec<String>>,
     /// The maximum depth to traverse into the directory structure.
     /// `None` means no limit. `Some(0)` would effectively show only the root (if walker adapted).
     /// `Some(1)` shows root and its direct children.
@@ -51,6 +54,7 @@ impl Default for RustreeLibConfig {
     fn default() -> Self {
         Self {
             root_display_name: String::new(), // Default to empty
+            match_patterns: None,
             max_depth: None,
             show_hidden: false,
             report_sizes: false,

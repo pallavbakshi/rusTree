@@ -36,4 +36,48 @@ pub mod common_test_utils {
         file.write_all(content.as_bytes())?;
         Ok(())
     }
+
+    #[allow(dead_code)] // Used by pattern_matching_tests.rs
+    pub fn setup_complex_test_directory() -> Result<TempDir> {
+        let dir = tempdir()?;
+        let base = dir.path();
+
+        // Root level files
+        create_file_with_content(base, "file_a.txt", "content of file_a.txt")?;
+        create_file_with_content(base, "file_b.log", "content of file_b.log")?;
+        create_file_with_content(base, ".hidden_file.txt", "hidden content")?;
+        create_file_with_content(base, "image.JPG", "image data")?;
+        create_file_with_content(base, "script.sh", "#!/bin/bash\necho hello")?;
+
+        // sub_dir/
+        let sub_dir_path = base.join("sub_dir");
+        fs::create_dir(&sub_dir_path)?;
+        create_file_with_content(&sub_dir_path, "sub_file.rs", "fn main() {}")?;
+        create_file_with_content(&sub_dir_path, ".sub_hidden_file", "sub hidden content")?;
+
+        // another_dir/
+        let another_dir_path = base.join("another_dir");
+        fs::create_dir(&another_dir_path)?;
+        create_file_with_content(&another_dir_path, "another_file.dat", "data content")?;
+        
+        // empty_dir/
+        fs::create_dir(base.join("empty_dir"))?;
+
+        // Symlinks (conditionally created for Unix/Windows)
+        if cfg!(unix) {
+            std::os::unix::fs::symlink(base.join("file_a.txt"), base.join("symlink_to_file_a.txt"))?;
+            std::os::unix::fs::symlink(&sub_dir_path, base.join("symlink_to_sub_dir"))?;
+        } else if cfg!(windows) {
+            #[cfg(windows)]
+            {
+                // On Windows, symlink creation might require special privileges.
+                // std::os::windows::fs::symlink_file for files, symlink_dir for directories.
+                // These calls return Result, so they can fail gracefully if permissions are not met.
+                let _ = std::os::windows::fs::symlink_file(base.join("file_a.txt"), base.join("symlink_to_file_a.txt"));
+                let _ = std::os::windows::fs::symlink_dir(&sub_dir_path, base.join("symlink_to_sub_dir"));
+            }
+        }
+
+        Ok(dir)
+    }
 }
