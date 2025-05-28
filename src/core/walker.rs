@@ -6,6 +6,15 @@ use crate::core::analyzer::{apply_fn, file_stats};
 use std::path::Path;
 use std::fs;
 use walkdir::WalkDir;
+use glob::{Pattern as GlobPattern, MatchOptions};
+
+// Helper struct to hold compiled glob patterns and their properties
+#[derive(Clone)]
+struct CompiledPattern {
+    glob_pattern: GlobPattern,
+    is_dir_only_match: bool, // True if original pattern string ended with '/'
+    is_path_pattern: bool,   // True if original pattern string contained '/' or '**'
+}
 
 /// Traverses a directory structure starting from `root_path` and collects information
 /// about each entry based on the provided `config`.
@@ -37,31 +46,141 @@ pub fn walk_directory(
     root_path: &Path,
     config: &RustreeLibConfig,
 ) -> Result<Vec<NodeInfo>, RustreeError> {
-    let mut nodes = Vec::new();
+    let mut intermediate_nodes = Vec::new();
+
+    // Compile glob patterns if provided
+    let compiled_patterns: Option<Vec<CompiledPattern>> = match &config.match_patterns {
+        Some(pattern_strings) if !pattern_strings.is_empty() => {
+            let mut patterns = Vec::new();
+            for p_str_outer in pattern_strings {
+                for p_str_inner in p_str_outer.split('|') {
+                    if p_str_inner.is_empty() { continue; } // Skip empty patterns from "||" or trailing "|"
+                    let is_dir_only = p_str_inner.ends_with('/');
+                    let pattern_to_compile = if is_dir_only {
+                        p_str_inner.strip_suffix('/').unwrap_or(p_str_inner)
+                    } else {
+                        p_str_inner
+                    };
+                    
+                    // Handle special case: if pattern_to_compile is empty after stripping '/',
+                    // e.g. user provided just "/", treat it as matching nothing or handle as error.
+                    // For now, an empty pattern_to_compile will likely error in GlobPattern::new or match nothing.
+                    // Let's ensure it's not empty before compiling.
+                    if pattern_to_compile.is_empty() && is_dir_only { // Original was just "/"
+                        // This case is tricky. `tree -P /` is not well-defined.
+                        // Let's make it match nothing to avoid errors with empty glob patterns.
+                        // Or, one could argue `*/` is the way to match all dirs.
+                        // For now, skip if pattern becomes empty.
+                        continue;
+                    }
+
+
+                    let glob_pattern = GlobPattern::new(pattern_to_compile)?;
+                    // A pattern is a "path pattern" if the original string segment (p_str_inner)
+                    // contained path separators or the double-star glob.
+                    let is_path_p = p_str_inner.contains('/') || p_str_inner.contains("**");
+
+                    patterns.push(CompiledPattern {
+                        glob_pattern,
+                        is_dir_only_match: is_dir_only,
+                        is_path_pattern: is_path_p,
+                    });
+                }
+            }
+            // If config.match_patterns was Some(_), but all resultant patterns were empty (e.g. from "||" or just ""),
+            // this should mean "match nothing". Represent this as Some(empty_vec).
+            // Otherwise, if no patterns were provided in config, it's None.
+            if patterns.is_empty() {
+                Some(Vec::new()) // Effectively "match nothing"
+            } else {
+                Some(patterns)
+            }
+        }
+        // If config.match_patterns was None or Some(empty_vec_originally), then it's None.
+        // This case is tricky: if config.match_patterns was Some(vec![]) initially, it should also be Some(Vec::new()) here.
+        // The current logic: if pattern_strings is empty (from config.match_patterns = Some([])), it falls to _ => None.
+        // This is correct: Some([]) in config means no patterns specified through CLI, so compiled_patterns = None (match all).
+        // Only if config.match_patterns = Some(vec!["", "|"]) etc. (non-empty vec of empty/invalid strings) should it be Some(Vec::new()).
+        _ => None, // No patterns provided in config, or config.match_patterns was Some(empty_vec_initially)
+    };
+
     let mut walker_builder = WalkDir::new(root_path).min_depth(1);
 
     if let Some(d) = config.max_depth {
-        // WalkDir's max_depth is relative to the root of the walk.
-        // Since we use min_depth(1), an entry at our depth 1 is WalkDir's depth 1.
-        // So, config.max_depth directly maps to WalkDir's max_depth.
         walker_builder = walker_builder.max_depth(d);
     }
+    
+    // Match options for glob patterns
+    let match_options = MatchOptions {
+        case_sensitive: true, // Default, as per PRD non-goal for --ignore-case
+        require_literal_separator: true,  // If true, `*` and `?` will not match `/`. This is standard.
+        require_literal_leading_dot: false, // `*` can match `.` at start of filename component if -a is used.
+    };
 
-    // Apply entry filtering for hidden files.
-    // This closure is called for each entry. If it returns true, the entry is processed.
-    // If it returns false for a directory, that directory's contents are skipped by WalkDir.
-    let walker_iter = walker_builder.into_iter().filter_entry(|e| {
-        // If show_hidden is true, always process the entry.
-        if config.show_hidden {
-            return true;
+    // Clone compiled_patterns for the filter_entry closure, as it's a `move` closure.
+    // The original compiled_patterns will be used for post-processing.
+    let compiled_patterns_for_filter = compiled_patterns.clone();
+
+    let walker_iter = walker_builder.into_iter().filter_entry(move |e| {
+        let file_name_lossy = e.file_name().to_string_lossy();
+        let is_hidden = file_name_lossy.starts_with('.');
+
+        // 1. Hidden file filtering
+        if !config.show_hidden && is_hidden {
+            return false; // Filter out hidden files if -a is not set
         }
-        // If show_hidden is false, check if the file name starts with a dot.
-        // Allow the walk to proceed (return true) if the entry is NOT hidden.
-        // Return false if it IS hidden, to filter it and prevent descent if it's a directory.
-        !e.file_name()
-            .to_string_lossy()
-            .starts_with('.')
-    });
+
+        // 2. Pattern matching (if patterns are provided)
+        if let Some(ref patterns_to_match) = compiled_patterns_for_filter {
+            let entry_path = e.path();
+            let entry_is_dir = e.file_type().is_dir();
+            let file_name_str = file_name_lossy.as_ref();
+            let mut matched_any_pattern = false;
+
+            for compiled_p in patterns_to_match {
+                if compiled_p.is_dir_only_match {
+                    // Pattern like "foo/" - must match a directory name
+                    if entry_is_dir && compiled_p.glob_pattern.matches_with(file_name_str, match_options) {
+                        matched_any_pattern = true;
+                        break;
+                    }
+                } else if compiled_p.is_path_pattern {
+                    // Pattern like "foo/*.txt" or "**/*.c" or "**/foo" - matches against full path
+                    if compiled_p.glob_pattern.matches_path_with(entry_path, match_options) {
+                        matched_any_pattern = true;
+                        break;
+                    }
+                } else {
+                    // Pattern like "*.txt" or "foo" - matches against basename
+                    if compiled_p.glob_pattern.matches_with(file_name_str, match_options) {
+                        matched_any_pattern = true;
+                        break;
+                    }
+                }
+            }
+            
+            // This is the crucial decision logic:
+            if entry_is_dir {
+                // If the directory itself matches a pattern, OR if there's any non-dir-specific pattern
+                // that *could* match a child, then we should explore this directory.
+                if matched_any_pattern {
+                    return true; // Directory itself matches, so explore it.
+                } else {
+                    // Directory itself does not match. Explore if any pattern could match a descendant.
+                    // A pattern is "general" if it's not directory-only (like "*.txt")
+                    // or if it's a path pattern (like "foo/**/bar.txt") which might apply to contents.
+                    let has_general_pattern = patterns_to_match.iter().any(|p|
+                        !p.is_dir_only_match || p.is_path_pattern
+                    );
+                    return has_general_pattern;
+                }
+            } else {
+                // For files, they must match a pattern to be included.
+                return matched_any_pattern;
+            }
+        } // This closes `if let Some(ref patterns_to_match) = compiled_patterns`
+        true // Entry passes all filters (e.g. no patterns specified, or already returned from inside the if block)
+    }); // This closes `filter_entry`
 
     for entry_result in walker_iter {
         let entry = entry_result?; // Propagate WalkDir errors
@@ -160,7 +279,19 @@ pub fn walk_directory(
                 }
             }
         }
-        nodes.push(node);
+        intermediate_nodes.push(node);
     }
-    Ok(nodes)
+
+    // If patterns were applied, intermediate_nodes has already been filtered by filter_entry.
+    // To match the observed `tree -P` behavior (which can be more inclusive of non-matching
+    // directories that were traversed), we return intermediate_nodes directly without further pruning.
+    // The filter_entry logic handles:
+    //  - Hidden files based on config.show_hidden.
+    //  - Max depth.
+    //  - For files: inclusion only if they match a pattern.
+    //  - For directories: inclusion if they match a pattern OR if `has_general_pattern` is true,
+    //    allowing WalkDir to explore them. These explored directories will be in intermediate_nodes.
+    //  - If compiled_patterns is Some([]), (e.g. from -P ""), filter_entry will correctly filter out all entries
+    //    as `has_general_pattern` will be false and `matched_any_pattern` will be false.
+    Ok(intermediate_nodes)
 }

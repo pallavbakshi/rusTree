@@ -76,6 +76,14 @@ pub struct CliArgs {
     /// List directories only. (Original tree: -d)
     #[arg(short = 'd', long = "dirs-only")]
     pub list_directories_only: bool,
+
+    /// List only those files that match the wild-card pattern. (Original tree: -P)
+    /// Can be specified multiple times.
+    /// See `glob` crate documentation for pattern syntax.
+    /// `|` can be used within a pattern for alternation, e.g., "*.txt|*.md".
+    /// A `/` at the end of a pattern matches directories only, e.g., "docs/".
+    #[arg(short = 'P', long = "match-pattern", action = clap::ArgAction::Append)]
+    pub match_patterns: Option<Vec<String>>,
 }
 
 /// Defines the possible keys for sorting directory entries via the CLI.

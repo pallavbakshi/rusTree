@@ -41,6 +41,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         root_display_name,
         root_node_size,
         root_is_directory,
+        match_patterns: cli_args.match_patterns.clone(),
         max_depth: cli_args.max_depth,
         show_hidden: cli_args.show_hidden,
         report_sizes: cli_args.report_sizes,

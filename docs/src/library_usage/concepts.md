@@ -15,6 +15,7 @@ This struct is central to controlling how `rustree` behaves. You create an insta
 *   `sort_by`: An optional `SortKey` to sort sibling entries.
 *   `reverse_sort`: Whether to reverse the sort order.
 *   `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
+*   `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--match-pattern` options.
 *   `root_node_size`: Optional size of the root node itself, used by formatters if `report_sizes` is true.
 *   `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
 
@@ -31,6 +32,7 @@ let config = RustreeLibConfig {
     sort_by: Some(SortKey::Size),
     reverse_sort: true,
     list_directories_only: false,
+    match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example patterns
     root_node_size: None, // Typically set by the CLI handler or by checking metadata
     root_is_directory: true, // Typically set by the CLI handler or by checking metadata
     ..Default::default() // Use defaults for other fields

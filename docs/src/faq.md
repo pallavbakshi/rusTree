@@ -19,7 +19,17 @@ A: Please open an issue on the [GitHub repository](https://github.com/youruserna
 
 **Q: Is there a way to ignore certain files or directories (like `.gitignore`)?**
 
-A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like `grep` to filter the output if needed, or rely on the `--show-hidden` (`-a`) flag.
+A: This feature is planned but not yet implemented in the initial versions. For now, you can use shell globbing or tools like `grep` to filter the output if needed, or rely on the `--show-hidden` (`-a`) flag. The new `-P`/`--match-pattern` options provide powerful built-in filtering.
+
+**Q: How does the `-P pattern` / `--match-pattern pattern` feature work?**
+
+A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.
+    *   You can use options like `-P "*.txt"` to show only text files, or `-P "docs/"` to show only a directory named `docs`.
+    *   Multiple patterns can be provided (e.g., `-P "*.rs" -P "*.toml"`) or combined with `|` (e.g., `-P "*.rs|*.toml"`).
+    *   Supported wildcards include `*`, `**`, `?`, `[...]`, and `[^...]`.
+    *   A `/` at the end of a pattern (e.g., `mydir/`) specifically matches directories.
+    *   To include hidden files (starting with `.`) in the pattern matching process, you must also use the `-a` (or `--all`) option.
+    *   The summary line (number of directories and files) will reflect only the listed items.
 
 **Q: Can I customize the output format further?**
 

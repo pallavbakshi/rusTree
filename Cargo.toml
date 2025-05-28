@@ -13,8 +13,8 @@ path = "src/main.rs"
 # Library-specific dependencies (also available to the binary)
 walkdir = "2.5"
 thiserror = "2.0.12"
+glob = "0.3" # For -P pattern matching
 # regex = "1.7" # If used for ignore patterns or apply functions in the lib
-# glob = "0.3"  # Alternative for patterns
 # rayon = "1.8" # For potential parallelism in the library
 
 # CLI-specific dependencies (only needed for the binary)
