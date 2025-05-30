@@ -1,7 +1,7 @@
 // src/core/node.rs
 use std::path::PathBuf;
 use std::time::SystemTime;
-use crate::core::analyzer::apply_fn::ApplyFnError;
+use crate::config::fileinfo::ApplyFnError;
 
 /// Represents information about a single file system entry (file, directory, or symlink).
 ///

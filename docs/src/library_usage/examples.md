@@ -1,6 +1,8 @@
 ## Library Usage Examples
 
 Here are some examples of how to use `rustree` as a library in your Rust code.
+Make sure to add `rustree` to your `Cargo.toml` dependencies.
+All key types like `RustreeLibConfig`, `NodeInfo`, `SortKey`, `LibOutputFormat`, `RustreeError` are re-exported by `rustree`'s `lib.rs`.
 
 ### Example 1: Basic Tree Listing
 

@@ -10,17 +10,16 @@
 mod cli; // Make cli module (and its submodules) available
 
 use clap::Parser;
-use cli::{args::CliArgs, handler};
+use cli::{CliArgs, map_cli_to_lib_config, map_cli_to_lib_output_format};
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
     let cli_args = CliArgs::parse();
 
     // 1. Map CLI args to Library config
-    let lib_config = handler::map_cli_to_lib_config(&cli_args);
+    let lib_config = map_cli_to_lib_config(&cli_args);
 
-    let lib_output_format = handler::map_cli_to_lib_output_format(cli_args.output_format.clone());
-
+    let lib_output_format = map_cli_to_lib_output_format(cli_args.format.output_format.clone());
 
     // 2. Call the library to get processed nodes
     let nodes = match rustree::get_tree_nodes(&cli_args.path, &lib_config) {
@@ -41,7 +40,7 @@ fn main() -> ExitCode {
     };
 
     // 4. Handle output based on CLI options
-    if let Some(question) = &cli_args.llm_ask {
+    if let Some(question) = &cli_args.llm.llm_ask {
         // Prepare for piping (as discussed, user handles the actual pipe)
         println!("---BEGIN RUSTREE OUTPUT---");
         println!("{}", output_string);

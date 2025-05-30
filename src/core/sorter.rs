@@ -1,29 +1,11 @@
 // src/core/sorter.rs
 use crate::core::node::{NodeInfo, NodeType};
 use std::cmp::Ordering;
+use crate::config::sorting::SortKey;
 // HashMap is not needed for the stack-based build_tree
 // use std::collections::HashMap;
 // Path and PathBuf not strictly needed in this file after NodeInfo has PathBuf
 // use std::path::{Path, PathBuf};
-
-/// Defines the keys by which directory entries can be sorted.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SortKey {
-    /// Sort by entry name (alphabetically).
-    Name,
-    /// Sort by entry size.
-    /// Files/symlinks are grouped before directories.
-    /// Files/symlinks are sorted by size (then name). Directories by name.
-    Size,
-    /// Sort by last modification time (oldest to newest, then name).
-    MTime,
-    /// Sort by word count (files only, fewest to most, then name).
-    Words,
-    /// Sort by line count (files only, fewest to most, then name).
-    Lines,
-    /// Sort by the output of a custom applied function (then name).
-    Custom,
-}
 
 #[derive(Debug)]
 struct TempNode {

@@ -1,5 +1,5 @@
 use super::base::TreeFormatter;
-use crate::core::config::RustreeLibConfig;
+use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
 use crate::core::node::{NodeInfo, NodeType};
 use std::collections::HashMap;

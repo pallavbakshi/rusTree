@@ -46,19 +46,18 @@
 //! ```
 
 pub mod core;
+pub mod config;
 
 // Re-export key types for the public API
 pub use crate::core::node::{NodeInfo, NodeType};
-pub use crate::core::config::RustreeLibConfig;
+pub use crate::config::{RustreeLibConfig, SortKey, BuiltInFunction, ApplyFnError};
 pub use crate::core::error::RustreeError;
-pub use crate::core::sorter::SortKey;
-pub use crate::core::analyzer::apply_fn::BuiltInFunction;
 pub use crate::core::formatter::{
     base::TreeFormatter,
     text_tree::TextTreeFormatter,
     markdown::MarkdownFormatter,
-    OutputFormat as LibOutputFormat
 };
+pub use crate::config::output::OutputFormat as LibOutputFormat;
 
 use std::path::Path;
 use crate::core::{walker, sorter}; // Internal use
