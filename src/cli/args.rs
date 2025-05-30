@@ -1,6 +1,12 @@
 // src/cli/args.rs
 use clap::Parser;
 use std::path::PathBuf;
+use crate::cli::sorting::order;
+use crate::cli::metadata::{size, date, stats};
+use crate::cli::listing::{depth, hidden, directory_only};
+use crate::cli::filtering::{include, exclude, gitignore};
+use crate::cli::output::format;
+use crate::cli::misc::llm;
 
 /// Defines the command-line arguments accepted by the `rustree` executable.
 ///
@@ -13,128 +19,39 @@ pub struct CliArgs {
     #[arg(default_value = ".")]
     pub path: PathBuf,
 
-    /// Maximum depth to scan into the directory tree. (Original tree: -L)
-    /// E.g., `-L 1` shows only direct children.
-    #[arg(short = 'L', long)]
-    pub max_depth: Option<usize>,
+    #[command(flatten)]
+    pub depth: depth::DepthArgs,
 
-    /// Show hidden files and directories (those starting with a `.`). (Original tree: -a)
-    #[arg(short = 'a', long = "all")]
-    pub show_hidden: bool,
+    #[command(flatten)]
+    pub all_files: hidden::AllFilesArgs,
 
-    /// Report sizes of files in the output. (Original tree: -s)
-    #[arg(short = 's', long)]
-    pub report_sizes: bool,
+    #[command(flatten)]
+    pub directory_only: directory_only::DirectoryOnlyArgs,
 
-    /// Report last modification times for files and directories. (Original tree: -D)
-    #[arg(short = 'D', long)]
-    pub report_mtime: bool,
+    #[command(flatten)]
+    pub size: size::SizeArgs,
 
-    /// Calculate and display line counts for files.
-    #[arg(long)]
-    pub calculate_lines: bool,
+    #[command(flatten)]
+    pub date: date::DateArgs,
 
-    /// Calculate and display word counts for files.
-    #[arg(short = 'w', long)]
-    pub calculate_words: bool,
+    #[command(flatten)]
+    pub file_stats: stats::FileStatsArgs,
 
-    /// Sort by modification time. (Original tree: -t)
-    /// Conflicts with --sort-key and -U/--unsorted.
-    #[arg(short = 't', long = "sort-by-mtime", conflicts_with_all = ["sort_key", "unsorted_flag"])]
-    pub sort_by_mtime_flag: bool,
+    #[command(flatten)]
+    pub sort_order: order::SortOrderArgs,
 
-    /// Do not sort; list files in directory order. (Original tree: -U)
-    /// Conflicts with --sort-key, -t/--sort-by-mtime, and -r/--reverse-sort.
-    #[arg(short = 'U', long, conflicts_with_all = ["sort_key", "sort_by_mtime_flag", "reverse_sort"])]
-    pub unsorted_flag: bool,
+    #[command(flatten)]
+    pub include: include::IncludeArgs,
 
-    /// Specifies the key for sorting directory entries (e.g., name, size, mtime).
-    /// Conflicts with -t/--sort-by-mtime and -U/--unsorted.
-    /// If no sort option (-t, -U, --sort-key) is given, defaults to sorting by name.
-    #[arg(long, conflicts_with_all = ["sort_by_mtime_flag", "unsorted_flag"])]
-    pub sort_key: Option<CliSortKey>,
+    #[command(flatten)]
+    pub exclude: exclude::ExcludeArgs,
 
-    /// Reverse the order of the active sort. (Original tree: -r)
-    /// Incompatible with -U/--unsorted.
-    #[arg(short = 'r', long)]
-    pub reverse_sort: bool,
+    #[command(flatten)]
+    pub gitignore: gitignore::GitignoreArgs,
 
-    /// Apply a built-in function to file contents and display the result.
-    #[arg(long)]
-    pub apply_function: Option<CliBuiltInFunction>,
+    #[command(flatten)]
+    pub format: format::FormatArgs,
 
-    /// Specifies the output format for the tree.
-    /// Defaults to "text".
-    #[arg(long, default_value = "text")]
-    pub output_format: Option<CliOutputFormat>,
-
-    /// Ask a question to an LLM, providing the `rustree` output as context.
-    /// The output will be specially formatted for easy piping to an LLM tool.
-    #[arg(long)]
-    pub llm_ask: Option<String>,
-
-    /// List directories only. (Original tree: -d)
-    #[arg(short = 'd', long = "dirs-only")]
-    pub list_directories_only: bool,
-
-    /// List only those files that match the wild-card pattern. (Original tree: -P)
-    /// Can be specified multiple times.
-    /// See `glob` crate documentation for pattern syntax.
-    /// `|` can be used within a pattern for alternation, e.g., "*.txt|*.md".
-    /// A `/` at the end of a pattern matches directories only, e.g., "docs/".
-    #[arg(short = 'P', long = "match-pattern", action = clap::ArgAction::Append)]
-    pub match_patterns: Option<Vec<String>>,
-
-    /// Do not list those files/directories that match the wild-card pattern. (Original tree: -I)
-    /// Can be specified multiple times. Uses glob pattern syntax (see -P).
-    #[arg(short = 'I', long = "ignore-path", action = clap::ArgAction::Append)]
-    pub ignore_patterns: Option<Vec<String>>,
-
-    /// Uses git .gitignore files for filtering.
-    /// Also respects global gitignore and $GIT_DIR/info/exclude.
-    #[arg(long)]
-    pub use_gitignore: bool,
-
-    /// Use file explicitly as a gitignore file.
-    /// Can be specified multiple times.
-    #[arg(long, value_name = "FILE", action = clap::ArgAction::Append)]
-    pub git_ignore_files: Option<Vec<PathBuf>>,
-
-    /// Ignore case for -P, -I, --gitignore, and --gitfile patterns.
-    #[arg(long = "ignore-case")]
-    pub ignore_case_for_patterns: bool,
-}
-
-/// Defines the possible keys for sorting directory entries via the CLI.
-#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
-pub enum CliSortKey {
-    /// Sort by entry name.
-    Name,
-    /// Sort by file size.
-    Size,
-    /// Sort by last modification time.
-    MTime,
-    /// Sort by word count (for files).
-    Words,
-    /// Sort by line count (for files).
-    Lines,
-    /// Sort by the output of a custom applied function.
-    Custom,
-}
-
-/// Defines the possible output formats selectable via the CLI.
-#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
-pub enum CliOutputFormat {
-    /// Plain text, tree-like structure.
-    Text,
-    /// Markdown list format.
-    Markdown,
-}
-
-/// Defines built-in functions that can be applied to file contents via the CLI.
-#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
-pub enum CliBuiltInFunction {
-    /// Counts occurrences of the '+' character.
-    CountPluses,
-    // Add other function names here
-}
+    #[command(flatten)]
+    pub llm: llm::LlmArgs,
+} 

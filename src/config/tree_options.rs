@@ -1,12 +1,13 @@
-// src/core/config.rs
-use crate::core::sorter::SortKey;
-use crate::core::analyzer::apply_fn::BuiltInFunction;
+// src/config/tree_options.rs (formerly src/core/config.rs)
+use crate::config::sorting::SortKey;
+use crate::config::fileinfo::BuiltInFunction;
 use std::path::PathBuf; // Added for PathBuf
 
 /// Configuration for the `rustree` library.
 ///
 /// This struct holds all the options that control how `rustree` processes
 /// and displays directory trees.
+// RustreeLibConfig will eventually become TreeOptions
 #[derive(Debug, Clone)]
 pub struct RustreeLibConfig {
     /// The name to display for the root of the scanned directory.

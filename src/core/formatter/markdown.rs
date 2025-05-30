@@ -1,7 +1,7 @@
 // src/core/formatter/markdown.rs
 use super::base::TreeFormatter;
 use crate::core::node::NodeInfo;
-use crate::core::config::RustreeLibConfig;
+use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
 
 /// A formatter that generates a Markdown list representation of the directory structure.

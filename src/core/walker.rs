@@ -1,5 +1,5 @@
 // src/core/walker.rs
-use crate::core::config::RustreeLibConfig;
+use crate::config::RustreeLibConfig;
 use crate::core::node::{NodeInfo, NodeType};
 use crate::core::error::RustreeError;
 use crate::core::analyzer::{apply_fn, file_stats};
