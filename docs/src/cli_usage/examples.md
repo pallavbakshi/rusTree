@@ -11,6 +11,8 @@ Here are some practical examples of how to use `rustree` from the command line.
 2. **Tree of a specific directory, showing hidden files and up to depth 2:**
 
    ```bash
+   rustree --include-hidden --depth 2 /var/log
+   # or using short flags
    rustree -a -L 2 /var/log
    ```
 
@@ -18,6 +20,8 @@ Here are some practical examples of how to use `rustree` from the command line.
 
    ```bash
    rustree -s -D -t -r ~/Documents
+   # or using long flags
+   rustree --report-sizes --report-mtime --sort-by-mtime --reverse-sort ~/Documents
    ```
 
 4. **Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):**
@@ -29,12 +33,16 @@ Here are some practical examples of how to use `rustree` from the command line.
 5. **List directories only in the current path:**
 
    ```bash
+   rustree --directory-only
+   # or using short flag
    rustree -d
    ```
 
 6. **List directories only in `./src`, showing sizes, up to depth 1:**
 
    ```bash
+   rustree --directory-only --report-sizes --depth 1 ./src
+   # or using short flags
    rustree -d -s -L 1 ./src
    ```
 
@@ -48,12 +56,16 @@ Here are some practical examples of how to use `rustree` from the command line.
 
    ```bash
    rustree -t ./my_project
+   # or using long flag
+   rustree --sort-by-mtime ./my_project
    ```
 
 9. **List files in directory order (unsorted using `-U`):**
 
    ```bash
    rustree -U ./my_project
+   # or using long flag
+   rustree --unsorted ./my_project
    ```
 
 10. **Apply the `CountPluses` function to files and sort by its custom output:**
@@ -67,69 +79,85 @@ Here are some practical examples of how to use `rustree` from the command line.
 11. **Pipe `rustree` output to an LLM for summarization:**
 
     ```bash
-    rustree -L 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+    rustree --depth 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+    # or using short flags
+    rustree -L 1 -s ./src --llm-ask "What are the main components in the src directory based on this tree?"
     ```
 
     Then, you would typically pipe this entire output to your LLM command-line tool. For example:
 
     ```bash
-    rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
+    rustree -L 1 -s ./src --llm-ask "Summarize these components" | ollama run mistral
     ```
 
 12. **List only Rust source files (`*.rs`):**
 
     ```bash
+    rustree --filter-include "*.rs" ./my_project
+    # or using short flag
     rustree -P "*.rs" ./my_project
     ```
 
 13. **List only Markdown (`*.md`) or text (`*.txt`) files:**
 
     ```bash
-    rustree -P "*.md|*.txt" ./notes
+    rustree --filter-include "*.md|*.txt" ./notes
     # or equivalently
     rustree -P "*.md" -P "*.txt" ./notes
     ```
 
 14. **List only directories named `build` or `target`:**
-
+    (Note: `-P` or `--filter-include` matches files and directories. A trailing `/` makes it specific to directories.)
     ```bash
+    rustree --filter-include "build/|target/" ./my_project
+    # or using short flag
     rustree -P "build/|target/" ./my_project
     ```
 
 15. **List all Markdown files, including hidden ones (e.g., in `.github/`):**
 
     ```bash
+    rustree --include-hidden --filter-include "*.md"
+    # or using short flags
     rustree -a -P "*.md"
     ```
 
 16. **List files starting with `test_` followed by any single character and then `.py`:**
 
     ```bash
+    rustree --filter-include "test_?.py" ./tests
+    # or using short flag
     rustree -P "test_?.py" ./tests
     ```
 
 17. **List all files within any subdirectory named `docs`:**
 
     ```bash
+    rustree --filter-include "docs/**" ./project_root
+    # or using short flag
     rustree -P "docs/**" ./project_root
     ```
 
 18. **Ignore all `.log` files:**
 
     ```bash
+    rustree --filter-exclude "*.log" ./my_project
+    # or using short flag
     rustree -I "*.log" ./my_project
     ```
 
 19. **Ignore the `target/` directory and all `*.tmp` files:**
 
     ```bash
+    rustree --filter-exclude "target/" --filter-exclude "*.tmp" ./my_project
+    # or using short flags
     rustree -I "target/" -I "*.tmp" ./my_project
     ```
 
 20. **Use `.gitignore` files to filter the output:**
 
     ```bash
-    rustree --use-gitignore ./my_git_repo
+    rustree --gitignore ./my_git_repo
     ```
 
 21. **Use a custom ignore file in addition to (or instead of) `.gitignore`:**
@@ -138,21 +166,25 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --git-ignore-files ./.my_custom_ignores ./my_project
     ```
 
-    If you also want standard `.gitignore` behavior, add `--use-gitignore`:
+    If you also want standard `.gitignore` behavior, add `--gitignore`:
 
     ```bash
-    rustree --use-gitignore --git-ignore-files ./.my_custom_ignores ./my_project
+    rustree --gitignore --git-ignore-files ./.my_custom_ignores ./my_project
     ```
 
 22. **List only `.TXT` files, case-insensitively (matching `file.txt`, `FILE.TXT`, etc.):**
 
     ```bash
+    rustree --filter-include "*.TXT" --ignore-case ./my_project
+    # or using short flag
     rustree -P "*.TXT" --ignore-case ./my_project
     ```
 
 23. **Ignore all files ending with `.bak`, case-insensitively, using `-I`:**
 
     ```bash
+    rustree --filter-exclude "*.bak" --ignore-case ./my_project
+    # or using short flag
     rustree -I "*.bak" --ignore-case ./my_project
     ```
 

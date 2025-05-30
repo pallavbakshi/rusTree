@@ -35,13 +35,15 @@ Here are a few common options to get you started:
   ```bash
   rustree -a
   # or
-  rustree --all
+  rustree --include-hidden
   ```
 
 - **Limit depth:**
 
   ```bash
   rustree -L 2  # Show current directory and its direct children (depth 1 and 2)
+  # or
+  rustree --depth 2
   ```
 
 - **Show file sizes:**
@@ -62,6 +64,8 @@ Here are a few common options to get you started:
 
   ```bash
   rustree --sort-key size -r
+  # or
+  rustree --sort-key size --reverse-sort
   ```
 
 ### Getting Help
