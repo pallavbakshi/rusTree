@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["OutputFormat"],"mod":["base","markdown","text_tree"]};
+window.SIDEBAR_ITEMS = {"mod":["base","markdown","text_tree"]};

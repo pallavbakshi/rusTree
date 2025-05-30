@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["analyzer","config","error","formatter","node","sorter","walker"]};
+window.SIDEBAR_ITEMS = {"mod":["analyzer","error","formatter","node","sorter","walker"]};

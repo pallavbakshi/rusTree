@@ -167,7 +167,9 @@
                 <div id="content" class="content">
                     <main>
                         <h2 id="library-usage-examples"><a class="header" href="#library-usage-examples">Library Usage Examples</a></h2>
-<p>Here are some examples of how to use <code>rustree</code> as a library in your Rust code.</p>
+<p>Here are some examples of how to use <code>rustree</code> as a library in your Rust code.
+Make sure to add <code>rustree</code> to your <code>Cargo.toml</code> dependencies.
+All key types like <code>RustreeLibConfig</code>, <code>NodeInfo</code>, <code>SortKey</code>, <code>LibOutputFormat</code>, <code>RustreeError</code> are re-exported by <code>rustree</code>'s <code>lib.rs</code>.</p>
 <h3 id="example-1-basic-tree-listing"><a class="header" href="#example-1-basic-tree-listing">Example 1: Basic Tree Listing</a></h3>
 <p>This example shows how to get a simple text tree of a directory.</p>
 <pre><pre class="playground"><code class="language-rust">use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError};

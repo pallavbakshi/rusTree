@@ -167,14 +167,38 @@
                 <div id="content" class="content">
                     <main>
                         <h2 id="core-library-modules"><a class="header" href="#core-library-modules">Core Library Modules</a></h2>
-<p>The <code>rustree</code> library (<code>src/core/</code>) is organized into several modules, each with a specific responsibility:</p>
+<p>The <code>rustree</code> library is organized into several modules, each with a specific responsibility.</p>
+<h3 id="srcconfig---configuration-module"><a class="header" href="#srcconfig---configuration-module"><code>src/config/</code> - Configuration Module</a></h3>
+<p>This top-level module centralizes all configuration-related definitions for the library.</p>
 <ul>
 <li>
-<p><strong><code>config.rs</code></strong>:</p>
+<p><strong><code>tree_options.rs</code></strong> (formerly <code>src/core/config.rs</code>):</p>
 <ul>
 <li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences. It also includes filtering options such as pattern matching (<code>match_patterns</code>), pattern ignoring (<code>ignore_patterns</code>), use of gitignore files (<code>use_gitignore</code>, <code>git_ignore_files</code>), case sensitivity for patterns (<code>ignore_case_for_patterns</code>), and options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
 </ul>
 </li>
+<li>
+<p><strong><code>sorting.rs</code></strong>:</p>
+<ul>
+<li>Defines the <code>SortKey</code> enum, used in <code>RustreeLibConfig</code> to specify sorting criteria.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>output.rs</code></strong>:</p>
+<ul>
+<li>Defines the <code>OutputFormat</code> enum (re-exported as <code>LibOutputFormat</code>), used to specify the desired output format (e.g., Text, Markdown).</li>
+</ul>
+</li>
+<li>
+<p><strong><code>fileinfo.rs</code></strong>:</p>
+<ul>
+<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content.</li>
+<li>Defines <code>ApplyFnError</code> for errors during custom function application.</li>
+</ul>
+</li>
+</ul>
+<h3 id="srccore---core-logic-modules"><a class="header" href="#srccore---core-logic-modules"><code>src/core/</code> - Core Logic Modules</a></h3>
+<ul>
 <li>
 <p><strong><code>node.rs</code></strong>:</p>
 <ul>
@@ -187,7 +211,7 @@
 <ul>
 <li>Contains the <code>walk_directory</code> function responsible for traversing the file system.</li>
 <li>Uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking, which provides powerful filtering capabilities including gitignore processing.</li>
-<li>Implements filtering logic based on <code>RustreeLibConfig</code>:
+<li>Implements filtering logic based on <code>RustreeLibConfig</code> (from <code>src/config/tree_options.rs</code>):
 <ul>
 <li><strong>Hidden Files</strong>: Controlled by <code>config.show_hidden</code> via <code>WalkBuilder::hidden()</code>.</li>
 <li><strong>Max Depth</strong>: Controlled by <code>config.max_depth</code> via <code>WalkBuilder::max_depth()</code>.</li>
@@ -197,9 +221,9 @@
 <li><code>config.git_ignore_files</code>: Allows specifying custom ignore files.</li>
 </ul>
 </li>
-<li><strong>Ignore Patterns (<code>-I</code>)</strong>: <code>config.ignore_patterns</code> are compiled into glob patterns and used with <code>WalkBuilder::filter_entry()</code> to prune the traversal, excluding matching files and directories.</li>
+<li><strong>Ignore Patterns (<code>-I</code> / <code>--filter-exclude</code>)</strong>: <code>config.ignore_patterns</code> are compiled into glob patterns and used with <code>WalkBuilder::filter_entry()</code> to prune the traversal, excluding matching files and directories.</li>
 <li><strong>Case Insensitivity</strong>: <code>config.ignore_case_for_patterns</code> affects all pattern matching, including gitignore, <code>-I</code>, and <code>-P</code> patterns.</li>
-<li><strong>Match Patterns (<code>-P</code>)</strong>: <code>config.match_patterns</code> are compiled into glob patterns. After the <code>ignore</code> crate yields an entry (i.e., it wasn't filtered by gitignore or <code>-I</code> patterns), these <code>-P</code> patterns are applied. Files and symlinks must match one of these patterns to be included. Directories are generally included if they might contain matching children (they are not filtered out by <code>-P</code> at this stage if they passed previous filters).</li>
+<li><strong>Match Patterns (<code>-P</code> / <code>--filter-include</code>)</strong>: <code>config.match_patterns</code> are compiled into glob patterns. After the <code>ignore</code> crate yields an entry (i.e., it wasn't filtered by gitignore or <code>-I</code> patterns), these <code>-P</code> patterns are applied. Files and symlinks must match one of these patterns to be included. Directories are generally included if they might contain matching children (they are not filtered out by <code>-P</code> at this stage if they passed previous filters).</li>
 <li><code>list_directories_only</code>: If true, only entries that are effectively directories (including symlinks to directories) are processed further.</li>
 </ul>
 </li>
@@ -211,14 +235,13 @@
 <p><strong><code>analyzer/</code></strong>: This sub-module handles file content analysis.</p>
 <ul>
 <li><code>file_stats.rs</code>: Provides functions like <code>count_lines_from_string</code> and <code>count_words_from_string</code>.</li>
-<li><code>apply_fn.rs</code>: Defines <code>BuiltInFunction</code> enum, <code>ApplyFnError</code>, and the <code>apply_function_to_content</code> logic for applying custom functions to file content.</li>
+<li><code>apply_fn.rs</code>: Defines the logic for applying custom functions (defined by <code>BuiltInFunction</code> from <code>src/config/fileinfo.rs</code>) to file content, handling <code>ApplyFnError</code> (also from <code>src/config/fileinfo.rs</code>).</li>
 </ul>
 </li>
 <li>
 <p><strong><code>sorter.rs</code></strong>:</p>
 <ul>
-<li>Defines the <code>SortKey</code> enum.</li>
-<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified key and order, primarily acting on sibling nodes.</li>
+<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified <code>SortKey</code> (from <code>src/config/sorting.rs</code>) and order, primarily acting on sibling nodes.</li>
 </ul>
 </li>
 <li>
@@ -226,8 +249,8 @@
 <ul>
 <li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
 <li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It handles the display of metadata (like sizes for directories when <code>-d</code> and <code>-s</code> are used), adapts the summary line based on <code>list_directories_only</code>, and uses <code>root_node_size</code> and <code>root_is_directory</code> from <code>RustreeLibConfig</code> for accurate root display.</li>
-<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists (currently a placeholder).</li>
-<li><code>mod.rs</code> (in <code>formatter</code>): Defines the <code>OutputFormat</code> enum (re-exported as <code>LibOutputFormat</code>).</li>
+<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists.</li>
+<li><code>mod.rs</code> (in <code>formatter</code>): Re-exports <code>OutputFormat</code> (as <code>LibOutputFormat</code>) from <code>src/config/output.rs</code>.</li>
 </ul>
 </li>
 <li>
@@ -239,7 +262,7 @@
 </ul>
 <h3 id="top-level-library-file-srclibrs"><a class="header" href="#top-level-library-file-srclibrs">Top-Level Library File (<code>src/lib.rs</code>)</a></h3>
 <ul>
-<li>Re-exports key public types from the core modules to form the library's public API.</li>
+<li>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes <code>RustreeLibConfig</code>, <code>SortKey</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>, <code>LibOutputFormat</code>, <code>NodeInfo</code>, <code>NodeType</code>, and <code>RustreeError</code>.</li>
 <li>Provides the main entry-point functions:
 <ul>
 <li><code>get_tree_nodes()</code>: Orchestrates walking, analysis, and sorting.</li>
@@ -247,7 +270,7 @@
 </ul>
 </li>
 </ul>
-<p>This modular structure aims to make the codebase maintainable and extensible. For example, adding a new output format would involve creating a new struct that implements the <code>TreeFormatter</code> trait and updating the <code>format_nodes</code> function and relevant enums. Similarly, new analysis functions or sort keys can be added by extending their respective modules.</p>
+<p>This modular structure aims to make the codebase maintainable and extensible. For example, adding a new output format would involve creating a new struct that implements the <code>TreeFormatter</code> trait and updating the <code>format_nodes</code> function and relevant enums (like <code>OutputFormat</code> in <code>src/config/output.rs</code>). Similarly, new analysis functions or sort keys can be added by extending their respective modules.</p>
 
                     </main>
 

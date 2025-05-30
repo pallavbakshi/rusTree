@@ -175,9 +175,9 @@
 <li><strong>Visualize Directory Structures:</strong> Clearly see the hierarchy of files and folders.</li>
 <li><strong>Filter and Ignore Entries:</strong>
 <ul>
-<li>List only files/directories matching specific wildcard patterns (<code>-P</code>).</li>
-<li>Exclude files/directories using glob patterns (<code>-I</code>).</li>
-<li>Respect <code>.gitignore</code> files (<code>--use-gitignore</code>) and custom ignore files (<code>--git-ignore-files</code>).</li>
+<li>List only files/directories matching specific wildcard patterns (<code>-P</code> or <code>--filter-include</code>).</li>
+<li>Exclude files/directories using glob patterns (<code>-I</code> or <code>--filter-exclude</code>).</li>
+<li>Respect <code>.gitignore</code> files (<code>--gitignore</code>) and custom ignore files (<code>--git-ignore-files</code>).</li>
 <li>Perform case-insensitive pattern matching (<code>--ignore-case</code>).</li>
 </ul>
 </li>
@@ -256,12 +256,14 @@ cd rustree
 <p><strong>Show all files (including hidden):</strong></p>
 <pre><code class="language-bash">rustree -a
 # or
-rustree --all
+rustree --include-hidden
 </code></pre>
 </li>
 <li>
 <p><strong>Limit depth:</strong></p>
 <pre><code class="language-bash">rustree -L 2  # Show current directory and its direct children (depth 1 and 2)
+# or
+rustree --depth 2
 </code></pre>
 </li>
 <li>
@@ -279,6 +281,8 @@ rustree --report-sizes
 <li>
 <p><strong>Sort by size (descending):</strong></p>
 <pre><code class="language-bash">rustree --sort-key size -r
+# or
+rustree --sort-key size --reverse-sort
 </code></pre>
 </li>
 </ul>
@@ -305,51 +309,77 @@ rustree --report-sizes
 <p>To see all available options directly from your terminal, run:</p>
 <pre><code class="language-bash">rustree --help
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="options-and-flags"><a class="header" href="#options-and-flags">Options and Flags</a></h2>
-<p>This page lists the command-line options available for <code>rustree</code>. You can also view this information by running <code>rustree --help</code>.</p>
-<h3 id="general-options"><a class="header" href="#general-options">General Options</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cli-usage-options"><a class="header" href="#cli-usage-options">CLI Usage Options</a></h1>
+<h2 id="frequently-asked-questions-faq"><a class="header" href="#frequently-asked-questions-faq">Frequently Asked Questions (FAQ)</a></h2>
+<p><strong>Q: How is RusTree different from the standard <code>tree</code> command?</strong></p>
+<p>A: While inspired by <code>tree</code>, RusTree aims to offer more:</p>
 <ul>
-<li>
-<p><code>[PATH]</code></p>
+<li><strong>Extensibility:</strong> Built in Rust, allowing for easier addition of new features.</li>
+<li><strong>Multiple Output Formats:</strong> Starting with text and Markdown, with potential for more (e.g., JSON).</li>
+<li><strong>Sorting Options:</strong> More granular control over sorting.</li>
+<li><strong>Library Usage:</strong> Can be used as a Rust library in other projects.</li>
+</ul>
+<p><strong>Q: What are the system requirements?</strong></p>
+<p>A: RusTree is built with Rust. To build it from source or install via <code>cargo install</code>, you'll need a Rust compiler and Cargo installed (see <a href="https://rustup.rs/">rustup.rs</a>). Once compiled, the binary should be relatively portable across systems supported by Rust.</p>
+<p><strong>Q: How do I report a bug or suggest a feature?</strong></p>
+<p>A: Please open an issue on the <a href="https://github.com/yourusername/rustree">GitHub repository</a> (replace with the actual link).</p>
+<p><strong>Q: Is there a way to ignore certain files or directories (like <code>.gitignore</code>)?</strong></p>
+<p>A: Yes, RusTree now offers several ways to ignore files and directories:</p>
 <ul>
-<li>Description: The root path to start scanning from.</li>
-<li>Default: <code>.</code> (current directory)</li>
+<li><strong><code>--gitignore</code></strong>: This flag tells RusTree to respect standard gitignore behavior. It will look for <code>.gitignore</code> files in the current directory and parent directories, as well as global gitignore configurations (e.g., <code>~/.config/git/ignore</code> or <code>$XDG_CONFIG_HOME/git/ignore</code>) and repository-specific exclude files (e.g., <code>.git/info/exclude</code>).</li>
+<li><strong><code>-I &lt;PATTERN&gt;</code> or <code>--filter-exclude &lt;PATTERN&gt;</code></strong>: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the <code>-P</code> option. For example, <code>rustree -I "*.log" -I "tmp/"</code> or <code>rustree --filter-exclude "*.log" --filter-exclude "tmp/"</code> will ignore all <code>.log</code> files and any directory named <code>tmp</code>.</li>
+<li><strong><code>--git-ignore-files &lt;FILE&gt;</code></strong>: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.</li>
+<li><strong><code>--ignore-case</code></strong>: This flag makes all pattern matching (from <code>-P</code>/<code>--filter-include</code>, <code>-I</code>/<code>--filter-exclude</code>, <code>--gitignore</code>, and <code>--git-ignore-files</code>) case-insensitive.</li>
 </ul>
-</li>
-<li>
-<p><code>-L, --max-depth &lt;DEPTH&gt;</code></p>
+<p>These options can be combined. For example, you can use <code>--gitignore</code> and also add specific <code>-I</code> patterns.</p>
+<p><strong>Q: How does the <code>-P pattern</code> / <code>--filter-include pattern</code> feature work?</strong></p>
+<p>A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.</p>
 <ul>
-<li>Description: Maximum depth to scan into the directory tree. (Original <code>tree</code> flag: <code>-L</code>)</li>
-<li>Example: <code>rustree -L 2</code></li>
+<li>You can use options like <code>-P "*.txt"</code> or <code>--filter-include "*.txt"</code> to show only text files, or <code>-P "docs/"</code> to show only a directory named <code>docs</code>.</li>
+<li>Multiple patterns can be provided (e.g., <code>-P "*.rs" -P "*.toml"</code>) or combined with <code>|</code> (e.g., <code>-P "*.rs|*.toml"</code>).</li>
+<li>Supported wildcards include <code>*</code>, <code>**</code>, <code>?</code>, <code>[...]</code>, and <code>[^...]</code>.</li>
+<li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
+<li>To match hidden files (starting with <code>.</code>) with general patterns like <code>*</code>, you must also use the <code>-a</code> (or <code>--include-hidden</code>) option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
+<li>The matching can be made case-insensitive using the <code>--ignore-case</code> flag.</li>
+<li>The summary line (number of directories and files) will reflect only the listed items.</li>
 </ul>
-</li>
-<li>
-<p><code>-a, --all</code></p>
+<p><strong>Q: How does <code>--ignore-case</code> work?</strong></p>
+<p>A: The <code>--ignore-case</code> flag makes all pattern matching operations case-insensitive. This applies to:</p>
 <ul>
-<li>Description: Show hidden files and directories (those starting with a <code>.</code>). (Original <code>tree</code> flag: <code>-a</code>)</li>
+<li>Patterns specified with <code>-P</code> or <code>--filter-include</code>.</li>
+<li>Patterns specified with <code>-I</code> or <code>--filter-exclude</code>.</li>
+<li>Patterns found in <code>.gitignore</code> files when <code>--gitignore</code> is active.</li>
+<li>Patterns found in custom ignore files specified with <code>--git-ignore-files</code>.</li>
 </ul>
-</li>
-<li>
-<p><code>--output-format &lt;FORMAT&gt;</code></p>
+<p>For example, if <code>--ignore-case</code> is used, a pattern like <code>-P "*.JPG"</code> would match <code>image.jpg</code>, <code>image.JPG</code>, and <code>image.Jpg</code>. Similarly, an ignore pattern like <code>-I "README.MD"</code> would ignore <code>readme.md</code>.</p>
+<p><strong>Q: Can I customize the output format further?</strong></p>
+<p>A: Currently, RusTree supports "text" and "markdown" formats. The text format has some implicit styling. More advanced customization (e.g., custom colors, icons, or entirely new formats like JSON) could be considered for future development. If you have specific needs, please open a feature request.</p>
+<p><strong>Q: How does the <code>--llm-ask</code> feature work?</strong></p>
+<p>A: The <code>--llm-ask</code> option formats the <code>rustree</code> output along with your question in a way that is convenient to pipe directly into a command-line Large Language Model (LLM) tool (like <code>ollama</code>, or scripts using OpenAI/Anthropic APIs). RusTree itself does not make any API calls to LLMs. It simply prepares the text.</p>
+<p>Example:</p>
+<pre><code class="language-bash">rustree --llm-ask "Summarize this project structure" | ollama run mistral
+</code></pre>
+<p>This pipes the tree output and your question to the <code>ollama</code> tool running the <code>mistral</code> model.</p>
+<p><strong>Q: How does the <code>-d</code> (or <code>--directory-only</code>) flag work?</strong></p>
+<p>A: When <code>-d</code> or <code>--directory-only</code> is used, RusTree will only list directories. All files will be excluded from the output.</p>
 <ul>
-<li>Description: Specifies the output format for the tree.</li>
-<li>Possible values: <code>text</code>, <code>markdown</code></li>
-<li>Default: <code>text</code></li>
-<li>Example: <code>rustree --output-format markdown</code></li>
+<li>Symlinks pointing to directories are treated as directories and will be listed.</li>
+<li>Symlinks pointing to files (or broken symlinks) will be excluded.</li>
+<li>The summary line will reflect "X directories, 0 files".</li>
+<li>File-specific analysis options (like <code>--calculate-lines</code>, <code>--calculate-words</code>, <code>--apply-function</code>) will effectively be ignored as there are no files to analyze in the output.</li>
+<li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
 </ul>
-</li>
-<li>
-<p><code>-d, --dirs-only</code></p>
-<ul>
-<li>Description: List directories only. Files will be excluded from the output. (Original <code>tree</code> flag: <code>-d</code>)</li>
-<li>Example: <code>rustree -d</code></li>
-</ul>
-</li>
-</ul>
+<p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
+<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
+<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
+<p><strong>Q: Where can I find the API documentation for the library?</strong></p>
+<p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
+<h2 id="cli-options-reference"><a class="header" href="#cli-options-reference">CLI Options Reference</a></h2>
 <h3 id="filtering-and-ignoring"><a class="header" href="#filtering-and-ignoring">Filtering and Ignoring</a></h3>
 <ul>
 <li>
-<p><code>-P, --match-pattern &lt;PATTERN&gt;</code></p>
+<p><code>-P, --filter-include &lt;PATTERN&gt;</code></p>
 <ul>
 <li>Description: List only those files and directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is listed. (Original <code>tree</code> flag: <code>-P</code>)</li>
 <li>Wildcard operators:
@@ -363,26 +393,26 @@ rustree --report-sizes
 </ul>
 </li>
 <li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
-<li>Note: To match hidden files (starting with <code>.</code>) with patterns like <code>*</code>, you must also use the <code>-a</code> or <code>--all</code> option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
+<li>Note: To match hidden files (starting with <code>.</code>) with patterns like <code>*</code>, you must also use the <code>-a</code> or <code>--include-hidden</code> option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
 <li>This option is affected by <code>--ignore-case</code>.</li>
-<li>Example: <code>rustree -P "*.rs"</code>, <code>rustree -P "*.txt|*.md" -P "docs/"</code></li>
+<li>Example: <code>rustree -P "*.rs"</code>, <code>rustree --filter-include "*.txt|*.md" --filter-include "docs/"</code></li>
 </ul>
 </li>
 <li>
-<p><code>-I, --ignore-path &lt;PATTERN&gt;</code></p>
+<p><code>-I, --filter-exclude &lt;PATTERN&gt;</code></p>
 <ul>
 <li>Description: Do not list those files or directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is excluded. (Original <code>tree</code> flag: <code>-I</code>)</li>
-<li>Uses the same wildcard pattern syntax as <code>-P, --match-pattern</code>.</li>
+<li>Uses the same wildcard pattern syntax as <code>-P, --filter-include</code>.</li>
 <li>This option is affected by <code>--ignore-case</code>.</li>
-<li>Example: <code>rustree -I "*.log"</code>, <code>rustree -I "target/" -I "*.tmp"</code></li>
+<li>Example: <code>rustree -I "*.log"</code>, <code>rustree --filter-exclude "target/" --filter-exclude "*.tmp"</code></li>
 </ul>
 </li>
 <li>
-<p><code>--use-gitignore</code></p>
+<p><code>--gitignore</code></p>
 <ul>
 <li>Description: Respects gitignore rules for filtering files and directories. This includes checking <code>.gitignore</code> files in the scanned directories and their parents, the global gitignore file (e.g., <code>~/.config/git/ignore</code>), and repository-specific exclude files (e.g., <code>$GIT_DIR/info/exclude</code>).</li>
 <li>This option is affected by <code>--ignore-case</code>.</li>
-<li>Example: <code>rustree --use-gitignore</code></li>
+<li>Example: <code>rustree --gitignore</code></li>
 </ul>
 </li>
 <li>
@@ -396,7 +426,7 @@ rustree --report-sizes
 <li>
 <p><code>--ignore-case</code></p>
 <ul>
-<li>Description: Perform case-insensitive matching for all patterns provided via <code>-P</code> (<code>--match-pattern</code>), <code>-I</code> (<code>--ignore-path</code>), <code>--use-gitignore</code>, and <code>--git-ignore-files</code>.</li>
+<li>Description: Perform case-insensitive matching for all patterns provided via <code>-P</code> (<code>--filter-include</code>), <code>-I</code> (<code>--filter-exclude</code>), <code>--gitignore</code>, and <code>--git-ignore-files</code>.</li>
 <li>Example: <code>rustree -P "*.TXT" --ignore-case</code> (would match <code>file.txt</code>)</li>
 </ul>
 </li>
@@ -445,14 +475,14 @@ rustree --report-sizes
 <p><code>-t, --sort-by-mtime</code></p>
 <ul>
 <li>Description: Sort the output by last modification time instead of alphabetically. (Original <code>tree</code> flag: <code>-t</code>)</li>
-<li>This option is mutually exclusive with <code>-U</code> and <code>--sort-key</code>.</li>
+<li>This option is mutually exclusive with <code>-U</code> (<code>--unsorted</code>) and <code>--sort-key</code>.</li>
 </ul>
 </li>
 <li>
 <p><code>-U, --unsorted</code></p>
 <ul>
 <li>Description: Do not sort. Lists files in directory order. (Original <code>tree</code> flag: <code>-U</code>)</li>
-<li>This option is mutually exclusive with <code>-t</code>, <code>--sort-key</code>, and <code>-r</code>.</li>
+<li>This option is mutually exclusive with <code>-t</code> (<code>--sort-by-mtime</code>), <code>--sort-key</code>, and <code>-r</code> (<code>--reverse-sort</code>).</li>
 </ul>
 </li>
 <li>
@@ -460,7 +490,7 @@ rustree --report-sizes
 <ul>
 <li>Description: Specifies the key for sorting directory entries. If no sorting option (<code>-t</code>, <code>-U</code>, or <code>--sort-key</code>) is provided, <code>rustree</code> defaults to sorting by <code>name</code>.</li>
 <li>Possible values: <code>name</code>, <code>size</code>, <code>m-time</code> (equivalent to <code>-t</code>), <code>words</code>, <code>lines</code>, <code>custom</code></li>
-<li>This option is mutually exclusive with <code>-t</code> and <code>-U</code>.</li>
+<li>This option is mutually exclusive with <code>-t</code> (<code>--sort-by-mtime</code>) and <code>-U</code> (<code>--unsorted</code>).</li>
 <li>Example: <code>rustree --sort-key size</code></li>
 </ul>
 </li>
@@ -468,7 +498,7 @@ rustree --report-sizes
 <p><code>-r, --reverse-sort</code></p>
 <ul>
 <li>Description: Reverse the order of the active sort. (Original <code>tree</code> flag: <code>-r</code>)</li>
-<li>This option is ignored if <code>-U</code> (unsorted) is used.</li>
+<li>This option is ignored if <code>-U</code> (<code>--unsorted</code>) is used.</li>
 </ul>
 </li>
 </ul>
@@ -506,12 +536,16 @@ rustree --report-sizes
 </li>
 <li>
 <p><strong>Tree of a specific directory, showing hidden files and up to depth 2:</strong></p>
-<pre><code class="language-bash">rustree -a -L 2 /var/log
+<pre><code class="language-bash">rustree --include-hidden --depth 2 /var/log
+# or using short flags
+rustree -a -L 2 /var/log
 </code></pre>
 </li>
 <li>
 <p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first using <code>-t</code> and <code>-r</code>):</strong></p>
 <pre><code class="language-bash">rustree -s -D -t -r ~/Documents
+# or using long flags
+rustree --report-sizes --report-mtime --sort-by-mtime --reverse-sort ~/Documents
 </code></pre>
 </li>
 <li>
@@ -521,12 +555,16 @@ rustree --report-sizes
 </li>
 <li>
 <p><strong>List directories only in the current path:</strong></p>
-<pre><code class="language-bash">rustree -d
+<pre><code class="language-bash">rustree --directory-only
+# or using short flag
+rustree -d
 </code></pre>
 </li>
 <li>
 <p><strong>List directories only in <code>./src</code>, showing sizes, up to depth 1:</strong></p>
-<pre><code class="language-bash">rustree -d -s -L 1 ./src
+<pre><code class="language-bash">rustree --directory-only --report-sizes --depth 1 ./src
+# or using short flags
+rustree -d -s -L 1 ./src
 </code></pre>
 </li>
 <li>
@@ -537,11 +575,15 @@ rustree --report-sizes
 <li>
 <p><strong>Sort by modification time (oldest first using <code>-t</code>):</strong></p>
 <pre><code class="language-bash">rustree -t ./my_project
+# or using long flag
+rustree --sort-by-mtime ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>List files in directory order (unsorted using <code>-U</code>):</strong></p>
 <pre><code class="language-bash">rustree -U ./my_project
+# or using long flag
+rustree --unsorted ./my_project
 </code></pre>
 </li>
 <li>
@@ -552,75 +594,96 @@ rustree --report-sizes
 </li>
 <li>
 <p><strong>Pipe <code>rustree</code> output to an LLM for summarization:</strong></p>
-<pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+<pre><code class="language-bash">rustree --depth 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+# or using short flags
+rustree -L 1 -s ./src --llm-ask "What are the main components in the src directory based on this tree?"
 </code></pre>
 <p>Then, you would typically pipe this entire output to your LLM command-line tool. For example:</p>
-<pre><code class="language-bash">rustree -L 1 --report-sizes ./src --llm-ask "Summarize these components" | ollama run mistral
+<pre><code class="language-bash">rustree -L 1 -s ./src --llm-ask "Summarize these components" | ollama run mistral
 </code></pre>
 </li>
 <li>
 <p><strong>List only Rust source files (<code>*.rs</code>):</strong></p>
-<pre><code class="language-bash">rustree -P "*.rs" ./my_project
+<pre><code class="language-bash">rustree --filter-include "*.rs" ./my_project
+# or using short flag
+rustree -P "*.rs" ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>List only Markdown (<code>*.md</code>) or text (<code>*.txt</code>) files:</strong></p>
-<pre><code class="language-bash">rustree -P "*.md|*.txt" ./notes
+<pre><code class="language-bash">rustree --filter-include "*.md|*.txt" ./notes
 # or equivalently
 rustree -P "*.md" -P "*.txt" ./notes
 </code></pre>
 </li>
 <li>
-<p><strong>List only directories named <code>build</code> or <code>target</code>:</strong></p>
-<pre><code class="language-bash">rustree -P "build/|target/" ./my_project
+<p><strong>List only directories named <code>build</code> or <code>target</code>:</strong>
+(Note: <code>-P</code> or <code>--filter-include</code> matches files and directories. A trailing <code>/</code> makes it specific to directories.)</p>
+<pre><code class="language-bash">rustree --filter-include "build/|target/" ./my_project
+# or using short flag
+rustree -P "build/|target/" ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>List all Markdown files, including hidden ones (e.g., in <code>.github/</code>):</strong></p>
-<pre><code class="language-bash">rustree -a -P "*.md"
+<pre><code class="language-bash">rustree --include-hidden --filter-include "*.md"
+# or using short flags
+rustree -a -P "*.md"
 </code></pre>
 </li>
 <li>
 <p><strong>List files starting with <code>test_</code> followed by any single character and then <code>.py</code>:</strong></p>
-<pre><code class="language-bash">rustree -P "test_?.py" ./tests
+<pre><code class="language-bash">rustree --filter-include "test_?.py" ./tests
+# or using short flag
+rustree -P "test_?.py" ./tests
 </code></pre>
 </li>
 <li>
 <p><strong>List all files within any subdirectory named <code>docs</code>:</strong></p>
-<pre><code class="language-bash">rustree -P "docs/**" ./project_root
+<pre><code class="language-bash">rustree --filter-include "docs/**" ./project_root
+# or using short flag
+rustree -P "docs/**" ./project_root
 </code></pre>
 </li>
 <li>
 <p><strong>Ignore all <code>.log</code> files:</strong></p>
-<pre><code class="language-bash">rustree -I "*.log" ./my_project
+<pre><code class="language-bash">rustree --filter-exclude "*.log" ./my_project
+# or using short flag
+rustree -I "*.log" ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>Ignore the <code>target/</code> directory and all <code>*.tmp</code> files:</strong></p>
-<pre><code class="language-bash">rustree -I "target/" -I "*.tmp" ./my_project
+<pre><code class="language-bash">rustree --filter-exclude "target/" --filter-exclude "*.tmp" ./my_project
+# or using short flags
+rustree -I "target/" -I "*.tmp" ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>Use <code>.gitignore</code> files to filter the output:</strong></p>
-<pre><code class="language-bash">rustree --use-gitignore ./my_git_repo
+<pre><code class="language-bash">rustree --gitignore ./my_git_repo
 </code></pre>
 </li>
 <li>
 <p><strong>Use a custom ignore file in addition to (or instead of) <code>.gitignore</code>:</strong></p>
 <pre><code class="language-bash">rustree --git-ignore-files ./.my_custom_ignores ./my_project
 </code></pre>
-<p>If you also want standard <code>.gitignore</code> behavior, add <code>--use-gitignore</code>:</p>
-<pre><code class="language-bash">rustree --use-gitignore --git-ignore-files ./.my_custom_ignores ./my_project
+<p>If you also want standard <code>.gitignore</code> behavior, add <code>--gitignore</code>:</p>
+<pre><code class="language-bash">rustree --gitignore --git-ignore-files ./.my_custom_ignores ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>List only <code>.TXT</code> files, case-insensitively (matching <code>file.txt</code>, <code>FILE.TXT</code>, etc.):</strong></p>
-<pre><code class="language-bash">rustree -P "*.TXT" --ignore-case ./my_project
+<pre><code class="language-bash">rustree --filter-include "*.TXT" --ignore-case ./my_project
+# or using short flag
+rustree -P "*.TXT" --ignore-case ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>Ignore all files ending with <code>.bak</code>, case-insensitively, using <code>-I</code>:</strong></p>
-<pre><code class="language-bash">rustree -I "*.bak" --ignore-case ./my_project
+<pre><code class="language-bash">rustree --filter-exclude "*.bak" --ignore-case ./my_project
+# or using short flag
+rustree -I "*.bak" --ignore-case ./my_project
 </code></pre>
 </li>
 </ol>
@@ -650,19 +713,19 @@ rustree = "0.1.0" # Replace with the desired version
 <div style="break-before: page; page-break-before: always;"></div><h2 id="core-library-concepts"><a class="header" href="#core-library-concepts">Core Library Concepts</a></h2>
 <p>Understanding these core components will help you effectively use the <code>rustree</code> library.</p>
 <h3 id="rustreelibconfig"><a class="header" href="#rustreelibconfig"><code>RustreeLibConfig</code></a></h3>
-<p>This struct is central to controlling how <code>rustree</code> behaves. You create an instance of <code>RustreeLibConfig</code> and set its fields to specify:</p>
+<p>This struct (defined in <code>src/config/tree_options.rs</code>) is central to controlling how <code>rustree</code> behaves. You create an instance of <code>RustreeLibConfig</code> and set its fields to specify:</p>
 <ul>
 <li><code>root_display_name</code>: How the root directory is named in the output.</li>
 <li><code>max_depth</code>: The maximum depth of traversal.</li>
 <li><code>show_hidden</code>: Whether to include hidden files/directories.</li>
 <li><code>report_sizes</code>, <code>report_mtime</code>: Whether to collect and report file sizes and modification times. <code>report_sizes</code> also applies to directories.</li>
 <li><code>calculate_line_count</code>, <code>calculate_word_count</code>: Whether to perform these analyses on files.</li>
-<li><code>apply_function</code>: An optional <code>BuiltInFunction</code> to apply to file contents.</li>
-<li><code>sort_by</code>: An optional <code>SortKey</code> to sort sibling entries.</li>
+<li><code>apply_function</code>: An optional <code>BuiltInFunction</code> (from <code>src/config/fileinfo.rs</code>) to apply to file contents.</li>
+<li><code>sort_by</code>: An optional <code>SortKey</code> (from <code>src/config/sorting.rs</code>) to sort sibling entries.</li>
 <li><code>reverse_sort</code>: Whether to reverse the sort order.</li>
 <li><code>list_directories_only</code>: If <code>true</code>, only directories (including symlinks to directories) are included in the results.</li>
-<li><code>match_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI <code>-P</code>/<code>--match-pattern</code> options.</li>
-<li><code>ignore_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI <code>-I</code>/<code>--ignore-path</code> options.</li>
+<li><code>match_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI <code>-P</code>/<code>--filter-include</code> options.</li>
+<li><code>ignore_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI <code>-I</code>/<code>--filter-exclude</code> options.</li>
 <li><code>use_gitignore</code>: If <code>true</code>, standard gitignore files (<code>.gitignore</code>, global gitignore, etc.) will be used for filtering.</li>
 <li><code>git_ignore_files</code>: <code>Option&lt;Vec&lt;PathBuf&gt;&gt;</code> specifying paths to custom files to be used as additional gitignore files.</li>
 <li><code>ignore_case_for_patterns</code>: If <code>true</code>, all pattern matching (<code>match_patterns</code>, <code>ignore_patterns</code>, and gitignore processing) will be case-insensitive.</li>
@@ -672,7 +735,7 @@ rustree = "0.1.0" # Replace with the desired version
 <p><strong>Example:</strong></p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use rustree::{RustreeLibConfig, SortKey};
+</span>use rustree::{RustreeLibConfig, SortKey, BuiltInFunction}; // These are re-exported by lib.rs
 use std::path::PathBuf;
 
 let config = RustreeLibConfig {
@@ -694,7 +757,7 @@ let config = RustreeLibConfig {
 };
 <span class="boring">}</span></code></pre></pre>
 <h3 id="nodeinfo"><a class="header" href="#nodeinfo"><code>NodeInfo</code></a></h3>
-<p>Each file or directory encountered during the scan is represented by a <code>NodeInfo</code> struct. It contains:</p>
+<p>Each file or directory encountered during the scan is represented by a <code>NodeInfo</code> struct (defined in <code>src/core/node.rs</code>). It contains:</p>
 <ul>
 <li><code>path</code>: The full <code>PathBuf</code> to the entry.</li>
 <li><code>name</code>: The file or directory name as a <code>String</code>.</li>
@@ -703,7 +766,7 @@ let config = RustreeLibConfig {
 <li><code>size</code>: <code>Option&lt;u64&gt;</code> for file or directory size (if <code>report_sizes</code> is enabled).</li>
 <li><code>mtime</code>: <code>Option&lt;SystemTime&gt;</code> for modification time.</li>
 <li><code>line_count</code>, <code>word_count</code>: <code>Option&lt;usize&gt;</code> for analysis results (applicable to files only).</li>
-<li><code>custom_function_output</code>: <code>Option&lt;Result&lt;String, ApplyFnError&gt;&gt;</code> for results of <code>apply_function</code>.</li>
+<li><code>custom_function_output</code>: <code>Option&lt;Result&lt;String, ApplyFnError&gt;&gt;</code> (where <code>ApplyFnError</code> is from <code>src/config/fileinfo.rs</code>) for results of <code>apply_function</code>.</li>
 </ul>
 <p>You typically receive a <code>Vec&lt;NodeInfo&gt;</code> from <code>get_tree_nodes()</code>.</p>
 <h3 id="get_tree_nodes"><a class="header" href="#get_tree_nodes"><code>get_tree_nodes()</code></a></h3>
@@ -730,18 +793,20 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
     format_nodes(nodes, format, config)
 }
 <span class="boring">}</span></code></pre></pre>
-<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code> or <code>Markdown</code>), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
+<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code> or <code>Markdown</code>, from <code>src/config/output.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
 <h3 id="key-enums"><a class="header" href="#key-enums">Key Enums</a></h3>
 <ul>
-<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>. Used in <code>RustreeLibConfig</code> to specify sorting.</li>
-<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Used with <code>format_nodes()</code>.</li>
-<li><strong><code>BuiltInFunction</code></strong>: e.g., <code>CountPluses</code>. Used in <code>RustreeLibConfig</code> for <code>apply_function</code>.</li>
-<li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Found in <code>NodeInfo</code>.</li>
-<li><strong><code>RustreeError</code></strong>: The error type returned by library functions.</li>
+<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig</code> to specify sorting.</li>
+<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Defined in <code>src/config/output.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
+<li><strong><code>BuiltInFunction</code></strong>: e.g., <code>CountPluses</code>. Defined in <code>src/config/fileinfo.rs</code>. Used in <code>RustreeLibConfig</code> for <code>apply_function</code>.</li>
+<li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Defined in <code>src/core/node.rs</code>. Found in <code>NodeInfo</code>.</li>
+<li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Defined in <code>src/core/error.rs</code>.</li>
 </ul>
 <p>Refer to the API documentation (generated by <code>cargo doc</code>) for the full details of these types and their variants/fields.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="library-usage-examples"><a class="header" href="#library-usage-examples">Library Usage Examples</a></h2>
-<p>Here are some examples of how to use <code>rustree</code> as a library in your Rust code.</p>
+<p>Here are some examples of how to use <code>rustree</code> as a library in your Rust code.
+Make sure to add <code>rustree</code> to your <code>Cargo.toml</code> dependencies.
+All key types like <code>RustreeLibConfig</code>, <code>NodeInfo</code>, <code>SortKey</code>, <code>LibOutputFormat</code>, <code>RustreeError</code> are re-exported by <code>rustree</code>'s <code>lib.rs</code>.</p>
 <h3 id="example-1-basic-tree-listing"><a class="header" href="#example-1-basic-tree-listing">Example 1: Basic Tree Listing</a></h3>
 <p>This example shows how to get a simple text tree of a directory.</p>
 <pre><pre class="playground"><code class="language-rust">use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError};
@@ -832,73 +897,73 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
 <ol>
 <li>
-<p><strong>Configuration (<code>RustreeLibConfig</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur.</p>
+<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur.</p>
 </li>
 <li>
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
+</li>
+</ol>
 <ul>
 <li>The <code>walk_directory</code> function, using the <code>ignore</code> crate, traverses the file system starting from a root path.</li>
 <li>It respects configuration settings from <code>RustreeLibConfig</code>:
 <ul>
 <li><code>max_depth</code>, <code>show_hidden</code>.</li>
 <li><code>use_gitignore</code> and <code>git_ignore_files</code> for respecting standard and custom gitignore rules.</li>
-<li><code>ignore_patterns</code> (CLI <code>-I</code>) to exclude entries matching specified glob patterns. These are applied early to prune the walk.</li>
+<li><code>ignore_patterns</code> (CLI <code>-I</code> / <code>--filter-exclude</code>) to exclude entries matching specified glob patterns. These are applied early to prune the walk.</li>
 <li><code>ignore_case_for_patterns</code> to control case sensitivity for all pattern matching.</li>
 </ul>
 </li>
 <li>After initial filtering by the <code>ignore</code> crate (based on hidden status, gitignore rules, and <code>-I</code> patterns), further filtering is applied:
 <ul>
-<li><code>match_patterns</code> (CLI <code>-P</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
+<li><code>match_patterns</code> (CLI <code>-P</code> / <code>--filter-include</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
 <li><code>list_directories_only</code>: If true, only effective directories are kept.</li>
 </ul>
 </li>
 <li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
-</li>
-<li>
-<p><strong>Analysis (<code>core::analyzer</code>)</strong>:</p>
+<ol>
+<li><strong>Analysis (<code>core::analyzer</code>)</strong>:</li>
+</ol>
 <ul>
 <li>As the walker processes entries that are effectively files (i.e., not filtered out by <code>list_directories_only</code>), it can invoke analysis functions based on the configuration.</li>
 <li><code>file_stats</code>: Calculates line counts and word counts for files.</li>
-<li><code>apply_fn</code>: Applies a selected built-in function to file content.</li>
+<li><code>apply_fn</code>: Applies a selected built-in function (from <code>src/config/fileinfo.rs</code>) to file content.</li>
 <li>The results of these analyses are stored in <code>NodeInfo</code> objects. This step is skipped for directories or when <code>list_directories_only</code> is active.</li>
 </ul>
-</li>
-<li>
-<p><strong>Node Representation (<code>NodeInfo</code>)</strong>:</p>
+<ol>
+<li><strong>Node Representation (<code>NodeInfo</code>)</strong>:</li>
+</ol>
 <ul>
-<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct. This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
+<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
 <li>The <code>size</code> field can be populated for directories if <code>report_sizes</code> is enabled.</li>
 <li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
 </ul>
-</li>
-<li>
-<p><strong>Sorting (<code>core::sorter</code>)</strong>:</p>
+<ol>
+<li><strong>Sorting (<code>core::sorter</code>)</strong>:</li>
+</ol>
 <ul>
-<li>If a sort key is specified in the configuration, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>If a <code>SortKey</code> (from <code>src/config/sorting.rs</code>) is specified in the configuration, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
 <li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure.</li>
 </ul>
-</li>
-<li>
-<p><strong>Formatting (<code>core::formatter</code>)</strong>:</p>
+<ol>
+<li><strong>Formatting (<code>core::formatter</code>)</strong>:</li>
+</ol>
 <ul>
 <li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is then passed to a formatter.</li>
 <li>The <code>TreeFormatter</code> trait defines the interface for formatters.</li>
 <li><code>TextTreeFormatter</code>: Generates a plain text, <code>tree</code>-like output. It adapts its output based on <code>list_directories_only</code> (e.g., summary line, metadata shown).</li>
 <li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>
-<li>The formatter produces the final string output, considering configuration like <code>root_node_size</code> and <code>root_is_directory</code> for accurate root display.</li>
+<li>The formatter produces the final string output, considering configuration like <code>root_node_size</code> and <code>root_is_directory</code> for accurate root display. The choice of formatter is determined by <code>LibOutputFormat</code> (from <code>src/config/output.rs</code>).</li>
 </ul>
-</li>
-</ol>
 <h3 id="cli-layer"><a class="header" href="#cli-layer">CLI Layer</a></h3>
 <p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
 <ul>
-<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments.</li>
-<li><strong>Handler (<code>cli::handler</code>)</strong>: Maps parsed CLI arguments (<code>CliArgs</code>) to the library's <code>RustreeLibConfig</code> and <code>LibOutputFormat</code>.</li>
+<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments. Arguments are organized into logical groups using flattened structs from submodules within <code>src/cli/</code> (e.g., <code>listing</code>, <code>filtering</code>, <code>metadata</code>).</li>
+<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function in this module translates the parsed <code>CliArgs</code> structure into the library's <code>RustreeLibConfig</code> and <code>LibOutputFormat</code>.</li>
 <li><strong>Orchestration (<code>main.rs</code>)</strong>:
 <ol>
 <li>Parses CLI args.</li>
-<li>Maps CLI args to library config.</li>
+<li>Maps CLI args to library config using <code>cli::mapping</code>.</li>
 <li>Calls <code>rustree::get_tree_nodes()</code> to get processed nodes.</li>
 <li>Calls <code>rustree::format_nodes()</code> to get the output string.</li>
 <li>Prints the string to the console, potentially with special formatting for LLM piping.</li>
@@ -907,14 +972,38 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 </ul>
 <p>This separation allows the core library to be used independently of the CLI.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="core-library-modules"><a class="header" href="#core-library-modules">Core Library Modules</a></h2>
-<p>The <code>rustree</code> library (<code>src/core/</code>) is organized into several modules, each with a specific responsibility:</p>
+<p>The <code>rustree</code> library is organized into several modules, each with a specific responsibility.</p>
+<h3 id="srcconfig---configuration-module"><a class="header" href="#srcconfig---configuration-module"><code>src/config/</code> - Configuration Module</a></h3>
+<p>This top-level module centralizes all configuration-related definitions for the library.</p>
 <ul>
 <li>
-<p><strong><code>config.rs</code></strong>:</p>
+<p><strong><code>tree_options.rs</code></strong> (formerly <code>src/core/config.rs</code>):</p>
 <ul>
 <li>Defines <code>RustreeLibConfig</code>, the struct holding all configuration options for the library's behavior. This includes settings for traversal depth, visibility of hidden files, metadata reporting (sizes, modification times), content analysis flags, sorting preferences. It also includes filtering options such as pattern matching (<code>match_patterns</code>), pattern ignoring (<code>ignore_patterns</code>), use of gitignore files (<code>use_gitignore</code>, <code>git_ignore_files</code>), case sensitivity for patterns (<code>ignore_case_for_patterns</code>), and options like <code>list_directories_only</code>, <code>root_node_size</code>, and <code>root_is_directory</code>.</li>
 </ul>
 </li>
+<li>
+<p><strong><code>sorting.rs</code></strong>:</p>
+<ul>
+<li>Defines the <code>SortKey</code> enum, used in <code>RustreeLibConfig</code> to specify sorting criteria.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>output.rs</code></strong>:</p>
+<ul>
+<li>Defines the <code>OutputFormat</code> enum (re-exported as <code>LibOutputFormat</code>), used to specify the desired output format (e.g., Text, Markdown).</li>
+</ul>
+</li>
+<li>
+<p><strong><code>fileinfo.rs</code></strong>:</p>
+<ul>
+<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content.</li>
+<li>Defines <code>ApplyFnError</code> for errors during custom function application.</li>
+</ul>
+</li>
+</ul>
+<h3 id="srccore---core-logic-modules"><a class="header" href="#srccore---core-logic-modules"><code>src/core/</code> - Core Logic Modules</a></h3>
+<ul>
 <li>
 <p><strong><code>node.rs</code></strong>:</p>
 <ul>
@@ -927,7 +1016,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <ul>
 <li>Contains the <code>walk_directory</code> function responsible for traversing the file system.</li>
 <li>Uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking, which provides powerful filtering capabilities including gitignore processing.</li>
-<li>Implements filtering logic based on <code>RustreeLibConfig</code>:
+<li>Implements filtering logic based on <code>RustreeLibConfig</code> (from <code>src/config/tree_options.rs</code>):
 <ul>
 <li><strong>Hidden Files</strong>: Controlled by <code>config.show_hidden</code> via <code>WalkBuilder::hidden()</code>.</li>
 <li><strong>Max Depth</strong>: Controlled by <code>config.max_depth</code> via <code>WalkBuilder::max_depth()</code>.</li>
@@ -937,9 +1026,9 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li><code>config.git_ignore_files</code>: Allows specifying custom ignore files.</li>
 </ul>
 </li>
-<li><strong>Ignore Patterns (<code>-I</code>)</strong>: <code>config.ignore_patterns</code> are compiled into glob patterns and used with <code>WalkBuilder::filter_entry()</code> to prune the traversal, excluding matching files and directories.</li>
+<li><strong>Ignore Patterns (<code>-I</code> / <code>--filter-exclude</code>)</strong>: <code>config.ignore_patterns</code> are compiled into glob patterns and used with <code>WalkBuilder::filter_entry()</code> to prune the traversal, excluding matching files and directories.</li>
 <li><strong>Case Insensitivity</strong>: <code>config.ignore_case_for_patterns</code> affects all pattern matching, including gitignore, <code>-I</code>, and <code>-P</code> patterns.</li>
-<li><strong>Match Patterns (<code>-P</code>)</strong>: <code>config.match_patterns</code> are compiled into glob patterns. After the <code>ignore</code> crate yields an entry (i.e., it wasn't filtered by gitignore or <code>-I</code> patterns), these <code>-P</code> patterns are applied. Files and symlinks must match one of these patterns to be included. Directories are generally included if they might contain matching children (they are not filtered out by <code>-P</code> at this stage if they passed previous filters).</li>
+<li><strong>Match Patterns (<code>-P</code> / <code>--filter-include</code>)</strong>: <code>config.match_patterns</code> are compiled into glob patterns. After the <code>ignore</code> crate yields an entry (i.e., it wasn't filtered by gitignore or <code>-I</code> patterns), these <code>-P</code> patterns are applied. Files and symlinks must match one of these patterns to be included. Directories are generally included if they might contain matching children (they are not filtered out by <code>-P</code> at this stage if they passed previous filters).</li>
 <li><code>list_directories_only</code>: If true, only entries that are effectively directories (including symlinks to directories) are processed further.</li>
 </ul>
 </li>
@@ -951,14 +1040,13 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong><code>analyzer/</code></strong>: This sub-module handles file content analysis.</p>
 <ul>
 <li><code>file_stats.rs</code>: Provides functions like <code>count_lines_from_string</code> and <code>count_words_from_string</code>.</li>
-<li><code>apply_fn.rs</code>: Defines <code>BuiltInFunction</code> enum, <code>ApplyFnError</code>, and the <code>apply_function_to_content</code> logic for applying custom functions to file content.</li>
+<li><code>apply_fn.rs</code>: Defines the logic for applying custom functions (defined by <code>BuiltInFunction</code> from <code>src/config/fileinfo.rs</code>) to file content, handling <code>ApplyFnError</code> (also from <code>src/config/fileinfo.rs</code>).</li>
 </ul>
 </li>
 <li>
 <p><strong><code>sorter.rs</code></strong>:</p>
 <ul>
-<li>Defines the <code>SortKey</code> enum.</li>
-<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified key and order, primarily acting on sibling nodes.</li>
+<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified <code>SortKey</code> (from <code>src/config/sorting.rs</code>) and order, primarily acting on sibling nodes.</li>
 </ul>
 </li>
 <li>
@@ -966,8 +1054,8 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <ul>
 <li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
 <li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It handles the display of metadata (like sizes for directories when <code>-d</code> and <code>-s</code> are used), adapts the summary line based on <code>list_directories_only</code>, and uses <code>root_node_size</code> and <code>root_is_directory</code> from <code>RustreeLibConfig</code> for accurate root display.</li>
-<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists (currently a placeholder).</li>
-<li><code>mod.rs</code> (in <code>formatter</code>): Defines the <code>OutputFormat</code> enum (re-exported as <code>LibOutputFormat</code>).</li>
+<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists.</li>
+<li><code>mod.rs</code> (in <code>formatter</code>): Re-exports <code>OutputFormat</code> (as <code>LibOutputFormat</code>) from <code>src/config/output.rs</code>.</li>
 </ul>
 </li>
 <li>
@@ -979,7 +1067,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 </ul>
 <h3 id="top-level-library-file-srclibrs"><a class="header" href="#top-level-library-file-srclibrs">Top-Level Library File (<code>src/lib.rs</code>)</a></h3>
 <ul>
-<li>Re-exports key public types from the core modules to form the library's public API.</li>
+<li>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes <code>RustreeLibConfig</code>, <code>SortKey</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>, <code>LibOutputFormat</code>, <code>NodeInfo</code>, <code>NodeType</code>, and <code>RustreeError</code>.</li>
 <li>Provides the main entry-point functions:
 <ul>
 <li><code>get_tree_nodes()</code>: Orchestrates walking, analysis, and sorting.</li>
@@ -987,7 +1075,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 </ul>
 </li>
 </ul>
-<p>This modular structure aims to make the codebase maintainable and extensible. For example, adding a new output format would involve creating a new struct that implements the <code>TreeFormatter</code> trait and updating the <code>format_nodes</code> function and relevant enums. Similarly, new analysis functions or sort keys can be added by extending their respective modules.</p>
+<p>This modular structure aims to make the codebase maintainable and extensible. For example, adding a new output format would involve creating a new struct that implements the <code>TreeFormatter</code> trait and updating the <code>format_nodes</code> function and relevant enums (like <code>OutputFormat</code> in <code>src/config/output.rs</code>). Similarly, new analysis functions or sort keys can be added by extending their respective modules.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="api-reference-rustdoc"><a class="header" href="#api-reference-rustdoc">API Reference (rustdoc)</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
 <p>Contributions to RusTree are welcome! Whether it's bug reports, feature requests, documentation improvements, or code contributions, your help is appreciated.</p>
@@ -1048,7 +1136,7 @@ mdbook serve docs
 </li>
 </ul>
 <p>Thank you for considering contributing to RusTree!</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="frequently-asked-questions-faq"><a class="header" href="#frequently-asked-questions-faq">Frequently Asked Questions (FAQ)</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="frequently-asked-questions-faq-1"><a class="header" href="#frequently-asked-questions-faq-1">Frequently Asked Questions (FAQ)</a></h1>
 <p><strong>Q: How is RusTree different from the standard <code>tree</code> command?</strong></p>
 <p>A: While inspired by <code>tree</code>, RusTree aims to offer more:</p>
 <ul>
@@ -1065,29 +1153,29 @@ mdbook serve docs
 <p><strong>Q: Is there a way to ignore certain files or directories (like <code>.gitignore</code>)?</strong></p>
 <p>A: Yes, RusTree now offers several ways to ignore files and directories:</p>
 <ul>
-<li><strong><code>--use-gitignore</code></strong>: This flag tells RusTree to respect standard gitignore behavior. It will look for <code>.gitignore</code> files in the current directory and parent directories, as well as global gitignore configurations (e.g., <code>~/.config/git/ignore</code> or <code>$XDG_CONFIG_HOME/git/ignore</code>) and repository-specific exclude files (e.g., <code>.git/info/exclude</code>).</li>
-<li><strong><code>-I &lt;PATTERN&gt;</code> or <code>--ignore-path &lt;PATTERN&gt;</code></strong>: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the <code>-P</code> option. For example, <code>rustree -I "*.log" -I "tmp/"</code> will ignore all <code>.log</code> files and any directory named <code>tmp</code>.</li>
+<li><strong><code>--gitignore</code></strong>: This flag tells RusTree to respect standard gitignore behavior. It will look for <code>.gitignore</code> files in the current directory and parent directories, as well as global gitignore configurations (e.g., <code>~/.config/git/ignore</code> or <code>$XDG_CONFIG_HOME/git/ignore</code>) and repository-specific exclude files (e.g., <code>.git/info/exclude</code>).</li>
+<li><strong><code>-I &lt;PATTERN&gt;</code> or <code>--filter-exclude &lt;PATTERN&gt;</code></strong>: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the <code>-P</code> option. For example, <code>rustree -I "*.log" -I "tmp/"</code> or <code>rustree --filter-exclude "*.log" --filter-exclude "tmp/"</code> will ignore all <code>.log</code> files and any directory named <code>tmp</code>.</li>
 <li><strong><code>--git-ignore-files &lt;FILE&gt;</code></strong>: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.</li>
-<li><strong><code>--ignore-case</code></strong>: This flag makes all pattern matching (from <code>-P</code>, <code>-I</code>, <code>--use-gitignore</code>, and <code>--git-ignore-files</code>) case-insensitive.</li>
+<li><strong><code>--ignore-case</code></strong>: This flag makes all pattern matching (from <code>-P</code>/<code>--filter-include</code>, <code>-I</code>/<code>--filter-exclude</code>, <code>--gitignore</code>, and <code>--git-ignore-files</code>) case-insensitive.</li>
 </ul>
-<p>These options can be combined. For example, you can use <code>--use-gitignore</code> and also add specific <code>-I</code> patterns.</p>
-<p><strong>Q: How does the <code>-P pattern</code> / <code>--match-pattern pattern</code> feature work?</strong></p>
+<p>These options can be combined. For example, you can use <code>--gitignore</code> and also add specific <code>-I</code> patterns.</p>
+<p><strong>Q: How does the <code>-P pattern</code> / <code>--filter-include pattern</code> feature work?</strong></p>
 <p>A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.</p>
 <ul>
-<li>You can use options like <code>-P "*.txt"</code> to show only text files, or <code>-P "docs/"</code> to show only a directory named <code>docs</code>.</li>
+<li>You can use options like <code>-P "*.txt"</code> or <code>--filter-include "*.txt"</code> to show only text files, or <code>-P "docs/"</code> to show only a directory named <code>docs</code>.</li>
 <li>Multiple patterns can be provided (e.g., <code>-P "*.rs" -P "*.toml"</code>) or combined with <code>|</code> (e.g., <code>-P "*.rs|*.toml"</code>).</li>
 <li>Supported wildcards include <code>*</code>, <code>**</code>, <code>?</code>, <code>[...]</code>, and <code>[^...]</code>.</li>
 <li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
-<li>To match hidden files (starting with <code>.</code>) with general patterns like <code>*</code>, you must also use the <code>-a</code> (or <code>--all</code>) option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
+<li>To match hidden files (starting with <code>.</code>) with general patterns like <code>*</code>, you must also use the <code>-a</code> (or <code>--include-hidden</code>) option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
 <li>The matching can be made case-insensitive using the <code>--ignore-case</code> flag.</li>
 <li>The summary line (number of directories and files) will reflect only the listed items.</li>
 </ul>
 <p><strong>Q: How does <code>--ignore-case</code> work?</strong></p>
 <p>A: The <code>--ignore-case</code> flag makes all pattern matching operations case-insensitive. This applies to:</p>
 <ul>
-<li>Patterns specified with <code>-P</code> or <code>--match-pattern</code>.</li>
-<li>Patterns specified with <code>-I</code> or <code>--ignore-path</code>.</li>
-<li>Patterns found in <code>.gitignore</code> files when <code>--use-gitignore</code> is active.</li>
+<li>Patterns specified with <code>-P</code> or <code>--filter-include</code>.</li>
+<li>Patterns specified with <code>-I</code> or <code>--filter-exclude</code>.</li>
+<li>Patterns found in <code>.gitignore</code> files when <code>--gitignore</code> is active.</li>
 <li>Patterns found in custom ignore files specified with <code>--git-ignore-files</code>.</li>
 </ul>
 <p>For example, if <code>--ignore-case</code> is used, a pattern like <code>-P "*.JPG"</code> would match <code>image.jpg</code>, <code>image.JPG</code>, and <code>image.Jpg</code>. Similarly, an ignore pattern like <code>-I "README.MD"</code> would ignore <code>readme.md</code>.</p>
@@ -1099,8 +1187,8 @@ mdbook serve docs
 <pre><code class="language-bash">rustree --llm-ask "Summarize this project structure" | ollama run mistral
 </code></pre>
 <p>This pipes the tree output and your question to the <code>ollama</code> tool running the <code>mistral</code> model.</p>
-<p><strong>Q: How does the <code>-d</code> (or <code>--dirs-only</code>) flag work?</strong></p>
-<p>A: When <code>-d</code> is used, RusTree will only list directories. All files will be excluded from the output.</p>
+<p><strong>Q: How does the <code>-d</code> (or <code>--directory-only</code>) flag work?</strong></p>
+<p>A: When <code>-d</code> or <code>--directory-only</code> is used, RusTree will only list directories. All files will be excluded from the output.</p>
 <ul>
 <li>Symlinks pointing to directories are treated as directories and will be listed.</li>
 <li>Symlinks pointing to files (or broken symlinks) will be excluded.</li>
@@ -1109,9 +1197,9 @@ mdbook serve docs
 <li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
 </ul>
 <p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
-<p>A: Yes. When <code>-d</code> and <code>-s</code> are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
 <p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
-<p>A: Since <code>-d</code> excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
+<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
 <p><strong>Q: Where can I find the API documentation for the library?</strong></p>
 <p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 

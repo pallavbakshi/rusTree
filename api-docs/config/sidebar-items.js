@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["fileinfo","output","sorting","tree_options"]};

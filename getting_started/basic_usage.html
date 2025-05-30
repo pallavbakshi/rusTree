@@ -187,12 +187,14 @@
 <p><strong>Show all files (including hidden):</strong></p>
 <pre><code class="language-bash">rustree -a
 # or
-rustree --all
+rustree --include-hidden
 </code></pre>
 </li>
 <li>
 <p><strong>Limit depth:</strong></p>
 <pre><code class="language-bash">rustree -L 2  # Show current directory and its direct children (depth 1 and 2)
+# or
+rustree --depth 2
 </code></pre>
 </li>
 <li>
@@ -210,6 +212,8 @@ rustree --report-sizes
 <li>
 <p><strong>Sort by size (descending):</strong></p>
 <pre><code class="language-bash">rustree --sort-key size -r
+# or
+rustree --sort-key size --reverse-sort
 </code></pre>
 </li>
 </ul>

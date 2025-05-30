@@ -3,19 +3,19 @@
     fn <a href="#tymethod.format" class="fn">format</a>(
         &amp;self,
         nodes: &amp;[<a class="struct" href="../../node/struct.NodeInfo.html" title="struct rustree::core::node::NodeInfo">NodeInfo</a>],
-        config: &amp;<a class="struct" href="../../config/struct.RustreeLibConfig.html" title="struct rustree::core::config::RustreeLibConfig">RustreeLibConfig</a>,
+        config: &amp;<a class="struct" href="../../../config/tree_options/struct.RustreeLibConfig.html" title="struct rustree::config::tree_options::RustreeLibConfig">RustreeLibConfig</a>,
     ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.87.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.87.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, <a class="enum" href="../../error/enum.RustreeError.html" title="enum rustree::core::error::RustreeError">RustreeError</a>&gt;;
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A trait for formatting a list of <code>NodeInfo</code> objects into a string representation.</p>
 <p>Implementors of this trait define specific output formats (e.g., text tree, Markdown).</p>
 </div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.format" class="method"><a class="src rightside" href="../../../../src/rustree/core/formatter/base.rs.html#20">Source</a><h4 class="code-header">fn <a href="#tymethod.format" class="fn">format</a>(
     &amp;self,
     nodes: &amp;[<a class="struct" href="../../node/struct.NodeInfo.html" title="struct rustree::core::node::NodeInfo">NodeInfo</a>],
-    config: &amp;<a class="struct" href="../../config/struct.RustreeLibConfig.html" title="struct rustree::core::config::RustreeLibConfig">RustreeLibConfig</a>,
+    config: &amp;<a class="struct" href="../../../config/tree_options/struct.RustreeLibConfig.html" title="struct rustree::config::tree_options::RustreeLibConfig">RustreeLibConfig</a>,
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.87.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.87.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, <a class="enum" href="../../error/enum.RustreeError.html" title="enum rustree::core::error::RustreeError">RustreeError</a>&gt;</h4></section></summary><div class="docblock"><p>Formats the given nodes according to the implementor’s logic and configuration.</p>
 <h5 id="arguments"><a class="doc-anchor" href="#arguments">§</a>Arguments</h5>
 <ul>
 <li><code>nodes</code> - A slice of <a href="../../node/struct.NodeInfo.html" title="struct rustree::core::node::NodeInfo"><code>NodeInfo</code></a> objects representing the directory tree to format.</li>
-<li><code>config</code> - The <a href="../../config/struct.RustreeLibConfig.html" title="struct rustree::core::config::RustreeLibConfig"><code>RustreeLibConfig</code></a> providing context and options for formatting.</li>
+<li><code>config</code> - The <a href="../../../config/tree_options/struct.RustreeLibConfig.html" title="struct rustree::config::tree_options::RustreeLibConfig"><code>RustreeLibConfig</code></a> providing context and options for formatting.</li>
 </ul>
 <h5 id="returns"><a class="doc-anchor" href="#returns">§</a>Returns</h5>
 <p>A <code>Result</code> containing the formatted <code>String</code> on success, or a <a href="../../error/enum.RustreeError.html" title="enum rustree::core::error::RustreeError"><code>RustreeError</code></a> on failure.</p>
