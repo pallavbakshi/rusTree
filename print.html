@@ -275,14 +275,14 @@ rustree --report-sizes
 </li>
 <li>
 <p><strong>Sort by size (ascending):</strong></p>
-<pre><code class="language-bash">rustree --sort-key size
+<pre><code class="language-bash">rustree --sort-by size
 </code></pre>
 </li>
 <li>
 <p><strong>Sort by size (descending):</strong></p>
-<pre><code class="language-bash">rustree --sort-key size -r
+<pre><code class="language-bash">rustree --sort-by size -r
 # or
-rustree --sort-key size --reverse-sort
+rustree --sort-by size --reverse-sort
 </code></pre>
 </li>
 </ul>
@@ -370,9 +370,9 @@ rustree --sort-key size --reverse-sort
 <li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
 </ul>
 <p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
-<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if <code>-D</code> (or <code>--date</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on <code>-c</code>) for the directories.</p>
 <p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
-<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
+<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>mtime</code>, <code>ctime</code>, <code>crtime</code>, <code>size</code> if <code>-s</code> is also used, or <code>version</code>) when <code>-d</code> is active. If you truly want directory order with <code>-d</code>, use <code>-U</code> or <code>--sort-by none</code>.</p>
 <p><strong>Q: Where can I find the API documentation for the library?</strong></p>
 <p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 <h2 id="cli-options-reference"><a class="header" href="#cli-options-reference">CLI Options Reference</a></h2>
@@ -440,9 +440,9 @@ rustree --sort-key size --reverse-sort
 </ul>
 </li>
 <li>
-<p><code>-D, --report-mtime</code></p>
+<p><code>-D, --date</code></p>
 <ul>
-<li>Description: Report last modification times for files and directories. (Original <code>tree</code> flag: <code>-D</code>)</li>
+<li>Description: Report dates for files and directories. By default, this shows the last modification time. If the <code>-c</code> flag (sort by change time) is also used, this flag will instead display the last status change time (ctime). (Original <code>tree</code> flag: <code>-D</code>)</li>
 </ul>
 </li>
 </ul>
@@ -472,33 +472,60 @@ rustree --sort-key size --reverse-sort
 <h3 id="sorting"><a class="header" href="#sorting">Sorting</a></h3>
 <ul>
 <li>
-<p><code>-t, --sort-by-mtime</code></p>
+<p><code>-v</code></p>
+<ul>
+<li>Description: Sort the output by version name. (Original <code>tree</code> flag: <code>-v</code>)</li>
+<li>This option is mutually exclusive with <code>-t</code>, <code>-c</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
+</ul>
+</li>
+<li>
+<p><code>-t</code></p>
 <ul>
 <li>Description: Sort the output by last modification time instead of alphabetically. (Original <code>tree</code> flag: <code>-t</code>)</li>
-<li>This option is mutually exclusive with <code>-U</code> (<code>--unsorted</code>) and <code>--sort-key</code>.</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-c</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
+</ul>
+</li>
+<li>
+<p><code>-c</code></p>
+<ul>
+<li>Description: Sort the output by last status change time (ctime) instead of alphabetically. If <code>-D</code> (or <code>--date</code>) is also used, <code>-D</code> will display change times instead of modification times. (Original <code>tree</code> flag: <code>-c</code>)</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
 </ul>
 </li>
 <li>
 <p><code>-U, --unsorted</code></p>
 <ul>
 <li>Description: Do not sort. Lists files in directory order. (Original <code>tree</code> flag: <code>-U</code>)</li>
-<li>This option is mutually exclusive with <code>-t</code> (<code>--sort-by-mtime</code>), <code>--sort-key</code>, and <code>-r</code> (<code>--reverse-sort</code>).</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-c</code>, <code>--sort-by</code>, and <code>-r</code> (<code>--reverse-sort</code>).</li>
 </ul>
 </li>
 <li>
-<p><code>--sort-key &lt;KEY&gt;</code></p>
+<p><code>-S, --sort-by &lt;FIELD&gt;</code></p>
 <ul>
-<li>Description: Specifies the key for sorting directory entries. If no sorting option (<code>-t</code>, <code>-U</code>, or <code>--sort-key</code>) is provided, <code>rustree</code> defaults to sorting by <code>name</code>.</li>
-<li>Possible values: <code>name</code>, <code>size</code>, <code>m-time</code> (equivalent to <code>-t</code>), <code>words</code>, <code>lines</code>, <code>custom</code></li>
-<li>This option is mutually exclusive with <code>-t</code> (<code>--sort-by-mtime</code>) and <code>-U</code> (<code>--unsorted</code>).</li>
-<li>Example: <code>rustree --sort-key size</code></li>
+<li>Description: Specifies the field for sorting directory entries. If no sorting option (<code>-v</code>, <code>-t</code>, <code>-c</code>, <code>-U</code>, or <code>--sort-by</code>) is provided, <code>rustree</code> defaults to sorting by <code>name</code>.</li>
+<li>Possible values for <code>&lt;FIELD&gt;</code>:
+<ul>
+<li><code>name</code>: Sort by entry name (default).</li>
+<li><code>version</code> (alias <code>ver</code>): Sort by version string (e.g., <code>file_v1.0.txt</code> before <code>file_v2.0.txt</code>). Equivalent to <code>-v</code>.</li>
+<li><code>size</code>: Sort by file size.</li>
+<li><code>mtime</code> (aliases <code>m</code>, <code>mod_time</code>): Sort by last modification time. Equivalent to <code>-t</code>.</li>
+<li><code>ctime</code> (aliases <code>c</code>, <code>change_time</code>): Sort by last status change time. Equivalent to <code>-c</code>.</li>
+<li><code>crtime</code> (aliases <code>cr</code>, <code>create_time</code>): Sort by creation time.</li>
+<li><code>words</code>: Sort by word count (for files).</li>
+<li><code>lines</code>: Sort by line count (for files).</li>
+<li><code>custom</code>: Sort by the output of a custom applied function.</li>
+<li><code>none</code> (alias <code>n</code>): No sorting; preserve directory order. Equivalent to <code>-U</code>.</li>
+</ul>
+</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-c</code>, and <code>-U</code>.</li>
+<li>Example: <code>rustree --sort-by size</code>, <code>rustree -S m</code></li>
 </ul>
 </li>
 <li>
 <p><code>-r, --reverse-sort</code></p>
 <ul>
 <li>Description: Reverse the order of the active sort. (Original <code>tree</code> flag: <code>-r</code>)</li>
-<li>This option is ignored if <code>-U</code> (<code>--unsorted</code>) is used.</li>
+<li>This option is ignored if <code>-U</code> (<code>--unsorted</code>) or <code>--sort-by none</code> is used.</li>
 </ul>
 </li>
 </ul>
@@ -545,12 +572,14 @@ rustree -a -L 2 /var/log
 <p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first using <code>-t</code> and <code>-r</code>):</strong></p>
 <pre><code class="language-bash">rustree -s -D -t -r ~/Documents
 # or using long flags
-rustree --report-sizes --report-mtime --sort-by-mtime --reverse-sort ~/Documents
+rustree --report-sizes --date -t --reverse-sort ~/Documents
+# or using --sort-by
+rustree --report-sizes --date --sort-by mtime --reverse-sort ~/Documents
 </code></pre>
 </li>
 <li>
 <p><strong>Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):</strong></p>
-<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-key lines -r ./my_project_src
+<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-by lines -r ./my_project_src
 </code></pre>
 </li>
 <li>
@@ -575,8 +604,8 @@ rustree -d -s -L 1 ./src
 <li>
 <p><strong>Sort by modification time (oldest first using <code>-t</code>):</strong></p>
 <pre><code class="language-bash">rustree -t ./my_project
-# or using long flag
-rustree --sort-by-mtime ./my_project
+# or using --sort-by
+rustree --sort-by mtime ./my_project
 </code></pre>
 </li>
 <li>
@@ -584,11 +613,13 @@ rustree --sort-by-mtime ./my_project
 <pre><code class="language-bash">rustree -U ./my_project
 # or using long flag
 rustree --unsorted ./my_project
+# or using --sort-by
+rustree --sort-by none ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>Apply the <code>CountPluses</code> function to files and sort by its custom output:</strong></p>
-<pre><code class="language-bash">rustree --apply-function CountPluses --sort-key custom ./config_files
+<pre><code class="language-bash">rustree --apply-function CountPluses --sort-by custom ./config_files
 </code></pre>
 <p><em>(This assumes <code>CountPluses</code> is a meaningful function for your files, e.g., counting '+' characters).</em></p>
 </li>
@@ -686,6 +717,27 @@ rustree -P "*.TXT" --ignore-case ./my_project
 rustree -I "*.bak" --ignore-case ./my_project
 </code></pre>
 </li>
+<li>
+<p><strong>Sort files by version (e.g., <code>file-1.0.0</code>, <code>file-1.2.0</code>, <code>file-2.0.0</code>):</strong></p>
+<pre><code class="language-bash">rustree -v ./my_scripts
+# or using --sort-by
+rustree --sort-by version ./my_scripts
+</code></pre>
+</li>
+<li>
+<p><strong>Sort files by change time (ctime) and display change times:</strong></p>
+<pre><code class="language-bash">rustree -c -D ./my_project
+# or using --sort-by
+rustree --sort-by ctime --date ./my_project
+</code></pre>
+<p>This will sort by ctime (oldest first). The <code>-D</code> (or <code>--date</code>) flag, when combined with <code>-c</code> (or <code>--sort-by ctime</code>), will display these ctimes.</p>
+</li>
+<li>
+<p><strong>Sort files by creation time (crtime/btime), newest first:</strong>
+(Note: Creation time might not be available on all filesystems or OS versions.)</p>
+<pre><code class="language-bash">rustree --sort-by crtime -r ./my_photos
+</code></pre>
+</li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="library-usage-api"><a class="header" href="#library-usage-api">Library Usage (API)</a></h1>
@@ -746,7 +798,10 @@ rustree = "0.1.0" # Replace with the desired version
 </li>
 <li><strong><code>metadata: MetadataOptions</code></strong> (from <code>src/config/metadata.rs</code>):
 <ul>
-<li><code>report_sizes</code>, <code>report_mtime</code>: Whether to collect and report file sizes and modification times. <code>report_sizes</code> also applies to directories.</li>
+<li><code>report_sizes</code>: Whether to collect and report file sizes. Applies to directories as well.</li>
+<li><code>report_modification_time</code>: Whether to collect and report last modification times (mtime).</li>
+<li><code>report_change_time</code>: Whether to collect and report last status change times (ctime).</li>
+<li><code>report_creation_time</code>: Whether to collect and report creation times (btime/crtime).</li>
 <li><code>calculate_line_count</code>, <code>calculate_word_count</code>: Whether to perform these analyses on files.</li>
 <li><code>apply_function</code>: An optional <code>BuiltInFunction</code> (from <code>src/config/metadata.rs</code>) to apply to file contents.</li>
 <li><code>report_permissions</code>: (Currently not exposed via CLI, defaults to false).</li>
@@ -795,6 +850,9 @@ let config = RustreeLibConfig {
     },
     metadata: MetadataOptions {
         report_sizes: true,
+        report_modification_time: true,
+        report_change_time: false,
+        report_creation_time: false,
         calculate_line_count: false, // Example: not calculating line count
         apply_function: Some(BuiltInFunction::CountPluses), // Example: applying a function
         ..Default::default()
@@ -810,7 +868,9 @@ let config = RustreeLibConfig {
 <li><code>node_type</code>: A <code>NodeType</code> enum (<code>File</code>, <code>Directory</code>, <code>Symlink</code>). When <code>listing.list_directories_only</code> is active, symlinks pointing to directories will have <code>NodeType::Directory</code>.</li>
 <li><code>depth</code>: The entry's depth in the tree.</li>
 <li><code>size</code>: <code>Option&lt;u64&gt;</code> for file or directory size (if <code>metadata.report_sizes</code> is enabled).</li>
-<li><code>mtime</code>: <code>Option&lt;SystemTime&gt;</code> for modification time.</li>
+<li><code>mtime</code>: <code>Option&lt;SystemTime&gt;</code> for last modification time.</li>
+<li><code>change_time</code>: <code>Option&lt;SystemTime&gt;</code> for last status change time (ctime).</li>
+<li><code>create_time</code>: <code>Option&lt;SystemTime&gt;</code> for creation time (btime/crtime).</li>
 <li><code>line_count</code>, <code>word_count</code>: <code>Option&lt;usize&gt;</code> for analysis results (applicable to files only).</li>
 <li><code>custom_function_output</code>: <code>Option&lt;Result&lt;String, ApplyFnError&gt;&gt;</code> (where <code>ApplyFnError</code> is from <code>src/config/metadata.rs</code>) for results of <code>metadata.apply_function</code>.</li>
 </ul>
@@ -842,7 +902,7 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
 <p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code> or <code>Markdown</code>, from <code>src/config/output_format.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
 <h3 id="key-enums"><a class="header" href="#key-enums">Key Enums</a></h3>
 <ul>
-<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
+<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
 <li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
 <li><strong><code>BuiltInFunction</code></strong>: e.g., <code>CountPluses</code>. Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>.</li>
 <li><strong><code>ApplyFnError</code></strong>: Error type for <code>BuiltInFunction</code> application. Defined in <code>src/config/metadata.rs</code>.</li>
@@ -910,6 +970,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
         },
         metadata: MetadataOptions {
             report_sizes: true,
+            report_modification_time: true, // To see mtime in output if sorting by size
             ..Default::default()
         },
         sorting: SortingOptions {
@@ -980,10 +1041,12 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
 <ol>
 <li>
-<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code>, <code>SortingOptions</code>, etc., to organize settings.</p>
+<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, etc.), to organize settings.</p>
 </li>
 <li>
-<p><strong>Walking (<code>core::walker</code>)</strong>:</p>
+<p><strong>Walking (<code>core::walker</code>)</strong>:
+===</p>
+</search>
 </li>
 </ol>
 <ul>
@@ -1002,7 +1065,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li><code>config.listing.list_directories_only</code>: If true, only effective directories are kept.</li>
 </ul>
 </li>
-<li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
+<li>For each qualifying file system entry, it gathers initial metadata (including mtime, and attempting to fetch ctime and creation time based on <code>config.metadata</code> settings and platform capabilities). Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
 <ol>
 <li><strong>Analysis (<code>core::analyzer</code>)</strong>:</li>
@@ -1017,7 +1080,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li><strong>Node Representation (<code>NodeInfo</code>)</strong>:</li>
 </ol>
 <ul>
-<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>config.listing.list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
+<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>config.listing.list_directories_only</code> is active), depth, metadata (size, mtime, change_time, create_time), and any analysis results.</li>
 <li>The <code>size</code> field can be populated for directories if <code>config.metadata.report_sizes</code> is enabled.</li>
 <li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
 </ul>
@@ -1025,11 +1088,13 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li><strong>Sorting (<code>core::sorter</code>)</strong>:</li>
 </ol>
 <ul>
-<li>If a <code>SortKey</code> (from <code>src/config/sorting.rs</code>) is specified in <code>config.sorting.sort_by</code>, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
-<li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure.</li>
+<li>If a <code>SortKey</code> (e.g., <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, from <code>src/config/sorting.rs</code>) is specified in <code>config.sorting.sort_by</code>, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure. If <code>SortKey::None</code> is used, the directory traversal order is preserved.</li>
 </ul>
 <ol>
-<li><strong>Formatting (<code>core::formatter</code>)</strong>:</li>
+<li><strong>Formatting (<code>core::formatter</code>)</strong>:
+===</search>
+</li>
 </ol>
 <ul>
 <li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is then passed to a formatter.</li>
@@ -1041,8 +1106,8 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <h3 id="cli-layer"><a class="header" href="#cli-layer">CLI Layer</a></h3>
 <p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
 <ul>
-<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments. Arguments are organized into logical groups using flattened structs from submodules within <code>src/cli/</code> (e.g., <code>listing</code>, <code>filtering</code>, <code>metadata</code>).</li>
-<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function in this module translates the parsed <code>CliArgs</code> structure into the library's <code>RustreeLibConfig</code> and <code>LibOutputFormat</code>.</li>
+<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments. Arguments are organized into logical groups using flattened structs from submodules within <code>src/cli/</code> (e.g., <code>listing</code>, <code>filtering</code>, <code>metadata</code>, <code>sorting</code>). This includes flags like <code>-v</code>, <code>-t</code>, <code>-c</code>, <code>-U</code>, <code>--sort-by</code>, and <code>-D</code>.</li>
+<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function in this module translates the parsed <code>CliArgs</code> structure into the library's <code>RustreeLibConfig</code> (setting fields like <code>sorting.sort_by</code> to <code>LibSortKey::Version</code>, <code>LibSortKey::MTime</code>, <code>LibSortKey::ChangeTime</code>, <code>LibSortKey::None</code>, etc., and <code>metadata.report_modification_time</code>, <code>metadata.report_change_time</code> based on CLI flags like <code>-D</code> and <code>-c</code>) and <code>LibOutputFormat</code>.</li>
 <li><strong>Orchestration (<code>main.rs</code>)</strong>:
 <ol>
 <li>Parses CLI args.</li>
@@ -1095,14 +1160,14 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>sorting.rs</code></strong>:</p>
 <ul>
-<li>Defines the <code>SortKey</code> enum.</li>
+<li>Defines the <code>SortKey</code> enum (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>).</li>
 <li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria and order.</li>
 </ul>
 </li>
 <li>
 <p><strong><code>metadata.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags.</li>
+<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>report_sizes</code>, <code>report_modification_time</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
 <li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content (formerly in <code>fileinfo.rs</code>).</li>
 <li>Defines <code>ApplyFnError</code> for errors during custom function application (formerly in <code>fileinfo.rs</code>).</li>
 </ul>
@@ -1125,7 +1190,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>node.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>NodeInfo</code>, the struct representing a single file system entry (file, directory, symlink) and its collected data.</li>
+<li>Defines <code>NodeInfo</code>, the struct representing a single file system entry (file, directory, symlink) and its collected data (including <code>path</code>, <code>name</code>, <code>node_type</code>, <code>depth</code>, <code>size</code>, <code>mtime</code>, <code>change_time</code>, <code>create_time</code>, analysis results).</li>
 <li>Defines <code>NodeType</code>, an enum for the type of file system entry.</li>
 </ul>
 </li>
@@ -1151,7 +1216,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 </ul>
 </li>
 <li>Handles symlink resolution to determine the effective type of an entry (file, directory, or symlink) for filtering and metadata.</li>
-<li>Populates <code>NodeInfo</code> structs with metadata (path, name, type, depth, size, mtime) and triggers content analysis for files based on <code>RustreeLibConfig</code> (specifically fields within <code>config.metadata</code>).</li>
+<li>Populates <code>NodeInfo</code> structs with metadata (path, name, type, depth, size, mtime, change_time, create_time) and triggers content analysis for files based on <code>RustreeLibConfig</code> (specifically fields within <code>config.metadata</code>). It attempts to fetch ctime and creation time based on platform capabilities.</li>
 </ul>
 </li>
 <li>
@@ -1164,14 +1229,14 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>sorter.rs</code></strong>:</p>
 <ul>
-<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified <code>SortKey</code> (from <code>src/config/sorting.rs</code>) and order (from <code>config.sorting.reverse_sort</code>), primarily acting on sibling nodes.</li>
+<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified <code>SortKey</code> (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code> from <code>src/config/sorting.rs</code>) and order (from <code>config.sorting.reverse_sort</code>), primarily acting on sibling nodes.</li>
 </ul>
 </li>
 <li>
 <p><strong><code>formatter/</code></strong>: This sub-module is responsible for generating the final output string.</p>
 <ul>
 <li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
-<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It handles the display of metadata (like sizes for directories when <code>-d</code> and <code>-s</code> are used, controlled by <code>config.metadata.report_sizes</code>), adapts the summary line based on <code>config.listing.list_directories_only</code>, and uses <code>config.input_source.root_node_size</code> and <code>config.input_source.root_is_directory</code> from <code>RustreeLibConfig</code> for accurate root display.</li>
+<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It handles the display of metadata (like sizes, modification time, change time, creation time, controlled by <code>config.metadata</code>), adapts the summary line based on <code>config.listing.list_directories_only</code>, and uses <code>config.input_source.root_node_size</code> and <code>config.input_source.root_is_directory</code> from <code>RustreeLibConfig</code> for accurate root display.</li>
 <li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists.</li>
 <li><code>mod.rs</code> (in <code>formatter</code>): Re-exports <code>OutputFormat</code> (as <code>LibOutputFormat</code>) from <code>src/config/output_format.rs</code>.</li>
 </ul>
@@ -1187,10 +1252,10 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <ul>
 <li>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:
 <ul>
-<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code>, <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
-<li>Enums and related types: <code>SortKey</code> (from <code>config::sorting</code>), <code>BuiltInFunction</code>, <code>ApplyFnError</code> (both from <code>config::metadata</code>).</li>
+<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code>, <code>MetadataOptions</code> (including fields like <code>report_modification_time</code>, <code>report_change_time</code>, <code>report_creation_time</code>), <code>MiscOptions</code>.</li>
+<li>Enums and related types: <code>SortKey</code> (e.g., <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code> from <code>config::sorting</code>), <code>BuiltInFunction</code>, <code>ApplyFnError</code> (both from <code>config::metadata</code>).</li>
 <li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code> from <code>config::output_format</code>).</li>
-<li>Core types: <code>NodeInfo</code>, <code>NodeType</code>, and <code>RustreeError</code>.</li>
+<li>Core types: <code>NodeInfo</code> (including fields like <code>mtime</code>, <code>change_time</code>, <code>create_time</code>), <code>NodeType</code>, and <code>RustreeError</code>.</li>
 </ul>
 </li>
 <li>Provides the main entry-point functions:
@@ -1322,9 +1387,16 @@ mdbook serve docs
 <li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
 </ul>
 <p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
-<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if <code>-D</code> (or <code>--date</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on whether <code>-c</code> is also active) for the directories.</p>
 <p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
-<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
+<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>version</code>, <code>mtime</code>, <code>ctime</code>, <code>crtime</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active. If you want to preserve directory order with <code>-d</code>, use <code>-U</code> or <code>--sort-by none</code>.</p>
+<p><strong>Q: How does the <code>-D</code> (or <code>--date</code>) flag interact with <code>-c</code> (sort by change time)?</strong></p>
+<p>A:</p>
+<ul>
+<li>If you use <code>-D</code> alone, it displays the last modification time (mtime).</li>
+<li>If you use <code>-c</code> alone, it sorts by change time (ctime), but <code>-D</code> is needed to <em>display</em> a time.</li>
+<li>If you use both <code>-D</code> and <code>-c</code> (or <code>-D</code> and <code>--sort-by ctime</code>), then <code>-D</code> will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.</li>
+</ul>
 <p><strong>Q: Where can I find the API documentation for the library?</strong></p>
 <p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 

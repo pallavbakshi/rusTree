@@ -227,9 +227,9 @@
 <li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
 </ul>
 <p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
-<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if <code>-D</code> (or <code>--date</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on <code>-c</code>) for the directories.</p>
 <p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
-<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
+<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>mtime</code>, <code>ctime</code>, <code>crtime</code>, <code>size</code> if <code>-s</code> is also used, or <code>version</code>) when <code>-d</code> is active. If you truly want directory order with <code>-d</code>, use <code>-U</code> or <code>--sort-by none</code>.</p>
 <p><strong>Q: Where can I find the API documentation for the library?</strong></p>
 <p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 <h2 id="cli-options-reference"><a class="header" href="#cli-options-reference">CLI Options Reference</a></h2>
@@ -297,9 +297,9 @@
 </ul>
 </li>
 <li>
-<p><code>-D, --report-mtime</code></p>
+<p><code>-D, --date</code></p>
 <ul>
-<li>Description: Report last modification times for files and directories. (Original <code>tree</code> flag: <code>-D</code>)</li>
+<li>Description: Report dates for files and directories. By default, this shows the last modification time. If the <code>-c</code> flag (sort by change time) is also used, this flag will instead display the last status change time (ctime). (Original <code>tree</code> flag: <code>-D</code>)</li>
 </ul>
 </li>
 </ul>
@@ -329,33 +329,60 @@
 <h3 id="sorting"><a class="header" href="#sorting">Sorting</a></h3>
 <ul>
 <li>
-<p><code>-t, --sort-by-mtime</code></p>
+<p><code>-v</code></p>
+<ul>
+<li>Description: Sort the output by version name. (Original <code>tree</code> flag: <code>-v</code>)</li>
+<li>This option is mutually exclusive with <code>-t</code>, <code>-c</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
+</ul>
+</li>
+<li>
+<p><code>-t</code></p>
 <ul>
 <li>Description: Sort the output by last modification time instead of alphabetically. (Original <code>tree</code> flag: <code>-t</code>)</li>
-<li>This option is mutually exclusive with <code>-U</code> (<code>--unsorted</code>) and <code>--sort-key</code>.</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-c</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
+</ul>
+</li>
+<li>
+<p><code>-c</code></p>
+<ul>
+<li>Description: Sort the output by last status change time (ctime) instead of alphabetically. If <code>-D</code> (or <code>--date</code>) is also used, <code>-D</code> will display change times instead of modification times. (Original <code>tree</code> flag: <code>-c</code>)</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
 </ul>
 </li>
 <li>
 <p><code>-U, --unsorted</code></p>
 <ul>
 <li>Description: Do not sort. Lists files in directory order. (Original <code>tree</code> flag: <code>-U</code>)</li>
-<li>This option is mutually exclusive with <code>-t</code> (<code>--sort-by-mtime</code>), <code>--sort-key</code>, and <code>-r</code> (<code>--reverse-sort</code>).</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-c</code>, <code>--sort-by</code>, and <code>-r</code> (<code>--reverse-sort</code>).</li>
 </ul>
 </li>
 <li>
-<p><code>--sort-key &lt;KEY&gt;</code></p>
+<p><code>-S, --sort-by &lt;FIELD&gt;</code></p>
 <ul>
-<li>Description: Specifies the key for sorting directory entries. If no sorting option (<code>-t</code>, <code>-U</code>, or <code>--sort-key</code>) is provided, <code>rustree</code> defaults to sorting by <code>name</code>.</li>
-<li>Possible values: <code>name</code>, <code>size</code>, <code>m-time</code> (equivalent to <code>-t</code>), <code>words</code>, <code>lines</code>, <code>custom</code></li>
-<li>This option is mutually exclusive with <code>-t</code> (<code>--sort-by-mtime</code>) and <code>-U</code> (<code>--unsorted</code>).</li>
-<li>Example: <code>rustree --sort-key size</code></li>
+<li>Description: Specifies the field for sorting directory entries. If no sorting option (<code>-v</code>, <code>-t</code>, <code>-c</code>, <code>-U</code>, or <code>--sort-by</code>) is provided, <code>rustree</code> defaults to sorting by <code>name</code>.</li>
+<li>Possible values for <code>&lt;FIELD&gt;</code>:
+<ul>
+<li><code>name</code>: Sort by entry name (default).</li>
+<li><code>version</code> (alias <code>ver</code>): Sort by version string (e.g., <code>file_v1.0.txt</code> before <code>file_v2.0.txt</code>). Equivalent to <code>-v</code>.</li>
+<li><code>size</code>: Sort by file size.</li>
+<li><code>mtime</code> (aliases <code>m</code>, <code>mod_time</code>): Sort by last modification time. Equivalent to <code>-t</code>.</li>
+<li><code>ctime</code> (aliases <code>c</code>, <code>change_time</code>): Sort by last status change time. Equivalent to <code>-c</code>.</li>
+<li><code>crtime</code> (aliases <code>cr</code>, <code>create_time</code>): Sort by creation time.</li>
+<li><code>words</code>: Sort by word count (for files).</li>
+<li><code>lines</code>: Sort by line count (for files).</li>
+<li><code>custom</code>: Sort by the output of a custom applied function.</li>
+<li><code>none</code> (alias <code>n</code>): No sorting; preserve directory order. Equivalent to <code>-U</code>.</li>
+</ul>
+</li>
+<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-c</code>, and <code>-U</code>.</li>
+<li>Example: <code>rustree --sort-by size</code>, <code>rustree -S m</code></li>
 </ul>
 </li>
 <li>
 <p><code>-r, --reverse-sort</code></p>
 <ul>
 <li>Description: Reverse the order of the active sort. (Original <code>tree</code> flag: <code>-r</code>)</li>
-<li>This option is ignored if <code>-U</code> (<code>--unsorted</code>) is used.</li>
+<li>This option is ignored if <code>-U</code> (<code>--unsorted</code>) or <code>--sort-by none</code> is used.</li>
 </ul>
 </li>
 </ul>

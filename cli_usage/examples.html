@@ -185,12 +185,14 @@ rustree -a -L 2 /var/log
 <p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first using <code>-t</code> and <code>-r</code>):</strong></p>
 <pre><code class="language-bash">rustree -s -D -t -r ~/Documents
 # or using long flags
-rustree --report-sizes --report-mtime --sort-by-mtime --reverse-sort ~/Documents
+rustree --report-sizes --date -t --reverse-sort ~/Documents
+# or using --sort-by
+rustree --report-sizes --date --sort-by mtime --reverse-sort ~/Documents
 </code></pre>
 </li>
 <li>
 <p><strong>Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):</strong></p>
-<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-key lines -r ./my_project_src
+<pre><code class="language-bash">rustree --calculate-lines --calculate-words --sort-by lines -r ./my_project_src
 </code></pre>
 </li>
 <li>
@@ -215,8 +217,8 @@ rustree -d -s -L 1 ./src
 <li>
 <p><strong>Sort by modification time (oldest first using <code>-t</code>):</strong></p>
 <pre><code class="language-bash">rustree -t ./my_project
-# or using long flag
-rustree --sort-by-mtime ./my_project
+# or using --sort-by
+rustree --sort-by mtime ./my_project
 </code></pre>
 </li>
 <li>
@@ -224,11 +226,13 @@ rustree --sort-by-mtime ./my_project
 <pre><code class="language-bash">rustree -U ./my_project
 # or using long flag
 rustree --unsorted ./my_project
+# or using --sort-by
+rustree --sort-by none ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>Apply the <code>CountPluses</code> function to files and sort by its custom output:</strong></p>
-<pre><code class="language-bash">rustree --apply-function CountPluses --sort-key custom ./config_files
+<pre><code class="language-bash">rustree --apply-function CountPluses --sort-by custom ./config_files
 </code></pre>
 <p><em>(This assumes <code>CountPluses</code> is a meaningful function for your files, e.g., counting '+' characters).</em></p>
 </li>
@@ -324,6 +328,27 @@ rustree -P "*.TXT" --ignore-case ./my_project
 <pre><code class="language-bash">rustree --filter-exclude "*.bak" --ignore-case ./my_project
 # or using short flag
 rustree -I "*.bak" --ignore-case ./my_project
+</code></pre>
+</li>
+<li>
+<p><strong>Sort files by version (e.g., <code>file-1.0.0</code>, <code>file-1.2.0</code>, <code>file-2.0.0</code>):</strong></p>
+<pre><code class="language-bash">rustree -v ./my_scripts
+# or using --sort-by
+rustree --sort-by version ./my_scripts
+</code></pre>
+</li>
+<li>
+<p><strong>Sort files by change time (ctime) and display change times:</strong></p>
+<pre><code class="language-bash">rustree -c -D ./my_project
+# or using --sort-by
+rustree --sort-by ctime --date ./my_project
+</code></pre>
+<p>This will sort by ctime (oldest first). The <code>-D</code> (or <code>--date</code>) flag, when combined with <code>-c</code> (or <code>--sort-by ctime</code>), will display these ctimes.</p>
+</li>
+<li>
+<p><strong>Sort files by creation time (crtime/btime), newest first:</strong>
+(Note: Creation time might not be available on all filesystems or OS versions.)</p>
+<pre><code class="language-bash">rustree --sort-by crtime -r ./my_photos
 </code></pre>
 </li>
 </ol>

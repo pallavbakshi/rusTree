@@ -170,10 +170,12 @@
 <p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
 <ol>
 <li>
-<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code>, <code>SortingOptions</code>, etc., to organize settings.</p>
+<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, etc.), to organize settings.</p>
 </li>
 <li>
-<p><strong>Walking (<code>core::walker</code>)</strong>:</p>
+<p><strong>Walking (<code>core::walker</code>)</strong>:
+===</p>
+</search>
 </li>
 </ol>
 <ul>
@@ -192,7 +194,7 @@
 <li><code>config.listing.list_directories_only</code>: If true, only effective directories are kept.</li>
 </ul>
 </li>
-<li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
+<li>For each qualifying file system entry, it gathers initial metadata (including mtime, and attempting to fetch ctime and creation time based on <code>config.metadata</code> settings and platform capabilities). Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
 </ul>
 <ol>
 <li><strong>Analysis (<code>core::analyzer</code>)</strong>:</li>
@@ -207,7 +209,7 @@
 <li><strong>Node Representation (<code>NodeInfo</code>)</strong>:</li>
 </ol>
 <ul>
-<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>config.listing.list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
+<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>config.listing.list_directories_only</code> is active), depth, metadata (size, mtime, change_time, create_time), and any analysis results.</li>
 <li>The <code>size</code> field can be populated for directories if <code>config.metadata.report_sizes</code> is enabled.</li>
 <li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
 </ul>
@@ -215,11 +217,13 @@
 <li><strong>Sorting (<code>core::sorter</code>)</strong>:</li>
 </ol>
 <ul>
-<li>If a <code>SortKey</code> (from <code>src/config/sorting.rs</code>) is specified in <code>config.sorting.sort_by</code>, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
-<li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure.</li>
+<li>If a <code>SortKey</code> (e.g., <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, from <code>src/config/sorting.rs</code>) is specified in <code>config.sorting.sort_by</code>, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure. If <code>SortKey::None</code> is used, the directory traversal order is preserved.</li>
 </ul>
 <ol>
-<li><strong>Formatting (<code>core::formatter</code>)</strong>:</li>
+<li><strong>Formatting (<code>core::formatter</code>)</strong>:
+===</search>
+</li>
 </ol>
 <ul>
 <li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is then passed to a formatter.</li>
@@ -231,8 +235,8 @@
 <h3 id="cli-layer"><a class="header" href="#cli-layer">CLI Layer</a></h3>
 <p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
 <ul>
-<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments. Arguments are organized into logical groups using flattened structs from submodules within <code>src/cli/</code> (e.g., <code>listing</code>, <code>filtering</code>, <code>metadata</code>).</li>
-<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function in this module translates the parsed <code>CliArgs</code> structure into the library's <code>RustreeLibConfig</code> and <code>LibOutputFormat</code>.</li>
+<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse command-line arguments. Arguments are organized into logical groups using flattened structs from submodules within <code>src/cli/</code> (e.g., <code>listing</code>, <code>filtering</code>, <code>metadata</code>, <code>sorting</code>). This includes flags like <code>-v</code>, <code>-t</code>, <code>-c</code>, <code>-U</code>, <code>--sort-by</code>, and <code>-D</code>.</li>
+<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function in this module translates the parsed <code>CliArgs</code> structure into the library's <code>RustreeLibConfig</code> (setting fields like <code>sorting.sort_by</code> to <code>LibSortKey::Version</code>, <code>LibSortKey::MTime</code>, <code>LibSortKey::ChangeTime</code>, <code>LibSortKey::None</code>, etc., and <code>metadata.report_modification_time</code>, <code>metadata.report_change_time</code> based on CLI flags like <code>-D</code> and <code>-c</code>) and <code>LibOutputFormat</code>.</li>
 <li><strong>Orchestration (<code>main.rs</code>)</strong>:
 <ol>
 <li>Parses CLI args.</li>

@@ -207,14 +207,14 @@
 <li>
 <p><strong><code>sorting.rs</code></strong>:</p>
 <ul>
-<li>Defines the <code>SortKey</code> enum.</li>
+<li>Defines the <code>SortKey</code> enum (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>).</li>
 <li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria and order.</li>
 </ul>
 </li>
 <li>
 <p><strong><code>metadata.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags.</li>
+<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>report_sizes</code>, <code>report_modification_time</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
 <li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content (formerly in <code>fileinfo.rs</code>).</li>
 <li>Defines <code>ApplyFnError</code> for errors during custom function application (formerly in <code>fileinfo.rs</code>).</li>
 </ul>
@@ -237,7 +237,7 @@
 <li>
 <p><strong><code>node.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>NodeInfo</code>, the struct representing a single file system entry (file, directory, symlink) and its collected data.</li>
+<li>Defines <code>NodeInfo</code>, the struct representing a single file system entry (file, directory, symlink) and its collected data (including <code>path</code>, <code>name</code>, <code>node_type</code>, <code>depth</code>, <code>size</code>, <code>mtime</code>, <code>change_time</code>, <code>create_time</code>, analysis results).</li>
 <li>Defines <code>NodeType</code>, an enum for the type of file system entry.</li>
 </ul>
 </li>
@@ -263,7 +263,7 @@
 </ul>
 </li>
 <li>Handles symlink resolution to determine the effective type of an entry (file, directory, or symlink) for filtering and metadata.</li>
-<li>Populates <code>NodeInfo</code> structs with metadata (path, name, type, depth, size, mtime) and triggers content analysis for files based on <code>RustreeLibConfig</code> (specifically fields within <code>config.metadata</code>).</li>
+<li>Populates <code>NodeInfo</code> structs with metadata (path, name, type, depth, size, mtime, change_time, create_time) and triggers content analysis for files based on <code>RustreeLibConfig</code> (specifically fields within <code>config.metadata</code>). It attempts to fetch ctime and creation time based on platform capabilities.</li>
 </ul>
 </li>
 <li>
@@ -276,14 +276,14 @@
 <li>
 <p><strong><code>sorter.rs</code></strong>:</p>
 <ul>
-<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified <code>SortKey</code> (from <code>src/config/sorting.rs</code>) and order (from <code>config.sorting.reverse_sort</code>), primarily acting on sibling nodes.</li>
+<li>Contains the <code>sort_nodes</code> function, which sorts a <code>Vec&lt;NodeInfo&gt;</code> based on the specified <code>SortKey</code> (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code> from <code>src/config/sorting.rs</code>) and order (from <code>config.sorting.reverse_sort</code>), primarily acting on sibling nodes.</li>
 </ul>
 </li>
 <li>
 <p><strong><code>formatter/</code></strong>: This sub-module is responsible for generating the final output string.</p>
 <ul>
 <li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
-<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It handles the display of metadata (like sizes for directories when <code>-d</code> and <code>-s</code> are used, controlled by <code>config.metadata.report_sizes</code>), adapts the summary line based on <code>config.listing.list_directories_only</code>, and uses <code>config.input_source.root_node_size</code> and <code>config.input_source.root_is_directory</code> from <code>RustreeLibConfig</code> for accurate root display.</li>
+<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It handles the display of metadata (like sizes, modification time, change time, creation time, controlled by <code>config.metadata</code>), adapts the summary line based on <code>config.listing.list_directories_only</code>, and uses <code>config.input_source.root_node_size</code> and <code>config.input_source.root_is_directory</code> from <code>RustreeLibConfig</code> for accurate root display.</li>
 <li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists.</li>
 <li><code>mod.rs</code> (in <code>formatter</code>): Re-exports <code>OutputFormat</code> (as <code>LibOutputFormat</code>) from <code>src/config/output_format.rs</code>.</li>
 </ul>
@@ -299,10 +299,10 @@
 <ul>
 <li>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:
 <ul>
-<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code>, <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
-<li>Enums and related types: <code>SortKey</code> (from <code>config::sorting</code>), <code>BuiltInFunction</code>, <code>ApplyFnError</code> (both from <code>config::metadata</code>).</li>
+<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code>, <code>MetadataOptions</code> (including fields like <code>report_modification_time</code>, <code>report_change_time</code>, <code>report_creation_time</code>), <code>MiscOptions</code>.</li>
+<li>Enums and related types: <code>SortKey</code> (e.g., <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code> from <code>config::sorting</code>), <code>BuiltInFunction</code>, <code>ApplyFnError</code> (both from <code>config::metadata</code>).</li>
 <li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code> from <code>config::output_format</code>).</li>
-<li>Core types: <code>NodeInfo</code>, <code>NodeType</code>, and <code>RustreeError</code>.</li>
+<li>Core types: <code>NodeInfo</code> (including fields like <code>mtime</code>, <code>change_time</code>, <code>create_time</code>), <code>NodeType</code>, and <code>RustreeError</code>.</li>
 </ul>
 </li>
 <li>Provides the main entry-point functions:

@@ -227,9 +227,16 @@
 <li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
 </ul>
 <p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
-<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if <code>-D</code> (or <code>--date</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on whether <code>-c</code> is also active) for the directories.</p>
 <p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
-<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>m-time</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active.</p>
+<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>version</code>, <code>mtime</code>, <code>ctime</code>, <code>crtime</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active. If you want to preserve directory order with <code>-d</code>, use <code>-U</code> or <code>--sort-by none</code>.</p>
+<p><strong>Q: How does the <code>-D</code> (or <code>--date</code>) flag interact with <code>-c</code> (sort by change time)?</strong></p>
+<p>A:</p>
+<ul>
+<li>If you use <code>-D</code> alone, it displays the last modification time (mtime).</li>
+<li>If you use <code>-c</code> alone, it sorts by change time (ctime), but <code>-D</code> is needed to <em>display</em> a time.</li>
+<li>If you use both <code>-D</code> and <code>-c</code> (or <code>-D</code> and <code>--sort-by ctime</code>), then <code>-D</code> will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.</li>
+</ul>
 <p><strong>Q: Where can I find the API documentation for the library?</strong></p>
 <p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 
