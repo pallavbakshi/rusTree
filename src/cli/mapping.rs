@@ -95,6 +95,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
                     .or(Some(LibSortKey::Name)) // Default to sort by Name if no sort option is specified
             },
             reverse_sort: cli_args.sort_order.reverse_sort,
+            files_before_directories: true, // Default to traditional behavior
         },
         metadata: MetadataOptions {
             report_sizes: cli_args.size.report_sizes,

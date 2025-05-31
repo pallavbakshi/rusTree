@@ -1,6 +1,7 @@
-// src/core/analyzer/file_stats.rs
-
-// For easier unit testing, you might have internal pure functions:
+//! File size and content measurement utilities.
+//!
+//! This module provides functions for calculating various size-related metrics
+//! for file contents, including line counts and word counts.
 
 /// Counts the number of lines in a string.
 ///
@@ -37,7 +38,7 @@ pub fn count_words_from_string(content: &str) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use super::*; // Imports functions from the parent module (file_stats)
+    use super::*; // Imports functions from the parent module (size_calculator)
 
     #[test]
     fn test_count_lines_empty() {
@@ -91,4 +92,4 @@ mod tests {
     fn test_count_words_extra_whitespace() {
         assert_eq!(count_words_from_string("  hello   world  "), 2);
     }
-}
+} 

@@ -1,11 +1,11 @@
 use super::base::TreeFormatter;
 use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
-use crate::core::node::{NodeInfo, NodeType};
+use crate::core::metadata::file_info::{format_node_metadata, MetadataStyle};
+use crate::core::tree::node::{NodeInfo, NodeType};
 use std::collections::HashMap;
 use std::fmt::Write;
 use std::path::{Path, PathBuf};
-use std::time::UNIX_EPOCH;
 
 /// A formatter that generates a plain text, tree-like representation of the directory structure.
 ///
@@ -13,76 +13,6 @@ use std::time::UNIX_EPOCH;
 pub struct TextTreeFormatter;
 
 impl TextTreeFormatter {
-    fn format_metadata(node: &NodeInfo, config: &RustreeLibConfig) -> String {
-        let mut metadata_str = String::new();
-
-        // FR7: Interaction with Metadata Flags
-        // Size: applies to files and directories if config.report_sizes is true.
-        // node.size is populated for directories by the walker.
-        if config.metadata.report_sizes {
-            if let Some(size) = node.size {
-                write!(metadata_str, "[{:>7}B] ", size).unwrap();
-            } else {
-                // This case should ideally not be hit if report_sizes is true,
-                // as walker populates size. But as a fallback:
-                write!(metadata_str, "[       B] ").unwrap();
-            }
-        }
-
-        // MTime/ChangeTime/CreateTime: applies to all node types if config.report_X_time is true.
-        if config.metadata.report_modification_time {
-            if let Some(mtime) = node.mtime {
-                write!(metadata_str, "[MTime: {:>10}s] ", mtime.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs())).unwrap();
-            } else {
-                write!(metadata_str, "[MTime:            ] ").unwrap();
-            }
-        }
-        if config.metadata.report_change_time {
-            if let Some(ctime) = node.change_time {
-                write!(metadata_str, "[CTime: {:>10}s] ", ctime.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs())).unwrap();
-            } else {
-                write!(metadata_str, "[CTime:            ] ").unwrap();
-            }
-        }
-        if config.metadata.report_creation_time {
-            if let Some(btime) = node.create_time {
-                write!(metadata_str, "[BTime: {:>10}s] ", btime.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs())).unwrap();
-            } else {
-                write!(metadata_str, "[BTime:            ] ").unwrap();
-            }
-        }
-
-        // File-specific metadata: only show if the node is a file.
-        // When -d is active, node.node_type will be Directory, so these won't be shown.
-        if node.node_type == NodeType::File {
-            if config.metadata.calculate_line_count {
-                if let Some(lc) = node.line_count {
-                    write!(metadata_str, "[L:{:>4}] ", lc).unwrap();
-                } else {
-                    write!(metadata_str, "[L:    ] ").unwrap(); // Placeholder if None
-                }
-            }
-            if config.metadata.calculate_word_count {
-                if let Some(wc) = node.word_count {
-                    write!(metadata_str, "[W:{:>4}] ", wc).unwrap();
-                } else {
-                    write!(metadata_str, "[W:    ] ").unwrap(); // Placeholder if None
-                }
-            }
-            if config.metadata.apply_function.is_some() {
-                match &node.custom_function_output {
-                    Some(Ok(val)) => write!(metadata_str, "[F: \"{}\"] ", val).unwrap(),
-                    Some(Err(_)) => write!(metadata_str, "[F: error] ").unwrap(),
-                    None => {
-                        // If apply_function was requested but output is None (e.g. read error before apply_fn)
-                        write!(metadata_str, "[F: N/A] ").unwrap();
-                    }
-                }
-            }
-        }
-        metadata_str
-    }
-
     // Helper to determine if a node (identified by its path) is the last among its siblings
     // in the `all_nodes` list (which is assumed to be sorted as per display requirements).
     fn is_last_sibling_in_sorted_list(
@@ -215,7 +145,7 @@ impl TreeFormatter for TextTreeFormatter {
 
             write!(output, "{}", line_prefix)?;
 
-            let metadata_string = Self::format_metadata(node, config);
+            let metadata_string = format_node_metadata(node, config, MetadataStyle::Text);
             write!(output, "{}", metadata_string)?;
 
             write!(output, "{}", node.name)?;
