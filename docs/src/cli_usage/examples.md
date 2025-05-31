@@ -21,9 +21,9 @@ Here are some practical examples of how to use `rustree` from the command line.
    ```bash
    rustree -s -D -t -r ~/Documents
    # or using long flags
-   rustree --report-sizes --date -t --reverse-sort ~/Documents
+   rustree --show-size-bytes --show-last-modified -t --reverse-sort ~/Documents
    # or using --sort-by
-   rustree --report-sizes --date --sort-by mtime --reverse-sort ~/Documents
+   rustree --show-size-bytes --show-last-modified --sort-by mtime --reverse-sort ~/Documents
    ```
 
 4. **Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):**
@@ -43,7 +43,7 @@ Here are some practical examples of how to use `rustree` from the command line.
 6. **List directories only in `./src`, showing sizes, up to depth 1:**
 
    ```bash
-   rustree --directory-only --report-sizes --depth 1 ./src
+   rustree --directory-only --show-size-bytes --depth 1 ./src
    # or using short flags
    rustree -d -s -L 1 ./src
    ```
@@ -83,7 +83,7 @@ Here are some practical examples of how to use `rustree` from the command line.
 11. **Pipe `rustree` output to an LLM for summarization:**
 
     ```bash
-    rustree --depth 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+    rustree --depth 1 --show-size-bytes ./src --llm-ask "What are the main components in the src directory based on this tree?"
     # or using short flags
     rustree -L 1 -s ./src --llm-ask "What are the main components in the src directory based on this tree?"
     ```
@@ -161,35 +161,36 @@ Here are some practical examples of how to use `rustree` from the command line.
 20. **Use `.gitignore` files to filter the output:**
 
     ```bash
-    rustree --gitignore ./my_git_repo
+    rustree --use-gitignore-rules ./my_git_repo
+    # or using the deprecated alias: rustree --gitignore ./my_git_repo
     ```
 
 21. **Use a custom ignore file in addition to (or instead of) `.gitignore`:**
 
     ```bash
-    rustree --git-ignore-files ./.my_custom_ignores ./my_project
+    rustree --gitignore-file ./.my_custom_ignores ./my_project
     ```
 
-    If you also want standard `.gitignore` behavior, add `--gitignore`:
+    If you also want standard `.gitignore` behavior, add `--use-gitignore-rules` (or its alias `--gitignore`):
 
     ```bash
-    rustree --gitignore --git-ignore-files ./.my_custom_ignores ./my_project
+    rustree --use-gitignore-rules --gitignore-file ./.my_custom_ignores ./my_project
     ```
 
 22. **List only `.TXT` files, case-insensitively (matching `file.txt`, `FILE.TXT`, etc.):**
 
     ```bash
-    rustree --filter-include "*.TXT" --ignore-case ./my_project
+    rustree --filter-include "*.TXT" --case-insensitive-filter ./my_project
     # or using short flag
-    rustree -P "*.TXT" --ignore-case ./my_project
+    rustree -P "*.TXT" --case-insensitive-filter ./my_project
     ```
 
 23. **Ignore all files ending with `.bak`, case-insensitively, using `-I`:**
 
     ```bash
-    rustree --filter-exclude "*.bak" --ignore-case ./my_project
+    rustree --filter-exclude "*.bak" --case-insensitive-filter ./my_project
     # or using short flag
-    rustree -I "*.bak" --ignore-case ./my_project
+    rustree -I "*.bak" --case-insensitive-filter ./my_project
     ```
 
 24. **Sort files by version (e.g., `file-1.0.0`, `file-1.2.0`, `file-2.0.0`):**
@@ -205,9 +206,9 @@ Here are some practical examples of how to use `rustree` from the command line.
     ```bash
     rustree -c -D ./my_project
     # or using --sort-by
-    rustree --sort-by ctime --date ./my_project
+    rustree --sort-by ctime --show-last-modified ./my_project
     ```
-    This will sort by ctime (oldest first). The `-D` (or `--date`) flag, when combined with `-c` (or `--sort-by ctime`), will display these ctimes.
+    This will sort by ctime (oldest first). The `-D` (or `--show-last-modified`) flag, when combined with `-c` (or `--sort-by ctime`), will display these ctimes.
 
 26. **Sort files by creation time (crtime/btime), newest first:**
     (Note: Creation time might not be available on all filesystems or OS versions.)

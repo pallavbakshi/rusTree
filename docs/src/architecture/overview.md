@@ -8,9 +8,9 @@ RusTree is designed with a modular approach, separating concerns into different 
     - The `walk_directory` function (in `core::walker::filesystem`) uses the `ignore` crate to traverse the file system.
     - It respects configuration settings from `RustreeLibConfig`:
         - `config.listing.max_depth`, `config.listing.show_hidden`.
-        - `config.filtering.use_gitignore` and `config.filtering.git_ignore_files` for gitignore rules (handled by the `ignore` crate).
+        - `config.filtering.use_gitignore_rules` and `config.filtering.gitignore_file` for gitignore rules (handled by the `ignore` crate).
         - `config.filtering.ignore_patterns` (CLI `-I`) are compiled by `core::filter::pattern` and used by the `ignore` crate's `WalkBuilder::filter_entry()` to prune the walk.
-        - `config.filtering.ignore_case_for_patterns` controls case sensitivity for all pattern matching.
+        - `config.filtering.case_insensitive_filter` controls case sensitivity for all pattern matching.
     - After the `ignore` crate yields an entry, further filtering is applied by the walker using `core::filter::pattern::entry_matches_glob_patterns`:
         - `config.filtering.match_patterns` (CLI `-P`): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.
         - `config.listing.list_directories_only`: If true, only effective directories are kept.
@@ -43,7 +43,7 @@ RusTree is designed with a modular approach, separating concerns into different 
 The command-line interface (`src/cli/`) acts as a wrapper around the core library:
 
 - **Argument Parsing (`cli::args`)**: Uses `clap` to parse arguments.
-- **Mapping (`cli::mapping`)**: The `map_cli_to_lib_config` function translates `CliArgs` into `RustreeLibConfig` (e.g., setting `sorting.sort_by`, `sorting.files_before_directories`, `metadata.report_modification_time`).
+- **Mapping (`cli::mapping`)**: The `map_cli_to_lib_config` function translates `CliArgs` into `RustreeLibConfig` (e.g., setting `sorting.sort_by`, `sorting.files_before_directories`, `metadata.show_last_modified`).
 - **Orchestration (`main.rs`)**:
   1. Parses CLI args.
   2. Maps CLI args to library config.
