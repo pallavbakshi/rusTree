@@ -303,28 +303,32 @@ pub fn walk_directory(
                 node.mtime = meta.modified().ok();
             }
             if config.metadata.report_change_time {
-                // Note: ctime is Unix-specific and not directly available via std::fs::Metadata.
-                // On Windows, it often returns creation_time. On macOS, it's status change time.
-                // A cross-platform solution often involves platform-specific APIs or assumes mtime for simplicity.
-                // For a robust solution, consider `libc` or `winapi` with `FileAttribute` or similar.
-                // For this PRD, assume a best-effort or placeholder if direct `std` access is insufficient.
+                // Note: ctime is Unix-specific and represents the time when file metadata was last changed.
+                // It is not directly available via std::fs::Metadata on all platforms.
+                // A cross-platform solution would require platform-specific APIs.
                 #[cfg(unix)]
                 {
                     use std::os::unix::fs::MetadataExt;
                     use std::time::{Duration, UNIX_EPOCH};
-                    if let Some(ctime_secs) = meta.ctime().checked_mul(1).map(|s| s as u64) {
-                        node.change_time = UNIX_EPOCH.checked_add(Duration::from_secs(ctime_secs));
+                    let ctime_secs = meta.ctime();
+                    // Only process non-negative timestamps to avoid conversion issues
+                    if ctime_secs >= 0 {
+                        // Safe conversion from i64 to u64 since we checked it's non-negative
+                        let secs = ctime_secs as u64;
+                        node.change_time = UNIX_EPOCH.checked_add(Duration::from_secs(secs));
                     }
+                    // If ctime is negative (before Unix epoch) or checked_add fails, change_time remains None
                 }
                 #[cfg(windows)]
                 {
-                    use std::os::windows::fs::MetadataExt;
-                    // Windows often reports creation time as ctime
-                    node.change_time = meta.created().ok();
+                    // Windows does not have a direct equivalent to Unix ctime (metadata change time).
+                    // Windows creation time semantics differ significantly from Unix ctime, so we set 
+                    // this to None rather than providing misleading information.
+                    node.change_time = None;
                 }
                 #[cfg(not(any(unix, windows)))]
                 {
-                    node.change_time = None; // Placeholder for other OS or if ctime isn't easily accessible
+                    node.change_time = None; // Placeholder for other OS where ctime isn't easily accessible
                 }
             }
             if config.metadata.report_creation_time {
