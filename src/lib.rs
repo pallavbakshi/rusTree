@@ -50,7 +50,7 @@
 //!         },
 //!         metadata: MetadataOptions {
 //!             report_sizes: true,
-//!             report_mtime: true,
+//!             report_modification_time: true,
 //!             ..Default::default()
 //!         },
 //!         sorting: SortingOptions {

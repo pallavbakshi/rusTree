@@ -105,6 +105,12 @@ fn compare_siblings(a: &TempNode, b: &TempNode, key: &SortKey, reverse: bool) ->
     let ord = match key {
         // Removed `mut` as it's not needed
         SortKey::Name => a.node_info.name.cmp(&b.node_info.name),
+        SortKey::Version => {
+            // Basic version-aware string comparison
+            // For now, using a simple string comparison; advanced version parsing would be a separate task
+            // TODO: Implement proper version comparison (e.g., 1.10 > 1.2)
+            a.node_info.name.cmp(&b.node_info.name)
+        }
         SortKey::Size => {
             let type_a = &a.node_info.node_type;
             let type_b = &b.node_info.node_type;
@@ -147,6 +153,24 @@ fn compare_siblings(a: &TempNode, b: &TempNode, key: &SortKey, reverse: bool) ->
             }
             .then_with(|| a.node_info.name.cmp(&b.node_info.name))
         }
+        SortKey::ChangeTime => {
+            match (a.node_info.change_time, b.node_info.change_time) {
+                (Some(ta), Some(tb)) => ta.cmp(&tb),
+                (Some(_), None) => Ordering::Less, // Valid change time before None
+                (None, Some(_)) => Ordering::Greater, // None after valid change time
+                (None, None) => Ordering::Equal,   // Both None, fall through to name
+            }
+            .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+        }
+        SortKey::CreateTime => {
+            match (a.node_info.create_time, b.node_info.create_time) {
+                (Some(ta), Some(tb)) => ta.cmp(&tb),
+                (Some(_), None) => Ordering::Less, // Valid create time before None
+                (None, Some(_)) => Ordering::Greater, // None after valid create time
+                (None, None) => Ordering::Equal,   // Both None, fall through to name
+            }
+            .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+        }
         SortKey::Words => {
             match (a.node_info.word_count, b.node_info.word_count) {
                 (Some(wa), Some(wb)) => wa.cmp(&wb),
@@ -179,6 +203,7 @@ fn compare_siblings(a: &TempNode, b: &TempNode, key: &SortKey, reverse: bool) ->
             }
             .then_with(|| a.node_info.name.cmp(&b.node_info.name))
         }
+        SortKey::None => Ordering::Equal, // No sorting, preserve original order
     };
 
     if reverse { ord.reverse() } else { ord }
@@ -242,6 +267,8 @@ mod tests {
             size,
             permissions: None,
             mtime: Some(SystemTime::now()), // Consistent MTime for tests not focusing on it
+            change_time: None,
+            create_time: None,
             line_count,
             word_count: None,
             custom_function_output: None,

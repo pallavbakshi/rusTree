@@ -25,6 +25,10 @@ pub struct NodeInfo {
     pub permissions: Option<String>,
     /// The last modification time of the entry. `None` if not reported or error.
     pub mtime: Option<SystemTime>,
+    /// The last status change time of the entry (ctime). `None` if not reported or error.
+    pub change_time: Option<SystemTime>,
+    /// The creation time of the entry (btime). `None` if not reported or error.
+    pub create_time: Option<SystemTime>,
     /// The number of lines in the file. `None` for directories or if not calculated.
     pub line_count: Option<usize>,
     /// The number of words in the file. `None` for directories or if not calculated.

@@ -81,11 +81,11 @@ A: When `-d` or `--directory-only` is used, RusTree will only list directories. 
 
 **Q: If I use `-d` with `-s` (report sizes), will it show directory sizes?**
 
-A: Yes. When `-d` (or `--directory-only`) and `-s` (or `--report-sizes`) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).
+A: Yes. When `-d` (or `--directory-only`) and `-s` (or `--report-sizes`) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if `-D` (or `--date`) is used with `-d`, it will show the relevant date (modification or change time, depending on `-c`) for the directories.
 
 **Q: What happens if I use `-d` with file-specific sorting keys like `lines` or `words`?**
 
-A: Since `-d` (or `--directory-only`) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., `name`, `m-time`, `size` if `-s` is also used) when `-d` is active.
+A: Since `-d` (or `--directory-only`) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., `name`, `mtime`, `ctime`, `crtime`, `size` if `-s` is also used, or `version`) when `-d` is active. If you truly want directory order with `-d`, use `-U` or `--sort-by none`.
 
 **Q: Where can I find the API documentation for the library?**
 
@@ -139,8 +139,8 @@ A: You can generate it locally by running `cargo doc --open` in the project's ro
 
   - Description: Report sizes of files in the output. (Original `tree` flag: `-s`)
 
-- `-D, --report-mtime`
-  - Description: Report last modification times for files and directories. (Original `tree` flag: `-D`)
+- `-D, --date`
+  - Description: Report dates for files and directories. By default, this shows the last modification time. If the `-c` flag (sort by change time) is also used, this flag will instead display the last status change time (ctime). (Original `tree` flag: `-D`)
 
 ### Content Analysis
 
@@ -159,26 +159,41 @@ A: You can generate it locally by running `cargo doc --open` in the project's ro
 
 ### Sorting
 
-- `-t, --sort-by-mtime`
+- `-v`
+  - Description: Sort the output by version name. (Original `tree` flag: `-v`)
+  - This option is mutually exclusive with `-t`, `-c`, `-U`, and `--sort-by`.
 
+- `-t`
   - Description: Sort the output by last modification time instead of alphabetically. (Original `tree` flag: `-t`)
-  - This option is mutually exclusive with `-U` (`--unsorted`) and `--sort-key`.
+  - This option is mutually exclusive with `-v`, `-c`, `-U`, and `--sort-by`.
+
+- `-c`
+  - Description: Sort the output by last status change time (ctime) instead of alphabetically. If `-D` (or `--date`) is also used, `-D` will display change times instead of modification times. (Original `tree` flag: `-c`)
+  - This option is mutually exclusive with `-v`, `-t`, `-U`, and `--sort-by`.
 
 - `-U, --unsorted`
-
   - Description: Do not sort. Lists files in directory order. (Original `tree` flag: `-U`)
-  - This option is mutually exclusive with `-t` (`--sort-by-mtime`), `--sort-key`, and `-r` (`--reverse-sort`).
+  - This option is mutually exclusive with `-v`, `-t`, `-c`, `--sort-by`, and `-r` (`--reverse-sort`).
 
-- `--sort-key <KEY>`
-
-  - Description: Specifies the key for sorting directory entries. If no sorting option (`-t`, `-U`, or `--sort-key`) is provided, `rustree` defaults to sorting by `name`.
-  - Possible values: `name`, `size`, `m-time` (equivalent to `-t`), `words`, `lines`, `custom`
-  - This option is mutually exclusive with `-t` (`--sort-by-mtime`) and `-U` (`--unsorted`).
-  - Example: `rustree --sort-key size`
+- `-S, --sort-by <FIELD>`
+  - Description: Specifies the field for sorting directory entries. If no sorting option (`-v`, `-t`, `-c`, `-U`, or `--sort-by`) is provided, `rustree` defaults to sorting by `name`.
+  - Possible values for `<FIELD>`:
+    - `name`: Sort by entry name (default).
+    - `version` (alias `ver`): Sort by version string (e.g., `file_v1.0.txt` before `file_v2.0.txt`). Equivalent to `-v`.
+    - `size`: Sort by file size.
+    - `mtime` (aliases `m`, `mod_time`): Sort by last modification time. Equivalent to `-t`.
+    - `ctime` (aliases `c`, `change_time`): Sort by last status change time. Equivalent to `-c`.
+    - `crtime` (aliases `cr`, `create_time`): Sort by creation time.
+    - `words`: Sort by word count (for files).
+    - `lines`: Sort by line count (for files).
+    - `custom`: Sort by the output of a custom applied function.
+    - `none` (alias `n`): No sorting; preserve directory order. Equivalent to `-U`.
+  - This option is mutually exclusive with `-v`, `-t`, `-c`, and `-U`.
+  - Example: `rustree --sort-by size`, `rustree -S m`
 
 - `-r, --reverse-sort`
   - Description: Reverse the order of the active sort. (Original `tree` flag: `-r`)
-  - This option is ignored if `-U` (`--unsorted`) is used.
+  - This option is ignored if `-U` (`--unsorted`) or `--sort-by none` is used.
 
 ### LLM Integration
 

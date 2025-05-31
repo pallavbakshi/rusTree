@@ -80,11 +80,18 @@ A: When `-d` or `--directory-only` is used, RusTree will only list directories. 
 
 **Q: If I use `-d` with `-s` (report sizes), will it show directory sizes?**
 
-A: Yes. When `-d` (or `--directory-only`) and `-s` (or `--report-sizes`) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).
+A: Yes. When `-d` (or `--directory-only`) and `-s` (or `--report-sizes`) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if `-D` (or `--date`) is used with `-d`, it will show the relevant date (modification or change time, depending on whether `-c` is also active) for the directories.
 
 **Q: What happens if I use `-d` with file-specific sorting keys like `lines` or `words`?**
 
-A: Since `-d` (or `--directory-only`) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., `name`, `m-time`, `size` if `-s` is also used) when `-d` is active.
+A: Since `-d` (or `--directory-only`) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., `name`, `version`, `mtime`, `ctime`, `crtime`, `size` if `-s` is also used) when `-d` is active. If you want to preserve directory order with `-d`, use `-U` or `--sort-by none`.
+
+**Q: How does the `-D` (or `--date`) flag interact with `-c` (sort by change time)?**
+
+A:
+- If you use `-D` alone, it displays the last modification time (mtime).
+- If you use `-c` alone, it sorts by change time (ctime), but `-D` is needed to *display* a time.
+- If you use both `-D` and `-c` (or `-D` and `--sort-by ctime`), then `-D` will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.
 
 **Q: Where can I find the API documentation for the library?**
 

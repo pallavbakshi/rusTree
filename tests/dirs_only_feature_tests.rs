@@ -419,7 +419,7 @@ fn test_d_with_report_sizes_s_for_dirs() -> Result<()> {
 }
 
 #[test]
-fn test_d_with_report_mtime_big_d_for_dirs() -> Result<()> {
+fn test_d_with_report_modification_time_big_d_for_dirs() -> Result<()> {
     let temp_dir = TempDir::new()?;
     create_dir_structure_for_d_tests(temp_dir.path())?;
     let root_path = temp_dir.path();
@@ -436,7 +436,7 @@ fn test_d_with_report_mtime_big_d_for_dirs() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_mtime: true,
+            report_modification_time: true,
             ..Default::default()
         },
         sorting: SortingOptions {
@@ -458,7 +458,7 @@ fn test_d_with_report_mtime_big_d_for_dirs() -> Result<()> {
 
     let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
     println!(
-        "[test_d_with_report_mtime_big_d_for_dirs]\nOutput:\n{}",
+        "[test_d_with_report_modification_time_big_d_for_dirs]\nOutput:\n{}",
         output
     );
     for line in output.lines() {
@@ -634,7 +634,7 @@ fn test_d_with_sort_by_mtime_t() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_mtime: true,
+            report_modification_time: true,
             ..Default::default()
         },
         sorting: SortingOptions {

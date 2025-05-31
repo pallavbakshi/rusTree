@@ -3,7 +3,8 @@ use clap::Args;
 
 #[derive(Args, Debug)]
 pub struct DateArgs {
-    /// Report last modification times for files and directories. (Original tree: -D)
-    #[arg(short = 'D', long)]
-    pub report_mtime: bool,
+    /// Report last modified dates for files and directories. (Original tree: -D)
+    /// If -c is also used, this flag will display change times instead.
+    #[arg(short = 'D', long = "date")]
+    pub report_last_modified_time: bool,
 }

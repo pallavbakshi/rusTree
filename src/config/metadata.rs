@@ -25,7 +25,11 @@ pub struct MetadataOptions {
     /// Whether to report file permissions.
     pub report_permissions: bool,
     /// Whether to report last modification time.
-    pub report_mtime: bool,
+    pub report_modification_time: bool,
+    /// Whether to report last status change time (ctime).
+    pub report_change_time: bool,
+    /// Whether to report creation time (btime).
+    pub report_creation_time: bool,
     /// Whether to calculate and report line counts for files.
     pub calculate_line_count: bool,
     /// Whether to calculate and report word counts for files.

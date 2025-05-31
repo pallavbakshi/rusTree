@@ -21,13 +21,15 @@ Here are some practical examples of how to use `rustree` from the command line.
    ```bash
    rustree -s -D -t -r ~/Documents
    # or using long flags
-   rustree --report-sizes --report-mtime --sort-by-mtime --reverse-sort ~/Documents
+   rustree --report-sizes --date -t --reverse-sort ~/Documents
+   # or using --sort-by
+   rustree --report-sizes --date --sort-by mtime --reverse-sort ~/Documents
    ```
 
 4. **Analyze a source code project, showing line counts and word counts, sorted by line count (largest first):**
 
    ```bash
-   rustree --calculate-lines --calculate-words --sort-key lines -r ./my_project_src
+   rustree --calculate-lines --calculate-words --sort-by lines -r ./my_project_src
    ```
 
 5. **List directories only in the current path:**
@@ -56,8 +58,8 @@ Here are some practical examples of how to use `rustree` from the command line.
 
    ```bash
    rustree -t ./my_project
-   # or using long flag
-   rustree --sort-by-mtime ./my_project
+   # or using --sort-by
+   rustree --sort-by mtime ./my_project
    ```
 
 9. **List files in directory order (unsorted using `-U`):**
@@ -66,12 +68,14 @@ Here are some practical examples of how to use `rustree` from the command line.
    rustree -U ./my_project
    # or using long flag
    rustree --unsorted ./my_project
+   # or using --sort-by
+   rustree --sort-by none ./my_project
    ```
 
 10. **Apply the `CountPluses` function to files and sort by its custom output:**
 
     ```bash
-    rustree --apply-function CountPluses --sort-key custom ./config_files
+    rustree --apply-function CountPluses --sort-by custom ./config_files
     ```
 
     _(This assumes `CountPluses` is a meaningful function for your files, e.g., counting '+' characters)._
@@ -186,6 +190,29 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --filter-exclude "*.bak" --ignore-case ./my_project
     # or using short flag
     rustree -I "*.bak" --ignore-case ./my_project
+    ```
+
+24. **Sort files by version (e.g., `file-1.0.0`, `file-1.2.0`, `file-2.0.0`):**
+
+    ```bash
+    rustree -v ./my_scripts
+    # or using --sort-by
+    rustree --sort-by version ./my_scripts
+    ```
+
+25. **Sort files by change time (ctime) and display change times:**
+
+    ```bash
+    rustree -c -D ./my_project
+    # or using --sort-by
+    rustree --sort-by ctime --date ./my_project
+    ```
+    This will sort by ctime (oldest first). The `-D` (or `--date`) flag, when combined with `-c` (or `--sort-by ctime`), will display these ctimes.
+
+26. **Sort files by creation time (crtime/btime), newest first:**
+    (Note: Creation time might not be available on all filesystems or OS versions.)
+    ```bash
+    rustree --sort-by crtime -r ./my_photos
     ```
 
 Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.

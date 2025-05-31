@@ -24,7 +24,10 @@ This struct (defined in `src/config/tree_options.rs`) is central to controlling 
   - `sort_by`: An optional `SortKey` (from `src/config/sorting.rs`) to sort sibling entries.
   - `reverse_sort`: Whether to reverse the sort order.
 - **`metadata: MetadataOptions`** (from `src/config/metadata.rs`):
-  - `report_sizes`, `report_mtime`: Whether to collect and report file sizes and modification times. `report_sizes` also applies to directories.
+  - `report_sizes`: Whether to collect and report file sizes. Applies to directories as well.
+  - `report_modification_time`: Whether to collect and report last modification times (mtime).
+  - `report_change_time`: Whether to collect and report last status change times (ctime).
+  - `report_creation_time`: Whether to collect and report creation times (btime/crtime).
   - `calculate_line_count`, `calculate_word_count`: Whether to perform these analyses on files.
   - `apply_function`: An optional `BuiltInFunction` (from `src/config/metadata.rs`) to apply to file contents.
   - `report_permissions`: (Currently not exposed via CLI, defaults to false).
@@ -68,6 +71,9 @@ let config = RustreeLibConfig {
     },
     metadata: MetadataOptions {
         report_sizes: true,
+        report_modification_time: true,
+        report_change_time: false,
+        report_creation_time: false,
         calculate_line_count: false, // Example: not calculating line count
         apply_function: Some(BuiltInFunction::CountPluses), // Example: applying a function
         ..Default::default()
@@ -85,7 +91,9 @@ Each file or directory encountered during the scan is represented by a `NodeInfo
 - `node_type`: A `NodeType` enum (`File`, `Directory`, `Symlink`). When `listing.list_directories_only` is active, symlinks pointing to directories will have `NodeType::Directory`.
 - `depth`: The entry's depth in the tree.
 - `size`: `Option<u64>` for file or directory size (if `metadata.report_sizes` is enabled).
-- `mtime`: `Option<SystemTime>` for modification time.
+- `mtime`: `Option<SystemTime>` for last modification time.
+- `change_time`: `Option<SystemTime>` for last status change time (ctime).
+- `create_time`: `Option<SystemTime>` for creation time (btime/crtime).
 - `line_count`, `word_count`: `Option<usize>` for analysis results (applicable to files only).
 - `custom_function_output`: `Option<Result<String, ApplyFnError>>` (where `ApplyFnError` is from `src/config/metadata.rs`) for results of `metadata.apply_function`.
 
@@ -124,7 +132,7 @@ This function takes the nodes, a `LibOutputFormat` enum (`Text` or `Markdown`, f
 
 ### Key Enums
 
-- **`SortKey`**: `Name`, `Size`, `MTime`, `Words`, `Lines`, `Custom`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig.sorting.sort_by`.
+- **`SortKey`**: `Name`, `Version`, `Size`, `MTime`, `ChangeTime`, `CreateTime`, `Words`, `Lines`, `Custom`, `None`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig.sorting.sort_by`.
 - **`LibOutputFormat`**: `Text`, `Markdown`. Defined in `src/config/output_format.rs` (as `OutputFormat`). Used with `format_nodes()`.
 - **`BuiltInFunction`**: e.g., `CountPluses`. Defined in `src/config/metadata.rs`. Used in `RustreeLibConfig.metadata.apply_function`.
 - **`ApplyFnError`**: Error type for `BuiltInFunction` application. Defined in `src/config/metadata.rs`.
