@@ -57,15 +57,15 @@ Here are a few common options to get you started:
 - **Sort by size (ascending):**
 
   ```bash
-  rustree --sort-key size
+  rustree --sort-by size
   ```
 
 - **Sort by size (descending):**
 
   ```bash
-  rustree --sort-key size -r
+  rustree --sort-by size -r
   # or
-  rustree --sort-key size --reverse-sort
+  rustree --sort-by size --reverse-sort
   ```
 
 ### Getting Help
