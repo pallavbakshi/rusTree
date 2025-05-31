@@ -45,6 +45,7 @@ Contributions to RusTree are welcome! Whether it's bug reports, feature requests
 - To run tests: `cargo test`
 - To format code: `cargo fmt`
 - To run linters (clippy): `cargo clippy`
+- To run benchmarks: `cargo bench`
 - To build and view `rustdoc` API documentation: `cargo doc --open`
 - To build and view `mdBook` documentation (from the project root):
   ```bash
