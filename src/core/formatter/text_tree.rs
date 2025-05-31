@@ -74,11 +74,11 @@ impl TreeFormatter for TextTreeFormatter {
         let mut output = String::new();
 
         // Handle root display name with optional size prefix
-        if config.metadata.report_sizes {
+        if config.metadata.show_size_bytes {
             if let Some(size) = config.input_source.root_node_size {
                 write!(output, "[{:>7}B] ", size)?;
             }
-            // If report_sizes is true but root_node_size is None (e.g. metadata error for root),
+            // If show_size_bytes is true but root_node_size is None (e.g. metadata error for root),
             // we could print a placeholder like "[       B] ", but original tree doesn't show
             // anything for the root if its size isn't available/applicable.
             // For now, if size is None, we just print the name.

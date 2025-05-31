@@ -246,7 +246,7 @@ fn test_gitignore_basic_root() -> Result<()> {
     let temp_dir = common_test_utils::setup_gitignore_test_dir()?;
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            use_gitignore: true,
+            use_gitignore_rules: true,
             ..Default::default()
         },
         ..Default::default()
@@ -283,7 +283,7 @@ fn test_gitignore_nested() -> Result<()> {
     let temp_dir = common_test_utils::setup_gitignore_test_dir()?;
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            use_gitignore: true,
+            use_gitignore_rules: true,
             ..Default::default()
         },
         ..Default::default()
@@ -310,7 +310,7 @@ fn test_gitignore_with_show_hidden() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            use_gitignore: true,
+            use_gitignore_rules: true,
             ..Default::default()
         },
         listing: ListingOptions {
@@ -368,8 +368,8 @@ fn test_gitfile_single_custom_ignore() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            git_ignore_files: Some(vec![custom_ignore_path]),
-            // use_gitignore: false, // Ensure only custom file is used
+            gitignore_file: Some(vec![custom_ignore_path]),
+            // use_gitignore_rules: false, // Ensure only custom file is used
             ..Default::default()
         },
         ..Default::default()
@@ -410,7 +410,7 @@ fn test_gitfile_multiple_custom_ignores() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            git_ignore_files: Some(vec![custom_ignore1_path, custom_ignore2_path]),
+            gitignore_file: Some(vec![custom_ignore1_path, custom_ignore2_path]),
             ..Default::default()
         },
         ..Default::default()
@@ -441,7 +441,7 @@ fn test_gitfile_path_relativity() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            git_ignore_files: Some(vec![custom_ignore_path]),
+            gitignore_file: Some(vec![custom_ignore_path]),
             ..Default::default()
         },
         ..Default::default()
@@ -463,7 +463,7 @@ fn test_ignore_case_with_i_flag() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             ignore_patterns: Some(vec!["image.png".to_string()]),
-            ignore_case_for_patterns: true,
+            case_insensitive_filter: true,
             ..Default::default()
         },
         ..Default::default()
@@ -486,8 +486,8 @@ fn test_ignore_case_with_gitignore() -> Result<()> {
     let temp_dir = common_test_utils::setup_gitignore_test_dir()?; // .gitignore has "IMAGE.PNG"
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            use_gitignore: true,
-            ignore_case_for_patterns: true,
+            use_gitignore_rules: true,
+            case_insensitive_filter: true,
             ..Default::default()
         },
         ..Default::default()
@@ -516,8 +516,8 @@ fn test_ignore_case_with_gitfile() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            git_ignore_files: Some(vec![custom_ignore_path]),
-            ignore_case_for_patterns: true,
+            gitignore_file: Some(vec![custom_ignore_path]),
+            case_insensitive_filter: true,
             ..Default::default()
         },
         ..Default::default()
@@ -544,7 +544,7 @@ fn test_combination_i_and_gitignore() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             ignore_patterns: Some(vec!["docs/".to_string()]), // -I docs/
-            use_gitignore: true,                              // --gitignore
+            use_gitignore_rules: true,                              // --gitignore
             ..Default::default()
         },
         ..Default::default()
@@ -577,8 +577,8 @@ fn test_combination_gitfile_and_gitignore() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            git_ignore_files: Some(vec![custom_ignore_path]),
-            use_gitignore: true,
+            gitignore_file: Some(vec![custom_ignore_path]),
+            use_gitignore_rules: true,
             ..Default::default()
         },
         ..Default::default()
@@ -607,8 +607,8 @@ fn test_combination_all_ignore_mechanisms() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             ignore_patterns: Some(vec!["docs/".to_string()]), // -I docs/
-            use_gitignore: true, // --gitignore (ignores *.log, target/, IMAGE.PNG)
-            git_ignore_files: Some(vec![custom_ignore_path]), // --gitfile (ignores *.rs)
+            use_gitignore_rules: true, // --gitignore (ignores *.log, target/, IMAGE.PNG)
+            gitignore_file: Some(vec![custom_ignore_path]), // --gitfile (ignores *.rs)
             ..Default::default()
         },
         ..Default::default()
@@ -725,7 +725,7 @@ fn test_gitignore_ignores_hidden_files_even_if_a_is_used() -> Result<()> {
 
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
-            use_gitignore: true,
+            use_gitignore_rules: true,
             ..Default::default()
         },
         listing: ListingOptions {

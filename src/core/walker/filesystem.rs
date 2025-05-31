@@ -37,12 +37,12 @@ pub fn walk_directory(
 
     let final_compiled_ignore_patterns = compile_glob_patterns(
         &config.filtering.ignore_patterns,
-        config.filtering.ignore_case_for_patterns,
+        config.filtering.case_insensitive_filter,
         config.listing.show_hidden,
     )?;
     let compiled_match_patterns = compile_glob_patterns(
         &config.filtering.match_patterns,
-        config.filtering.ignore_case_for_patterns,
+        config.filtering.case_insensitive_filter,
         config.listing.show_hidden,
     )?;
 
@@ -50,17 +50,17 @@ pub fn walk_directory(
     walker_builder.hidden(!config.listing.show_hidden);
     walker_builder.parents(true);
     walker_builder.ignore(false);
-    walker_builder.git_global(config.filtering.use_gitignore);
-    walker_builder.git_ignore(config.filtering.use_gitignore);
-    walker_builder.git_exclude(config.filtering.use_gitignore);
+    walker_builder.git_global(config.filtering.use_gitignore_rules);
+    walker_builder.git_ignore(config.filtering.use_gitignore_rules);
+    walker_builder.git_exclude(config.filtering.use_gitignore_rules);
     walker_builder.require_git(false); // Process gitignore files even if not in a git repo (for tests)
-    walker_builder.ignore_case_insensitive(config.filtering.ignore_case_for_patterns);
+    walker_builder.ignore_case_insensitive(config.filtering.case_insensitive_filter);
 
     if let Some(max_d) = config.listing.max_depth {
         walker_builder.max_depth(Some(max_d));
     }
 
-    if let Some(custom_ignore_files) = &config.filtering.git_ignore_files {
+    if let Some(custom_ignore_files) = &config.filtering.gitignore_file {
         for file_path in custom_ignore_files {
             walker_builder.add_custom_ignore_filename(file_path);
         }
@@ -175,10 +175,10 @@ pub fn walk_directory(
         };
 
         if let Some(meta) = resolved_metadata_for_node {
-            if config.metadata.report_sizes {
+            if config.metadata.show_size_bytes {
                 node.size = Some(meta.len());
             }
-            if config.metadata.report_modification_time {
+            if config.metadata.show_last_modified {
                 node.mtime = meta.modified().ok();
             }
             if config.metadata.report_change_time {

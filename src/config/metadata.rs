@@ -21,11 +21,11 @@ pub enum BuiltInFunction {
 #[derive(Debug, Clone, Default)]
 pub struct MetadataOptions {
     /// Whether to report file and directory sizes.
-    pub report_sizes: bool,
+    pub show_size_bytes: bool,
     /// Whether to report file permissions.
     pub report_permissions: bool,
     /// Whether to report last modification time.
-    pub report_modification_time: bool,
+    pub show_last_modified: bool,
     /// Whether to report last status change time (ctime).
     pub report_change_time: bool,
     /// Whether to report creation time (btime).

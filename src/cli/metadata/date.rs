@@ -5,6 +5,6 @@ use clap::Args;
 pub struct DateArgs {
     /// Report last modified dates for files and directories. (Original tree: -D)
     /// If -c is also used, this flag will display change times instead.
-    #[arg(short = 'D', long = "date")]
-    pub report_last_modified_time: bool,
+    #[arg(short = 'D', long = "show-last-modified")]
+    pub show_last_modified: bool,
 }

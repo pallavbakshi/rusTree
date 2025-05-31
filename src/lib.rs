@@ -49,8 +49,8 @@
 //!             ..Default::default()
 //!         },
 //!         metadata: MetadataOptions {
-//!             report_sizes: true,
-//!             report_modification_time: true,
+//!             show_size_bytes: true,
+//!             show_last_modified: true,
 //!             ..Default::default()
 //!         },
 //!         sorting: SortingOptions {
@@ -116,7 +116,7 @@ use std::path::Path;
 /// It performs the following steps:
 /// 1. Traverses the directory structure starting from `root_path` according to `config.listing` settings
 ///    (e.g., `config.listing.max_depth`, `config.listing.show_hidden`).
-/// 2. Collects metadata and performs analysis (e.g., `config.metadata.report_sizes`,
+/// 2. Collects metadata and performs analysis (e.g., `config.metadata.show_size_bytes`,
 ///    `config.metadata.calculate_line_count`) for each file and directory.
 /// 3. If a sort key is specified in `config.sorting.sort_by`, sorts the collected nodes.
 ///

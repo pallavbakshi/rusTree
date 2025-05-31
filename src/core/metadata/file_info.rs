@@ -42,8 +42,8 @@ pub fn format_node_metadata(
 ) -> String {
     let mut metadata_parts = Vec::new();
 
-    // Size: applies to files and directories if config.report_sizes is true
-    if config.metadata.report_sizes {
+    // Size: applies to files and directories if config.show_size_bytes is true
+    if config.metadata.show_size_bytes {
         if let Some(size) = node.size {
             match style {
                 MetadataStyle::Text => metadata_parts.push(format!("[{:>7}B]", size)),
@@ -56,7 +56,7 @@ pub fn format_node_metadata(
     }
 
     // Time metadata: applies to all node types if configured
-    if config.metadata.report_modification_time {
+    if config.metadata.show_last_modified {
         if let Some(formatted) = format_timestamp(node.mtime, "MTime", style) {
             metadata_parts.push(formatted);
         }
@@ -312,10 +312,10 @@ mod tests {
         let node = create_test_node();
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
-                report_sizes: true,
+                show_size_bytes: true,
                 calculate_line_count: true,
                 calculate_word_count: true,
-                report_modification_time: true,
+                show_last_modified: true,
                 apply_function: Some(BuiltInFunction::CountPluses),
                 ..Default::default()
             },
@@ -336,7 +336,7 @@ mod tests {
         let node = create_test_node();
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
-                report_sizes: true,
+                show_size_bytes: true,
                 calculate_line_count: true,
                 calculate_word_count: true,
                 ..Default::default()
@@ -356,7 +356,7 @@ mod tests {
         
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
-                report_sizes: true,
+                show_size_bytes: true,
                 calculate_line_count: true, // Should be ignored for directories
                 calculate_word_count: true, // Should be ignored for directories
                 ..Default::default()

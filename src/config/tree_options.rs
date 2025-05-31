@@ -45,7 +45,7 @@ use crate::config::sorting::SortingOptions;
 ///         ..Default::default()
 ///     },
 ///     metadata: MetadataOptions {
-///         report_sizes: true,
+///         show_size_bytes: true,
 ///         calculate_line_count: true,
 ///         ..Default::default()
 ///     },

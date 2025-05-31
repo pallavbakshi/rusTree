@@ -242,29 +242,7 @@ fn compare_version_strings(a: &str, b: &str) -> Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::tree::node::{NodeInfo, NodeType};
-    use std::path::PathBuf;
     use std::cmp::Ordering;
-
-    fn create_test_temp_node(name: &str, node_type: NodeType) -> TempNode {
-        TempNode {
-            node_info: NodeInfo {
-                name: name.to_string(),
-                path: PathBuf::from(name),
-                node_type,
-                depth: 1,
-                size: None,
-                permissions: None,
-                line_count: None,
-                word_count: None,
-                mtime: None,
-                change_time: None,
-                create_time: None,
-                custom_function_output: None,
-            },
-            children: Vec::new(),
-        }
-    }
 
     #[test]
     fn test_compare_version_strings_numeric_comparison() {

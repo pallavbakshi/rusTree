@@ -1,3 +1,3 @@
 pub mod exclude;
-pub mod gitignore;
+pub mod gitignore_rules;
 pub mod include;
