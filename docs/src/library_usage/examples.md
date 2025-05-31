@@ -67,8 +67,8 @@ fn main() -> Result<(), RustreeError> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
-            report_modification_time: true, // To see mtime in output if sorting by size
+            show_size_bytes: true,
+            show_last_modified: true, // To see mtime in output if sorting by size
             ..Default::default()
         },
         sorting: SortingOptions {

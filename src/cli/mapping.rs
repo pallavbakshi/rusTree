@@ -36,7 +36,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             .into_owned()
     };
 
-    let root_node_size = if cli_args.size.report_sizes {
+    let root_node_size = if cli_args.size.show_size_bytes {
         std::fs::metadata(&cli_args.path)
             .ok()
             .map(|meta| meta.len())
@@ -62,9 +62,9 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         filtering: FilteringOptions {
             match_patterns: cli_args.include.match_patterns.clone(),
             ignore_patterns: cli_args.exclude.ignore_patterns.clone(),
-            use_gitignore: cli_args.gitignore.use_gitignore,
-            git_ignore_files: cli_args.gitignore.git_ignore_files.clone(),
-            ignore_case_for_patterns: cli_args.gitignore.ignore_case_for_patterns,
+            use_gitignore_rules: cli_args.gitignore.use_gitignore_rules,
+            gitignore_file: cli_args.gitignore.gitignore_file.clone(),
+            case_insensitive_filter: cli_args.gitignore.case_insensitive_filter,
         },
         sorting: SortingOptions {
             sort_by: if cli_args.sort_order.legacy_no_sort {
@@ -98,10 +98,10 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             files_before_directories: true, // Default to traditional behavior
         },
         metadata: MetadataOptions {
-            report_sizes: cli_args.size.report_sizes,
+            show_size_bytes: cli_args.size.show_size_bytes,
             report_permissions: false, // Not exposed in CLI args yet
-            report_modification_time: cli_args.date.report_last_modified_time && !cli_args.sort_order.legacy_sort_change_time, // If -D is present AND -c is NOT
-            report_change_time: cli_args.sort_order.legacy_sort_change_time && cli_args.date.report_last_modified_time, // -c with -D implies reporting ctime for display
+            show_last_modified: cli_args.date.show_last_modified && !cli_args.sort_order.legacy_sort_change_time, // If -D is present AND -c is NOT
+            report_change_time: cli_args.sort_order.legacy_sort_change_time && cli_args.date.show_last_modified, // -c with -D implies reporting ctime for display
             report_creation_time: false, // Currently no CLI flag for reporting creation time, but can be added later
             calculate_line_count: cli_args.file_stats.calculate_lines,
             calculate_word_count: cli_args.file_stats.calculate_words,

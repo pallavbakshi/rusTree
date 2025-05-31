@@ -10,9 +10,9 @@ This top-level module centralizes all configuration-related definitions for the 
   - Defines `RustreeLibConfig`, the main configuration struct. It is composed of several sub-structs:
     - `InputSourceOptions` (from `input_source.rs`): Options related to the root input, like display name and initial metadata.
     - `ListingOptions` (from `listing.rs`): Options controlling directory traversal, such as `max_depth`, `show_hidden`, and `list_directories_only`.
-    - `FilteringOptions` (from `filtering.rs`): Options for including/excluding files/directories, such as `match_patterns`, `ignore_patterns`, `use_gitignore`, `git_ignore_files`, and `ignore_case_for_patterns`.
+    - `FilteringOptions` (from `filtering.rs`): Options for including/excluding files/directories, such as `match_patterns`, `ignore_patterns`, `use_gitignore_rules`, `gitignore_file`, and `case_insensitive_filter`.
     - `SortingOptions` (from `sorting.rs`): Options for sorting, including `sort_by` (using `SortKey`), `reverse_sort`, and `files_before_directories`.
-    - `MetadataOptions` (from `metadata.rs`): Options for collecting and reporting metadata, like `report_sizes`, `report_mtime`, `calculate_line_count`, `calculate_word_count`, and `apply_function` (using `BuiltInFunction`).
+    - `MetadataOptions` (from `metadata.rs`): Options for collecting and reporting metadata, like `show_size_bytes`, `show_last_modified`, `calculate_line_count`, `calculate_word_count`, and `apply_function` (using `BuiltInFunction`).
     - `MiscOptions` (from `misc.rs`): For miscellaneous options.
 
 - **`input_source.rs`**:
@@ -29,7 +29,7 @@ This top-level module centralizes all configuration-related definitions for the 
   - Defines `SortingOptions` struct, used in `RustreeLibConfig` to specify sorting criteria, order, and whether files should appear before directories in size-based sorts.
 
 - **`metadata.rs`**:
-  - Defines `MetadataOptions` struct for metadata collection and content analysis flags (e.g., `report_sizes`, `report_modification_time`, `report_change_time`, `report_creation_time`).
+  - Defines `MetadataOptions` struct for metadata collection and content analysis flags (e.g., `show_size_bytes`, `show_last_modified`, `report_change_time`, `report_creation_time`).
   - Defines `BuiltInFunction` enum for functions applicable to file content.
   - Defines `ApplyFnError` for errors during custom function application.
 
@@ -51,7 +51,7 @@ The `src/core/` directory houses the main operational logic of `rustree`.
   - `traversal.rs`: Implements various tree traversal algorithms (DFS pre-order, post-order, BFS) and a `TreeVisitor` trait for custom operations during traversal.
 
 - **`walker/`**: This sub-module is responsible for traversing the file system.
-  - `filesystem.rs`: Contains the `walk_directory` function. It uses the `ignore` crate (`ignore::WalkBuilder`) for directory walking. It implements initial filtering logic based on `RustreeLibConfig` (hidden files, max depth, gitignore, ignore patterns). After the `ignore` crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates `NodeInfo` structs with basic metadata, triggering content analysis via the `metadata` module.
+  - `filesystem.rs`: Contains the `walk_directory` function. It uses the `ignore` crate (`ignore::WalkBuilder`) for directory walking. It implements initial filtering logic based on `RustreeLibConfig` (hidden files, max depth, gitignore rules, ignore patterns). After the `ignore` crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates `NodeInfo` structs with basic metadata, triggering content analysis via the `metadata` module.
   - `depth_control.rs`: (Placeholder for future depth-specific control logic).
   - `input_source.rs`: (Placeholder for future advanced input source handling).
   - `symlinks.rs`: (Placeholder for future advanced symlink resolution strategies).
@@ -93,7 +93,8 @@ The `src/core/` directory houses the main operational logic of `rustree`.
   - `RustreeLibConfig` and its constituent option structs: `InputSourceOptions`, `ListingOptions`, `FilteringOptions`, `SortingOptions` (including `files_before_directories`), `MetadataOptions`, `MiscOptions`.
   - Enums and related types: `SortKey`, `BuiltInFunction`, `ApplyFnError`.
   - `LibOutputFormat` (an alias for `OutputFormat`).
-  - Core types: `NodeInfo` (from `core::tree::node`), `NodeType`, and `RustreeError`.
+
+- Core types: `NodeInfo` (from `core::tree::node`), `NodeType`, and `RustreeError`.
 - Provides the main entry-point functions:
   - `get_tree_nodes()`: Orchestrates walking (via `core::walker`), analysis (via `core::metadata`), and sorting (via `core::sorter::strategies::sort_nodes_with_options`).
   - `format_nodes()`: Takes the processed nodes and applies the chosen formatter.

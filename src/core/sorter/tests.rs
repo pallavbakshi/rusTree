@@ -46,7 +46,7 @@ mod tests {
             create_test_node_info("alpha.txt", 1, NodeType::File, Some(200), Some(5)),
             create_test_node_info("beta.txt", 1, NodeType::File, Some(50), Some(20)),
         ];
-        sort_nodes(&mut nodes_info, &SortKey::Name, false);
+        let _ = sort_nodes(&mut nodes_info, &SortKey::Name, false);
         assert_eq!(
             get_names(&nodes_info),
             vec!["alpha.txt", "beta.txt", "charlie.txt"]
@@ -60,7 +60,7 @@ mod tests {
             create_test_node_info("alpha.txt", 1, NodeType::File, Some(200), Some(5)),
             create_test_node_info("beta.txt", 1, NodeType::File, Some(50), Some(20)),
         ];
-        sort_nodes(&mut nodes_info, &SortKey::Name, true);
+        let _ = sort_nodes(&mut nodes_info, &SortKey::Name, true);
         assert_eq!(
             get_names(&nodes_info),
             vec!["charlie.txt", "beta.txt", "alpha.txt"]
@@ -77,7 +77,7 @@ mod tests {
             create_test_node_info("dir_beta", 1, NodeType::Directory, None, None),
             create_test_node_info("medium_file.txt", 1, NodeType::File, Some(100), None),
         ];
-        sort_nodes(&mut nodes_info, &SortKey::Size, false); // Size sort (descending for files)
+        let _ = sort_nodes(&mut nodes_info, &SortKey::Size, false); // Size sort (descending for files)
         assert_eq!(
             get_names(&nodes_info),
             vec![
@@ -99,7 +99,7 @@ mod tests {
             create_test_node_info("small_file.txt", 1, NodeType::File, Some(10), None),
             create_test_node_info("dir_beta", 1, NodeType::Directory, None, None),
         ];
-        sort_nodes(&mut nodes_info, &SortKey::Size, true); // Descending (reverse=true)
+        let _ = sort_nodes(&mut nodes_info, &SortKey::Size, true); // Descending (reverse=true)
         assert_eq!(
             get_names(&nodes_info),
             vec![
@@ -139,7 +139,7 @@ mod tests {
             create_test_node_info("file_beta.txt", 1, NodeType::File, Some(20), None),
         ];
         // Sort by name, ascending
-        sort_nodes(&mut nodes_info, &SortKey::Name, false);
+        let _ = sort_nodes(&mut nodes_info, &SortKey::Name, false);
         let expected_names_paths = vec![
             ("dir_a", "/dir_a"),
             ("file_d.txt", "//file_d.txt"), // Path depth 2
@@ -213,7 +213,7 @@ mod tests {
             create_test_node_info("file_alpha.txt", 1, NodeType::File, Some(100), None),
             create_test_node_info("file_beta.txt", 1, NodeType::File, Some(20), None),
         ];
-        sort_nodes(&mut nodes_info_size_sort, &SortKey::Size, false);
+        let _ = sort_nodes(&mut nodes_info_size_sort, &SortKey::Size, false);
         assert_eq!(
             get_names(&nodes_info_size_sort),
             vec![

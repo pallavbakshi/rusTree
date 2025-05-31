@@ -8,7 +8,7 @@ This struct (defined in `src/config/tree_options.rs`) is central to controlling 
 
 - **`input_source: InputSourceOptions`** (from `src/config/input_source.rs`):
   - `root_display_name`: How the root directory is named in the output.
-  - `root_node_size`: Optional size of the root node itself, used by formatters if `metadata.report_sizes` is true.
+  - `root_node_size`: Optional size of the root node itself, used by formatters if `metadata.show_size_bytes` is true.
   - `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
 - **`listing: ListingOptions`** (from `src/config/listing.rs`):
   - `max_depth`: The maximum depth of traversal.
@@ -17,16 +17,16 @@ This struct (defined in `src/config/tree_options.rs`) is central to controlling 
 - **`filtering: FilteringOptions`** (from `src/config/filtering.rs`):
   - `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--filter-include` options.
   - `ignore_patterns`: `Option<Vec<String>>` containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI `-I`/`--filter-exclude` options.
-  - `use_gitignore`: If `true`, standard gitignore files (`.gitignore`, global gitignore, etc.) will be used for filtering.
-  - `git_ignore_files`: `Option<Vec<PathBuf>>` specifying paths to custom files to be used as additional gitignore files.
-  - `ignore_case_for_patterns`: If `true`, all pattern matching (`match_patterns`, `ignore_patterns`, and gitignore processing) will be case-insensitive.
+  - `use_gitignore_rules`: If `true`, standard gitignore files (`.gitignore`, global gitignore, etc.) will be used for filtering.
+  - `gitignore_file`: `Option<Vec<PathBuf>>` specifying paths to custom files to be used as additional gitignore files.
+  - `case_insensitive_filter`: If `true`, all pattern matching (`match_patterns`, `ignore_patterns`, and gitignore processing) will be case-insensitive.
 - **`sorting: SortingOptions`** (from `src/config/sorting.rs`):
   - `sort_by`: An optional `SortKey` (from `src/config/sorting.rs`) to sort sibling entries.
   - `reverse_sort`: Whether to reverse the sort order.
   - `files_before_directories`: A `bool` (default `true`) that, when sorting by size, determines if files and symlinks are grouped before directories. If `false`, types are intermingled based purely on size.
 - **`metadata: MetadataOptions`** (from `src/config/metadata.rs`):
-  - `report_sizes`: Whether to collect and report file sizes. Applies to directories as well.
-  - `report_modification_time`: Whether to collect and report last modification times (mtime).
+  - `show_size_bytes`: Whether to collect and report file sizes in bytes. Applies to directories as well.
+  - `show_last_modified`: Whether to collect and report last modification times (mtime).
   - `report_change_time`: Whether to collect and report last status change times (ctime).
   - `report_creation_time`: Whether to collect and report creation times (btime/crtime).
   - `calculate_line_count`, `calculate_word_count`: Whether to perform these analyses on files.
@@ -60,9 +60,9 @@ let config = RustreeLibConfig {
     filtering: FilteringOptions {
         match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example -P patterns
         ignore_patterns: Some(vec!["*.log".to_string(), "target/".to_string()]), // Example -I patterns
-        use_gitignore: true,
-        git_ignore_files: Some(vec![PathBuf::from(".customignore")]),
-        ignore_case_for_patterns: false,
+        use_gitignore_rules: true,
+        gitignore_file: Some(vec![PathBuf::from(".customignore")]),
+        case_insensitive_filter: false,
         ..Default::default()
     },
     sorting: SortingOptions {
@@ -72,8 +72,8 @@ let config = RustreeLibConfig {
         ..Default::default()
     },
     metadata: MetadataOptions {
-        report_sizes: true,
-        report_modification_time: true,
+        show_size_bytes: true,
+        show_last_modified: true,
         report_change_time: false,
         report_creation_time: false,
         calculate_line_count: false, // Example: not calculating line count

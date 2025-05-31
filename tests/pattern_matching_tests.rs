@@ -57,7 +57,7 @@ fn test_p_pattern_with_ignore_case_txt_extension() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             match_patterns: Some(vec!["*.jpg".to_string()]),
-            ignore_case_for_patterns: true, // --ignore-case
+            case_insensitive_filter: true, // --ignore-case
             ..Default::default()
         },
         listing: ListingOptions {
@@ -91,7 +91,7 @@ fn test_p_pattern_with_ignore_case_exact_filename() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
-            ignore_case_for_patterns: true, // --ignore-case
+            case_insensitive_filter: true, // --ignore-case
             ..Default::default()
         },
         listing: ListingOptions {
@@ -125,7 +125,7 @@ fn test_p_pattern_without_ignore_case_is_sensitive() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
-            ignore_case_for_patterns: false, // NO --ignore-case (default)
+            case_insensitive_filter: false, // NO --ignore-case (default)
             ..Default::default()
         },
         listing: ListingOptions {

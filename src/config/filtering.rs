@@ -15,9 +15,9 @@ pub struct FilteringOptions {
     /// Corresponds to CLI -I/--ignore-path.
     pub ignore_patterns: Option<Vec<String>>,
     /// If `true`, use .gitignore files for filtering.
-    pub use_gitignore: bool,
+    pub use_gitignore_rules: bool,
     /// List of custom files to use as gitignore files.
-    pub git_ignore_files: Option<Vec<PathBuf>>,
+    pub gitignore_file: Option<Vec<PathBuf>>,
     /// If `true`, all pattern matching (-P, -I, gitignore) is case-insensitive.
-    pub ignore_case_for_patterns: bool,
+    pub case_insensitive_filter: bool,
 }

@@ -44,7 +44,7 @@ fn benchmark_tree_walking(c: &mut Criterion) {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
+            show_size_bytes: true,
             ..Default::default()
         },
         ..Default::default()
@@ -68,7 +68,7 @@ fn benchmark_tree_walking_with_analysis(c: &mut Criterion) {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
+            show_size_bytes: true,
             calculate_line_count: true,
             calculate_word_count: true,
             ..Default::default()
@@ -93,7 +93,7 @@ fn benchmark_sorting(c: &mut Criterion) {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
+            show_size_bytes: true,
             ..Default::default()
         },
         sorting: SortingOptions {

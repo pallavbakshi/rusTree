@@ -205,8 +205,8 @@ fn test_formatter_no_file_specific_metadata_prefixes_in_dirs_only_mode() -> Resu
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
-            report_modification_time: true,
+            show_size_bytes: true,
+            show_last_modified: true,
             calculate_line_count: true,
             calculate_word_count: true,
             apply_function: Some(BuiltInFunction::CountPluses),
@@ -266,14 +266,14 @@ fn test_formatter_no_file_specific_metadata_prefixes_in_dirs_only_mode() -> Resu
                 "Function prefix found in -d mode: {}",
                 line
             );
-            if config.metadata.report_sizes {
+            if config.metadata.show_size_bytes {
                 assert!(
                     line.contains("B]"),
                     "Expected size prefix not found in -d mode for line: {}",
                     line
                 );
             }
-            if config.metadata.report_modification_time {
+            if config.metadata.show_last_modified {
                 assert!(
                     line.contains("MTime:"),
                     "Expected MTime prefix not found in -d mode for line: {}",
@@ -455,7 +455,7 @@ fn get_mock_mtime_str(node_path: &Path) -> String {
 }
 
 #[test]
-fn test_formatter_with_report_sizes() -> Result<()> {
+fn test_formatter_with_show_size_bytes() -> Result<()> {
     let temp_dir = setup_formatter_test_directory()?;
     let root_path = temp_dir.path();
     let root_name = get_root_name(root_path);
@@ -471,7 +471,7 @@ fn test_formatter_with_report_sizes() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
+            show_size_bytes: true,
             ..Default::default()
         },
         sorting: SortingOptions {
@@ -503,7 +503,7 @@ fn test_formatter_with_report_sizes() -> Result<()> {
 }
 
 #[test]
-fn test_formatter_with_report_modification_time() -> Result<()> {
+fn test_formatter_with_show_last_modified() -> Result<()> {
     let temp_dir = setup_formatter_test_directory()?;
     let root_path = temp_dir.path();
     let root_name = get_root_name(root_path);
@@ -523,7 +523,7 @@ fn test_formatter_with_report_modification_time() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_modification_time: true,
+            show_last_modified: true,
             ..Default::default()
         },
         ..Default::default()
@@ -707,8 +707,8 @@ fn test_formatter_with_multiple_metadata() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
-            report_modification_time: true,
+            show_size_bytes: true,
+            show_last_modified: true,
             calculate_line_count: true,
             calculate_word_count: true,
             apply_function: Some(BuiltInFunction::CountPluses),
@@ -867,7 +867,7 @@ fn test_formatter_sort_integration() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_sizes: true,
+            show_size_bytes: true,
             ..Default::default()
         },
         sorting: SortingOptions {

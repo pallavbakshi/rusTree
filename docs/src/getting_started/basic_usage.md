@@ -46,12 +46,12 @@ Here are a few common options to get you started:
   rustree --depth 2
   ```
 
-- **Show file sizes:**
+- **Show file sizes (in bytes):**
 
   ```bash
   rustree -s
   # or
-  rustree --report-sizes
+  rustree --show-size-bytes
   ```
 
 - **Sort by size (ascending):**
