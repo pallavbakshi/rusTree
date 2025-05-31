@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ApplyFnError","BuiltInFunction"],"struct":["MetadataOptions"]};

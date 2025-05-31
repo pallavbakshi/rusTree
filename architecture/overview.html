@@ -170,7 +170,7 @@
 <p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
 <ol>
 <li>
-<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur.</p>
+<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code>, <code>SortingOptions</code>, etc., to organize settings.</p>
 </li>
 <li>
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
@@ -180,16 +180,16 @@
 <li>The <code>walk_directory</code> function, using the <code>ignore</code> crate, traverses the file system starting from a root path.</li>
 <li>It respects configuration settings from <code>RustreeLibConfig</code>:
 <ul>
-<li><code>max_depth</code>, <code>show_hidden</code>.</li>
-<li><code>use_gitignore</code> and <code>git_ignore_files</code> for respecting standard and custom gitignore rules.</li>
-<li><code>ignore_patterns</code> (CLI <code>-I</code> / <code>--filter-exclude</code>) to exclude entries matching specified glob patterns. These are applied early to prune the walk.</li>
-<li><code>ignore_case_for_patterns</code> to control case sensitivity for all pattern matching.</li>
+<li><code>config.listing.max_depth</code>, <code>config.listing.show_hidden</code>.</li>
+<li><code>config.filtering.use_gitignore</code> and <code>config.filtering.git_ignore_files</code> for respecting standard and custom gitignore rules.</li>
+<li><code>config.filtering.ignore_patterns</code> (CLI <code>-I</code> / <code>--filter-exclude</code>) to exclude entries matching specified glob patterns. These are applied early to prune the walk.</li>
+<li><code>config.filtering.ignore_case_for_patterns</code> to control case sensitivity for all pattern matching.</li>
 </ul>
 </li>
 <li>After initial filtering by the <code>ignore</code> crate (based on hidden status, gitignore rules, and <code>-I</code> patterns), further filtering is applied:
 <ul>
-<li><code>match_patterns</code> (CLI <code>-P</code> / <code>--filter-include</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
-<li><code>list_directories_only</code>: If true, only effective directories are kept.</li>
+<li><code>config.filtering.match_patterns</code> (CLI <code>-P</code> / <code>--filter-include</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
+<li><code>config.listing.list_directories_only</code>: If true, only effective directories are kept.</li>
 </ul>
 </li>
 <li>For each qualifying file system entry, it gathers initial metadata. Symlinks are resolved to determine their effective type for filtering and metadata collection.</li>
@@ -198,24 +198,24 @@
 <li><strong>Analysis (<code>core::analyzer</code>)</strong>:</li>
 </ol>
 <ul>
-<li>As the walker processes entries that are effectively files (i.e., not filtered out by <code>list_directories_only</code>), it can invoke analysis functions based on the configuration.</li>
+<li>As the walker processes entries that are effectively files (i.e., not filtered out by <code>config.listing.list_directories_only</code>), it can invoke analysis functions based on the configuration (e.g., <code>config.metadata.calculate_line_count</code>, <code>config.metadata.apply_function</code>).</li>
 <li><code>file_stats</code>: Calculates line counts and word counts for files.</li>
-<li><code>apply_fn</code>: Applies a selected built-in function (from <code>src/config/fileinfo.rs</code>) to file content.</li>
-<li>The results of these analyses are stored in <code>NodeInfo</code> objects. This step is skipped for directories or when <code>list_directories_only</code> is active.</li>
+<li><code>apply_fn</code>: Applies a selected built-in function (from <code>src/config/metadata.rs</code>, specified via <code>config.metadata.apply_function</code>) to file content.</li>
+<li>The results of these analyses are stored in <code>NodeInfo</code> objects. This step is skipped for directories or when <code>config.listing.list_directories_only</code> is active.</li>
 </ul>
 <ol>
 <li><strong>Node Representation (<code>NodeInfo</code>)</strong>:</li>
 </ol>
 <ul>
-<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
-<li>The <code>size</code> field can be populated for directories if <code>report_sizes</code> is enabled.</li>
+<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct (from <code>src/core/node.rs</code>). This struct holds its path, name, effective <code>node_type</code> (e.g., a symlink to a directory might be stored as <code>NodeType::Directory</code> if <code>config.listing.list_directories_only</code> is active), depth, metadata (size, mtime), and any analysis results.</li>
+<li>The <code>size</code> field can be populated for directories if <code>config.metadata.report_sizes</code> is enabled.</li>
 <li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
 </ul>
 <ol>
 <li><strong>Sorting (<code>core::sorter</code>)</strong>:</li>
 </ol>
 <ul>
-<li>If a <code>SortKey</code> (from <code>src/config/sorting.rs</code>) is specified in the configuration, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>If a <code>SortKey</code> (from <code>src/config/sorting.rs</code>) is specified in <code>config.sorting.sort_by</code>, the <code>sort_nodes</code> function sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
 <li>Sorting primarily applies to sibling nodes (nodes at the same depth under the same parent) to maintain the overall tree structure.</li>
 </ul>
 <ol>
@@ -224,9 +224,9 @@
 <ul>
 <li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is then passed to a formatter.</li>
 <li>The <code>TreeFormatter</code> trait defines the interface for formatters.</li>
-<li><code>TextTreeFormatter</code>: Generates a plain text, <code>tree</code>-like output. It adapts its output based on <code>list_directories_only</code> (e.g., summary line, metadata shown).</li>
+<li><code>TextTreeFormatter</code>: Generates a plain text, <code>tree</code>-like output. It adapts its output based on <code>config.listing.list_directories_only</code> (e.g., summary line, metadata shown).</li>
 <li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>
-<li>The formatter produces the final string output, considering configuration like <code>root_node_size</code> and <code>root_is_directory</code> for accurate root display. The choice of formatter is determined by <code>LibOutputFormat</code> (from <code>src/config/output.rs</code>).</li>
+<li>The formatter produces the final string output, considering configuration like <code>config.input_source.root_node_size</code> and <code>config.input_source.root_is_directory</code> for accurate root display. The choice of formatter is determined by <code>LibOutputFormat</code> (from <code>src/config/output_format.rs</code>).</li>
 </ul>
 <h3 id="cli-layer"><a class="header" href="#cli-layer">CLI Layer</a></h3>
 <p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
