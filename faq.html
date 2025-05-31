@@ -167,86 +167,50 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="frequently-asked-questions-faq"><a class="header" href="#frequently-asked-questions-faq">Frequently Asked Questions (FAQ)</a></h1>
-<p><strong>Q: How is RusTree different from the standard <code>tree</code> command?</strong></p>
-<p>A: While inspired by <code>tree</code>, RusTree aims to offer more:</p>
+<p><strong>Q: How do I ignore files and directories?</strong>
+A: RusTree offers several ways:</p>
 <ul>
-<li><strong>Extensibility:</strong> Built in Rust, allowing for easier addition of new features.</li>
-<li><strong>Analysis Features:</strong> Built-in capabilities like line/word counts and potential for custom function application on file contents.</li>
-<li><strong>Multiple Output Formats:</strong> Starting with text and Markdown, with potential for more (e.g., JSON).</li>
-<li><strong>Sorting Options:</strong> More granular control over sorting, including improved version sorting (e.g., "1.10" correctly sorts after "1.2") and configurable grouping of files/directories when sorting by size. By default, size sort lists largest items first.</li>
-<li><strong>Library Usage:</strong> Can be used as a Rust library in other projects.</li>
+<li><strong><code>-I &lt;PATTERN&gt;</code> or <code>--filter-exclude &lt;PATTERN&gt;</code></strong>: Exclude files/directories matching the glob pattern. This can be used multiple times.</li>
+<li><strong><code>--use-gitignore-rules</code> (alias: <code>--gitignore</code>)</strong>: This flag tells RusTree to respect standard gitignore behavior. It will look for <code>.gitignore</code> files in the current directory and parent directories, as well as global gitignore configurations (e.g., <code>~/.config/git/ignore</code> or <code>$XDG_CONFIG_HOME/git/ignore</code>) and repository-specific exclude files (e.g., <code>.git/info/exclude</code>). Note: <code>--gitignore</code> is a deprecated alias.</li>
+<li><strong><code>--gitignore-file &lt;FILE&gt;</code></strong>: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.</li>
+<li><strong><code>--case-insensitive-filter</code></strong>: This flag makes all pattern matching (from <code>-P</code>/<code>--filter-include</code>, <code>-I</code>/<code>--filter-exclude</code>, <code>--use-gitignore-rules</code>, and <code>--gitignore-file</code>) case-insensitive.</li>
 </ul>
-<p><strong>Q: What are the system requirements?</strong></p>
-<p>A: RusTree is built with Rust. To build it from source or install via <code>cargo install</code>, you'll need a Rust compiler and Cargo installed (see <a href="https://rustup.rs/">rustup.rs</a>). Once compiled, the binary should be relatively portable across systems supported by Rust.</p>
-<p><strong>Q: How do I report a bug or suggest a feature?</strong></p>
-<p>A: Please open an issue on the <a href="https://github.com/yourusername/rustree">GitHub repository</a> (replace with the actual link).</p>
-<p><strong>Q: Is there a way to ignore certain files or directories (like <code>.gitignore</code>)?</strong></p>
-<p>A: Yes, RusTree now offers several ways to ignore files and directories:</p>
+<p>These options can be combined. For example, you can use <code>--use-gitignore-rules</code> and also add specific <code>-I</code> patterns.</p>
+<p><strong>Q: How does the <code>-P</code> (or <code>--filter-include</code>) pattern matching work?</strong>
+A: The <code>-P &lt;PATTERN&gt;</code> or <code>--filter-include &lt;PATTERN&gt;</code> option allows you to specify wildcard patterns to list only matching files and directories.</p>
 <ul>
-<li><strong><code>--gitignore</code></strong>: This flag tells RusTree to respect standard gitignore behavior. It will look for <code>.gitignore</code> files in the current directory and parent directories, as well as global gitignore configurations (e.g., <code>~/.config/git/ignore</code> or <code>$XDG_CONFIG_HOME/git/ignore</code>) and repository-specific exclude files (e.g., <code>.git/info/exclude</code>).</li>
-<li><strong><code>-I &lt;PATTERN&gt;</code> or <code>--filter-exclude &lt;PATTERN&gt;</code></strong>: This option allows you to specify glob patterns for files and directories that should be excluded from the output. You can use this option multiple times. It uses the same wildcard syntax as the <code>-P</code> option. For example, <code>rustree -I "*.log" -I "tmp/"</code> or <code>rustree --filter-exclude "*.log" --filter-exclude "tmp/"</code> will ignore all <code>.log</code> files and any directory named <code>tmp</code>.</li>
-<li><strong><code>--git-ignore-files &lt;FILE&gt;</code></strong>: This option lets you specify one or more custom files that contain gitignore-style patterns. These patterns are applied as if the file was located at the root of the scan.</li>
-<li><strong><code>--ignore-case</code></strong>: This flag makes all pattern matching (from <code>-P</code>/<code>--filter-include</code>, <code>-I</code>/<code>--filter-exclude</code>, <code>--gitignore</code>, and <code>--git-ignore-files</code>) case-insensitive.</li>
+<li>Wildcard patterns supported:
+<ul>
+<li><code>*</code>: any zero or more characters.</li>
+<li><code>?</code>: any single character.</li>
+<li><code>[...]</code>: any single character listed (e.g., <code>[abc]</code>, <code>[a-z]</code>).</li>
+<li><code>[!...]</code>: any single character not listed.</li>
+<li><code>|</code>: separates alternate patterns within a single pattern string (e.g., <code>*.txt|*.log</code>).</li>
 </ul>
-<p>These options can be combined. For example, you can use <code>--gitignore</code> and also add specific <code>-I</code> patterns.</p>
-<p><strong>Q: How does the <code>-P pattern</code> / <code>--filter-include pattern</code> feature work?</strong></p>
-<p>A: This feature allows you to list only files and directories whose names match one or more specified wildcard patterns.</p>
-<ul>
-<li>You can use options like <code>-P "*.txt"</code> or <code>--filter-include "*.txt"</code> to show only text files, or <code>-P "docs/"</code> to show only a directory named <code>docs</code>.</li>
-<li>Multiple patterns can be provided (e.g., <code>-P "*.rs" -P "*.toml"</code>) or combined with <code>|</code> (e.g., <code>-P "*.rs|*.toml"</code>).</li>
-<li>Supported wildcards include <code>*</code>, <code>**</code>, <code>?</code>, <code>[...]</code>, and <code>[^...]</code>.</li>
+</li>
 <li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
-<li>To match hidden files (starting with <code>.</code>) with general patterns like <code>*</code>, you must also use the <code>-a</code> (or <code>--include-hidden</code>) option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
-<li>The matching can be made case-insensitive using the <code>--ignore-case</code> flag.</li>
-<li>The summary line (number of directories and files) will reflect only the listed items.</li>
+<li>Note: To match hidden files (starting with <code>.</code>) with patterns like <code>*</code>, you must also use the <code>-a</code> or <code>--include-hidden</code> option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
+<li>The matching can be made case-insensitive using the <code>--case-insensitive-filter</code> flag.</li>
 </ul>
-<p><strong>Q: How does <code>--ignore-case</code> work?</strong></p>
-<p>A: The <code>--ignore-case</code> flag makes all pattern matching operations case-insensitive. This applies to:</p>
+<p><strong>Q: How does <code>--case-insensitive-filter</code> work?</strong>
+A: The <code>--case-insensitive-filter</code> flag makes all pattern matching operations case-insensitive. This applies to:</p>
 <ul>
-<li>Patterns specified with <code>-P</code> or <code>--filter-include</code>.</li>
-<li>Patterns specified with <code>-I</code> or <code>--filter-exclude</code>.</li>
-<li>Patterns found in <code>.gitignore</code> files when <code>--gitignore</code> is active.</li>
-<li>Patterns found in custom ignore files specified with <code>--git-ignore-files</code>.</li>
+<li>Patterns specified with <code>-P &lt;PATTERN&gt;</code> or <code>--filter-include &lt;PATTERN&gt;</code>.</li>
+<li>Patterns specified with <code>-I &lt;PATTERN&gt;</code> or <code>--filter-exclude &lt;PATTERN&gt;</code>.</li>
+<li>Patterns found in <code>.gitignore</code> files when <code>--use-gitignore-rules</code> (or its alias <code>--gitignore</code>) is active.</li>
+<li>Patterns found in custom ignore files specified with <code>--gitignore-file</code>.</li>
 </ul>
-<p>For example, if <code>--ignore-case</code> is used, a pattern like <code>-P "*.JPG"</code> would match <code>image.jpg</code>, <code>image.JPG</code>, and <code>image.Jpg</code>. Similarly, an ignore pattern like <code>-I "README.MD"</code> would ignore <code>readme.md</code>.</p>
-<p><strong>Q: Can I customize the output format further?</strong></p>
-<p>A: Currently, RusTree supports "text" and "markdown" formats. The text format has some implicit styling. More advanced customization (e.g., custom colors, icons, or entirely new formats like JSON) could be considered for future development. If you have specific needs, please open a feature request.</p>
-<p><strong>Q: How does the <code>--llm-ask</code> feature work?</strong></p>
-<p>A: The <code>--llm-ask</code> option formats the <code>rustree</code> output along with your question in a way that is convenient to pipe directly into a command-line Large Language Model (LLM) tool (like <code>ollama</code>, or scripts using OpenAI/Anthropic APIs). RusTree itself does not make any API calls to LLMs. It simply prepares the text.</p>
-<p>Example:</p>
-<pre><code class="language-bash">rustree --llm-ask "Summarize this project structure" | ollama run mistral
-</code></pre>
-<p>This pipes the tree output and your question to the <code>ollama</code> tool running the <code>mistral</code> model.</p>
-<p><strong>Q: How does the <code>-d</code> (or <code>--directory-only</code>) flag work?</strong></p>
-<p>A: When <code>-d</code> or <code>--directory-only</code> is used, RusTree will only list directories. All files will be excluded from the output.</p>
+<p>For example, if <code>--case-insensitive-filter</code> is used, a pattern like <code>-P "*.JPG"</code> would match <code>image.jpg</code>, <code>image.JPG</code>, and <code>image.Jpg</code>. Similarly, an ignore pattern like <code>-I "README.MD"</code> would ignore <code>readme.md</code>.</p>
+<p><strong>Q: If I use <code>-d</code> with <code>-s</code> (show size in bytes), will it show directory sizes?</strong>
+A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--show-size-bytes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems).</p>
+<p>Similarly, if <code>-D</code> (or <code>--show-last-modified</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on whether <code>-c</code> is also active) for the directories.</p>
+<p><strong>Q: How does the <code>-D</code> (or <code>--show-last-modified</code>) flag interact with <code>-c</code> (sort by change time)?</strong>
+A:</p>
 <ul>
-<li>Symlinks pointing to directories are treated as directories and will be listed.</li>
-<li>Symlinks pointing to files (or broken symlinks) will be excluded.</li>
-<li>The summary line will reflect "X directories, 0 files".</li>
-<li>File-specific analysis options (like <code>--calculate-lines</code>, <code>--calculate-words</code>, <code>--apply-function</code>) will effectively be ignored as there are no files to analyze in the output.</li>
-<li>Metadata like size (<code>-s</code>) and modification time (<code>-D</code>) will apply to the listed directories.</li>
+<li>If you use <code>-D</code> (or <code>--show-last-modified</code>) alone, it displays the last modification time (mtime).</li>
+<li>If you use <code>-c</code> alone, it sorts by change time (ctime), but <code>-D</code> (or <code>--show-last-modified</code>) is needed to <em>display</em> a time.</li>
+<li>If you use both <code>-D</code> (or <code>--show-last-modified</code>) and <code>-c</code> (or <code>-D</code> and <code>--sort-by ctime</code>), then <code>-D</code> (or <code>--show-last-modified</code>) will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.</li>
 </ul>
-<p><strong>Q: If I use <code>-d</code> with <code>-s</code> (report sizes), will it show directory sizes?</strong></p>
-<p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if <code>-D</code> (or <code>--date</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on whether <code>-c</code> is also active) for the directories.</p>
-<p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
-<p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>version</code>, <code>mtime</code>, <code>ctime</code>, <code>crtime</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active. If you want to preserve directory order with <code>-d</code>, use <code>-U</code> or <code>--sort-by none</code>.</p>
-<p><strong>Q: How does size sorting work?</strong></p>
-<p>A: When sorting by size (e.g., using <code>--sort-by size</code>):</p>
-<ol>
-<li>Files and symbolic links are grouped together and listed before directories. This is the default behavior.</li>
-<li>Within each group (files/symlinks, then directories), entries are sorted by size in <strong>descending order</strong> (largest first).</li>
-<li>If sizes are equal, entries are then sorted by name in ascending order as a tie-breaker.
-If you use <code>-r</code> (or <code>--reverse-sort</code>) with size sorting, the overall order is reversed: directories will come first (sorted by size ascending, then name ascending), followed by files/symlinks (sorted by size ascending, then name ascending).</li>
-</ol>
-<p><strong>Q: How does the <code>-D</code> (or <code>--date</code>) flag interact with <code>-c</code> (sort by change time)?</strong></p>
-<p>A:</p>
-<ul>
-<li>If you use <code>-D</code> alone, it displays the last modification time (mtime).</li>
-<li>If you use <code>-c</code> alone, it sorts by change time (ctime), but <code>-D</code> is needed to <em>display</em> a time.</li>
-<li>If you use both <code>-D</code> and <code>-c</code> (or <code>-D</code> and <code>--sort-by ctime</code>), then <code>-D</code> will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.</li>
-</ul>
-<p><strong>Q: Where can I find the API documentation for the library?</strong></p>
-<p>A: You can generate it locally by running <code>cargo doc --open</code> in the project's root directory. If the crate is published to <code>crates.io</code>, the API documentation will also be available on <code>docs.rs</code>.</p>
 
                     </main>
 

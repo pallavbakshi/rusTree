@@ -166,35 +166,40 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="cli-options-reference"><a class="header" href="#cli-options-reference">CLI Options Reference</a></h1>
-<p>This page provides a comprehensive reference for all command-line options available in <code>rustree</code>.</p>
-<h2 id="general-usage"><a class="header" href="#general-usage">General Usage</a></h2>
-<pre><code class="language-bash">rustree [OPTIONS] [PATH]
-</code></pre>
+                        <h1 id="command-line-options"><a class="header" href="#command-line-options">Command-Line Options</a></h1>
+<p>This page details all available command-line options for <code>rustree</code>.</p>
+<p>The basic syntax is:
+<code>rustree [OPTIONS] [PATH]</code></p>
+<p>If <code>PATH</code> is omitted, it defaults to the current directory (<code>.</code>).</p>
+<h2 id="path-argument"><a class="header" href="#path-argument">Path Argument</a></h2>
 <ul>
-<li><code>[OPTIONS]</code>: Various flags to control behavior (e.g., depth, sorting, output format).</li>
-<li><code>[PATH]</code>: Optional path to the directory to scan. Defaults to the current directory (<code>.</code>).</li>
+<li><code>[PATH]</code>
+<ul>
+<li>Description: The directory or file path to process. If omitted, defaults to the current directory (<code>.</code>).</li>
+<li>Example: <code>rustree ./my_project</code>, <code>rustree /var/log/syslog</code></li>
 </ul>
-<h2 id="display-options"><a class="header" href="#display-options">Display Options</a></h2>
+</li>
+</ul>
+<h2 id="listing-control"><a class="header" href="#listing-control">Listing Control</a></h2>
 <ul>
 <li>
 <p><code>-a, --include-hidden</code></p>
 <ul>
-<li>Description: Include hidden files and directories (those starting with a <code>.</code>) in the output. (Original <code>tree</code> flag: <code>-a</code>)</li>
+<li>Description: Include hidden files and directories (those starting with a <code>.</code>) in the listing. (Original <code>tree</code> flag: <code>-a</code>)</li>
 <li>Example: <code>rustree -a</code></li>
 </ul>
 </li>
 <li>
 <p><code>-d, --directory-only</code></p>
 <ul>
-<li>Description: List directories only. Files will be excluded. Symlinks pointing to directories are treated as directories. (Original <code>tree</code> flag: <code>-d</code>)</li>
-<li>Example: <code>rustree -d</code></li>
+<li>Description: List directories only. Files will not be included in the output. (Original <code>tree</code> flag: <code>-d</code>)</li>
+<li>Example: <code>rustree -d ./src</code></li>
 </ul>
 </li>
 <li>
 <p><code>-L, --depth &lt;LEVEL&gt;</code></p>
 <ul>
-<li>Description: Descend only <code>&lt;LEVEL&gt;</code> directory levels deep. <code>0</code> means display only the root. (Original <code>tree</code> flag: <code>-L</code>)</li>
+<li>Description: Descend only <code>&lt;LEVEL&gt;</code> directory levels deep. <code>1</code> means the root and its direct children. (Original <code>tree</code> flag: <code>-L</code>)</li>
 <li>Example: <code>rustree -L 2</code> (shows root and its direct children)</li>
 </ul>
 </li>
@@ -205,14 +210,6 @@
 <li>Example: <code>rustree -f</code></li>
 </ul>
 </li>
-<li>
-<p><code>-o, --output-format &lt;FORMAT&gt;</code></p>
-<ul>
-<li>Description: Specifies the output format.</li>
-<li>Possible values: <code>text</code> (default), <code>markdown</code>.</li>
-<li>Example: <code>rustree --output-format markdown</code></li>
-</ul>
-</li>
 </ul>
 <h2 id="filtering-and-ignoring"><a class="header" href="#filtering-and-ignoring">Filtering and Ignoring</a></h2>
 <ul>
@@ -220,19 +217,18 @@
 <p><code>-P, --filter-include &lt;PATTERN&gt;</code></p>
 <ul>
 <li>Description: List only those files and directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is listed. (Original <code>tree</code> flag: <code>-P</code>)</li>
-<li>Wildcard operators:
+<li>Wildcard patterns supported:
 <ul>
 <li><code>*</code>: any zero or more characters.</li>
-<li><code>**</code>: any zero or more characters, including path separators (<code>/</code>).</li>
 <li><code>?</code>: any single character.</li>
 <li><code>[...]</code>: any single character listed (e.g., <code>[abc]</code>, <code>[a-z]</code>).</li>
-<li><code>[^...]</code>: any single character <em>not</em> listed.</li>
+<li><code>[!...]</code>: any single character not listed.</li>
 <li><code>|</code>: separates alternate patterns within a single pattern string (e.g., <code>*.txt|*.log</code>).</li>
 </ul>
 </li>
 <li>A <code>/</code> at the end of a pattern (e.g., <code>mydir/</code>) specifically matches directories.</li>
 <li>Note: To match hidden files (starting with <code>.</code>) with patterns like <code>*</code>, you must also use the <code>-a</code> or <code>--include-hidden</code> option. If <code>-a</code> is not used, <code>*</code> will not match hidden entries. Patterns explicitly starting with <code>.</code> (e.g., <code>.*</code>) will match hidden files regardless of <code>-a</code>.</li>
-<li>This option is affected by <code>--ignore-case</code>.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
 <li>Example: <code>rustree -P "*.rs"</code>, <code>rustree --filter-include "*.txt|*.md" --filter-include "docs/"</code></li>
 </ul>
 </li>
@@ -241,48 +237,48 @@
 <ul>
 <li>Description: Do not list those files or directories that match the specified wildcard pattern. This option can be used multiple times to provide several patterns. If any pattern matches, the entry is excluded. (Original <code>tree</code> flag: <code>-I</code>)</li>
 <li>Uses the same wildcard pattern syntax as <code>-P, --filter-include</code>.</li>
-<li>This option is affected by <code>--ignore-case</code>.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
 <li>Example: <code>rustree -I "*.log"</code>, <code>rustree --filter-exclude "target/" --filter-exclude "*.tmp"</code></li>
 </ul>
 </li>
 <li>
-<p><code>--gitignore</code></p>
+<p><code>--use-gitignore-rules</code>, <code>--gitignore</code> (deprecated alias)</p>
 <ul>
-<li>Description: Respects gitignore rules for filtering files and directories. This includes checking <code>.gitignore</code> files in the scanned directories and their parents, the global gitignore file (e.g., <code>~/.config/git/ignore</code>), and repository-specific exclude files (e.g., <code>$GIT_DIR/info/exclude</code>).</li>
-<li>This option is affected by <code>--ignore-case</code>.</li>
-<li>Example: <code>rustree --gitignore</code></li>
+<li>Description: Respects gitignore rules for filtering files and directories. This includes checking <code>.gitignore</code> files in the scanned directories and their parents, the global gitignore file (e.g., <code>~/.config/git/ignore</code>), and repository-specific exclude files (e.g., <code>$GIT_DIR/info/exclude</code>). The <code>--gitignore</code> flag is deprecated; use <code>--use-gitignore-rules</code> instead.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
+<li>Example: <code>rustree --use-gitignore-rules</code></li>
 </ul>
 </li>
 <li>
-<p><code>--git-ignore-files &lt;FILE&gt;</code></p>
+<p><code>--gitignore-file &lt;FILE&gt;</code></p>
 <ul>
 <li>Description: Use the specified file(s) as additional sources of gitignore patterns. Patterns in these files are matched as if the specified file was located at the root of the scan. This option can be specified multiple times.</li>
-<li>This option is affected by <code>--ignore-case</code>.</li>
-<li>Example: <code>rustree --git-ignore-files ./.customignore --git-ignore-files ./project.ignores</code></li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
+<li>Example: <code>rustree --gitignore-file ./.customignore --gitignore-file ./project.ignores</code></li>
 </ul>
 </li>
 <li>
-<p><code>--ignore-case</code></p>
+<p><code>--case-insensitive-filter</code></p>
 <ul>
-<li>Description: Perform case-insensitive matching for all patterns provided via <code>-P</code> (<code>--filter-include</code>), <code>-I</code> (<code>--filter-exclude</code>), <code>--gitignore</code>, and <code>--git-ignore-files</code>.</li>
-<li>Example: <code>rustree -P "*.TXT" --ignore-case</code> (would match <code>file.txt</code>)</li>
+<li>Description: Perform case-insensitive matching for all patterns provided via <code>-P</code> (<code>--filter-include</code>), <code>-I</code> (<code>--filter-exclude</code>), <code>--use-gitignore-rules</code> (and its alias <code>--gitignore</code>), and <code>--gitignore-file</code>.</li>
+<li>Example: <code>rustree -P "*.TXT" --case-insensitive-filter</code> (would match <code>file.txt</code>)</li>
 </ul>
 </li>
 </ul>
 <h2 id="metadata-reporting"><a class="header" href="#metadata-reporting">Metadata Reporting</a></h2>
 <ul>
 <li>
-<p><code>-s, --report-sizes</code></p>
+<p><code>-s, --show-size-bytes</code></p>
 <ul>
-<li>Description: Report sizes of files and directories in the output. (Original <code>tree</code> flag: <code>-s</code>)</li>
-<li>Example: <code>rustree -s</code></li>
+<li>Description: Report sizes of files and directories in bytes in the output. (Original <code>tree</code> flag: <code>-s</code>)</li>
+<li>Example: <code>rustree -s</code> or <code>rustree --show-size-bytes</code></li>
 </ul>
 </li>
 <li>
-<p><code>-D, --date</code></p>
+<p><code>-D, --show-last-modified</code></p>
 <ul>
 <li>Description: Report dates for files and directories. By default, this shows the last modification time (mtime). If sorting by change time (<code>-c</code> or <code>--sort-by ctime</code>), this flag will instead display the last status change time (ctime). (Original <code>tree</code> flag: <code>-D</code>)</li>
-<li>Example: <code>rustree -D</code></li>
+<li>Example: <code>rustree -D</code> or <code>rustree --show-last-modified</code></li>
 </ul>
 </li>
 </ul>
@@ -296,7 +292,7 @@
 </ul>
 </li>
 <li>
-<p><code>-w, --calculate-words</code></p>
+<p><code>--calculate-words</code></p>
 <ul>
 <li>Description: Calculate and display word counts for files.</li>
 <li>Example: <code>rustree --calculate-words</code></li>
@@ -306,7 +302,7 @@
 <p><code>--apply-function &lt;FUNCTION_NAME&gt;</code></p>
 <ul>
 <li>Description: Apply a built-in function to file contents and display the result.</li>
-<li>Possible values: <code>CountPluses</code> (more can be added).</li>
+<li>Available functions: <code>CountPluses</code> (example function, counts '+' characters). More can be added.</li>
 <li>Example: <code>rustree --apply-function CountPluses</code></li>
 </ul>
 </li>
@@ -314,89 +310,115 @@
 <h2 id="sorting"><a class="header" href="#sorting">Sorting</a></h2>
 <ul>
 <li>
-<p><code>-v</code></p>
+<p><code>-U, --unsorted</code></p>
 <ul>
-<li>Description: Sort the output by version name (e.g., <code>file-1.2.0</code> before <code>file-1.10.0</code>). Uses an improved natural version sorting algorithm. (Original <code>tree</code> flag: <code>-v</code>)</li>
-<li>This option is mutually exclusive with <code>-t</code>, <code>-c</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
-<li>Example: <code>rustree -v</code></li>
+<li>Description: Do not sort the output. List entries in directory order. Overrides other sort options. Equivalent to <code>--sort-by none</code>. (Original <code>tree</code> flag: <code>-U</code>)</li>
+<li>Example: <code>rustree -U</code></li>
 </ul>
 </li>
 <li>
 <p><code>-t</code></p>
 <ul>
-<li>Description: Sort the output by last modification time (mtime) instead of alphabetically. Oldest first. (Original <code>tree</code> flag: <code>-t</code>)</li>
-<li>This option is mutually exclusive with <code>-v</code>, <code>-c</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
+<li>Description: Sort the output by last modification time (mtime) instead of alphabetically. Oldest first. Equivalent to <code>--sort-by mtime</code>. (Original <code>tree</code> flag: <code>-t</code>)</li>
 <li>Example: <code>rustree -t</code></li>
 </ul>
 </li>
 <li>
 <p><code>-c</code></p>
 <ul>
-<li>Description: Sort the output by last status change time (ctime) instead of alphabetically. Oldest first. If <code>-D</code> (or <code>--date</code>) is also used, <code>-D</code> will display change times instead of modification times. (Original <code>tree</code> flag: <code>-c</code>)</li>
-<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-U</code>, and <code>--sort-by</code>.</li>
+<li>Description: Sort the output by last status change time (ctime) instead of alphabetically. Oldest first. Equivalent to <code>--sort-by ctime</code>. (Original <code>tree</code> flag: <code>-c</code>)</li>
 <li>Example: <code>rustree -c</code></li>
 </ul>
 </li>
 <li>
-<p><code>-U, --unsorted</code></p>
+<p><code>-v</code></p>
 <ul>
-<li>Description: Do not sort. Lists files in directory order. (Original <code>tree</code> flag: <code>-U</code>)</li>
-<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-c</code>, <code>--sort-by</code>, and <code>-r</code> (<code>--reverse-sort</code>).</li>
-<li>Example: <code>rustree -U</code></li>
+<li>Description: Sort the output by version strings embedded in file names. (Original <code>tree</code> flag: <code>-v</code>)</li>
+<li>Example: <code>rustree -v</code></li>
 </ul>
 </li>
 <li>
-<p><code>-S, --sort-by &lt;FIELD&gt;</code></p>
+<p><code>--sort-by &lt;KEY&gt;</code></p>
 <ul>
-<li>Description: Specifies the field for sorting directory entries. If no sorting option (<code>-v</code>, <code>-t</code>, <code>-c</code>, <code>-U</code>, or <code>--sort-by</code>) is provided, <code>rustree</code> defaults to sorting by file size (descending). Default sort order for time-based fields is oldest first. For size, it's largest first.</li>
-<li>Possible values for <code>&lt;FIELD&gt;</code>:
+<li>Description: Sort the output by the given key.</li>
+<li>Possible keys:
 <ul>
-<li><code>name</code>: Sort by entry name (ascending).</li>
-<li><code>version</code> (alias <code>ver</code>): Sort by version string (e.g., <code>file_v1.2.txt</code> before <code>file_v1.10.txt</code>). Uses an improved natural version sorting. Equivalent to <code>-v</code>.</li>
-<li><code>size</code>: Sort by size (default, descending). By default, files/symlinks are grouped before directories. Within these groups, entries are sorted by size (largest first), then by name (ascending). Use with <code>-r</code> for smallest first and to reverse the group order (directories first, sorted by size ascending).</li>
-<li><code>mtime</code> (aliases <code>m</code>, <code>mod_time</code>): Sort by last modification time (oldest first). Equivalent to <code>-t</code>.</li>
-<li><code>ctime</code> (aliases <code>c</code>, <code>change_time</code>): Sort by last status change time (oldest first). Equivalent to <code>-c</code>.</li>
-<li><code>crtime</code> (aliases <code>cr</code>, <code>create_time</code>): Sort by creation time (oldest first).</li>
-<li><code>words</code>: Sort by word count (for files, ascending).</li>
-<li><code>lines</code>: Sort by line count (for files, ascending).</li>
-<li><code>custom</code>: Sort by the output of a custom applied function (ascending).</li>
-<li><code>none</code> (alias <code>n</code>): No sorting; preserve directory order. Equivalent to <code>-U</code>.</li>
+<li><code>name</code> (default): Alphabetical sort.</li>
+<li><code>size</code>: Sort by file/directory size. Default is largest first.</li>
+<li><code>mtime</code>: Sort by modification time (oldest first).</li>
+<li><code>ctime</code>: Sort by status change time (oldest first).</li>
+<li><code>crtime</code>: Sort by creation time (oldest first). (May not be available on all systems/files.)</li>
+<li><code>version</code>: Sort by version strings in names.</li>
+<li><code>lines</code>: Sort by line count (requires <code>--calculate-lines</code>). Default is most lines first.</li>
+<li><code>words</code>: Sort by word count (requires <code>--calculate-words</code>). Default is most words first.</li>
+<li><code>custom</code>: Sort by the output of <code>--apply-function</code>.</li>
+<li><code>none</code>: No sorting (directory order).</li>
 </ul>
 </li>
-<li>This option is mutually exclusive with <code>-v</code>, <code>-t</code>, <code>-c</code>, and <code>-U</code>.</li>
-<li>Example: <code>rustree --sort-by size</code>, <code>rustree -S mtime</code></li>
+<li>Example: <code>rustree --sort-by size</code>, <code>rustree --sort-by mtime</code></li>
 </ul>
 </li>
 <li>
 <p><code>-r, --reverse-sort</code></p>
 <ul>
-<li>Description: Reverse the order of the active sort. For example, if sorting by <code>mtime</code> (oldest first), <code>-r</code> makes it newest first. If sorting by <code>size</code> (largest first, files before dirs), <code>-r</code> makes it smallest first and directories before files (within dirs, smallest first). (Original <code>tree</code> flag: <code>-r</code>)</li>
-<li>This option is ignored if <code>-U</code> (<code>--unsorted</code>) or <code>--sort-by none</code> is used.</li>
-<li>Example: <code>rustree -t -r</code> (sorts by mtime, newest first)</li>
+<li>Description: Reverse the order of the sort.</li>
+<li>Example: <code>rustree -t -r</code> (newest mtime first), <code>rustree --sort-by size -r</code> (smallest size first)</li>
+</ul>
+</li>
+<li>
+<p><code>--files-first</code></p>
+<ul>
+<li>Description: When sorting by size, list all files and symlinks before directories. This is the default behavior for size sort.</li>
+<li>Example: <code>rustree --sort-by size --files-first</code> (explicitly stating default)</li>
+</ul>
+</li>
+<li>
+<p><code>--no-files-first</code></p>
+<ul>
+<li>Description: When sorting by size, intermingle files, symlinks, and directories based purely on their size.</li>
+<li>Example: <code>rustree --sort-by size --no-files-first</code></li>
 </ul>
 </li>
 </ul>
-<h2 id="llm-integration"><a class="header" href="#llm-integration">LLM Integration</a></h2>
-<ul>
-<li><code>--llm-ask &lt;QUESTION&gt;</code>
-<ul>
-<li>Description: Ask a question to an LLM, providing the <code>rustree</code> output as context. The output will be specially formatted for easy piping to an LLM tool.</li>
-<li>Example: <code>rustree --llm-ask "Summarize the Go files in this project." | your-llm-cli-tool</code></li>
-</ul>
-</li>
-</ul>
-<h2 id="help-and-version"><a class="header" href="#help-and-version">Help and Version</a></h2>
+<h2 id="output-formatting"><a class="header" href="#output-formatting">Output Formatting</a></h2>
 <ul>
 <li>
-<p><code>-h, --help</code></p>
+<p><code>--output-format &lt;FORMAT&gt;</code></p>
 <ul>
-<li>Description: Print help information.</li>
+<li>Description: Specifies the output format.</li>
+<li>Possible values: <code>text</code> (default), <code>markdown</code>.</li>
+<li>Example: <code>rustree --output-format markdown</code></li>
 </ul>
 </li>
+<li>
+<p><code>--no-indent</code></p>
+<ul>
+<li>Description: Turn off file/directory indentation. (Original <code>tree</code> flag: <code>-i</code>)</li>
+<li>Example: <code>rustree --no-indent</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="miscellaneous"><a class="header" href="#miscellaneous">Miscellaneous</a></h2>
+<ul>
 <li>
 <p><code>-V, --version</code></p>
 <ul>
-<li>Description: Print version information.</li>
+<li>Description: Print version information and exit.</li>
+<li>Example: <code>rustree -V</code></li>
+</ul>
+</li>
+<li>
+<p><code>-h, --help</code></p>
+<ul>
+<li>Description: Print help information and exit.</li>
+<li>Example: <code>rustree --help</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-ask &lt;PROMPT&gt;</code></p>
+<ul>
+<li>Description: Prepend the tree output with a specific prompt string, useful for piping to Large Language Models (LLMs). The prompt is followed by "--- TREE ---" and then the actual tree output.</li>
+<li>Example: <code>rustree --llm-ask "Summarize this project structure:" | ollama run mistral</code></li>
 </ul>
 </li>
 </ul>

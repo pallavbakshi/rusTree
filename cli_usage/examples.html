@@ -185,9 +185,9 @@ rustree -a -L 2 /var/log
 <p><strong>List files in <code>~/Documents</code>, showing sizes and modification times, sorted by modification time (newest first using <code>-t</code> and <code>-r</code>):</strong></p>
 <pre><code class="language-bash">rustree -s -D -t -r ~/Documents
 # or using long flags
-rustree --report-sizes --date -t --reverse-sort ~/Documents
+rustree --show-size-bytes --show-last-modified -t --reverse-sort ~/Documents
 # or using --sort-by
-rustree --report-sizes --date --sort-by mtime --reverse-sort ~/Documents
+rustree --show-size-bytes --show-last-modified --sort-by mtime --reverse-sort ~/Documents
 </code></pre>
 </li>
 <li>
@@ -204,7 +204,7 @@ rustree -d
 </li>
 <li>
 <p><strong>List directories only in <code>./src</code>, showing sizes, up to depth 1:</strong></p>
-<pre><code class="language-bash">rustree --directory-only --report-sizes --depth 1 ./src
+<pre><code class="language-bash">rustree --directory-only --show-size-bytes --depth 1 ./src
 # or using short flags
 rustree -d -s -L 1 ./src
 </code></pre>
@@ -238,7 +238,7 @@ rustree --sort-by none ./my_project
 </li>
 <li>
 <p><strong>Pipe <code>rustree</code> output to an LLM for summarization:</strong></p>
-<pre><code class="language-bash">rustree --depth 1 --report-sizes ./src --llm-ask "What are the main components in the src directory based on this tree?"
+<pre><code class="language-bash">rustree --depth 1 --show-size-bytes ./src --llm-ask "What are the main components in the src directory based on this tree?"
 # or using short flags
 rustree -L 1 -s ./src --llm-ask "What are the main components in the src directory based on this tree?"
 </code></pre>
@@ -305,29 +305,30 @@ rustree -I "target/" -I "*.tmp" ./my_project
 </li>
 <li>
 <p><strong>Use <code>.gitignore</code> files to filter the output:</strong></p>
-<pre><code class="language-bash">rustree --gitignore ./my_git_repo
+<pre><code class="language-bash">rustree --use-gitignore-rules ./my_git_repo
+# or using the deprecated alias: rustree --gitignore ./my_git_repo
 </code></pre>
 </li>
 <li>
 <p><strong>Use a custom ignore file in addition to (or instead of) <code>.gitignore</code>:</strong></p>
-<pre><code class="language-bash">rustree --git-ignore-files ./.my_custom_ignores ./my_project
+<pre><code class="language-bash">rustree --gitignore-file ./.my_custom_ignores ./my_project
 </code></pre>
-<p>If you also want standard <code>.gitignore</code> behavior, add <code>--gitignore</code>:</p>
-<pre><code class="language-bash">rustree --gitignore --git-ignore-files ./.my_custom_ignores ./my_project
+<p>If you also want standard <code>.gitignore</code> behavior, add <code>--use-gitignore-rules</code> (or its alias <code>--gitignore</code>):</p>
+<pre><code class="language-bash">rustree --use-gitignore-rules --gitignore-file ./.my_custom_ignores ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>List only <code>.TXT</code> files, case-insensitively (matching <code>file.txt</code>, <code>FILE.TXT</code>, etc.):</strong></p>
-<pre><code class="language-bash">rustree --filter-include "*.TXT" --ignore-case ./my_project
+<pre><code class="language-bash">rustree --filter-include "*.TXT" --case-insensitive-filter ./my_project
 # or using short flag
-rustree -P "*.TXT" --ignore-case ./my_project
+rustree -P "*.TXT" --case-insensitive-filter ./my_project
 </code></pre>
 </li>
 <li>
 <p><strong>Ignore all files ending with <code>.bak</code>, case-insensitively, using <code>-I</code>:</strong></p>
-<pre><code class="language-bash">rustree --filter-exclude "*.bak" --ignore-case ./my_project
+<pre><code class="language-bash">rustree --filter-exclude "*.bak" --case-insensitive-filter ./my_project
 # or using short flag
-rustree -I "*.bak" --ignore-case ./my_project
+rustree -I "*.bak" --case-insensitive-filter ./my_project
 </code></pre>
 </li>
 <li>
@@ -341,9 +342,9 @@ rustree --sort-by version ./my_scripts
 <p><strong>Sort files by change time (ctime) and display change times:</strong></p>
 <pre><code class="language-bash">rustree -c -D ./my_project
 # or using --sort-by
-rustree --sort-by ctime --date ./my_project
+rustree --sort-by ctime --show-last-modified ./my_project
 </code></pre>
-<p>This will sort by ctime (oldest first). The <code>-D</code> (or <code>--date</code>) flag, when combined with <code>-c</code> (or <code>--sort-by ctime</code>), will display these ctimes.</p>
+<p>This will sort by ctime (oldest first). The <code>-D</code> (or <code>--show-last-modified</code>) flag, when combined with <code>-c</code> (or <code>--sort-by ctime</code>), will display these ctimes.</p>
 </li>
 <li>
 <p><strong>Sort files by creation time (crtime/btime), newest first:</strong>

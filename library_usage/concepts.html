@@ -174,7 +174,7 @@
 <li><strong><code>input_source: InputSourceOptions</code></strong> (from <code>src/config/input_source.rs</code>):
 <ul>
 <li><code>root_display_name</code>: How the root directory is named in the output.</li>
-<li><code>root_node_size</code>: Optional size of the root node itself, used by formatters if <code>metadata.report_sizes</code> is true.</li>
+<li><code>root_node_size</code>: Optional size of the root node itself, used by formatters if <code>metadata.show_size_bytes</code> is true.</li>
 <li><code>root_is_directory</code>: Indicates if the root path itself is a directory, used by formatters.</li>
 </ul>
 </li>
@@ -189,9 +189,9 @@
 <ul>
 <li><code>match_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI <code>-P</code>/<code>--filter-include</code> options.</li>
 <li><code>ignore_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI <code>-I</code>/<code>--filter-exclude</code> options.</li>
-<li><code>use_gitignore</code>: If <code>true</code>, standard gitignore files (<code>.gitignore</code>, global gitignore, etc.) will be used for filtering.</li>
-<li><code>git_ignore_files</code>: <code>Option&lt;Vec&lt;PathBuf&gt;&gt;</code> specifying paths to custom files to be used as additional gitignore files.</li>
-<li><code>ignore_case_for_patterns</code>: If <code>true</code>, all pattern matching (<code>match_patterns</code>, <code>ignore_patterns</code>, and gitignore processing) will be case-insensitive.</li>
+<li><code>use_gitignore_rules</code>: If <code>true</code>, standard gitignore files (<code>.gitignore</code>, global gitignore, etc.) will be used for filtering.</li>
+<li><code>gitignore_file</code>: <code>Option&lt;Vec&lt;PathBuf&gt;&gt;</code> specifying paths to custom files to be used as additional gitignore files.</li>
+<li><code>case_insensitive_filter</code>: If <code>true</code>, all pattern matching (<code>match_patterns</code>, <code>ignore_patterns</code>, and gitignore processing) will be case-insensitive.</li>
 </ul>
 </li>
 <li><strong><code>sorting: SortingOptions</code></strong> (from <code>src/config/sorting.rs</code>):
@@ -203,8 +203,8 @@
 </li>
 <li><strong><code>metadata: MetadataOptions</code></strong> (from <code>src/config/metadata.rs</code>):
 <ul>
-<li><code>report_sizes</code>: Whether to collect and report file sizes. Applies to directories as well.</li>
-<li><code>report_modification_time</code>: Whether to collect and report last modification times (mtime).</li>
+<li><code>show_size_bytes</code>: Whether to collect and report file sizes in bytes. Applies to directories as well.</li>
+<li><code>show_last_modified</code>: Whether to collect and report last modification times (mtime).</li>
 <li><code>report_change_time</code>: Whether to collect and report last status change times (ctime).</li>
 <li><code>report_creation_time</code>: Whether to collect and report creation times (btime/crtime).</li>
 <li><code>calculate_line_count</code>, <code>calculate_word_count</code>: Whether to perform these analyses on files.</li>
@@ -243,9 +243,9 @@ let config = RustreeLibConfig {
     filtering: FilteringOptions {
         match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example -P patterns
         ignore_patterns: Some(vec!["*.log".to_string(), "target/".to_string()]), // Example -I patterns
-        use_gitignore: true,
-        git_ignore_files: Some(vec![PathBuf::from(".customignore")]),
-        ignore_case_for_patterns: false,
+        use_gitignore_rules: true,
+        gitignore_file: Some(vec![PathBuf::from(".customignore")]),
+        case_insensitive_filter: false,
         ..Default::default()
     },
     sorting: SortingOptions {
@@ -255,8 +255,8 @@ let config = RustreeLibConfig {
         ..Default::default()
     },
     metadata: MetadataOptions {
-        report_sizes: true,
-        report_modification_time: true,
+        show_size_bytes: true,
+        show_last_modified: true,
         report_change_time: false,
         report_creation_time: false,
         calculate_line_count: false, // Example: not calculating line count

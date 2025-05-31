@@ -178,9 +178,9 @@
 <ul>
 <li><code>InputSourceOptions</code> (from <code>input_source.rs</code>): Options related to the root input, like display name and initial metadata.</li>
 <li><code>ListingOptions</code> (from <code>listing.rs</code>): Options controlling directory traversal, such as <code>max_depth</code>, <code>show_hidden</code>, and <code>list_directories_only</code>.</li>
-<li><code>FilteringOptions</code> (from <code>filtering.rs</code>): Options for including/excluding files/directories, such as <code>match_patterns</code>, <code>ignore_patterns</code>, <code>use_gitignore</code>, <code>git_ignore_files</code>, and <code>ignore_case_for_patterns</code>.</li>
+<li><code>FilteringOptions</code> (from <code>filtering.rs</code>): Options for including/excluding files/directories, such as <code>match_patterns</code>, <code>ignore_patterns</code>, <code>use_gitignore_rules</code>, <code>gitignore_file</code>, and <code>case_insensitive_filter</code>.</li>
 <li><code>SortingOptions</code> (from <code>sorting.rs</code>): Options for sorting, including <code>sort_by</code> (using <code>SortKey</code>), <code>reverse_sort</code>, and <code>files_before_directories</code>.</li>
-<li><code>MetadataOptions</code> (from <code>metadata.rs</code>): Options for collecting and reporting metadata, like <code>report_sizes</code>, <code>report_mtime</code>, <code>calculate_line_count</code>, <code>calculate_word_count</code>, and <code>apply_function</code> (using <code>BuiltInFunction</code>).</li>
+<li><code>MetadataOptions</code> (from <code>metadata.rs</code>): Options for collecting and reporting metadata, like <code>show_size_bytes</code>, <code>show_last_modified</code>, <code>calculate_line_count</code>, <code>calculate_word_count</code>, and <code>apply_function</code> (using <code>BuiltInFunction</code>).</li>
 <li><code>MiscOptions</code> (from <code>misc.rs</code>): For miscellaneous options.</li>
 </ul>
 </li>
@@ -214,7 +214,7 @@
 <li>
 <p><strong><code>metadata.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>report_sizes</code>, <code>report_modification_time</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
+<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>show_size_bytes</code>, <code>show_last_modified</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
 <li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content.</li>
 <li>Defines <code>ApplyFnError</code> for errors during custom function application.</li>
 </ul>
@@ -247,7 +247,7 @@
 <li>
 <p><strong><code>walker/</code></strong>: This sub-module is responsible for traversing the file system.</p>
 <ul>
-<li><code>filesystem.rs</code>: Contains the <code>walk_directory</code> function. It uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking. It implements initial filtering logic based on <code>RustreeLibConfig</code> (hidden files, max depth, gitignore, ignore patterns). After the <code>ignore</code> crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates <code>NodeInfo</code> structs with basic metadata, triggering content analysis via the <code>metadata</code> module.</li>
+<li><code>filesystem.rs</code>: Contains the <code>walk_directory</code> function. It uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking. It implements initial filtering logic based on <code>RustreeLibConfig</code> (hidden files, max depth, gitignore rules, ignore patterns). After the <code>ignore</code> crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates <code>NodeInfo</code> structs with basic metadata, triggering content analysis via the <code>metadata</code> module.</li>
 <li><code>depth_control.rs</code>: (Placeholder for future depth-specific control logic).</li>
 <li><code>input_source.rs</code>: (Placeholder for future advanced input source handling).</li>
 <li><code>symlinks.rs</code>: (Placeholder for future advanced symlink resolution strategies).</li>
@@ -306,15 +306,19 @@
 </ul>
 <h3 id="top-level-library-file-srclibrs"><a class="header" href="#top-level-library-file-srclibrs">Top-Level Library File (<code>src/lib.rs</code>)</a></h3>
 <ul>
-<li>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:
+<li>
+<p>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:</p>
 <ul>
 <li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code> (including <code>files_before_directories</code>), <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
 <li>Enums and related types: <code>SortKey</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>.</li>
 <li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code>).</li>
-<li>Core types: <code>NodeInfo</code> (from <code>core::tree::node</code>), <code>NodeType</code>, and <code>RustreeError</code>.</li>
 </ul>
 </li>
-<li>Provides the main entry-point functions:
+<li>
+<p>Core types: <code>NodeInfo</code> (from <code>core::tree::node</code>), <code>NodeType</code>, and <code>RustreeError</code>.</p>
+</li>
+<li>
+<p>Provides the main entry-point functions:</p>
 <ul>
 <li><code>get_tree_nodes()</code>: Orchestrates walking (via <code>core::walker</code>), analysis (via <code>core::metadata</code>), and sorting (via <code>core::sorter::strategies::sort_nodes_with_options</code>).</li>
 <li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter.</li>

@@ -179,9 +179,9 @@
 <li>It respects configuration settings from <code>RustreeLibConfig</code>:
 <ul>
 <li><code>config.listing.max_depth</code>, <code>config.listing.show_hidden</code>.</li>
-<li><code>config.filtering.use_gitignore</code> and <code>config.filtering.git_ignore_files</code> for gitignore rules (handled by the <code>ignore</code> crate).</li>
+<li><code>config.filtering.use_gitignore_rules</code> and <code>config.filtering.gitignore_file</code> for gitignore rules (handled by the <code>ignore</code> crate).</li>
 <li><code>config.filtering.ignore_patterns</code> (CLI <code>-I</code>) are compiled by <code>core::filter::pattern</code> and used by the <code>ignore</code> crate's <code>WalkBuilder::filter_entry()</code> to prune the walk.</li>
-<li><code>config.filtering.ignore_case_for_patterns</code> controls case sensitivity for all pattern matching.</li>
+<li><code>config.filtering.case_insensitive_filter</code> controls case sensitivity for all pattern matching.</li>
 </ul>
 </li>
 <li>After the <code>ignore</code> crate yields an entry, further filtering is applied by the walker using <code>core::filter::pattern::entry_matches_glob_patterns</code>:
@@ -232,7 +232,7 @@
 <p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
 <ul>
 <li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse arguments.</li>
-<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function translates <code>CliArgs</code> into <code>RustreeLibConfig</code> (e.g., setting <code>sorting.sort_by</code>, <code>sorting.files_before_directories</code>, <code>metadata.report_modification_time</code>).</li>
+<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function translates <code>CliArgs</code> into <code>RustreeLibConfig</code> (e.g., setting <code>sorting.sort_by</code>, <code>sorting.files_before_directories</code>, <code>metadata.show_last_modified</code>).</li>
 <li><strong>Orchestration (<code>main.rs</code>)</strong>:
 <ol>
 <li>Parses CLI args.</li>
