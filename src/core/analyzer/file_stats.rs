@@ -35,7 +35,6 @@ pub fn count_words_from_string(content: &str) -> usize {
     content.split_whitespace().count()
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*; // Imports functions from the parent module (file_stats)
@@ -44,7 +43,7 @@ mod tests {
     fn test_count_lines_empty() {
         assert_eq!(count_lines_from_string(""), 0); // An empty string has 0 lines if it doesn't contain a newline character. Behavior might differ if "" is considered 1 line.
     }
-    
+
     #[test]
     fn test_count_lines_single_no_newline() {
         assert_eq!(count_lines_from_string("hello world"), 1);
@@ -54,7 +53,6 @@ mod tests {
     fn test_count_lines_single_with_newline() {
         assert_eq!(count_lines_from_string("hello world\n"), 1); // .lines() iterator behavior
     }
-
 
     #[test]
     fn test_count_lines_multiple() {
@@ -67,13 +65,12 @@ mod tests {
         assert_eq!(count_lines_from_string("hello\nworld\n"), 2);
         assert_eq!(count_lines_from_string("hello\nworld\n\n"), 3); // two trailing newlines means one empty line
     }
-    
+
     #[test]
     fn test_count_lines_only_newlines() {
         assert_eq!(count_lines_from_string("\n"), 1);
         assert_eq!(count_lines_from_string("\n\n"), 2);
     }
-
 
     #[test]
     fn test_count_words_empty() {

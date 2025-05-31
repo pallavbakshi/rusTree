@@ -9,7 +9,10 @@ All key types like `RustreeLibConfig`, `NodeInfo`, `SortKey`, `LibOutputFormat`,
 This example shows how to get a simple text tree of a directory.
 
 ```rust
-use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError};
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError,
+    InputSourceOptions, ListingOptions,
+};
 use std::path::Path;
 
 fn main() -> Result<(), RustreeError> {
@@ -17,8 +20,15 @@ fn main() -> Result<(), RustreeError> {
     let path_obj = Path::new(target_path);
 
     let config = RustreeLibConfig {
-        root_display_name: path_obj.file_name().unwrap_or_default().to_string_lossy().into_owned(),
-        max_depth: Some(2), // Limit depth to 2 levels
+        input_source: InputSourceOptions {
+            root_display_name: path_obj.file_name().unwrap_or_default().to_string_lossy().into_owned(),
+            root_is_directory: path_obj.is_dir(), // Set based on actual path
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(2), // Limit depth to 2 levels
+            ..Default::default()
+        },
         ..Default::default()
     };
 
@@ -40,7 +50,10 @@ fn main() -> Result<(), RustreeError> {
 This example demonstrates reporting file sizes and sorting by size in descending order.
 
 ```rust
-use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey, RustreeError};
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey, RustreeError,
+    InputSourceOptions, MetadataOptions, SortingOptions,
+};
 use std::path::Path;
 
 fn main() -> Result<(), RustreeError> {
@@ -48,10 +61,20 @@ fn main() -> Result<(), RustreeError> {
     let path_obj = Path::new(target_path);
 
     let config = RustreeLibConfig {
-        root_display_name: "Source Files".to_string(),
-        report_sizes: true,
-        sort_by: Some(SortKey::Size),
-        reverse_sort: true, // Largest files first
+        input_source: InputSourceOptions {
+            root_display_name: "Source Files".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            report_sizes: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Size),
+            reverse_sort: true, // Largest files first
+            ..Default::default()
+        },
         ..Default::default()
     };
 
@@ -69,7 +92,10 @@ fn main() -> Result<(), RustreeError> {
 This example shows how to calculate line counts and output in Markdown format.
 
 ```rust
-use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey, RustreeError};
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey, RustreeError,
+    InputSourceOptions, MetadataOptions, SortingOptions,
+};
 use std::path::Path;
 
 fn main() -> Result<(), RustreeError> {
@@ -77,10 +103,20 @@ fn main() -> Result<(), RustreeError> {
     let path_obj = Path::new(target_path);
 
     let config = RustreeLibConfig {
-        root_display_name: "Project Source (Markdown)".to_string(),
-        calculate_line_count: true,
-        sort_by: Some(SortKey::Lines), // Sort by line count
-        reverse_sort: true,            // Most lines first
+        input_source: InputSourceOptions {
+            root_display_name: "Project Source (Markdown)".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            calculate_line_count: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Lines), // Sort by line count
+            reverse_sort: true,            // Most lines first
+            ..Default::default()
+        },
         ..Default::default()
     };
 

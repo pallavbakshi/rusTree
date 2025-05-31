@@ -1,5 +1,5 @@
 // src/core/analyzer/apply_fn.rs
-use crate::config::fileinfo::{BuiltInFunction, ApplyFnError};
+use crate::config::metadata::{ApplyFnError, BuiltInFunction};
 
 /// Applies a specified built-in function to the given string content.
 ///
@@ -12,7 +12,10 @@ use crate::config::fileinfo::{BuiltInFunction, ApplyFnError};
 ///
 /// A `Result` containing the string representation of the function's output on success,
 /// or an [`ApplyFnError`] on failure.
-pub fn apply_function_to_content(content: &str, func: &BuiltInFunction) -> Result<String, ApplyFnError> {
+pub fn apply_function_to_content(
+    content: &str,
+    func: &BuiltInFunction,
+) -> Result<String, ApplyFnError> {
     match func {
         BuiltInFunction::CountPluses => {
             let count = content.chars().filter(|&c| c == '+').count();

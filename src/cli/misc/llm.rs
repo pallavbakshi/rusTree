@@ -7,4 +7,4 @@ pub struct LlmArgs {
     /// The output will be specially formatted for easy piping to an LLM tool.
     #[arg(long)]
     pub llm_ask: Option<String>,
-} 
+}

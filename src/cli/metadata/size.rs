@@ -6,4 +6,4 @@ pub struct SizeArgs {
     /// Report sizes of files in the output. (Original tree: -s)
     #[arg(short = 's', long)]
     pub report_sizes: bool,
-} 
+}

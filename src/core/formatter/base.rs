@@ -1,7 +1,7 @@
 // src/core/formatter/base.rs
-use crate::core::node::NodeInfo;
 use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
+use crate::core::node::NodeInfo;
 
 /// A trait for formatting a list of `NodeInfo` objects into a string representation.
 ///
@@ -17,5 +17,6 @@ pub trait TreeFormatter {
     /// # Returns
     ///
     /// A `Result` containing the formatted `String` on success, or a [`RustreeError`] on failure.
-    fn format(&self, nodes: &[NodeInfo], config: &RustreeLibConfig) -> Result<String, RustreeError>;
+    fn format(&self, nodes: &[NodeInfo], config: &RustreeLibConfig)
+    -> Result<String, RustreeError>;
 }
