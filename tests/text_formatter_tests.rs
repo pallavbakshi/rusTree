@@ -853,10 +853,8 @@ fn test_formatter_sort_integration() -> Result<()> {
         expected_output_name_sorted.trim()
     );
 
-    // Config with sorting by size (descending for test, files first then dirs)
-    // Note: sorter.rs current Size sort puts Some before None (smaller first).
-    // For descending, None would be first.
-    // Let's test with ascending size sort.
+    // Config with sorting by size (descending by default, files first then dirs)
+    // Note: sorter.rs now sorts by size in descending order (largest first).
     let config_size_sort = RustreeLibConfig {
         input_source: InputSourceOptions {
             root_display_name: root_name.clone(),
@@ -864,7 +862,7 @@ fn test_formatter_sort_integration() -> Result<()> {
             ..Default::default()
         },
         listing: ListingOptions {
-            max_depth: Some(1), // Only top level: file1 (18B), file2 (12B), sub_dir (None/Dir)
+            max_depth: Some(1), // Only top level: file1 (16B), file2 (12B), sub_dir (192B)
             show_hidden: false,
             ..Default::default()
         },
@@ -873,7 +871,7 @@ fn test_formatter_sort_integration() -> Result<()> {
             ..Default::default()
         },
         sorting: SortingOptions {
-            sort_by: Some(SortKey::Size), // Ascending: small files first
+            sort_by: Some(SortKey::Size), // Descending: large files first
             reverse_sort: false,
             ..Default::default()
         },
@@ -884,14 +882,15 @@ fn test_formatter_sort_integration() -> Result<()> {
     let output_size_sorted =
         format_nodes(&nodes_size_sorted, LibOutputFormat::Text, &config_size_sort)?;
 
-    // Expected order for top level (size ascending): file2 (12B), file1 (16B), sub_dir (dirs/None size last)
-    // Current sorter.rs: Some < None. So Dirs (None size) will be last.
+    // Expected order for top level (size descending): file1 (16B), file2 (12B), sub_dir (192B but comes last due to type bias)
+    // New sorter.rs: Files before directories, then descending size within each type.
     // file1.txt is "hello\nworld\nrust" = 5+1+5+1+4 = 16 bytes.
-    // sub_dir size observed as 192B in other test failures.
+    // file2.log is smaller.
+    // sub_dir size observed as 192B in practice.
     let expected_output_size_sorted = format!(
         r#"{}/
-├── [     12B] file2.log
 ├── [     16B] file1.txt
+├── [     12B] file2.log
 └── [    192B] sub_dir/
 
 1 directory, 2 files"#,

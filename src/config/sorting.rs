@@ -26,10 +26,24 @@ pub enum SortKey {
 }
 
 /// Configuration for sorting behavior.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct SortingOptions {
     /// The key to sort by. None means no sorting (preserve directory traversal order).
     pub sort_by: Option<SortKey>,
     /// Whether to reverse the sort order.
     pub reverse_sort: bool,
+    /// Whether to sort files before directories when sorting by size.
+    /// When true (default), files and symlinks appear before directories.
+    /// When false, files and directories are intermixed based purely on size.
+    pub files_before_directories: bool,
+}
+
+impl Default for SortingOptions {
+    fn default() -> Self {
+        Self {
+            sort_by: None,
+            reverse_sort: false,
+            files_before_directories: true, // Default to traditional behavior
+        }
+    }
 }

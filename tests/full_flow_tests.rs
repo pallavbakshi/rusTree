@@ -3,16 +3,8 @@
 // Use your library as if you were an external user
 use anyhow::Result;
 use rustree::{
-    BuiltInFunction,
-    LibOutputFormat,
-    ListingOptions,
-    MetadataOptions,
-    NodeType, // Added NodeType
-    RustreeLibConfig,
-    SortKey,
-    SortingOptions, // Added new configuration structs
-    format_nodes,
-    get_tree_nodes,
+    format_nodes, get_tree_nodes, BuiltInFunction, InputSourceOptions,
+    LibOutputFormat, ListingOptions, MetadataOptions, NodeType, RustreeLibConfig,
 }; // For test functions returning Result
 
 // Use the common module
@@ -144,18 +136,13 @@ fn test_formatting_markdown() -> Result<()> {
     let root_path = temp_dir.path();
 
     let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "test_root".to_string(),
+            root_is_directory: true,
+            ..Default::default()
+        },
         listing: ListingOptions {
-            max_depth: Some(2),
-            show_hidden: false,
-            ..Default::default()
-        },
-        metadata: MetadataOptions {
-            calculate_line_count: true,
-            report_sizes: true,
-            ..Default::default()
-        },
-        sorting: SortingOptions {
-            sort_by: Some(SortKey::Name),
+            max_depth: Some(1),
             ..Default::default()
         },
         ..Default::default()
@@ -168,9 +155,12 @@ fn test_formatting_markdown() -> Result<()> {
     let markdown_output = format_nodes(&nodes, LibOutputFormat::Markdown, &config)?;
 
     println!("Markdown Output:\n{}", markdown_output);
-    // Since the MarkdownFormatter is a placeholder returning "- Markdown output (placeholder)"
-    // this test will reflect that.
-    assert_eq!(markdown_output, "- Markdown output (placeholder)");
+    
+    // Test that we get proper Markdown formatting instead of placeholder
+    assert!(markdown_output.starts_with("# test_root"));
+    assert!(markdown_output.contains("* "));
+    assert!(markdown_output.contains("director"));
+    assert!(markdown_output.contains("file"));
 
     Ok(())
 }

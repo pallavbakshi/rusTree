@@ -9,6 +9,10 @@ edition = "2024"
 name = "rustree"
 path = "src/main.rs"
 
+[[bench]]
+name = "core_performance"
+harness = false
+
 [dependencies]
 # Library-specific dependencies (also available to the binary)
 walkdir = "2.5"
@@ -34,3 +38,4 @@ clap = { version = "4.5", features = ["derive"] }
 [dev-dependencies]
 tempfile = "3.20"
 anyhow = "1.0"
+criterion = "0.5"

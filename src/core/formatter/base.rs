@@ -1,7 +1,7 @@
 // src/core/formatter/base.rs
 use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
-use crate::core::node::NodeInfo;
+use crate::core::tree::node::NodeInfo;
 
 /// A trait for formatting a list of `NodeInfo` objects into a string representation.
 ///

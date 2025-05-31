@@ -1,4 +1,3 @@
-// src/core/node.rs
 use crate::config::metadata::ApplyFnError;
 use std::path::PathBuf;
 use std::time::SystemTime;
@@ -48,4 +47,4 @@ pub enum NodeType {
     Directory,
     /// Represents a symbolic link.
     Symlink,
-}
+} 

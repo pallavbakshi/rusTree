@@ -99,7 +99,7 @@ pub use crate::config::output_format::OutputFormat as LibOutputFormat;
 
 // Core types for working with nodes
 pub use crate::core::error::RustreeError;
-pub use crate::core::node::{NodeInfo, NodeType};
+pub use crate::core::tree::node::{NodeInfo, NodeType};
 
 // Formatter types (for advanced usage)
 pub use crate::core::formatter::{
@@ -143,8 +143,14 @@ pub fn get_tree_nodes(
     let mut nodes = walker::walk_directory(root_path, config)?;
 
     // 2. Sort if requested in config
-    if let Some(sort_key) = &config.sorting.sort_by {
-        sorter::sort_nodes(&mut nodes, sort_key, config.sorting.reverse_sort);
+    if config.sorting.sort_by.is_some() {
+        if let Err(e) = sorter::strategies::sort_nodes_with_options(&mut nodes, &config.sorting) {
+            // Convert sorting error to IO error since it's related to data structure processing
+            return Err(RustreeError::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("Sorting failed: {}", e)
+            )));
+        }
     }
     Ok(nodes)
 }
