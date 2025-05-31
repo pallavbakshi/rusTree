@@ -4,47 +4,75 @@ Understanding these core components will help you effectively use the `rustree` 
 
 ### `RustreeLibConfig`
 
-This struct (defined in `src/config/tree_options.rs`) is central to controlling how `rustree` behaves. You create an instance of `RustreeLibConfig` and set its fields to specify:
+This struct (defined in `src/config/tree_options.rs`) is central to controlling how `rustree` behaves. It has been refactored into a hierarchical structure, grouping related options into sub-structs for better organization. You create an instance of `RustreeLibConfig` and set fields within these sub-structs:
 
-- `root_display_name`: How the root directory is named in the output.
-- `max_depth`: The maximum depth of traversal.
-- `show_hidden`: Whether to include hidden files/directories.
-- `report_sizes`, `report_mtime`: Whether to collect and report file sizes and modification times. `report_sizes` also applies to directories.
-- `calculate_line_count`, `calculate_word_count`: Whether to perform these analyses on files.
-- `apply_function`: An optional `BuiltInFunction` (from `src/config/fileinfo.rs`) to apply to file contents.
-- `sort_by`: An optional `SortKey` (from `src/config/sorting.rs`) to sort sibling entries.
-- `reverse_sort`: Whether to reverse the sort order.
-- `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
-- `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--filter-include` options.
-- `ignore_patterns`: `Option<Vec<String>>` containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI `-I`/`--filter-exclude` options.
-- `use_gitignore`: If `true`, standard gitignore files (`.gitignore`, global gitignore, etc.) will be used for filtering.
-- `git_ignore_files`: `Option<Vec<PathBuf>>` specifying paths to custom files to be used as additional gitignore files.
-- `ignore_case_for_patterns`: If `true`, all pattern matching (`match_patterns`, `ignore_patterns`, and gitignore processing) will be case-insensitive.
-- `root_node_size`: Optional size of the root node itself, used by formatters if `report_sizes` is true.
-- `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
+- **`input_source: InputSourceOptions`** (from `src/config/input_source.rs`):
+  - `root_display_name`: How the root directory is named in the output.
+  - `root_node_size`: Optional size of the root node itself, used by formatters if `metadata.report_sizes` is true.
+  - `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
+- **`listing: ListingOptions`** (from `src/config/listing.rs`):
+  - `max_depth`: The maximum depth of traversal.
+  - `show_hidden`: Whether to include hidden files/directories.
+  - `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
+- **`filtering: FilteringOptions`** (from `src/config/filtering.rs`):
+  - `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--filter-include` options.
+  - `ignore_patterns`: `Option<Vec<String>>` containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI `-I`/`--filter-exclude` options.
+  - `use_gitignore`: If `true`, standard gitignore files (`.gitignore`, global gitignore, etc.) will be used for filtering.
+  - `git_ignore_files`: `Option<Vec<PathBuf>>` specifying paths to custom files to be used as additional gitignore files.
+  - `ignore_case_for_patterns`: If `true`, all pattern matching (`match_patterns`, `ignore_patterns`, and gitignore processing) will be case-insensitive.
+- **`sorting: SortingOptions`** (from `src/config/sorting.rs`):
+  - `sort_by`: An optional `SortKey` (from `src/config/sorting.rs`) to sort sibling entries.
+  - `reverse_sort`: Whether to reverse the sort order.
+- **`metadata: MetadataOptions`** (from `src/config/metadata.rs`):
+  - `report_sizes`, `report_mtime`: Whether to collect and report file sizes and modification times. `report_sizes` also applies to directories.
+  - `calculate_line_count`, `calculate_word_count`: Whether to perform these analyses on files.
+  - `apply_function`: An optional `BuiltInFunction` (from `src/config/metadata.rs`) to apply to file contents.
+  - `report_permissions`: (Currently not exposed via CLI, defaults to false).
+- **`misc: MiscOptions`** (from `src/config/misc.rs`):
+  - Currently no fields, reserved for future use.
 
 **Example:**
 
 ```rust
-use rustree::{RustreeLibConfig, SortKey, BuiltInFunction}; // These are re-exported by lib.rs
+use rustree::{
+    RustreeLibConfig, SortKey, BuiltInFunction,
+    InputSourceOptions, ListingOptions, FilteringOptions, SortingOptions, MetadataOptions,
+};
 use std::path::PathBuf;
 
 let config = RustreeLibConfig {
-    root_display_name: "MyProject".to_string(),
-    max_depth: Some(3),
-    show_hidden: false,
-    report_sizes: true,
-    sort_by: Some(SortKey::Size),
-    reverse_sort: true,
-    list_directories_only: false,
-    match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example -P patterns
-    ignore_patterns: Some(vec!["*.log".to_string(), "target/".to_string()]), // Example -I patterns
-    use_gitignore: true,
-    git_ignore_files: Some(vec![PathBuf::from(".customignore")]),
-    ignore_case_for_patterns: false,
-    root_node_size: None, // Typically set by the CLI handler or by checking metadata
-    root_is_directory: true, // Typically set by the CLI handler or by checking metadata
-    ..Default::default() // Use defaults for other fields
+    input_source: InputSourceOptions {
+        root_display_name: "MyProject".to_string(),
+        root_node_size: None, // Typically set by the CLI handler or by checking metadata
+        root_is_directory: true, // Typically set by the CLI handler or by checking metadata
+        ..Default::default()
+    },
+    listing: ListingOptions {
+        max_depth: Some(3),
+        show_hidden: false,
+        list_directories_only: false,
+        ..Default::default()
+    },
+    filtering: FilteringOptions {
+        match_patterns: Some(vec!["*.rs".to_string(), "src/".to_string()]), // Example -P patterns
+        ignore_patterns: Some(vec!["*.log".to_string(), "target/".to_string()]), // Example -I patterns
+        use_gitignore: true,
+        git_ignore_files: Some(vec![PathBuf::from(".customignore")]),
+        ignore_case_for_patterns: false,
+        ..Default::default()
+    },
+    sorting: SortingOptions {
+        sort_by: Some(SortKey::Size),
+        reverse_sort: true,
+        ..Default::default()
+    },
+    metadata: MetadataOptions {
+        report_sizes: true,
+        calculate_line_count: false, // Example: not calculating line count
+        apply_function: Some(BuiltInFunction::CountPluses), // Example: applying a function
+        ..Default::default()
+    },
+    ..Default::default() // Use defaults for misc and other fields if not specified
 };
 ```
 
@@ -54,12 +82,12 @@ Each file or directory encountered during the scan is represented by a `NodeInfo
 
 - `path`: The full `PathBuf` to the entry.
 - `name`: The file or directory name as a `String`.
-- `node_type`: A `NodeType` enum (`File`, `Directory`, `Symlink`). When `list_directories_only` is active, symlinks pointing to directories will have `NodeType::Directory`.
+- `node_type`: A `NodeType` enum (`File`, `Directory`, `Symlink`). When `listing.list_directories_only` is active, symlinks pointing to directories will have `NodeType::Directory`.
 - `depth`: The entry's depth in the tree.
-- `size`: `Option<u64>` for file or directory size (if `report_sizes` is enabled).
+- `size`: `Option<u64>` for file or directory size (if `metadata.report_sizes` is enabled).
 - `mtime`: `Option<SystemTime>` for modification time.
 - `line_count`, `word_count`: `Option<usize>` for analysis results (applicable to files only).
-- `custom_function_output`: `Option<Result<String, ApplyFnError>>` (where `ApplyFnError` is from `src/config/fileinfo.rs`) for results of `apply_function`.
+- `custom_function_output`: `Option<Result<String, ApplyFnError>>` (where `ApplyFnError` is from `src/config/metadata.rs`) for results of `metadata.apply_function`.
 
 You typically receive a `Vec<NodeInfo>` from `get_tree_nodes()`.
 
@@ -92,13 +120,14 @@ fn display_tree(nodes: &[NodeInfo], format: LibOutputFormat, config: &RustreeLib
 }
 ```
 
-This function takes the nodes, a `LibOutputFormat` enum (`Text` or `Markdown`, from `src/config/output.rs` and re-exported), and the `RustreeLibConfig` (as some config options affect formatting).
+This function takes the nodes, a `LibOutputFormat` enum (`Text` or `Markdown`, from `src/config/output_format.rs` and re-exported), and the `RustreeLibConfig` (as some config options affect formatting).
 
 ### Key Enums
 
-- **`SortKey`**: `Name`, `Size`, `MTime`, `Words`, `Lines`, `Custom`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig` to specify sorting.
-- **`LibOutputFormat`**: `Text`, `Markdown`. Defined in `src/config/output.rs` (as `OutputFormat`). Used with `format_nodes()`.
-- **`BuiltInFunction`**: e.g., `CountPluses`. Defined in `src/config/fileinfo.rs`. Used in `RustreeLibConfig` for `apply_function`.
+- **`SortKey`**: `Name`, `Size`, `MTime`, `Words`, `Lines`, `Custom`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig.sorting.sort_by`.
+- **`LibOutputFormat`**: `Text`, `Markdown`. Defined in `src/config/output_format.rs` (as `OutputFormat`). Used with `format_nodes()`.
+- **`BuiltInFunction`**: e.g., `CountPluses`. Defined in `src/config/metadata.rs`. Used in `RustreeLibConfig.metadata.apply_function`.
+- **`ApplyFnError`**: Error type for `BuiltInFunction` application. Defined in `src/config/metadata.rs`.
 - **`NodeType`**: `File`, `Directory`, `Symlink`. Defined in `src/core/node.rs`. Found in `NodeInfo`.
 - **`RustreeError`**: The error type returned by library functions. Defined in `src/core/error.rs`.
 
