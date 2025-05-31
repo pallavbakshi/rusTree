@@ -29,17 +29,26 @@ impl TextTreeFormatter {
             }
         }
 
-        // MTime: applies to all node types if config.report_mtime is true.
-        if config.metadata.report_mtime {
+        // MTime/ChangeTime/CreateTime: applies to all node types if config.report_X_time is true.
+        if config.metadata.report_modification_time {
             if let Some(mtime) = node.mtime {
-                match mtime.duration_since(UNIX_EPOCH) {
-                    Ok(duration) => {
-                        write!(metadata_str, "[MTime: {:>10}s] ", duration.as_secs()).unwrap()
-                    }
-                    Err(_) => write!(metadata_str, "[MTime: <error>] ").unwrap(),
-                }
+                write!(metadata_str, "[MTime: {:>10}s] ", mtime.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs())).unwrap();
             } else {
-                write!(metadata_str, "[MTime:            ] ").unwrap(); // Placeholder
+                write!(metadata_str, "[MTime:            ] ").unwrap();
+            }
+        }
+        if config.metadata.report_change_time {
+            if let Some(ctime) = node.change_time {
+                write!(metadata_str, "[CTime: {:>10}s] ", ctime.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs())).unwrap();
+            } else {
+                write!(metadata_str, "[CTime:            ] ").unwrap();
+            }
+        }
+        if config.metadata.report_creation_time {
+            if let Some(btime) = node.create_time {
+                write!(metadata_str, "[BTime: {:>10}s] ", btime.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs())).unwrap();
+            } else {
+                write!(metadata_str, "[BTime:            ] ").unwrap();
             }
         }
 

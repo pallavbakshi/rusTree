@@ -206,7 +206,7 @@ fn test_formatter_no_file_specific_metadata_prefixes_in_dirs_only_mode() -> Resu
         },
         metadata: MetadataOptions {
             report_sizes: true,
-            report_mtime: true,
+            report_modification_time: true,
             calculate_line_count: true,
             calculate_word_count: true,
             apply_function: Some(BuiltInFunction::CountPluses),
@@ -273,7 +273,7 @@ fn test_formatter_no_file_specific_metadata_prefixes_in_dirs_only_mode() -> Resu
                     line
                 );
             }
-            if config.metadata.report_mtime {
+            if config.metadata.report_modification_time {
                 assert!(
                     line.contains("MTime:"),
                     "Expected MTime prefix not found in -d mode for line: {}",
@@ -503,7 +503,7 @@ fn test_formatter_with_report_sizes() -> Result<()> {
 }
 
 #[test]
-fn test_formatter_with_report_mtime() -> Result<()> {
+fn test_formatter_with_report_modification_time() -> Result<()> {
     let temp_dir = setup_formatter_test_directory()?;
     let root_path = temp_dir.path();
     let root_name = get_root_name(root_path);
@@ -523,7 +523,7 @@ fn test_formatter_with_report_mtime() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            report_mtime: true,
+            report_modification_time: true,
             ..Default::default()
         },
         ..Default::default()
@@ -708,7 +708,7 @@ fn test_formatter_with_multiple_metadata() -> Result<()> {
         },
         metadata: MetadataOptions {
             report_sizes: true,
-            report_mtime: true,
+            report_modification_time: true,
             calculate_line_count: true,
             calculate_word_count: true,
             apply_function: Some(BuiltInFunction::CountPluses),

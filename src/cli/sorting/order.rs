@@ -4,21 +4,33 @@ use clap::Args;
 
 #[derive(Args, Debug)]
 pub struct SortOrderArgs {
+    /// Sort by entry name, version, size, modification time, change time, creation time, lines, words, custom, or none.
+    /// E.g., `--sort-by size` or `-S m`.
+    /// Conflicts with -v, -t, -c, -U.
+    #[arg(long = "sort-by", short = 'S', value_name = "FIELD", conflicts_with_all = ["legacy_sort_version", "legacy_sort_mtime", "legacy_sort_change_time", "legacy_no_sort"])]
+    pub sort_by: Option<CliSortKey>,
+
+    // Legacy flags for backward compatibility
+    /// Sort by version. (Original tree: -v)
+    /// Conflicts with --sort-by, -t, -c, -U.
+    #[arg(short = 'v', conflicts_with_all = ["sort_by", "legacy_sort_mtime", "legacy_sort_change_time", "legacy_no_sort"])]
+    pub legacy_sort_version: bool,
+
     /// Sort by modification time. (Original tree: -t)
-    /// Conflicts with --sort-key and -U/--unsorted.
-    #[arg(short = 't', long = "sort-by-mtime", conflicts_with_all = ["sort_key", "unsorted_flag"])]
-    pub sort_by_mtime_flag: bool,
+    /// Conflicts with --sort-by, -v, -c, -U.
+    #[arg(short = 't', conflicts_with_all = ["sort_by", "legacy_sort_version", "legacy_sort_change_time", "legacy_no_sort"])]
+    pub legacy_sort_mtime: bool,
+
+    /// Sort by change time. (Original tree: -c)
+    /// Also modifies --date to show change time if both -c and -D are present.
+    /// Conflicts with --sort-by, -v, -t, -U.
+    #[arg(short = 'c', conflicts_with_all = ["sort_by", "legacy_sort_version", "legacy_sort_mtime", "legacy_no_sort"])]
+    pub legacy_sort_change_time: bool,
 
     /// Do not sort; list files in directory order. (Original tree: -U)
-    /// Conflicts with --sort-key, -t/--sort-by-mtime, and -r/--reverse-sort.
-    #[arg(short = 'U', long, conflicts_with_all = ["sort_key", "sort_by_mtime_flag", "reverse_sort"])]
-    pub unsorted_flag: bool,
-
-    /// Specifies the key for sorting directory entries (e.g., name, size, mtime).
-    /// Conflicts with -t/--sort-by-mtime and -U/--unsorted.
-    /// If no sort option (-t, -U, --sort-key) is given, defaults to sorting by name.
-    #[arg(long, conflicts_with_all = ["sort_by_mtime_flag", "unsorted_flag"])]
-    pub sort_key: Option<CliSortKey>,
+    /// Conflicts with --sort-by, -v, -t, -c, -r.
+    #[arg(short = 'U', long, conflicts_with_all = ["sort_by", "legacy_sort_version", "legacy_sort_mtime", "legacy_sort_change_time", "reverse_sort"])]
+    pub legacy_no_sort: bool,
 
     /// Reverse the order of the active sort. (Original tree: -r)
     /// Incompatible with -U/--unsorted.

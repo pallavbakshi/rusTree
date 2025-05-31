@@ -67,23 +67,30 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             ignore_case_for_patterns: cli_args.gitignore.ignore_case_for_patterns,
         },
         sorting: SortingOptions {
-            sort_by: if cli_args.sort_order.unsorted_flag {
+            sort_by: if cli_args.sort_order.legacy_no_sort {
                 None // -U means no sorting
-            } else if cli_args.sort_order.sort_by_mtime_flag {
+            } else if cli_args.sort_order.legacy_sort_version {
+                Some(LibSortKey::Version) // -v means sort by Version
+            } else if cli_args.sort_order.legacy_sort_mtime {
                 Some(LibSortKey::MTime) // -t means sort by MTime
+            } else if cli_args.sort_order.legacy_sort_change_time {
+                Some(LibSortKey::ChangeTime) // -c means sort by ChangeTime
             } else {
                 cli_args
                     .sort_order
-                    .sort_key
+                    .sort_by
                     .as_ref()
                     .map(|sk| match sk {
-                        // --sort-key
                         CliSortKey::Name => LibSortKey::Name,
+                        CliSortKey::Version => LibSortKey::Version,
                         CliSortKey::Size => LibSortKey::Size,
                         CliSortKey::MTime => LibSortKey::MTime,
+                        CliSortKey::ChangeTime => LibSortKey::ChangeTime,
+                        CliSortKey::CreateTime => LibSortKey::CreateTime,
                         CliSortKey::Words => LibSortKey::Words,
                         CliSortKey::Lines => LibSortKey::Lines,
                         CliSortKey::Custom => LibSortKey::Custom,
+                        CliSortKey::None => LibSortKey::None,
                     })
                     .or(Some(LibSortKey::Name)) // Default to sort by Name if no sort option is specified
             },
@@ -92,7 +99,9 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         metadata: MetadataOptions {
             report_sizes: cli_args.size.report_sizes,
             report_permissions: false, // Not exposed in CLI args yet
-            report_mtime: cli_args.date.report_mtime,
+            report_modification_time: cli_args.date.report_last_modified_time && !cli_args.sort_order.legacy_sort_change_time, // If -D is present AND -c is NOT
+            report_change_time: cli_args.sort_order.legacy_sort_change_time && cli_args.date.report_last_modified_time, // -c with -D implies reporting ctime for display
+            report_creation_time: false, // Currently no CLI flag for reporting creation time, but can be added later
             calculate_line_count: cli_args.file_stats.calculate_lines,
             calculate_word_count: cli_args.file_stats.calculate_words,
             apply_function: cli_args

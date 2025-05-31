@@ -288,6 +288,8 @@ pub fn walk_directory(
             size: None,
             permissions: None,
             mtime: None,
+            change_time: None,
+            create_time: None,
             line_count: None,
             word_count: None,
             custom_function_output: None,
@@ -297,8 +299,38 @@ pub fn walk_directory(
             if config.metadata.report_sizes {
                 node.size = Some(meta.len());
             }
-            if config.metadata.report_mtime {
+            if config.metadata.report_modification_time {
                 node.mtime = meta.modified().ok();
+            }
+            if config.metadata.report_change_time {
+                // Note: ctime is Unix-specific and not directly available via std::fs::Metadata.
+                // On Windows, it often returns creation_time. On macOS, it's status change time.
+                // A cross-platform solution often involves platform-specific APIs or assumes mtime for simplicity.
+                // For a robust solution, consider `libc` or `winapi` with `FileAttribute` or similar.
+                // For this PRD, assume a best-effort or placeholder if direct `std` access is insufficient.
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::MetadataExt;
+                    use std::time::{Duration, UNIX_EPOCH};
+                    if let Some(ctime_secs) = meta.ctime().checked_mul(1).map(|s| s as u64) {
+                        node.change_time = UNIX_EPOCH.checked_add(Duration::from_secs(ctime_secs));
+                    }
+                }
+                #[cfg(windows)]
+                {
+                    use std::os::windows::fs::MetadataExt;
+                    // Windows often reports creation time as ctime
+                    node.change_time = meta.created().ok();
+                }
+                #[cfg(not(any(unix, windows)))]
+                {
+                    node.change_time = None; // Placeholder for other OS or if ctime isn't easily accessible
+                }
+            }
+            if config.metadata.report_creation_time {
+                // Note: creation_time is not universally available (e.g., Linux filesystems often don't store it).
+                // `std::fs::Metadata::created()` is the portable way but can return an error.
+                node.create_time = meta.created().ok();
             }
         }
 
