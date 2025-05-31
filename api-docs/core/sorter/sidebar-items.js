@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["sort_nodes"]};
+window.SIDEBAR_ITEMS = {"mod":["comparators","composite","strategies"]};

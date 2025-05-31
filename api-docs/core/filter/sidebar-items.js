@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["composite","gitignore","matcher","pattern","size_filter"]};

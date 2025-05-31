@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["walk_directory"]};
+window.SIDEBAR_ITEMS = {"mod":["depth_control","filesystem","input_source","symlinks"]};

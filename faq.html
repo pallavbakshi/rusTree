@@ -173,7 +173,7 @@
 <li><strong>Extensibility:</strong> Built in Rust, allowing for easier addition of new features.</li>
 <li><strong>Analysis Features:</strong> Built-in capabilities like line/word counts and potential for custom function application on file contents.</li>
 <li><strong>Multiple Output Formats:</strong> Starting with text and Markdown, with potential for more (e.g., JSON).</li>
-<li><strong>Sorting Options:</strong> More granular control over sorting.</li>
+<li><strong>Sorting Options:</strong> More granular control over sorting, including improved version sorting (e.g., "1.10" correctly sorts after "1.2") and configurable grouping of files/directories when sorting by size. By default, size sort lists largest items first.</li>
 <li><strong>Library Usage:</strong> Can be used as a Rust library in other projects.</li>
 </ul>
 <p><strong>Q: What are the system requirements?</strong></p>
@@ -230,6 +230,14 @@
 <p>A: Yes. When <code>-d</code> (or <code>--directory-only</code>) and <code>-s</code> (or <code>--report-sizes</code>) are used together, RusTree will report the sizes of the directories themselves (as reported by the operating system, which might vary in meaning, e.g., size of metadata vs. total content size on some systems). Similarly, if <code>-D</code> (or <code>--date</code>) is used with <code>-d</code>, it will show the relevant date (modification or change time, depending on whether <code>-c</code> is also active) for the directories.</p>
 <p><strong>Q: What happens if I use <code>-d</code> with file-specific sorting keys like <code>lines</code> or <code>words</code>?</strong></p>
 <p>A: Since <code>-d</code> (or <code>--directory-only</code>) excludes files, sorting by file-specific attributes like line count or word count will not be meaningful. The sorting behavior in such cases might default to sorting by name or be unpredictable for those specific keys. It's recommended to use sort keys applicable to directories (e.g., <code>name</code>, <code>version</code>, <code>mtime</code>, <code>ctime</code>, <code>crtime</code>, <code>size</code> if <code>-s</code> is also used) when <code>-d</code> is active. If you want to preserve directory order with <code>-d</code>, use <code>-U</code> or <code>--sort-by none</code>.</p>
+<p><strong>Q: How does size sorting work?</strong></p>
+<p>A: When sorting by size (e.g., using <code>--sort-by size</code>):</p>
+<ol>
+<li>Files and symbolic links are grouped together and listed before directories. This is the default behavior.</li>
+<li>Within each group (files/symlinks, then directories), entries are sorted by size in <strong>descending order</strong> (largest first).</li>
+<li>If sizes are equal, entries are then sorted by name in ascending order as a tie-breaker.
+If you use <code>-r</code> (or <code>--reverse-sort</code>) with size sorting, the overall order is reversed: directories will come first (sorted by size ascending, then name ascending), followed by files/symlinks (sorted by size ascending, then name ascending).</li>
+</ol>
 <p><strong>Q: How does the <code>-D</code> (or <code>--date</code>) flag interact with <code>-c</code> (sort by change time)?</strong></p>
 <p>A:</p>
 <ul>

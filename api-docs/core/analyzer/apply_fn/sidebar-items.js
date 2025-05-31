@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["apply_function_to_content"]};

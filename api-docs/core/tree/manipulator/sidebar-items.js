@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["TreeManipulator"],"type":["NodeFilter","NodeTransformer"]};

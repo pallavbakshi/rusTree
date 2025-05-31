@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["MetadataStyle"],"fn":["apply_builtin_function","apply_builtin_to_file","apply_function_to_content","format_node_metadata"]};
