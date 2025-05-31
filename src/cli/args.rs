@@ -1,12 +1,12 @@
 // src/cli/args.rs
+use crate::cli::filtering::{exclude, gitignore, include};
+use crate::cli::listing::{depth, directory_only, hidden};
+use crate::cli::metadata::{date, size, stats};
+use crate::cli::misc::llm;
+use crate::cli::output::format;
+use crate::cli::sorting::order;
 use clap::Parser;
 use std::path::PathBuf;
-use crate::cli::sorting::order;
-use crate::cli::metadata::{size, date, stats};
-use crate::cli::listing::{depth, hidden, directory_only};
-use crate::cli::filtering::{include, exclude, gitignore};
-use crate::cli::output::format;
-use crate::cli::misc::llm;
 
 /// Defines the command-line arguments accepted by the `rustree` executable.
 ///
@@ -54,4 +54,4 @@ pub struct CliArgs {
 
     #[command(flatten)]
     pub llm: llm::LlmArgs,
-} 
+}

@@ -19,7 +19,7 @@ impl TextTreeFormatter {
         // FR7: Interaction with Metadata Flags
         // Size: applies to files and directories if config.report_sizes is true.
         // node.size is populated for directories by the walker.
-        if config.report_sizes {
+        if config.metadata.report_sizes {
             if let Some(size) = node.size {
                 write!(metadata_str, "[{:>7}B] ", size).unwrap();
             } else {
@@ -30,10 +30,12 @@ impl TextTreeFormatter {
         }
 
         // MTime: applies to all node types if config.report_mtime is true.
-        if config.report_mtime {
+        if config.metadata.report_mtime {
             if let Some(mtime) = node.mtime {
                 match mtime.duration_since(UNIX_EPOCH) {
-                    Ok(duration) => write!(metadata_str, "[MTime: {:>10}s] ", duration.as_secs()).unwrap(),
+                    Ok(duration) => {
+                        write!(metadata_str, "[MTime: {:>10}s] ", duration.as_secs()).unwrap()
+                    }
                     Err(_) => write!(metadata_str, "[MTime: <error>] ").unwrap(),
                 }
             } else {
@@ -44,21 +46,21 @@ impl TextTreeFormatter {
         // File-specific metadata: only show if the node is a file.
         // When -d is active, node.node_type will be Directory, so these won't be shown.
         if node.node_type == NodeType::File {
-            if config.calculate_line_count {
+            if config.metadata.calculate_line_count {
                 if let Some(lc) = node.line_count {
                     write!(metadata_str, "[L:{:>4}] ", lc).unwrap();
                 } else {
                     write!(metadata_str, "[L:    ] ").unwrap(); // Placeholder if None
                 }
             }
-            if config.calculate_word_count {
+            if config.metadata.calculate_word_count {
                 if let Some(wc) = node.word_count {
                     write!(metadata_str, "[W:{:>4}] ", wc).unwrap();
                 } else {
                     write!(metadata_str, "[W:    ] ").unwrap(); // Placeholder if None
                 }
             }
-            if config.apply_function.is_some() {
+            if config.metadata.apply_function.is_some() {
                 match &node.custom_function_output {
                     Some(Ok(val)) => write!(metadata_str, "[F: \"{}\"] ", val).unwrap(),
                     Some(Err(_)) => write!(metadata_str, "[F: error] ").unwrap(),
@@ -85,7 +87,8 @@ impl TextTreeFormatter {
 
         let node_info = match all_nodes.iter().find(|n| n.path == node_to_check_path) {
             Some(info) => info,
-            None => { // Should not happen if node_to_check_path is from a node in all_nodes
+            None => {
+                // Should not happen if node_to_check_path is from a node in all_nodes
                 cache.insert(node_to_check_path.to_path_buf(), true); // Default to true to avoid issues
                 return true;
             }
@@ -102,12 +105,14 @@ impl TextTreeFormatter {
             // not strictly by depth across different branches. A deeper branch of an earlier sibling
             // could appear before a later sibling at `node_depth` when iterating in reverse.
             // The correct approach is to scan until a sibling is found or the list is exhausted.
-            if sibling_candidate_node.depth == node_depth && sibling_candidate_node.path.parent() == parent_path_opt {
+            if sibling_candidate_node.depth == node_depth
+                && sibling_candidate_node.path.parent() == parent_path_opt
+            {
                 last_sibling_path_in_list = Some(&sibling_candidate_node.path);
                 break; // Found the last sibling (due to reverse iteration)
             }
         }
-        
+
         let result = match last_sibling_path_in_list {
             Some(last_path) => last_path == node_to_check_path,
             // If no sibling is found with the same parent and depth (e.g., root items, or error in data),
@@ -130,8 +135,8 @@ impl TreeFormatter for TextTreeFormatter {
         let mut output = String::new();
 
         // Handle root display name with optional size prefix
-        if config.report_sizes {
-            if let Some(size) = config.root_node_size {
+        if config.metadata.report_sizes {
+            if let Some(size) = config.input_source.root_node_size {
                 write!(output, "[{:>7}B] ", size)?;
             }
             // If report_sizes is true but root_node_size is None (e.g. metadata error for root),
@@ -140,17 +145,18 @@ impl TreeFormatter for TextTreeFormatter {
             // For now, if size is None, we just print the name.
             // The original `tree` command shows size for the root only if -s is active.
         }
-        if config.root_is_directory {
-            writeln!(output, "{}/", config.root_display_name)?;
+        if config.input_source.root_is_directory {
+            writeln!(output, "{}/", config.input_source.root_display_name)?;
         } else {
-            writeln!(output, "{}", config.root_display_name)?;
+            writeln!(output, "{}", config.input_source.root_display_name)?;
         }
-    
+
         let mut last_sibling_cache = HashMap::<PathBuf, bool>::new();
 
         // Determine the effective root path from the nodes themselves
         // This is the parent of the first depth-1 node.
-        let scan_root_path_opt = nodes.iter()
+        let scan_root_path_opt = nodes
+            .iter()
             .find(|n| n.depth == 1)
             .and_then(|n| n.path.parent().map(|p| p.to_path_buf()));
 
@@ -158,7 +164,8 @@ impl TreeFormatter for TextTreeFormatter {
             let mut line_prefix = String::new();
 
             // Build prefix based on ancestors' "last sibling" status
-            if node.depth > 1 { // Only if there are ancestors to draw pipes for
+            if node.depth > 1 {
+                // Only if there are ancestors to draw pipes for
                 let mut ancestor_paths_to_check = Vec::new();
                 let mut p_iter = node.path.ancestors().skip(1); // Skips self
 
@@ -178,7 +185,11 @@ impl TreeFormatter for TextTreeFormatter {
                 ancestor_paths_to_check.reverse(); // Order from shallowest to deepest ancestor
 
                 for ancestor_p_path in &ancestor_paths_to_check {
-                    if !Self::is_last_sibling_in_sorted_list(ancestor_p_path, nodes, &mut last_sibling_cache) {
+                    if !Self::is_last_sibling_in_sorted_list(
+                        ancestor_p_path,
+                        nodes,
+                        &mut last_sibling_cache,
+                    ) {
                         line_prefix.push_str("│   ");
                     } else {
                         line_prefix.push_str("    ");
@@ -192,7 +203,7 @@ impl TreeFormatter for TextTreeFormatter {
             } else {
                 line_prefix.push_str("├── ");
             }
-            
+
             write!(output, "{}", line_prefix)?;
 
             let metadata_string = Self::format_metadata(node, config);
@@ -206,11 +217,15 @@ impl TreeFormatter for TextTreeFormatter {
         }
 
         // FR4 & FR7: Summary Line
-        let (dir_count, file_count) = if config.list_directories_only {
+        let (dir_count, file_count) = if config.listing.list_directories_only {
             // If -d is active, nodes contains child directories.
             // The total directory count includes these children plus the root if it's a directory.
             let child_dir_count = nodes.len();
-            let root_dir_increment = if config.root_is_directory { 1 } else { 0 };
+            let root_dir_increment = if config.input_source.root_is_directory {
+                1
+            } else {
+                0
+            };
             (child_dir_count + root_dir_increment, 0)
         } else {
             let mut dc = 0;

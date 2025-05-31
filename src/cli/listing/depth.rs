@@ -7,4 +7,4 @@ pub struct DepthArgs {
     /// E.g., `-L 1` shows only direct children.
     #[arg(short = 'L', long = "depth")]
     pub max_depth: Option<usize>,
-} 
+}

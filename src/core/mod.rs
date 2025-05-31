@@ -1,7 +1,7 @@
 // src/core/mod.rs
-pub mod walker;
-pub mod node;
 pub mod analyzer;
-pub mod sorter;
-pub mod formatter;
 pub mod error;
+pub mod formatter;
+pub mod node;
+pub mod sorter;
+pub mod walker;

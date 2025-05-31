@@ -1,7 +1,7 @@
 // tests/walker_integration_tests.rs
 
-use rustree::{get_tree_nodes, RustreeLibConfig, NodeType};
 use anyhow::Result;
+use rustree::{ListingOptions, NodeType, RustreeLibConfig, get_tree_nodes};
 
 mod common;
 use common::common_test_utils;
@@ -12,8 +12,11 @@ fn test_walker_basic_depth_one() -> Result<()> {
     let root_path = temp_dir.path();
 
     let config = RustreeLibConfig {
-        max_depth: Some(1),
-        show_hidden: false,
+        listing: ListingOptions {
+            max_depth: Some(1),
+            show_hidden: false,
+            ..Default::default()
+        },
         ..Default::default()
     };
 
@@ -36,8 +39,11 @@ fn test_walker_show_hidden_at_depth_two() -> Result<()> {
     let root_path = temp_dir.path();
 
     let config = RustreeLibConfig {
-        max_depth: Some(2), // Need depth 2 to reach .hidden_file
-        show_hidden: true,
+        listing: ListingOptions {
+            max_depth: Some(2), // Need depth 2 to reach .hidden_file
+            show_hidden: true,
+            ..Default::default()
+        },
         ..Default::default()
     };
 
@@ -47,11 +53,17 @@ fn test_walker_show_hidden_at_depth_two() -> Result<()> {
     // Expected: file1.txt, file2.log, sub_dir, sub_dir/.hidden_file, sub_dir/file3.dat
     assert_eq!(nodes.len(), 5);
 
-    let hidden_node = nodes.iter().find(|n| n.name == ".hidden_file").expect(".hidden_file not found");
+    let hidden_node = nodes
+        .iter()
+        .find(|n| n.name == ".hidden_file")
+        .expect(".hidden_file not found");
     assert_eq!(hidden_node.depth, 2);
     assert_eq!(hidden_node.node_type, NodeType::File);
-    
-    let file3_node = nodes.iter().find(|n| n.name == "file3.dat").expect("file3.dat not found");
+
+    let file3_node = nodes
+        .iter()
+        .find(|n| n.name == "file3.dat")
+        .expect("file3.dat not found");
     assert_eq!(file3_node.depth, 2);
 
     Ok(())

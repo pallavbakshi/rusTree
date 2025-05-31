@@ -1,12 +1,12 @@
 // src/core/walker.rs
 use crate::config::RustreeLibConfig;
-use crate::core::node::{NodeInfo, NodeType};
-use crate::core::error::RustreeError;
 use crate::core::analyzer::{apply_fn, file_stats};
-use std::path::Path;
-use std::fs;
-use ignore::WalkBuilder;
+use crate::core::error::RustreeError;
+use crate::core::node::{NodeInfo, NodeType};
 use glob::MatchOptions;
+use ignore::WalkBuilder;
+use std::fs;
+use std::path::Path;
 
 // Helper struct to hold compiled glob patterns and their properties
 #[derive(Clone)]
@@ -14,7 +14,7 @@ struct CompiledGlobPattern {
     pattern: glob::Pattern,
     options: MatchOptions, // Stores case sensitivity and other glob matching options
     is_dir_only_match: bool, // True if original pattern string ended with '/'
-    is_path_pattern: bool,   // True if original pattern string contained '/' or '**'
+    is_path_pattern: bool, // True if original pattern string contained '/' or '**'
 }
 
 /// Compiles string patterns into `CompiledGlobPattern` structs.
@@ -35,7 +35,9 @@ fn compile_glob_patterns(
 
             for p_outer_str in ps_outer {
                 for p_inner_str in p_outer_str.split('|') {
-                    if p_inner_str.is_empty() { continue; }
+                    if p_inner_str.is_empty() {
+                        continue;
+                    }
 
                     let is_dir_only = p_inner_str.ends_with('/');
                     let pattern_to_compile = if is_dir_only {
@@ -79,28 +81,33 @@ fn compile_glob_patterns(
 fn entry_matches_glob_patterns(
     entry: &ignore::DirEntry,
     compiled_patterns: &Vec<CompiledGlobPattern>, // Expects a non-empty Vec
-    walk_root_path: &Path, // The canonicalized root path of the walk
+    walk_root_path: &Path,                        // The canonicalized root path of the walk
 ) -> bool {
     let entry_full_path = entry.path();
     let file_name_lossy = entry.file_name().to_string_lossy();
-    let is_dir = entry.file_type().map_or(false, |ft| ft.is_dir());
+    let is_dir = entry.file_type().is_some_and(|ft| ft.is_dir());
 
     for p_info in compiled_patterns {
         let matches = if p_info.is_dir_only_match {
             // Pattern like "dir/" - matches directory name
-            is_dir && p_info.pattern.matches_with(&file_name_lossy, p_info.options)
+            is_dir
+                && p_info
+                    .pattern
+                    .matches_with(&file_name_lossy, p_info.options)
         } else if p_info.is_path_pattern {
             // Pattern like "src/*.rs" or "**/*.tmp" or "/abs/path/*.txt"
             let pattern_str = p_info.pattern.as_str();
             if Path::new(pattern_str).is_absolute() {
                 // For absolute path patterns, match against the full entry path.
-                p_info.pattern.matches_path_with(entry_full_path, p_info.options)
+                p_info
+                    .pattern
+                    .matches_path_with(entry_full_path, p_info.options)
             } else {
                 // For relative path patterns (including "**" patterns), match against path relative to walk_root_path.
                 match entry_full_path.strip_prefix(walk_root_path) {
-                    Ok(relative_path) => {
-                        p_info.pattern.matches_path_with(relative_path, p_info.options)
-                    }
+                    Ok(relative_path) => p_info
+                        .pattern
+                        .matches_path_with(relative_path, p_info.options),
                     Err(_) => {
                         // This occurs if entry_full_path is not under walk_root_path,
                         // or walk_root_path is not a prefix. This should be rare if walk_root_path
@@ -115,7 +122,9 @@ fn entry_matches_glob_patterns(
             }
         } else {
             // Basename match, e.g., "*.log"
-            p_info.pattern.matches_with(&file_name_lossy, p_info.options)
+            p_info
+                .pattern
+                .matches_with(&file_name_lossy, p_info.options)
         };
         if matches {
             return true;
@@ -123,7 +132,6 @@ fn entry_matches_glob_patterns(
     }
     false
 }
-
 
 pub fn walk_directory(
     root_path: &Path,
@@ -134,7 +142,9 @@ pub fn walk_directory(
     // Canonicalize root_path for consistent path operations
     let canonical_root_path = match fs::canonicalize(root_path) {
         Ok(p) => p,
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound && root_path.to_string_lossy() == "." => {
+        Err(e)
+            if e.kind() == std::io::ErrorKind::NotFound && root_path.to_string_lossy() == "." =>
+        {
             // Special case: if root_path is "." and canonicalize fails (e.g. current dir deleted during run),
             // try to use the original path. This is mostly for robustness in edge cases.
             // For most scenarios, if canonicalize fails, it's a hard error.
@@ -146,33 +156,32 @@ pub fn walk_directory(
         Err(e) => return Err(RustreeError::Io(e)),
     };
 
-
     let final_compiled_ignore_patterns = compile_glob_patterns(
-        &config.ignore_patterns,
-        config.ignore_case_for_patterns,
-        config.show_hidden,
+        &config.filtering.ignore_patterns,
+        config.filtering.ignore_case_for_patterns,
+        config.listing.show_hidden,
     )?;
     let compiled_match_patterns = compile_glob_patterns(
-        &config.match_patterns,
-        config.ignore_case_for_patterns,
-        config.show_hidden,
+        &config.filtering.match_patterns,
+        config.filtering.ignore_case_for_patterns,
+        config.listing.show_hidden,
     )?;
 
     let mut walker_builder = WalkBuilder::new(&canonical_root_path); // Use canonicalized path
-    walker_builder.hidden(!config.show_hidden);
+    walker_builder.hidden(!config.listing.show_hidden);
     walker_builder.parents(true);
     walker_builder.ignore(false);
-    walker_builder.git_global(config.use_gitignore);
-    walker_builder.git_ignore(config.use_gitignore);
-    walker_builder.git_exclude(config.use_gitignore);
+    walker_builder.git_global(config.filtering.use_gitignore);
+    walker_builder.git_ignore(config.filtering.use_gitignore);
+    walker_builder.git_exclude(config.filtering.use_gitignore);
     walker_builder.require_git(false); // Process gitignore files even if not in a git repo (for tests)
-    walker_builder.ignore_case_insensitive(config.ignore_case_for_patterns);
+    walker_builder.ignore_case_insensitive(config.filtering.ignore_case_for_patterns);
 
-    if let Some(max_d) = config.max_depth {
+    if let Some(max_d) = config.listing.max_depth {
         walker_builder.max_depth(Some(max_d));
     }
 
-    if let Some(custom_ignore_files) = &config.git_ignore_files {
+    if let Some(custom_ignore_files) = &config.filtering.git_ignore_files {
         for file_path in custom_ignore_files {
             walker_builder.add_custom_ignore_filename(file_path);
         }
@@ -185,12 +194,14 @@ pub fn walk_directory(
             // Clone canonical_root_path for the closure, as it needs to own its captured variables or have 'static lifetime
             let root_path_for_closure = canonical_root_path.clone();
             walker_builder.filter_entry(move |entry| {
-                if entry.depth() == 0 { return true; }
+                if entry.depth() == 0 {
+                    return true;
+                }
                 !entry_matches_glob_patterns(entry, &patterns_for_closure, &root_path_for_closure)
             });
         }
     }
-    
+
     for entry_result in walker_builder.build() {
         let entry = match entry_result {
             Ok(e) => e,
@@ -210,11 +221,14 @@ pub fn walk_directory(
         // If config.match_patterns is Some (i.e., -P was used), then files/symlinks must match.
         // Directories are not filtered by -P at this stage.
         let should_be_skipped_by_p_pattern = match &compiled_match_patterns {
-            Some(patterns) => { // -P was used
-                if patterns.is_empty() { // e.g. -P "" or -P "|", which means "match nothing"
+            Some(patterns) => {
+                // -P was used
+                if patterns.is_empty() {
+                    // e.g. -P "" or -P "|", which means "match nothing"
                     true // Skip everything, because nothing can match empty patterns
                 } else if let Some(file_type) = entry.file_type() {
-                    if file_type.is_file() || file_type.is_symlink() { // Files and symlinks must match
+                    if file_type.is_file() || file_type.is_symlink() {
+                        // Files and symlinks must match
                         !entry_matches_glob_patterns(&entry, patterns, &canonical_root_path) // Skip if it does NOT match
                     } else {
                         false // It's a directory, don't skip based on -P here
@@ -235,25 +249,32 @@ pub fn walk_directory(
         let depth = entry.depth();
         let current_entry_file_type = entry.file_type(); // Option<std::fs::FileType>
 
-        let (node_type_for_filter, resolved_metadata_for_node): (NodeType, Option<std::fs::Metadata>) =
-            if current_entry_file_type.map_or(false, |ft| ft.is_dir()) {
-                (NodeType::Directory, entry.metadata().ok())
-            } else if current_entry_file_type.map_or(false, |ft| ft.is_file()) {
-                (NodeType::File, entry.metadata().ok())
-            } else if current_entry_file_type.map_or(false, |ft| ft.is_symlink()) {
-                match fs::metadata(entry_path_obj) { // Follow symlink
-                    Ok(target_meta) => {
-                        if target_meta.is_dir() { (NodeType::Directory, Some(target_meta)) }
-                        else if target_meta.is_file() { (NodeType::File, Some(target_meta)) }
-                        else { (NodeType::Symlink, Some(target_meta)) } // Target is not file/dir
-                    }
-                    Err(_) => (NodeType::Symlink, None), // Broken symlink
+        let (node_type_for_filter, resolved_metadata_for_node): (
+            NodeType,
+            Option<std::fs::Metadata>,
+        ) = if current_entry_file_type.is_some_and(|ft| ft.is_dir()) {
+            (NodeType::Directory, entry.metadata().ok())
+        } else if current_entry_file_type.is_some_and(|ft| ft.is_file()) {
+            (NodeType::File, entry.metadata().ok())
+        } else if current_entry_file_type.is_some_and(|ft| ft.is_symlink()) {
+            match fs::metadata(entry_path_obj) {
+                // Follow symlink
+                Ok(target_meta) => {
+                    if target_meta.is_dir() {
+                        (NodeType::Directory, Some(target_meta))
+                    } else if target_meta.is_file() {
+                        (NodeType::File, Some(target_meta))
+                    } else {
+                        (NodeType::Symlink, Some(target_meta))
+                    } // Target is not file/dir
                 }
-            } else {
-                continue; // Not a dir, file, or symlink
-            };
+                Err(_) => (NodeType::Symlink, None), // Broken symlink
+            }
+        } else {
+            continue; // Not a dir, file, or symlink
+        };
 
-        if config.list_directories_only && node_type_for_filter != NodeType::Directory {
+        if config.listing.list_directories_only && node_type_for_filter != NodeType::Directory {
             continue;
         }
 
@@ -273,22 +294,32 @@ pub fn walk_directory(
         };
 
         if let Some(meta) = resolved_metadata_for_node {
-            if config.report_sizes { node.size = Some(meta.len()); }
-            if config.report_mtime { node.mtime = meta.modified().ok(); }
+            if config.metadata.report_sizes {
+                node.size = Some(meta.len());
+            }
+            if config.metadata.report_mtime {
+                node.mtime = meta.modified().ok();
+            }
         }
 
-        if node.node_type == NodeType::File { // Analysis only for effective files
-            if config.calculate_line_count || config.calculate_word_count || config.apply_function.is_some() {
-                match fs::read_to_string(&node.path) { // Reads target for symlinks
+        if node.node_type == NodeType::File {
+            // Analysis only for effective files
+            if config.metadata.calculate_line_count
+                || config.metadata.calculate_word_count
+                || config.metadata.apply_function.is_some()
+            {
+                match fs::read_to_string(&node.path) {
+                    // Reads target for symlinks
                     Ok(content) => {
-                        if config.calculate_line_count {
+                        if config.metadata.calculate_line_count {
                             node.line_count = Some(file_stats::count_lines_from_string(&content));
                         }
-                        if config.calculate_word_count {
+                        if config.metadata.calculate_word_count {
                             node.word_count = Some(file_stats::count_words_from_string(&content));
                         }
-                        if let Some(func_type) = &config.apply_function {
-                            node.custom_function_output = Some(apply_fn::apply_function_to_content(&content, func_type));
+                        if let Some(func_type) = &config.metadata.apply_function {
+                            node.custom_function_output =
+                                Some(apply_fn::apply_function_to_content(&content, func_type));
                         }
                     }
                     Err(_e) => { /* Log error or store in NodeInfo */ }

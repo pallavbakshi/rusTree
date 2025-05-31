@@ -1,6 +1,6 @@
 // tests/pattern_matching_tests.rs
-use rustree::{get_tree_nodes, RustreeLibConfig, NodeInfo};
 use anyhow::Result;
+use rustree::{FilteringOptions, ListingOptions, NodeInfo, RustreeLibConfig, get_tree_nodes};
 use std::collections::HashSet;
 
 mod common;
@@ -17,9 +17,15 @@ fn test_pattern_no_patterns() -> Result<()> {
     let root_path = temp_dir.path();
 
     let config = RustreeLibConfig {
-        match_patterns: None, // No patterns
-        show_hidden: false,
-        max_depth: Some(1), // Limit depth for simplicity
+        filtering: FilteringOptions {
+            match_patterns: None, // No patterns
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: false,
+            max_depth: Some(1), // Limit depth for simplicity
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(root_path, &config)?;
@@ -33,11 +39,12 @@ fn test_pattern_no_patterns() -> Result<()> {
     expected_names.insert("sub_dir".to_string());
     expected_names.insert("another_dir".to_string());
     expected_names.insert("empty_dir".to_string()); // Added empty_dir
-    if cfg!(unix) || cfg!(windows) { // Symlinks created
+    if cfg!(unix) || cfg!(windows) {
+        // Symlinks created
         expected_names.insert("symlink_to_file_a.txt".to_string());
         expected_names.insert("symlink_to_sub_dir".to_string());
     }
-    
+
     assert_eq!(names, expected_names, "Mismatch with no patterns");
     Ok(())
 }
@@ -48,9 +55,15 @@ fn test_pattern_no_patterns() -> Result<()> {
 fn test_p_pattern_with_ignore_case_txt_extension() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?; // Has image.JPG
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["*.jpg".to_string()]),
-        ignore_case_for_patterns: true, // --ignore-case
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["*.jpg".to_string()]),
+            ignore_case_for_patterns: true, // --ignore-case
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -65,7 +78,10 @@ fn test_p_pattern_with_ignore_case_txt_extension() -> Result<()> {
     if cfg!(unix) || cfg!(windows) {
         // symlink_to_sub_dir is not *.jpg
     }
-    assert_eq!(names, expected, "image.JPG should be matched with -P \"*.jpg\" --ignore-case");
+    assert_eq!(
+        names, expected,
+        "image.JPG should be matched with -P \"*.jpg\" --ignore-case"
+    );
     Ok(())
 }
 
@@ -73,9 +89,15 @@ fn test_p_pattern_with_ignore_case_txt_extension() -> Result<()> {
 fn test_p_pattern_with_ignore_case_exact_filename() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?; // Has file_a.txt
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
-        ignore_case_for_patterns: true, // --ignore-case
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
+            ignore_case_for_patterns: true, // --ignore-case
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -90,7 +112,10 @@ fn test_p_pattern_with_ignore_case_exact_filename() -> Result<()> {
         // symlink_to_file_a.txt would match if pattern was "*.txt"
         // but pattern is "FILE_A.TXT", symlink name is "symlink_to_file_a.txt"
     }
-    assert_eq!(names, expected, "file_a.txt should be matched with -P \"FILE_A.TXT\" --ignore-case");
+    assert_eq!(
+        names, expected,
+        "file_a.txt should be matched with -P \"FILE_A.TXT\" --ignore-case"
+    );
     Ok(())
 }
 
@@ -98,9 +123,15 @@ fn test_p_pattern_with_ignore_case_exact_filename() -> Result<()> {
 fn test_p_pattern_without_ignore_case_is_sensitive() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?; // Has file_a.txt
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
-        ignore_case_for_patterns: false, // NO --ignore-case (default)
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["FILE_A.TXT".to_string()]),
+            ignore_case_for_patterns: false, // NO --ignore-case (default)
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -114,7 +145,10 @@ fn test_p_pattern_without_ignore_case_is_sensitive() -> Result<()> {
     if cfg!(unix) || cfg!(windows) {
         // symlink_to_sub_dir is not matched
     }
-    assert_eq!(names, expected, "file_a.txt should NOT be matched by -P \"FILE_A.TXT\" (case sensitive)");
+    assert_eq!(
+        names, expected,
+        "file_a.txt should NOT be matched by -P \"FILE_A.TXT\" (case sensitive)"
+    );
     Ok(())
 }
 
@@ -122,8 +156,14 @@ fn test_p_pattern_without_ignore_case_is_sensitive() -> Result<()> {
 fn test_pattern_single_exact_match_file() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["file_a.txt".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["file_a.txt".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -135,7 +175,10 @@ fn test_pattern_single_exact_match_file() -> Result<()> {
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included because its name doesn't match "file_a.txt"
     // and filter_entry treats it like a file for pattern matching.
-    assert_eq!(names, expected, "Failed test_pattern_single_exact_match_file");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_single_exact_match_file"
+    );
     Ok(())
 }
 
@@ -143,9 +186,15 @@ fn test_pattern_single_exact_match_file() -> Result<()> {
 fn test_pattern_wildcard_star_extension() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["*.txt".to_string()]),
-        show_hidden: false, // .hidden_file.txt should not appear
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["*.txt".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: false, // .hidden_file.txt should not appear
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -153,13 +202,16 @@ fn test_pattern_wildcard_star_extension() -> Result<()> {
     let mut expected = HashSet::new();
     expected.insert("file_a.txt".to_string());
     if cfg!(unix) || cfg!(windows) {
-         expected.insert("symlink_to_file_a.txt".to_string()); // Name matches *.txt
+        expected.insert("symlink_to_file_a.txt".to_string()); // Name matches *.txt
     }
     expected.insert("sub_dir".to_string());
     expected.insert("another_dir".to_string());
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names, expected, "Failed test_pattern_wildcard_star_extension");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_wildcard_star_extension"
+    );
     Ok(())
 }
 
@@ -167,9 +219,15 @@ fn test_pattern_wildcard_star_extension() -> Result<()> {
 fn test_pattern_wildcard_star_extension_with_hidden() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["*.txt".to_string()]),
-        show_hidden: true, // .hidden_file.txt should appear
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["*.txt".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: true, // .hidden_file.txt should appear
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -178,13 +236,16 @@ fn test_pattern_wildcard_star_extension_with_hidden() -> Result<()> {
     expected.insert("file_a.txt".to_string());
     expected.insert(".hidden_file.txt".to_string());
     if cfg!(unix) || cfg!(windows) {
-         expected.insert("symlink_to_file_a.txt".to_string());
+        expected.insert("symlink_to_file_a.txt".to_string());
     }
     expected.insert("sub_dir".to_string());
     expected.insert("another_dir".to_string());
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names, expected, "Failed test_pattern_wildcard_star_extension_with_hidden");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_wildcard_star_extension_with_hidden"
+    );
     Ok(())
 }
 
@@ -192,8 +253,14 @@ fn test_pattern_wildcard_star_extension_with_hidden() -> Result<()> {
 fn test_pattern_wildcard_question_mark() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["file_?.txt".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["file_?.txt".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -205,7 +272,10 @@ fn test_pattern_wildcard_question_mark() -> Result<()> {
     expected.insert("another_dir".to_string());
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names, expected, "Failed test_pattern_wildcard_question_mark");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_wildcard_question_mark"
+    );
     Ok(())
 }
 
@@ -213,8 +283,14 @@ fn test_pattern_wildcard_question_mark() -> Result<()> {
 fn test_pattern_character_set() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["image.[Jj][Pp][Gg]".to_string()]), // Matches image.JPG
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["image.[Jj][Pp][Gg]".to_string()]), // Matches image.JPG
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -233,9 +309,19 @@ fn test_pattern_character_set() -> Result<()> {
 fn test_pattern_multiple_patterns() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["*.txt".to_string(), "*.log".to_string(), "script.sh".to_string()]),
-        show_hidden: true, // To include .hidden_file.txt
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec![
+                "*.txt".to_string(),
+                "*.log".to_string(),
+                "script.sh".to_string(),
+            ]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: true, // To include .hidden_file.txt
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -247,7 +333,7 @@ fn test_pattern_multiple_patterns() -> Result<()> {
     expected.insert("file_b.log".to_string());
     expected.insert("script.sh".to_string());
     if cfg!(unix) || cfg!(windows) {
-         expected.insert("symlink_to_file_a.txt".to_string());
+        expected.insert("symlink_to_file_a.txt".to_string());
     }
     expected.insert("sub_dir".to_string());
     expected.insert("another_dir".to_string());
@@ -261,8 +347,14 @@ fn test_pattern_multiple_patterns() -> Result<()> {
 fn test_pattern_directory_only_suffix_slash() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["sub_dir/".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["sub_dir/".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -274,12 +366,21 @@ fn test_pattern_directory_only_suffix_slash() -> Result<()> {
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included because it's not an actual directory by e.file_type()
     // and its name "symlink_to_sub_dir" does not match "sub_dir".
-    assert_eq!(names, expected, "Failed test_pattern_directory_only_suffix_slash");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_directory_only_suffix_slash"
+    );
 
     // Ensure file_a.txt is not matched by "file_a.txt/"
     let config_file = RustreeLibConfig {
-        match_patterns: Some(vec!["file_a.txt/".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["file_a.txt/".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes_file = get_tree_nodes(temp_dir.path(), &config_file)?;
@@ -293,8 +394,14 @@ fn test_pattern_directory_only_suffix_slash() -> Result<()> {
     expected_traversed_dirs.insert("empty_dir".to_string());
     // symlink_to_sub_dir is not included as its name doesn't match and it's not an actual dir for this pattern type.
 
-    assert_eq!(names_file, expected_traversed_dirs, "Expected only traversed directories for pattern 'file_a.txt/'");
-    assert!(!names_file.contains("file_a.txt"), "file_a.txt (a file) should not match the pattern 'file_a.txt/'");
+    assert_eq!(
+        names_file, expected_traversed_dirs,
+        "Expected only traversed directories for pattern 'file_a.txt/'"
+    );
+    assert!(
+        !names_file.contains("file_a.txt"),
+        "file_a.txt (a file) should not match the pattern 'file_a.txt/'"
+    );
     Ok(())
 }
 
@@ -302,8 +409,14 @@ fn test_pattern_directory_only_suffix_slash() -> Result<()> {
 fn test_pattern_directory_only_special_slash() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["/".to_string()]), // Match any directory
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["/".to_string()]), // Match any directory
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -324,14 +437,21 @@ fn test_pattern_directory_only_special_slash() -> Result<()> {
     Ok(())
 }
 
-
 #[test]
 fn test_pattern_match_symlink_name_not_dir_only() -> Result<()> {
-    if !(cfg!(unix) || cfg!(windows)) { return Ok(()); } // Skip if symlinks not created
+    if !(cfg!(unix) || cfg!(windows)) {
+        return Ok(());
+    } // Skip if symlinks not created
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["symlink_to_sub_dir".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["symlink_to_sub_dir".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -351,11 +471,19 @@ fn test_pattern_match_symlink_name_not_dir_only() -> Result<()> {
 fn test_pattern_match_symlink_name_dir_only_fails() -> Result<()> {
     // This tests that "symlink_to_sub_dir/" does NOT match the symlink itself,
     // because the symlink entry e.file_type().is_dir() is false.
-    if !(cfg!(unix) || cfg!(windows)) { return Ok(()); }
+    if !(cfg!(unix) || cfg!(windows)) {
+        return Ok(());
+    }
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["symlink_to_sub_dir/".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["symlink_to_sub_dir/".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -371,17 +499,25 @@ fn test_pattern_match_symlink_name_dir_only_fails() -> Result<()> {
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir itself is NOT included.
     // symlink_to_file_a.txt is not included as it's not a dir.
-    assert_eq!(names, expected, "Failed test_pattern_match_symlink_name_dir_only_fails: Symlink should not match dir-only pattern, but other dirs traversed.");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_match_symlink_name_dir_only_fails: Symlink should not match dir-only pattern, but other dirs traversed."
+    );
     Ok(())
 }
-
 
 #[test]
 fn test_pattern_no_match() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["non_existent_file".to_string()]),
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["non_existent_file".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -391,7 +527,10 @@ fn test_pattern_no_match() -> Result<()> {
     expected.insert("another_dir".to_string());
     expected.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names, expected, "Failed test_pattern_no_match: Expected traversed directories even if no direct match");
+    assert_eq!(
+        names, expected,
+        "Failed test_pattern_no_match: Expected traversed directories even if no direct match"
+    );
     Ok(())
 }
 
@@ -400,13 +539,22 @@ fn test_pattern_empty_string_pattern() -> Result<()> {
     // -P "" should match nothing (or files with empty names, which is rare)
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["".to_string()]), // This compiles to Some(Vec::new()) in walker.rs
-                                                    // which means "match nothing".
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["".to_string()]), // This compiles to Some(Vec::new()) in walker.rs
+            // which means "match nothing".
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
-    assert!(nodes.is_empty(), "Empty string pattern should match nothing");
+    assert!(
+        nodes.is_empty(),
+        "Empty string pattern should match nothing"
+    );
     Ok(())
 }
 
@@ -415,9 +563,15 @@ fn test_pattern_interaction_with_hidden_flag() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     // Case 1: -P ".hidden*" (no -a)
     let config_no_a = RustreeLibConfig {
-        match_patterns: Some(vec![".hidden*".to_string()]),
-        show_hidden: false,
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec![".hidden*".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: false,
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes_no_a = get_tree_nodes(temp_dir.path(), &config_no_a)?;
@@ -429,13 +583,22 @@ fn test_pattern_interaction_with_hidden_flag() -> Result<()> {
     expected_no_a.insert("another_dir".to_string());
     expected_no_a.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names_no_a, expected_no_a, "Pattern on hidden file without -a should yield traversed non-hidden dirs");
+    assert_eq!(
+        names_no_a, expected_no_a,
+        "Pattern on hidden file without -a should yield traversed non-hidden dirs"
+    );
 
     // Case 2: -P ".hidden*" -a -> should find .hidden_file.txt
     let config_with_a = RustreeLibConfig {
-        match_patterns: Some(vec![".hidden*".to_string()]),
-        show_hidden: true,
-        max_depth: Some(1),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec![".hidden*".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: true,
+            max_depth: Some(1),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes_with_a = get_tree_nodes(temp_dir.path(), &config_with_a)?;
@@ -448,7 +611,10 @@ fn test_pattern_interaction_with_hidden_flag() -> Result<()> {
     expected.insert("empty_dir".to_string());
     // .hidden_data (dir) would also be included if depth allowed and it was traversed.
     // symlink_to_sub_dir is NOT included as its name doesn't match .hidden*
-    assert_eq!(names_with_a, expected, "Pattern on hidden file with -a failed");
+    assert_eq!(
+        names_with_a, expected,
+        "Pattern on hidden file with -a failed"
+    );
     Ok(())
 }
 
@@ -456,9 +622,15 @@ fn test_pattern_interaction_with_hidden_flag() -> Result<()> {
 fn test_pattern_match_in_subdir() -> Result<()> {
     let temp_dir = common_test_utils::setup_complex_test_directory()?;
     let config = RustreeLibConfig {
-        match_patterns: Some(vec!["*.rs".to_string()]), // Matches sub_file.rs in sub_dir
-        show_hidden: false,
-        max_depth: Some(2), // Need depth 2 to see sub_file.rs
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["*.rs".to_string()]), // Matches sub_file.rs in sub_dir
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: false,
+            max_depth: Some(2), // Need depth 2 to see sub_file.rs
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes = get_tree_nodes(temp_dir.path(), &config)?;
@@ -471,27 +643,38 @@ fn test_pattern_match_in_subdir() -> Result<()> {
     expected_names_rs_match.insert("another_dir".to_string());
     expected_names_rs_match.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names, expected_names_rs_match, "Pattern *.rs failed to find sub_file.rs and its parent sub_dir, plus other traversed dirs correctly");
-
+    assert_eq!(
+        names, expected_names_rs_match,
+        "Pattern *.rs failed to find sub_file.rs and its parent sub_dir, plus other traversed dirs correctly"
+    );
 
     // Test with multiple patterns: "sub_dir/" and "*.rs"
     let config_match_dir_and_file = RustreeLibConfig {
-        match_patterns: Some(vec!["sub_dir/".to_string(), "*.rs".to_string()]),
-        show_hidden: false,
-        max_depth: Some(2),
+        filtering: FilteringOptions {
+            match_patterns: Some(vec!["sub_dir/".to_string(), "*.rs".to_string()]),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            show_hidden: false,
+            max_depth: Some(2),
+            ..Default::default()
+        },
         ..Default::default()
     };
     let nodes_explicit = get_tree_nodes(temp_dir.path(), &config_match_dir_and_file)?;
     let names_explicit = get_node_names(&nodes_explicit);
-    
+
     let mut expected_explicit = HashSet::new();
-    expected_explicit.insert("sub_dir".to_string());     // Matched by "sub_dir/"
+    expected_explicit.insert("sub_dir".to_string()); // Matched by "sub_dir/"
     expected_explicit.insert("sub_file.rs".to_string()); // Matched by "*.rs"
     // Other directories traversed because patterns are general or path patterns
     expected_explicit.insert("another_dir".to_string());
     expected_explicit.insert("empty_dir".to_string());
     // symlink_to_sub_dir is NOT included
-    assert_eq!(names_explicit, expected_explicit, "Failed test_pattern_match_in_subdir with multiple patterns");
+    assert_eq!(
+        names_explicit, expected_explicit,
+        "Failed test_pattern_match_in_subdir with multiple patterns"
+    );
 
     Ok(())
 }

@@ -1,11 +1,21 @@
 // src/config/mod.rs
-pub mod tree_options;
+pub mod filtering;
+pub mod input_source;
+pub mod listing;
+pub mod metadata;
+pub mod misc;
+pub mod output_format;
 pub mod sorting;
-pub mod output;
-pub mod fileinfo;
+pub mod tree_options;
 
 // Re-export the main config struct and key types
+pub use output_format::OutputFormat;
 pub use tree_options::RustreeLibConfig;
-pub use sorting::SortKey;
-pub use output::OutputFormat;
-pub use fileinfo::{BuiltInFunction, ApplyFnError};
+
+// Re-export specific enums for convenience in other modules
+pub use filtering::FilteringOptions;
+pub use input_source::InputSourceOptions;
+pub use listing::ListingOptions;
+pub use metadata::{ApplyFnError, BuiltInFunction, MetadataOptions}; // Re-export BuiltInFunction, ApplyFnError
+pub use misc::MiscOptions;
+pub use sorting::{SortKey, SortingOptions}; // Re-export SortKey directly as it's a common enum

@@ -1,89 +1,79 @@
-// src/config/tree_options.rs (formerly src/core/config.rs)
-use crate::config::sorting::SortKey;
-use crate::config::fileinfo::BuiltInFunction;
-use std::path::PathBuf; // Added for PathBuf
+// src/config/tree_options.rs
+
+use crate::config::filtering::FilteringOptions;
+use crate::config::input_source::InputSourceOptions;
+use crate::config::listing::ListingOptions;
+use crate::config::metadata::MetadataOptions;
+use crate::config::misc::MiscOptions;
+use crate::config::sorting::SortingOptions;
 
 /// Configuration for the `rustree` library.
 ///
 /// This struct holds all the options that control how `rustree` processes
-/// and displays directory trees.
-// RustreeLibConfig will eventually become TreeOptions
-#[derive(Debug, Clone)]
+/// and displays directory trees. It uses a hierarchical structure where
+/// related configuration options are grouped together for better organization
+/// and maintainability.
+///
+/// # Structure
+///
+/// The configuration is organized into logical groups:
+///
+/// - [`input_source`](Self::input_source): Controls how the root path is displayed
+/// - [`listing`](Self::listing): Controls directory traversal behavior
+/// - [`filtering`](Self::filtering): Controls inclusion/exclusion patterns
+/// - [`sorting`](Self::sorting): Controls sorting behavior
+/// - [`metadata`](Self::metadata): Controls what metadata to collect and display
+/// - [`misc`](Self::misc): Additional miscellaneous options
+///
+/// # Examples
+///
+/// Basic usage with default options:
+/// ```
+/// use rustree::RustreeLibConfig;
+///
+/// let config = RustreeLibConfig::default();
+/// ```
+///
+/// Customizing specific aspects:
+/// ```
+/// use rustree::{RustreeLibConfig, ListingOptions, MetadataOptions, SortingOptions, SortKey};
+///
+/// let config = RustreeLibConfig {
+///     listing: ListingOptions {
+///         max_depth: Some(3),
+///         show_hidden: true,
+///         ..Default::default()
+///     },
+///     metadata: MetadataOptions {
+///         report_sizes: true,
+///         calculate_line_count: true,
+///         ..Default::default()
+///     },
+///     sorting: SortingOptions {
+///         sort_by: Some(SortKey::Size),
+///         reverse_sort: true,
+///         ..Default::default()
+///     },
+///     ..Default::default()
+/// };
+/// ```
+#[derive(Debug, Clone, Default)]
 pub struct RustreeLibConfig {
-    /// The name to display for the root of the scanned directory.
-    /// Typically the directory name itself or "." for the current directory.
-    pub root_display_name: String,
-    /// Patterns to filter entries by. Only entries matching any pattern will be shown.
-    /// Corresponds to CLI -P/--match-pattern.
-    pub match_patterns: Option<Vec<String>>,
-    /// The maximum depth to traverse into the directory structure.
-    /// `None` means no limit. `Some(0)` would effectively show only the root (if walker adapted).
-    /// `Some(1)` shows root and its direct children.
-    pub max_depth: Option<usize>,
-    /// If `true`, hidden files and directories (those starting with a `.`) will be included.
-    pub show_hidden: bool,
-    // pub ignore_patterns: Vec<String>, // Future: For ignoring specific patterns
-    /// If `true`, report the size of files.
-    pub report_sizes: bool,
-    /// If `true`, report file permissions (currently not implemented in output).
-    pub report_permissions: bool,
-    /// If `true`, report the last modification time of files and directories.
-    pub report_mtime: bool,
+    /// Configuration for input source handling (root display name, etc.)
+    pub input_source: InputSourceOptions,
 
-    /// If `true`, calculate and report the number of lines for files.
-    pub calculate_line_count: bool,
-    /// If `true`, calculate and report the number of words for files.
-    pub calculate_word_count: bool,
-    /// Specifies a built-in function to apply to the content of each file.
-    /// The result of this function can be displayed.
-    pub apply_function: Option<BuiltInFunction>,
+    /// Configuration for directory listing behavior (depth, hidden files, etc.)
+    pub listing: ListingOptions,
 
-    /// The key by which to sort directory entries. `None` means default (usually OS-dependent or DFS order).
-    pub sort_by: Option<SortKey>,
-    /// If `true`, reverses the sort order specified by `sort_by`.
-    pub reverse_sort: bool,
-    /// If `true`, only directories will be listed.
-    pub list_directories_only: bool,
-    /// Optional size of the root node itself, used by formatters if `report_sizes` is true.
-    pub root_node_size: Option<u64>,
-    /// Indicates if the root path itself is a directory.
-    pub root_is_directory: bool,
+    /// Configuration for filtering (include/exclude patterns, gitignore, etc.)
+    pub filtering: FilteringOptions,
 
-    // Ignore feature fields
-    /// Patterns to ignore entries by. Entries matching any pattern will be excluded.
-    /// Corresponds to CLI -I/--ignore-path.
-    pub ignore_patterns: Option<Vec<String>>,
-    /// If `true`, use .gitignore files for filtering.
-    pub use_gitignore: bool,
-    /// List of custom files to use as gitignore files.
-    pub git_ignore_files: Option<Vec<PathBuf>>,
-    /// If `true`, all pattern matching (-P, -I, gitignore) is case-insensitive.
-    pub ignore_case_for_patterns: bool,
-}
+    /// Configuration for sorting behavior
+    pub sorting: SortingOptions,
 
-impl Default for RustreeLibConfig {
-    fn default() -> Self {
-        Self {
-            root_display_name: String::new(), // Default to empty
-            match_patterns: None,
-            max_depth: None,
-            show_hidden: false,
-            report_sizes: false,
-            report_permissions: false,
-            report_mtime: false,
-            calculate_line_count: false,
-            calculate_word_count: false,
-            apply_function: None,
-            sort_by: None,
-            reverse_sort: false,
-            list_directories_only: false,
-            root_node_size: None,
-            root_is_directory: false, // Default to false, will be set by handler
-            // Defaults for ignore features
-            ignore_patterns: None,
-            use_gitignore: false,
-            git_ignore_files: None,
-            ignore_case_for_patterns: false,
-        }
-    }
+    /// Configuration for metadata collection and display
+    pub metadata: MetadataOptions,
+
+    /// Miscellaneous configuration options
+    pub misc: MiscOptions,
 }

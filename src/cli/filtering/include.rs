@@ -10,4 +10,4 @@ pub struct IncludeArgs {
     /// A `/` at the end of a pattern matches directories only, e.g., "docs/".
     #[arg(short = 'P', long = "filter-include", action = clap::ArgAction::Append)]
     pub match_patterns: Option<Vec<String>>,
-} 
+}

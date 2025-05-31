@@ -15,4 +15,13 @@ pub enum SortKey {
     Lines,
     /// Sort by the output of a custom applied function (then name).
     Custom,
-} 
+}
+
+/// Configuration for sorting behavior.
+#[derive(Debug, Clone, Default)]
+pub struct SortingOptions {
+    /// The key to sort by. None means no sorting (preserve directory traversal order).
+    pub sort_by: Option<SortKey>,
+    /// Whether to reverse the sort order.
+    pub reverse_sort: bool,
+}

@@ -16,21 +16,47 @@
 //! - Sorting of tree entries by various keys (name, size, mtime, etc.).
 //! - Multiple output formats.
 //!
+//! # Configuration
+//!
+//! The library uses a hierarchical configuration structure through [`RustreeLibConfig`],
+//! which is composed of several specialized option groups:
+//!
+//! - [`InputSourceOptions`] - Controls how the root path is displayed
+//! - [`ListingOptions`] - Controls directory traversal (depth, hidden files, etc.)
+//! - [`FilteringOptions`] - Controls which files/directories to include/exclude
+//! - [`SortingOptions`] - Controls sorting behavior
+//! - [`MetadataOptions`] - Controls what metadata to collect and display
+//! - [`MiscOptions`] - Additional miscellaneous options
+//!
 //! # Examples
 //!
 //! ```no_run
-//! use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, SortKey};
+//! use rustree::{get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat};
+//! use rustree::{InputSourceOptions, ListingOptions, MetadataOptions, SortingOptions, SortKey};
 //! use std::path::Path;
 //!
 //! fn main() -> Result<(), rustree::RustreeError> {
 //!     let path = Path::new(".");
-//!     let mut config = RustreeLibConfig {
-//!         root_display_name: path.file_name().unwrap_or_default().to_string_lossy().into_owned(),
-//!         max_depth: Some(2),
-//!         show_hidden: false,
-//!         report_sizes: true,
-//!         report_mtime: true,
-//!         sort_by: Some(SortKey::Name),
+//!     let config = RustreeLibConfig {
+//!         input_source: InputSourceOptions {
+//!             root_display_name: path.file_name().unwrap_or_default().to_string_lossy().into_owned(),
+//!             root_is_directory: true,
+//!             ..Default::default()
+//!         },
+//!         listing: ListingOptions {
+//!             max_depth: Some(2),
+//!             show_hidden: false,
+//!             ..Default::default()
+//!         },
+//!         metadata: MetadataOptions {
+//!             report_sizes: true,
+//!             report_mtime: true,
+//!             ..Default::default()
+//!         },
+//!         sorting: SortingOptions {
+//!             sort_by: Some(SortKey::Name),
+//!             ..Default::default()
+//!         },
 //!         ..Default::default()
 //!     };
 //!
@@ -45,31 +71,54 @@
 //! }
 //! ```
 
-pub mod core;
 pub mod config;
+pub mod core;
 
 // Re-export key types for the public API
-pub use crate::core::node::{NodeInfo, NodeType};
-pub use crate::config::{RustreeLibConfig, SortKey, BuiltInFunction, ApplyFnError};
-pub use crate::core::error::RustreeError;
-pub use crate::core::formatter::{
-    base::TreeFormatter,
-    text_tree::TextTreeFormatter,
-    markdown::MarkdownFormatter,
-};
-pub use crate::config::output::OutputFormat as LibOutputFormat;
 
+// Configuration types - organized by category
+pub use crate::config::{
+    // Enums and related types
+    ApplyFnError,
+    BuiltInFunction,
+    // Configuration option groups
+    FilteringOptions,
+    InputSourceOptions,
+    ListingOptions,
+    MetadataOptions,
+    MiscOptions,
+    // Main config struct
+    RustreeLibConfig,
+
+    SortKey,
+    SortingOptions,
+};
+
+// Output format
+pub use crate::config::output_format::OutputFormat as LibOutputFormat;
+
+// Core types for working with nodes
+pub use crate::core::error::RustreeError;
+pub use crate::core::node::{NodeInfo, NodeType};
+
+// Formatter types (for advanced usage)
+pub use crate::core::formatter::{
+    base::TreeFormatter, markdown::MarkdownFormatter, text_tree::TextTreeFormatter,
+};
+
+// Internal imports
+use crate::core::{sorter, walker};
 use std::path::Path;
-use crate::core::{walker, sorter}; // Internal use
 
 /// Walks the directory, analyzes files, and sorts them based on the provided configuration.
 ///
 /// This is the main entry point for gathering information about a directory structure.
 /// It performs the following steps:
-/// 1. Traverses the directory structure starting from `root_path` according to `config` settings
-///    (e.g., `max_depth`, `show_hidden`).
-/// 2. Collects metadata and performs analysis (e.g., size, line count) for each file and directory.
-/// 3. If a sort key is specified in `config`, sorts the collected nodes.
+/// 1. Traverses the directory structure starting from `root_path` according to `config.listing` settings
+///    (e.g., `config.listing.max_depth`, `config.listing.show_hidden`).
+/// 2. Collects metadata and performs analysis (e.g., `config.metadata.report_sizes`,
+///    `config.metadata.calculate_line_count`) for each file and directory.
+/// 3. If a sort key is specified in `config.sorting.sort_by`, sorts the collected nodes.
 ///
 /// # Arguments
 ///
@@ -94,8 +143,8 @@ pub fn get_tree_nodes(
     let mut nodes = walker::walk_directory(root_path, config)?;
 
     // 2. Sort if requested in config
-    if let Some(sort_key) = &config.sort_by {
-        sorter::sort_nodes(&mut nodes, sort_key, config.reverse_sort);
+    if let Some(sort_key) = &config.sorting.sort_by {
+        sorter::sort_nodes(&mut nodes, sort_key, config.sorting.reverse_sort);
     }
     Ok(nodes)
 }
@@ -111,7 +160,7 @@ pub fn get_tree_nodes(
 /// * `nodes` - A slice of `NodeInfo` objects to format.
 /// * `format` - The desired output format (e.g., text tree, Markdown).
 /// * `config` - The library configuration, which may influence formatting details
-///   (e.g., which metadata to display).
+///   (e.g., which metadata to display via `config.metadata`).
 ///
 /// # Returns
 ///

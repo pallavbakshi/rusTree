@@ -7,4 +7,4 @@ pub struct ExcludeArgs {
     /// Can be specified multiple times. Uses glob pattern syntax (see -P).
     #[arg(short = 'I', long = "filter-exclude", action = clap::ArgAction::Append)]
     pub ignore_patterns: Option<Vec<String>>,
-} 
+}

@@ -1,8 +1,8 @@
 // tests/common.rs
+use anyhow::Result;
 use std::fs::{self, File};
 use std::io::Write;
 use tempfile::{TempDir, tempdir};
-use anyhow::Result;
 
 pub mod common_test_utils {
     use super::*; // To bring fs, File, Write, TempDir, Result into this module's scope
@@ -18,15 +18,11 @@ pub mod common_test_utils {
         //   sub_dir/
         //     file3.dat (2 lines, "data\nplus+plus")
         //     .hidden_file (1 line, "secret")
-        File::create(dir.path().join("file1.txt"))?
-            .write_all(b"hello\nworld\nrust")?;
-        File::create(dir.path().join("file2.log"))?
-            .write_all(b"another file")?;
+        File::create(dir.path().join("file1.txt"))?.write_all(b"hello\nworld\nrust")?;
+        File::create(dir.path().join("file2.log"))?.write_all(b"another file")?;
         fs::create_dir(dir.path().join("sub_dir"))?;
-        File::create(dir.path().join("sub_dir/file3.dat"))?
-            .write_all(b"data\nplus++plus")?; // Changed to have two '+' characters
-        File::create(dir.path().join("sub_dir/.hidden_file"))?
-            .write_all(b"secret")?;
+        File::create(dir.path().join("sub_dir/file3.dat"))?.write_all(b"data\nplus++plus")?; // Changed to have two '+' characters
+        File::create(dir.path().join("sub_dir/.hidden_file"))?.write_all(b"secret")?;
         Ok(dir)
     }
 
@@ -59,13 +55,16 @@ pub mod common_test_utils {
         let another_dir_path = base.join("another_dir");
         fs::create_dir(&another_dir_path)?;
         create_file_with_content(&another_dir_path, "another_file.dat", "data content")?;
-        
+
         // empty_dir/
         fs::create_dir(base.join("empty_dir"))?;
 
         // Symlinks (conditionally created for Unix/Windows)
         if cfg!(unix) {
-            std::os::unix::fs::symlink(base.join("file_a.txt"), base.join("symlink_to_file_a.txt"))?;
+            std::os::unix::fs::symlink(
+                base.join("file_a.txt"),
+                base.join("symlink_to_file_a.txt"),
+            )?;
             std::os::unix::fs::symlink(&sub_dir_path, base.join("symlink_to_sub_dir"))?;
         } else if cfg!(windows) {
             #[cfg(windows)]
@@ -73,8 +72,14 @@ pub mod common_test_utils {
                 // On Windows, symlink creation might require special privileges.
                 // std::os::windows::fs::symlink_file for files, symlink_dir for directories.
                 // These calls return Result, so they can fail gracefully if permissions are not met.
-                let _ = std::os::windows::fs::symlink_file(base.join("file_a.txt"), base.join("symlink_to_file_a.txt"));
-                let _ = std::os::windows::fs::symlink_dir(&sub_dir_path, base.join("symlink_to_sub_dir"));
+                let _ = std::os::windows::fs::symlink_file(
+                    base.join("file_a.txt"),
+                    base.join("symlink_to_file_a.txt"),
+                );
+                let _ = std::os::windows::fs::symlink_dir(
+                    &sub_dir_path,
+                    base.join("symlink_to_sub_dir"),
+                );
             }
         }
 
@@ -112,7 +117,11 @@ pub mod common_test_utils {
         // Hidden files/dirs
         create_file_with_content(base, ".secret_file", "secret")?;
         fs::create_dir(base.join(".hidden_dir"))?;
-        create_file_with_content(&base.join(".hidden_dir"), "content.txt", "hidden dir content")?;
+        create_file_with_content(
+            &base.join(".hidden_dir"),
+            "content.txt",
+            "hidden dir content",
+        )?;
 
         Ok(dir)
     }

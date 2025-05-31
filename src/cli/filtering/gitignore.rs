@@ -17,4 +17,4 @@ pub struct GitignoreArgs {
     /// Ignore case for -P, -I, --gitignore, and --gitfile patterns.
     #[arg(long = "ignore-case")]
     pub ignore_case_for_patterns: bool,
-} 
+}

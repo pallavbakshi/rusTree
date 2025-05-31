@@ -1,6 +1,6 @@
 // src/cli/sorting/order.rs
-use clap::Args;
 use crate::cli::sorting::CliSortKey;
+use clap::Args;
 
 #[derive(Args, Debug)]
 pub struct SortOrderArgs {
@@ -24,4 +24,4 @@ pub struct SortOrderArgs {
     /// Incompatible with -U/--unsorted.
     #[arg(short = 'r', long)]
     pub reverse_sort: bool,
-} 
+}

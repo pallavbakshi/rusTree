@@ -1,6 +1,6 @@
 // src/cli/output/format.rs
-use clap::Args;
 use super::CliOutputFormat;
+use clap::Args;
 
 #[derive(Args, Debug)]
 pub struct FormatArgs {
@@ -8,4 +8,4 @@ pub struct FormatArgs {
     /// Defaults to "text".
     #[arg(long, default_value = "text")]
     pub output_format: Option<CliOutputFormat>,
-} 
+}

@@ -1,6 +1,6 @@
 // src/cli/metadata/stats.rs
-use clap::Args;
 use crate::cli::metadata::CliBuiltInFunction;
+use clap::Args;
 
 #[derive(Args, Debug)]
 pub struct FileStatsArgs {
@@ -15,4 +15,4 @@ pub struct FileStatsArgs {
     /// Apply a built-in function to file contents and display the result.
     #[arg(long)]
     pub apply_function: Option<CliBuiltInFunction>,
-} 
+}
