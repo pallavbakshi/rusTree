@@ -92,7 +92,12 @@ fn compare_by_custom(a: &TempNode, b: &TempNode) -> Ordering {
 }
 
 /// Core comparison logic that both comparison functions can use.
-fn compare_by_sort_key(a: &TempNode, b: &TempNode, key: &SortKey, files_before_directories: bool) -> Ordering {
+fn compare_by_sort_key(
+    a: &TempNode,
+    b: &TempNode,
+    key: &SortKey,
+    files_before_directories: bool,
+) -> Ordering {
     match key {
         SortKey::Name => compare_by_name(a, b),
         SortKey::Version => compare_by_version(a, b),
@@ -120,7 +125,11 @@ pub fn compare_siblings(a: &TempNode, b: &TempNode, key: &SortKey, reverse: bool
 /// Compares two sibling nodes based on the specified sorting options.
 ///
 /// This is the newer version that accepts full SortingOptions for more flexible configuration.
-pub fn compare_siblings_with_options(a: &TempNode, b: &TempNode, options: &SortingOptions) -> Ordering {
+pub fn compare_siblings_with_options(
+    a: &TempNode,
+    b: &TempNode,
+    options: &SortingOptions,
+) -> Ordering {
     let key = match &options.sort_by {
         Some(k) => k,
         None => return Ordering::Equal, // No sorting
@@ -128,7 +137,11 @@ pub fn compare_siblings_with_options(a: &TempNode, b: &TempNode, options: &Sorti
 
     let ord = compare_by_sort_key(a, b, key, options.files_before_directories);
 
-    if options.reverse_sort { ord.reverse() } else { ord }
+    if options.reverse_sort {
+        ord.reverse()
+    } else {
+        ord
+    }
 }
 
 /// Compares two nodes by size with configurable type bias.
@@ -161,27 +174,30 @@ fn compare_by_size(a: &TempNode, b: &TempNode, files_before_directories: bool) -
             // For files/symlinks: compare by size (descending), treating None as 0
             let size_a = a.node_info.size.unwrap_or(0);
             let size_b = b.node_info.size.unwrap_or(0);
-            
+
             // Descending order: larger files first
-            size_b.cmp(&size_a)
+            size_b
+                .cmp(&size_a)
                 .then_with(|| a.node_info.name.cmp(&b.node_info.name))
         }
         (NodeType::Directory, NodeType::Directory) => {
             // For directories: compare by size if available (descending), then by name
             let size_a = a.node_info.size.unwrap_or(0);
             let size_b = b.node_info.size.unwrap_or(0);
-            
+
             // Descending order: larger directories first
-            size_b.cmp(&size_a)
+            size_b
+                .cmp(&size_a)
                 .then_with(|| a.node_info.name.cmp(&b.node_info.name))
         }
         _ => {
             // Mixed types when type bias is disabled
             let size_a = a.node_info.size.unwrap_or(0);
             let size_b = b.node_info.size.unwrap_or(0);
-            
+
             // Descending order: larger items first
-            size_b.cmp(&size_a)
+            size_b
+                .cmp(&size_a)
                 .then_with(|| a.node_info.name.cmp(&b.node_info.name))
         }
     }
@@ -196,7 +212,7 @@ fn compare_by_size(a: &TempNode, b: &TempNode, files_before_directories: bool) -
 /// # Examples
 ///
 /// - "1.10" > "1.2" (numeric comparison of segments)
-/// - "v2.1.0" > "v2.0.9" 
+/// - "v2.1.0" > "v2.0.9"
 /// - "file-1.10.txt" > "file-1.2.txt"
 ///
 /// # Arguments
@@ -209,14 +225,14 @@ fn compare_by_size(a: &TempNode, b: &TempNode, files_before_directories: bool) -
 /// `Ordering` indicating the relationship between the two version strings.
 fn compare_version_strings(a: &str, b: &str) -> Ordering {
     // Split on common version separators
-    let a_parts: Vec<&str> = a.split(|c| c == '.' || c == '-' || c == '_').collect();
-    let b_parts: Vec<&str> = b.split(|c| c == '.' || c == '-' || c == '_').collect();
-    
+    let a_parts: Vec<&str> = a.split(['.', '-', '_']).collect();
+    let b_parts: Vec<&str> = b.split(['.', '-', '_']).collect();
+
     // Compare parts segment by segment
     for i in 0..std::cmp::max(a_parts.len(), b_parts.len()) {
         let a_part = a_parts.get(i).unwrap_or(&"");
         let b_part = b_parts.get(i).unwrap_or(&"");
-        
+
         // Try to parse as numbers first
         match (a_part.parse::<u64>(), b_part.parse::<u64>()) {
             (Ok(a_num), Ok(b_num)) => {
@@ -235,7 +251,7 @@ fn compare_version_strings(a: &str, b: &str) -> Ordering {
             }
         }
     }
-    
+
     Ordering::Equal
 }
 
@@ -251,9 +267,12 @@ mod tests {
         assert_eq!(compare_version_strings("1.2", "1.10"), Ordering::Less);
         assert_eq!(compare_version_strings("2.0", "1.9"), Ordering::Greater);
         assert_eq!(compare_version_strings("1.0", "1.0"), Ordering::Equal);
-        
+
         // Multi-segment numeric comparisons
-        assert_eq!(compare_version_strings("1.2.10", "1.2.9"), Ordering::Greater);
+        assert_eq!(
+            compare_version_strings("1.2.10", "1.2.9"),
+            Ordering::Greater
+        );
         assert_eq!(compare_version_strings("2.1.0", "2.0.9"), Ordering::Greater);
         assert_eq!(compare_version_strings("1.0.0", "1.0.0"), Ordering::Equal);
     }
@@ -262,9 +281,12 @@ mod tests {
     fn test_compare_version_strings_lexicographic_fallback() {
         // Mixed numeric and non-numeric segments
         assert_eq!(compare_version_strings("v1.10", "v1.2"), Ordering::Greater);
-        assert_eq!(compare_version_strings("file-1.txt", "file-2.txt"), Ordering::Less);
+        assert_eq!(
+            compare_version_strings("file-1.txt", "file-2.txt"),
+            Ordering::Less
+        );
         assert_eq!(compare_version_strings("alpha-1", "beta-1"), Ordering::Less);
-        
+
         // Pure lexicographic comparison when no numbers
         assert_eq!(compare_version_strings("abc", "def"), Ordering::Less);
         assert_eq!(compare_version_strings("xyz", "abc"), Ordering::Greater);
@@ -278,7 +300,7 @@ mod tests {
         assert_eq!(compare_version_strings("1.2.1", "1.2"), Ordering::Greater);
         assert_eq!(compare_version_strings("1", "1.0.0"), Ordering::Less); // "" vs "0" in second segment
         assert_eq!(compare_version_strings("1.0", "1"), Ordering::Greater); // "0" vs ""
-        
+
         // More complex cases with different segment counts
         assert_eq!(compare_version_strings("2", "1.9.9"), Ordering::Greater);
         assert_eq!(compare_version_strings("1.1", "1.0.9"), Ordering::Greater);
@@ -291,9 +313,12 @@ mod tests {
         assert_eq!(compare_version_strings("1.010", "1.10"), Ordering::Equal);
         assert_eq!(compare_version_strings("01.2", "1.2"), Ordering::Equal);
         assert_eq!(compare_version_strings("1.09", "1.10"), Ordering::Less);
-        
+
         // Leading zeros in non-numeric context should be lexicographic
-        assert_eq!(compare_version_strings("file-01", "file-1"), Ordering::Equal); // Both parse as "file" + "-" + "01"/"1" -> numeric 1
+        assert_eq!(
+            compare_version_strings("file-01", "file-1"),
+            Ordering::Equal
+        ); // Both parse as "file" + "-" + "01"/"1" -> numeric 1
     }
 
     #[test]
@@ -311,34 +336,70 @@ mod tests {
         // Test different separators (., -, _)
         assert_eq!(compare_version_strings("1.2-3", "1.2.3"), Ordering::Equal);
         assert_eq!(compare_version_strings("1_2_3", "1.2.3"), Ordering::Equal);
-        assert_eq!(compare_version_strings("v1-2_3.4", "v1.2.3.4"), Ordering::Equal);
-        assert_eq!(compare_version_strings("file-1.10.txt", "file-1.2.txt"), Ordering::Greater);
+        assert_eq!(
+            compare_version_strings("v1-2_3.4", "v1.2.3.4"),
+            Ordering::Equal
+        );
+        assert_eq!(
+            compare_version_strings("file-1.10.txt", "file-1.2.txt"),
+            Ordering::Greater
+        );
     }
 
     #[test]
     fn test_compare_version_strings_complex_real_world_cases() {
         // Real-world version string scenarios
-        assert_eq!(compare_version_strings("v2.1.0", "v2.0.9"), Ordering::Greater);
-        assert_eq!(compare_version_strings("release-1.10.5", "release-1.9.20"), Ordering::Greater);
-        assert_eq!(compare_version_strings("build_2023.12.01", "build_2023.11.30"), Ordering::Greater);
-        assert_eq!(compare_version_strings("snapshot-1.0", "release-1.0"), Ordering::Greater); // "s" > "r"
-        
+        assert_eq!(
+            compare_version_strings("v2.1.0", "v2.0.9"),
+            Ordering::Greater
+        );
+        assert_eq!(
+            compare_version_strings("release-1.10.5", "release-1.9.20"),
+            Ordering::Greater
+        );
+        assert_eq!(
+            compare_version_strings("build_2023.12.01", "build_2023.11.30"),
+            Ordering::Greater
+        );
+        assert_eq!(
+            compare_version_strings("snapshot-1.0", "release-1.0"),
+            Ordering::Greater
+        ); // "s" > "r"
+
         // File names with version-like patterns
-        assert_eq!(compare_version_strings("document_v1.10.pdf", "document_v1.2.pdf"), Ordering::Greater);
-        assert_eq!(compare_version_strings("backup-2023.12.01.tar.gz", "backup-2023.11.30.tar.gz"), Ordering::Greater);
+        assert_eq!(
+            compare_version_strings("document_v1.10.pdf", "document_v1.2.pdf"),
+            Ordering::Greater
+        );
+        assert_eq!(
+            compare_version_strings("backup-2023.12.01.tar.gz", "backup-2023.11.30.tar.gz"),
+            Ordering::Greater
+        );
     }
 
     #[test]
     fn test_compare_version_strings_edge_cases() {
         // Very large numbers (testing u64 parsing)
-        assert_eq!(compare_version_strings("1.999999999999999999", "1.1000000000000000000"), Ordering::Less);
-        
+        assert_eq!(
+            compare_version_strings("1.999999999999999999", "1.1000000000000000000"),
+            Ordering::Less
+        );
+
         // Numbers that would overflow - should fall back to lexicographic
-        assert_eq!(compare_version_strings("1.99999999999999999999999999999", "1.2"), Ordering::Greater); // Lexicographic
-        
+        assert_eq!(
+            compare_version_strings("1.99999999999999999999999999999", "1.2"),
+            Ordering::Greater
+        ); // Lexicographic
+
         // Mixed valid and invalid numbers in same string
-        assert_eq!(compare_version_strings("1.abc.10", "1.abc.2"), Ordering::Greater);
-        assert_eq!(compare_version_strings("1.2.abc", "1.10.abc"), Ordering::Less);
+        assert_eq!(
+            compare_version_strings("1.abc.10", "1.abc.2"),
+            Ordering::Greater
+        );
+        assert_eq!(
+            compare_version_strings("1.2.abc", "1.10.abc"),
+            Ordering::Less
+        );
     }
 
     #[test]
@@ -351,28 +412,35 @@ mod tests {
                     let ord_ij = compare_version_strings(versions[i], versions[j]);
                     let ord_jk = compare_version_strings(versions[j], versions[k]);
                     let ord_ik = compare_version_strings(versions[i], versions[k]);
-                    
+
                     // If i > j and j > k, then i > k
                     if ord_ij == Ordering::Greater && ord_jk == Ordering::Greater {
-                        assert_eq!(ord_ik, Ordering::Greater, 
-                            "Transitivity failed: {} > {} > {} but {} not > {}", 
-                            versions[i], versions[j], versions[k], versions[i], versions[k]);
+                        assert_eq!(
+                            ord_ik,
+                            Ordering::Greater,
+                            "Transitivity failed: {} > {} > {} but {} not > {}",
+                            versions[i],
+                            versions[j],
+                            versions[k],
+                            versions[i],
+                            versions[k]
+                        );
                     }
                 }
             }
         }
-        
+
         // Test reflexivity: a == a
         for version in &versions {
             assert_eq!(compare_version_strings(version, version), Ordering::Equal);
         }
-        
+
         // Test antisymmetry: if a <= b and b <= a, then a == b
         for version_a in &versions {
             for version_b in &versions {
                 let ord_ab = compare_version_strings(version_a, version_b);
                 let ord_ba = compare_version_strings(version_b, version_a);
-                
+
                 if ord_ab != Ordering::Greater && ord_ba != Ordering::Greater {
                     assert_eq!(ord_ab, Ordering::Equal);
                     assert_eq!(ord_ba, Ordering::Equal);
@@ -380,4 +448,4 @@ mod tests {
             }
         }
     }
-} 
+}

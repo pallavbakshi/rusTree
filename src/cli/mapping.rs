@@ -100,8 +100,10 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         metadata: MetadataOptions {
             show_size_bytes: cli_args.size.show_size_bytes,
             report_permissions: false, // Not exposed in CLI args yet
-            show_last_modified: cli_args.date.show_last_modified && !cli_args.sort_order.legacy_sort_change_time, // If -D is present AND -c is NOT
-            report_change_time: cli_args.sort_order.legacy_sort_change_time && cli_args.date.show_last_modified, // -c with -D implies reporting ctime for display
+            show_last_modified: cli_args.date.show_last_modified
+                && !cli_args.sort_order.legacy_sort_change_time, // If -D is present AND -c is NOT
+            report_change_time: cli_args.sort_order.legacy_sort_change_time
+                && cli_args.date.show_last_modified, // -c with -D implies reporting ctime for display
             report_creation_time: false, // Currently no CLI flag for reporting creation time, but can be added later
             calculate_line_count: cli_args.file_stats.calculate_lines,
             calculate_word_count: cli_args.file_stats.calculate_words,

@@ -408,7 +408,10 @@ fn test_d_with_show_size_bytes_s_for_dirs() -> Result<()> {
     }
 
     let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
-    println!("[test_d_with_show_size_bytes_s_for_dirs]\nOutput:\n{}", output);
+    println!(
+        "[test_d_with_show_size_bytes_s_for_dirs]\nOutput:\n{}",
+        output
+    );
     for line in output.lines() {
         if (line.contains("├──") || line.contains("└──")) && !line.contains("B]") {
             panic!("Directory line missing size prefix: {}", line);
@@ -632,18 +635,21 @@ fn test_d_with_sort_by_mtime_t() -> Result<()> {
 
     let nodes = get_tree_nodes(root_path, &config)?;
     assert_eq!(nodes.len(), 3);
-    
+
     // Just verify that the nodes are sorted by modification time (oldest first)
     // without making strict assumptions about which directory has which name
     // since filesystem timing can be unpredictable
     if nodes.len() >= 2 {
         for i in 1..nodes.len() {
-            let prev_mtime = nodes[i-1].mtime.unwrap_or(std::time::UNIX_EPOCH);
+            let prev_mtime = nodes[i - 1].mtime.unwrap_or(std::time::UNIX_EPOCH);
             let curr_mtime = nodes[i].mtime.unwrap_or(std::time::UNIX_EPOCH);
             assert!(
                 prev_mtime <= curr_mtime,
                 "Directories should be sorted by mtime (oldest first), but {} (mtime: {:?}) comes before {} (mtime: {:?})",
-                nodes[i-1].name, prev_mtime, nodes[i].name, curr_mtime
+                nodes[i - 1].name,
+                prev_mtime,
+                nodes[i].name,
+                curr_mtime
             );
         }
     }

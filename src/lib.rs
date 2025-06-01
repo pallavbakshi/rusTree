@@ -148,7 +148,7 @@ pub fn get_tree_nodes(
             // Convert sorting error to IO error since it's related to data structure processing
             return Err(RustreeError::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidData,
-                format!("Sorting failed: {}", e)
+                format!("Sorting failed: {}", e),
             )));
         }
     }

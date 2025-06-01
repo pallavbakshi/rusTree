@@ -201,7 +201,7 @@ pub fn walk_directory(
                 #[cfg(windows)]
                 {
                     // Windows does not have a direct equivalent to Unix ctime (metadata change time).
-                    // Windows creation time semantics differ significantly from Unix ctime, so we set 
+                    // Windows creation time semantics differ significantly from Unix ctime, so we set
                     // this to None rather than providing misleading information.
                     node.change_time = None;
                 }
@@ -227,10 +227,12 @@ pub fn walk_directory(
                     // Reads target for symlinks
                     Ok(content) => {
                         if config.metadata.calculate_line_count {
-                            node.line_count = Some(size_calculator::count_lines_from_string(&content));
+                            node.line_count =
+                                Some(size_calculator::count_lines_from_string(&content));
                         }
                         if config.metadata.calculate_word_count {
-                            node.word_count = Some(size_calculator::count_words_from_string(&content));
+                            node.word_count =
+                                Some(size_calculator::count_words_from_string(&content));
                         }
                         if let Some(func_type) = &config.metadata.apply_function {
                             node.custom_function_output =
@@ -244,4 +246,4 @@ pub fn walk_directory(
         intermediate_nodes.push(node);
     }
     Ok(intermediate_nodes)
-} 
+}

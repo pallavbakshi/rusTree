@@ -20,7 +20,7 @@ use std::cmp::Ordering;
 /// ```rust
 /// # use rustree::core::sorter::composite::CompositeSortKey;
 /// # use rustree::config::sorting::SortKey;
-/// 
+///
 /// // Sort by type first (files before directories), then by name
 /// let composite = CompositeSortKey::new(vec![
 ///     (SortKey::Size, false),  // Size sorting (which includes type sorting)
@@ -114,9 +114,9 @@ pub fn natural_sort() -> CompositeSortKey {
 /// This is useful for finding recently modified large files.
 pub fn detailed_sort() -> CompositeSortKey {
     CompositeSortKey::new(vec![
-        (SortKey::MTime, true),  // Newest first
-        (SortKey::Size, true),   // Largest first (within same mtime)
-        (SortKey::Name, false),  // Then by name
+        (SortKey::MTime, true), // Newest first
+        (SortKey::Size, true),  // Largest first (within same mtime)
+        (SortKey::Name, false), // Then by name
     ])
 }
 
@@ -148,11 +148,8 @@ mod tests {
 
     #[test]
     fn test_composite_sort_key_creation() {
-        let composite = CompositeSortKey::new(vec![
-            (SortKey::Name, false),
-            (SortKey::Size, true),
-        ]);
-        
+        let composite = CompositeSortKey::new(vec![(SortKey::Name, false), (SortKey::Size, true)]);
+
         assert_eq!(composite.len(), 2);
         assert!(!composite.is_empty());
     }
@@ -189,4 +186,4 @@ mod tests {
         assert!(!detailed.is_empty());
         assert_eq!(detailed.len(), 3);
     }
-} 
+}

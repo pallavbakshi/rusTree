@@ -3,4 +3,4 @@
 //! This module will contain logic for controlling the depth of directory traversal,
 //! implementing depth-based pruning, and managing depth-related configurations.
 
-// Placeholder for future implementation of depth control 
+// Placeholder for future implementation of depth control

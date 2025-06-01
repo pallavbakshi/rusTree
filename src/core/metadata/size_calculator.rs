@@ -92,4 +92,4 @@ mod tests {
     fn test_count_words_extra_whitespace() {
         assert_eq!(count_words_from_string("  hello   world  "), 2);
     }
-} 
+}

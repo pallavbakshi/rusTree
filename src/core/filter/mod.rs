@@ -7,4 +7,4 @@ pub mod composite;
 pub mod gitignore;
 pub mod matcher;
 pub mod pattern;
-pub mod size_filter; 
+pub mod size_filter;

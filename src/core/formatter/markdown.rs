@@ -2,14 +2,14 @@
 use super::base::TreeFormatter;
 use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
-use crate::core::metadata::file_info::{format_node_metadata, MetadataStyle};
+use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fmt::Write;
 
 /// A formatter that generates a Markdown list representation of the directory structure.
 ///
 /// The output is a nested Markdown list using `*` for unordered lists, with proper
-/// indentation to represent the tree hierarchy. Files and directories are 
+/// indentation to represent the tree hierarchy. Files and directories are
 /// distinguished by trailing `/` for directories.
 pub struct MarkdownFormatter;
 
@@ -29,7 +29,7 @@ impl TreeFormatter for MarkdownFormatter {
         for node in nodes {
             // Create indentation based on depth (depth 1 = no extra indent, depth 2 = 2 spaces, etc.)
             let indent = "  ".repeat(node.depth.saturating_sub(1));
-            
+
             // Format the node name with directory indicator
             let name_with_suffix = if node.node_type == NodeType::Directory {
                 format!("{}/", node.name)
@@ -47,7 +47,11 @@ impl TreeFormatter for MarkdownFormatter {
         // Add summary
         let (dir_count, file_count) = if config.listing.list_directories_only {
             let child_dir_count = nodes.len();
-            let root_dir_increment = if config.input_source.root_is_directory { 1 } else { 0 };
+            let root_dir_increment = if config.input_source.root_is_directory {
+                1
+            } else {
+                0
+            };
             (child_dir_count + root_dir_increment, 0)
         } else {
             let mut dc = 0;
