@@ -201,7 +201,7 @@
 <li>
 <p><strong><code>filtering.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>FilteringOptions</code> struct for inclusion/exclusion patterns and gitignore settings.</li>
+<li>Defines <code>FilteringOptions</code> struct for inclusion/exclusion patterns, gitignore settings, and the <code>prune_empty_directories</code> flag.</li>
 </ul>
 </li>
 <li>
@@ -247,7 +247,7 @@
 <li>
 <p><strong><code>walker/</code></strong>: This sub-module is responsible for traversing the file system.</p>
 <ul>
-<li><code>filesystem.rs</code>: Contains the <code>walk_directory</code> function. It uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking. It implements initial filtering logic based on <code>RustreeLibConfig</code> (hidden files, max depth, gitignore rules, ignore patterns). After the <code>ignore</code> crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates <code>NodeInfo</code> structs with basic metadata, triggering content analysis via the <code>metadata</code> module.</li>
+<li><code>filesystem.rs</code>: Contains the <code>walk_directory</code> function. It uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking. It implements initial filtering logic based on <code>RustreeLibConfig</code> (hidden files, max depth, gitignore rules, ignore patterns). After the <code>ignore</code> crate yields an entry, it applies further filtering (match patterns). The <code>list_directories_only</code> filter is applied later in <code>lib.rs</code> after potential pruning. It handles symlink resolution and populates <code>NodeInfo</code> structs with basic metadata, triggering content analysis via the <code>metadata</code> module.</li>
 <li><code>depth_control.rs</code>: (Placeholder for future depth-specific control logic).</li>
 <li><code>input_source.rs</code>: (Placeholder for future advanced input source handling).</li>
 <li><code>symlinks.rs</code>: (Placeholder for future advanced symlink resolution strategies).</li>
@@ -300,7 +300,7 @@
 <li>
 <p><strong><code>error.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeError</code>, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, and errors from the <code>ignore</code> crate (<code>IgnoreError</code>).</li>
+<li>Defines <code>RustreeError</code>, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, errors from the <code>ignore</code> crate (<code>IgnoreError</code>), and <code>TreeBuildError</code> (for errors during internal tree construction for sorting or pruning).</li>
 </ul>
 </li>
 </ul>
@@ -318,9 +318,19 @@
 <p>Core types: <code>NodeInfo</code> (from <code>core::tree::node</code>), <code>NodeType</code>, and <code>RustreeError</code>.</p>
 </li>
 <li>
+<p>The <code>cli</code> module, while part of the crate, is marked <code>#[doc(hidden)]</code> and is not part of the stable public API.</p>
+</li>
+<li>
 <p>Provides the main entry-point functions:</p>
 <ul>
-<li><code>get_tree_nodes()</code>: Orchestrates walking (via <code>core::walker</code>), analysis (via <code>core::metadata</code>), and sorting (via <code>core::sorter::strategies::sort_nodes_with_options</code>).</li>
+<li><code>get_tree_nodes()</code>: Orchestrates the main logic:
+<ol>
+<li>Walking the file system (via <code>core::walker</code>), applying initial filters and collecting metadata.</li>
+<li>If <code>config.filtering.prune_empty_directories</code> is true, prunes empty directories from the results (using <code>core::tree::manipulator</code> and <code>core::tree::builder</code>).</li>
+<li>If <code>config.listing.list_directories_only</code> is true, filters the results to include only directories. This occurs <em>after</em> pruning.</li>
+<li>If sorting is requested, sorts the nodes (via <code>core::sorter::strategies::sort_nodes_with_options</code>). Errors during sorting or tree building for pruning now map to <code>RustreeError::TreeBuildError</code>.</li>
+</ol>
+</li>
 <li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter.</li>
 </ul>
 </li>

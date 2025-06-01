@@ -170,7 +170,7 @@
 <p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
 <ol>
 <li>
-<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), and <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, and behaviors like <code>files_before_directories</code>).</p>
+<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code> (including <code>prune_empty_directories</code>), <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), and <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, and behaviors like <code>files_before_directories</code>).</p>
 </li>
 <li>
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
@@ -187,10 +187,9 @@
 <li>After the <code>ignore</code> crate yields an entry, further filtering is applied by the walker using <code>core::filter::pattern::entry_matches_glob_patterns</code>:
 <ul>
 <li><code>config.filtering.match_patterns</code> (CLI <code>-P</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
-<li><code>config.listing.list_directories_only</code>: If true, only effective directories are kept.</li>
 </ul>
 </li>
-<li>For each qualifying entry, it gathers initial metadata (mtime, ctime, crtime based on <code>config.metadata</code> and platform capabilities). Symlinks are resolved.</li>
+<li>For each qualifying entry, it gathers initial metadata (mtime, ctime, crtime based on <code>config.metadata</code> and platform capabilities). Symlinks are resolved. The <code>list_directories_only</code> filter is NOT applied at this stage.</li>
 </ul>
 </li>
 <li>
@@ -199,7 +198,7 @@
 <li>As the walker processes entries, it invokes functions from <code>core::metadata</code> based on <code>config.metadata</code>.</li>
 <li><code>core::metadata::size_calculator</code>: Calculates line counts and word counts for files.</li>
 <li><code>core::metadata::file_info</code>: Applies built-in functions (from <code>config::metadata::BuiltInFunction</code>) to file content using <code>apply_builtin_to_file</code>.</li>
-<li>The results are stored in <code>NodeInfo</code> objects (defined in <code>core::tree::node</code>). This step is skipped for directories or when <code>config.listing.list_directories_only</code> is active for file-specific analyses.</li>
+<li>The results are stored in <code>NodeInfo</code> objects (defined in <code>core::tree::node</code>). This step is skipped for directories for file-specific analyses.</li>
 </ul>
 </li>
 <li>
@@ -210,17 +209,32 @@
 </ul>
 </li>
 <li>
+<p><strong>Pruning (<code>lib.rs</code>, using <code>core::tree::manipulator</code>)</strong>:</p>
+<ul>
+<li>If <code>config.filtering.prune_empty_directories</code> is <code>true</code>, the <code>Vec&lt;NodeInfo&gt;</code> is processed to remove empty directories.</li>
+<li>This involves building a temporary tree, pruning nodes where a directory contains no files and no non-empty subdirectories, and then flattening the tree back.</li>
+<li>This step occurs <em>after</em> all initial walking and filtering, but <em>before</em> the <code>list_directories_only</code> filter and sorting.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>list_directories_only</code> Filtering (<code>lib.rs</code>)</strong>:</p>
+<ul>
+<li>If <code>config.listing.list_directories_only</code> is <code>true</code>, the <code>Vec&lt;NodeInfo&gt;</code> (potentially already pruned) is further filtered to retain only entries with <code>NodeType::Directory</code>.</li>
+<li>This ensures that pruning decisions are made based on the full content of directories before they are potentially removed by this filter.</li>
+</ul>
+</li>
+<li>
 <p><strong>Sorting (<code>core::sorter</code>)</strong>:</p>
 <ul>
-<li>If <code>config.sorting.sort_by</code> specifies a <code>SortKey</code>, the <code>sort_nodes_with_options</code> function (in <code>core::sorter::strategies</code>) sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
-<li>Sorting involves building a temporary tree (<code>core::tree::builder</code>), sorting sibling nodes at each level using comparison logic from <code>core::sorter::comparators</code> (which respects <code>config.sorting.reverse_sort</code> and <code>config.sorting.files_before_directories</code>), and then flattening the tree back.</li>
+<li>If <code>config.sorting.sort_by</code> specifies a <code>SortKey</code>, the <code>sort_nodes_with_options</code> function (in <code>core::sorter::strategies</code>) sorts the (potentially pruned and filtered) <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>Sorting involves building a temporary tree, sorting sibling nodes at each level using comparison logic from <code>core::sorter::comparators</code> (which respects <code>config.sorting.reverse_sort</code> and <code>config.sorting.files_before_directories</code>), and then flattening the tree back.</li>
 <li>Default size sorting is now largest first, with files/symlinks grouped before directories. Version sorting is more intelligent. If <code>SortKey::None</code> is used, directory traversal order is preserved.</li>
 </ul>
 </li>
 <li>
 <p><strong>Formatting (<code>core::formatter</code>)</strong>:</p>
 <ul>
-<li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is passed to a formatter.</li>
+<li>The processed (sorted or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is passed to a formatter.</li>
 <li>The <code>TreeFormatter</code> trait defines the interface. Formatters use <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display.</li>
 <li><code>TextTreeFormatter</code>: Generates plain text, <code>tree</code>-like output.</li>
 <li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>

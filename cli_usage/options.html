@@ -264,6 +264,13 @@
 <li>Example: <code>rustree -P "*.TXT" --case-insensitive-filter</code> (would match <code>file.txt</code>)</li>
 </ul>
 </li>
+<li>
+<p><code>--prune-empty-directories</code>, <code>--prune</code> (alias)</p>
+<ul>
+<li>Description: Remove empty directories from the output. An empty directory is one that contains no files and no non-empty subdirectories after all other filtering (e.g., <code>-P</code>, <code>-I</code>, gitignore rules) has been applied. This option is applied before sorting.</li>
+<li>Example: <code>rustree --prune-empty-directories</code>, <code>rustree --prune ./my_project</code></li>
+</ul>
+</li>
 </ul>
 <h2 id="metadata-reporting"><a class="header" href="#metadata-reporting">Metadata Reporting</a></h2>
 <ul>

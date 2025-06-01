@@ -177,8 +177,9 @@
 <ul>
 <li>List only files/directories matching specific wildcard patterns (<code>-P</code> or <code>--filter-include</code>).</li>
 <li>Exclude files/directories using glob patterns (<code>-I</code> or <code>--filter-exclude</code>).</li>
-<li>Respect <code>.gitignore</code> files (<code>--gitignore</code>) and custom ignore files (<code>--git-ignore-files</code>).</li>
-<li>Perform case-insensitive pattern matching (<code>--ignore-case</code>).</li>
+<li>Respect <code>.gitignore</code> files (<code>--use-gitignore-rules</code>) and custom ignore files (<code>--gitignore-file</code>).</li>
+<li>Perform case-insensitive pattern matching (<code>--case-insensitive-filter</code>).</li>
+<li>Prune empty directories from the output (<code>--prune-empty-directories</code>).</li>
 </ul>
 </li>
 <li><strong>Analyze Content:</strong> Get insights like file sizes, modification dates, line counts, and word counts.</li>
@@ -405,6 +406,13 @@ rustree --sort-by size --reverse-sort
 <ul>
 <li>Description: Perform case-insensitive matching for all patterns provided via <code>-P</code> (<code>--filter-include</code>), <code>-I</code> (<code>--filter-exclude</code>), <code>--use-gitignore-rules</code> (and its alias <code>--gitignore</code>), and <code>--gitignore-file</code>.</li>
 <li>Example: <code>rustree -P "*.TXT" --case-insensitive-filter</code> (would match <code>file.txt</code>)</li>
+</ul>
+</li>
+<li>
+<p><code>--prune-empty-directories</code>, <code>--prune</code> (alias)</p>
+<ul>
+<li>Description: Remove empty directories from the output. An empty directory is one that contains no files and no non-empty subdirectories after all other filtering (e.g., <code>-P</code>, <code>-I</code>, gitignore rules) has been applied. This option is applied before sorting.</li>
+<li>Example: <code>rustree --prune-empty-directories</code>, <code>rustree --prune ./my_project</code></li>
 </ul>
 </li>
 </ul>
@@ -751,6 +759,21 @@ rustree --sort-by ctime --show-last-modified ./my_project
 <pre><code class="language-bash">rustree --sort-by crtime -r ./my_photos
 </code></pre>
 </li>
+<li>
+<p><strong>Prune empty directories from the output:</strong>
+Imagine a project with many empty <code>build/</code> or <code>log/</code> subdirectories.</p>
+<pre><code class="language-bash">rustree --prune-empty-directories ./my_project
+# or using the alias
+rustree --prune ./my_project
+</code></pre>
+<p>This will list <code>my_project</code>, but any directories within it (or nested deeper) that become empty after other filters (like <code>-P</code>, <code>-I</code>, or gitignore) are applied will not be shown.</p>
+</li>
+<li>
+<p><strong>Prune empty directories while listing only <code>.rs</code> files:</strong></p>
+<pre><code class="language-bash">rustree -P "*.rs" --prune ./my_rust_project
+</code></pre>
+<p>In this case, if a directory <code>src/utils/</code> contains only <code>helper.txt</code> and <code>mod.rs</code>, after <code>-P "*.rs"</code> is applied, <code>helper.txt</code> is filtered out. If <code>src/utils/</code> now only effectively contains <code>mod.rs</code>, it's not empty. However, if <code>src/empty_module/</code> contained only <code>old_code.txt</code>, it would first be filtered by <code>-P</code>, then <code>src/empty_module/</code> would become empty and subsequently pruned by <code>--prune</code>.</p>
+</li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="library-usage-api"><a class="header" href="#library-usage-api">Library Usage (API)</a></h1>
@@ -801,6 +824,7 @@ rustree = "0.1.0" # Replace with the desired version
 <li><code>use_gitignore_rules</code>: If <code>true</code>, standard gitignore files (<code>.gitignore</code>, global gitignore, etc.) will be used for filtering.</li>
 <li><code>gitignore_file</code>: <code>Option&lt;Vec&lt;PathBuf&gt;&gt;</code> specifying paths to custom files to be used as additional gitignore files.</li>
 <li><code>case_insensitive_filter</code>: If <code>true</code>, all pattern matching (<code>match_patterns</code>, <code>ignore_patterns</code>, and gitignore processing) will be case-insensitive.</li>
+<li><code>prune_empty_directories</code>: If <code>true</code>, empty directories are removed from the results after initial walking and filtering, but before sorting. An empty directory is one that contains no files and no non-empty subdirectories after other filters have been applied.</li>
 </ul>
 </li>
 <li><strong><code>sorting: SortingOptions</code></strong> (from <code>src/config/sorting.rs</code>):
@@ -903,7 +927,14 @@ fn list_directory_contents(path_str: &amp;str, config: &amp;RustreeLibConfig) -&
 }
 <span class="boring">}</span></code></pre></pre>
 <p>It takes the root path and a <code>RustreeLibConfig</code> and returns a <code>Result&lt;Vec&lt;NodeInfo&gt;, RustreeError&gt;</code>.
-The returned <code>Vec&lt;NodeInfo&gt;</code> will only contain directories if <code>config.list_directories_only</code> is true.</p>
+The processing order is:</p>
+<ol>
+<li>Walk the directory structure, applying initial filters (<code>match_patterns</code>, <code>ignore_patterns</code>, gitignore rules, etc.) and collecting metadata.</li>
+<li>If <code>config.filtering.prune_empty_directories</code> is <code>true</code>, empty directories are pruned from the collected nodes.</li>
+<li>If <code>config.listing.list_directories_only</code> is <code>true</code>, the node list is filtered to retain only directories. This happens <em>after</em> pruning, so pruning decisions are based on the full content before this filter.</li>
+<li>If sorting is specified (<code>config.sorting.sort_by</code>), the remaining nodes are sorted.
+The final <code>Vec&lt;NodeInfo&gt;</code> reflects these processing steps.</li>
+</ol>
 <h3 id="format_nodes"><a class="header" href="#format_nodes"><code>format_nodes()</code></a></h3>
 <p>Once you have the <code>Vec&lt;NodeInfo&gt;</code>, you can format it into a string.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -922,7 +953,7 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
 <li><strong><code>BuiltInFunction</code></strong>: e.g., <code>CountPluses</code>. Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>.</li>
 <li><strong><code>ApplyFnError</code></strong>: Error type for <code>BuiltInFunction</code> application. Defined in <code>src/config/metadata.rs</code>.</li>
 <li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Defined in <code>src/core/tree/node.rs</code>. Found in <code>NodeInfo</code>.</li>
-<li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Defined in <code>src/core/error.rs</code>.</li>
+<li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Defined in <code>src/core/error.rs</code>. Includes variants like <code>Io</code>, <code>GlobPattern</code>, <code>IgnoreError</code>, and <code>TreeBuildError</code> (for errors during internal tree construction or sorting).</li>
 </ul>
 <p>Refer to the API documentation (generated by <code>cargo doc</code>) for the full details of these types and their variants/fields.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="library-usage-examples"><a class="header" href="#library-usage-examples">Library Usage Examples</a></h2>
@@ -1056,7 +1087,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
 <ol>
 <li>
-<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), and <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, and behaviors like <code>files_before_directories</code>).</p>
+<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code> (including <code>prune_empty_directories</code>), <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), and <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, and behaviors like <code>files_before_directories</code>).</p>
 </li>
 <li>
 <p><strong>Walking (<code>core::walker</code>)</strong>:</p>
@@ -1073,10 +1104,9 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>After the <code>ignore</code> crate yields an entry, further filtering is applied by the walker using <code>core::filter::pattern::entry_matches_glob_patterns</code>:
 <ul>
 <li><code>config.filtering.match_patterns</code> (CLI <code>-P</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
-<li><code>config.listing.list_directories_only</code>: If true, only effective directories are kept.</li>
 </ul>
 </li>
-<li>For each qualifying entry, it gathers initial metadata (mtime, ctime, crtime based on <code>config.metadata</code> and platform capabilities). Symlinks are resolved.</li>
+<li>For each qualifying entry, it gathers initial metadata (mtime, ctime, crtime based on <code>config.metadata</code> and platform capabilities). Symlinks are resolved. The <code>list_directories_only</code> filter is NOT applied at this stage.</li>
 </ul>
 </li>
 <li>
@@ -1085,7 +1115,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>As the walker processes entries, it invokes functions from <code>core::metadata</code> based on <code>config.metadata</code>.</li>
 <li><code>core::metadata::size_calculator</code>: Calculates line counts and word counts for files.</li>
 <li><code>core::metadata::file_info</code>: Applies built-in functions (from <code>config::metadata::BuiltInFunction</code>) to file content using <code>apply_builtin_to_file</code>.</li>
-<li>The results are stored in <code>NodeInfo</code> objects (defined in <code>core::tree::node</code>). This step is skipped for directories or when <code>config.listing.list_directories_only</code> is active for file-specific analyses.</li>
+<li>The results are stored in <code>NodeInfo</code> objects (defined in <code>core::tree::node</code>). This step is skipped for directories for file-specific analyses.</li>
 </ul>
 </li>
 <li>
@@ -1096,17 +1126,32 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 </ul>
 </li>
 <li>
+<p><strong>Pruning (<code>lib.rs</code>, using <code>core::tree::manipulator</code>)</strong>:</p>
+<ul>
+<li>If <code>config.filtering.prune_empty_directories</code> is <code>true</code>, the <code>Vec&lt;NodeInfo&gt;</code> is processed to remove empty directories.</li>
+<li>This involves building a temporary tree, pruning nodes where a directory contains no files and no non-empty subdirectories, and then flattening the tree back.</li>
+<li>This step occurs <em>after</em> all initial walking and filtering, but <em>before</em> the <code>list_directories_only</code> filter and sorting.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>list_directories_only</code> Filtering (<code>lib.rs</code>)</strong>:</p>
+<ul>
+<li>If <code>config.listing.list_directories_only</code> is <code>true</code>, the <code>Vec&lt;NodeInfo&gt;</code> (potentially already pruned) is further filtered to retain only entries with <code>NodeType::Directory</code>.</li>
+<li>This ensures that pruning decisions are made based on the full content of directories before they are potentially removed by this filter.</li>
+</ul>
+</li>
+<li>
 <p><strong>Sorting (<code>core::sorter</code>)</strong>:</p>
 <ul>
-<li>If <code>config.sorting.sort_by</code> specifies a <code>SortKey</code>, the <code>sort_nodes_with_options</code> function (in <code>core::sorter::strategies</code>) sorts the <code>Vec&lt;NodeInfo&gt;</code>.</li>
-<li>Sorting involves building a temporary tree (<code>core::tree::builder</code>), sorting sibling nodes at each level using comparison logic from <code>core::sorter::comparators</code> (which respects <code>config.sorting.reverse_sort</code> and <code>config.sorting.files_before_directories</code>), and then flattening the tree back.</li>
+<li>If <code>config.sorting.sort_by</code> specifies a <code>SortKey</code>, the <code>sort_nodes_with_options</code> function (in <code>core::sorter::strategies</code>) sorts the (potentially pruned and filtered) <code>Vec&lt;NodeInfo&gt;</code>.</li>
+<li>Sorting involves building a temporary tree, sorting sibling nodes at each level using comparison logic from <code>core::sorter::comparators</code> (which respects <code>config.sorting.reverse_sort</code> and <code>config.sorting.files_before_directories</code>), and then flattening the tree back.</li>
 <li>Default size sorting is now largest first, with files/symlinks grouped before directories. Version sorting is more intelligent. If <code>SortKey::None</code> is used, directory traversal order is preserved.</li>
 </ul>
 </li>
 <li>
 <p><strong>Formatting (<code>core::formatter</code>)</strong>:</p>
 <ul>
-<li>The sorted (or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is passed to a formatter.</li>
+<li>The processed (sorted or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is passed to a formatter.</li>
 <li>The <code>TreeFormatter</code> trait defines the interface. Formatters use <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display.</li>
 <li><code>TextTreeFormatter</code>: Generates plain text, <code>tree</code>-like output.</li>
 <li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>
@@ -1165,7 +1210,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>filtering.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>FilteringOptions</code> struct for inclusion/exclusion patterns and gitignore settings.</li>
+<li>Defines <code>FilteringOptions</code> struct for inclusion/exclusion patterns, gitignore settings, and the <code>prune_empty_directories</code> flag.</li>
 </ul>
 </li>
 <li>
@@ -1211,7 +1256,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>walker/</code></strong>: This sub-module is responsible for traversing the file system.</p>
 <ul>
-<li><code>filesystem.rs</code>: Contains the <code>walk_directory</code> function. It uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking. It implements initial filtering logic based on <code>RustreeLibConfig</code> (hidden files, max depth, gitignore rules, ignore patterns). After the <code>ignore</code> crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates <code>NodeInfo</code> structs with basic metadata, triggering content analysis via the <code>metadata</code> module.</li>
+<li><code>filesystem.rs</code>: Contains the <code>walk_directory</code> function. It uses the <code>ignore</code> crate (<code>ignore::WalkBuilder</code>) for directory walking. It implements initial filtering logic based on <code>RustreeLibConfig</code> (hidden files, max depth, gitignore rules, ignore patterns). After the <code>ignore</code> crate yields an entry, it applies further filtering (match patterns). The <code>list_directories_only</code> filter is applied later in <code>lib.rs</code> after potential pruning. It handles symlink resolution and populates <code>NodeInfo</code> structs with basic metadata, triggering content analysis via the <code>metadata</code> module.</li>
 <li><code>depth_control.rs</code>: (Placeholder for future depth-specific control logic).</li>
 <li><code>input_source.rs</code>: (Placeholder for future advanced input source handling).</li>
 <li><code>symlinks.rs</code>: (Placeholder for future advanced symlink resolution strategies).</li>
@@ -1264,7 +1309,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p><strong><code>error.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeError</code>, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, and errors from the <code>ignore</code> crate (<code>IgnoreError</code>).</li>
+<li>Defines <code>RustreeError</code>, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, errors from the <code>ignore</code> crate (<code>IgnoreError</code>), and <code>TreeBuildError</code> (for errors during internal tree construction for sorting or pruning).</li>
 </ul>
 </li>
 </ul>
@@ -1282,9 +1327,19 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p>Core types: <code>NodeInfo</code> (from <code>core::tree::node</code>), <code>NodeType</code>, and <code>RustreeError</code>.</p>
 </li>
 <li>
+<p>The <code>cli</code> module, while part of the crate, is marked <code>#[doc(hidden)]</code> and is not part of the stable public API.</p>
+</li>
+<li>
 <p>Provides the main entry-point functions:</p>
 <ul>
-<li><code>get_tree_nodes()</code>: Orchestrates walking (via <code>core::walker</code>), analysis (via <code>core::metadata</code>), and sorting (via <code>core::sorter::strategies::sort_nodes_with_options</code>).</li>
+<li><code>get_tree_nodes()</code>: Orchestrates the main logic:
+<ol>
+<li>Walking the file system (via <code>core::walker</code>), applying initial filters and collecting metadata.</li>
+<li>If <code>config.filtering.prune_empty_directories</code> is true, prunes empty directories from the results (using <code>core::tree::manipulator</code> and <code>core::tree::builder</code>).</li>
+<li>If <code>config.listing.list_directories_only</code> is true, filters the results to include only directories. This occurs <em>after</em> pruning.</li>
+<li>If sorting is requested, sorts the nodes (via <code>core::sorter::strategies::sort_nodes_with_options</code>). Errors during sorting or tree building for pruning now map to <code>RustreeError::TreeBuildError</code>.</li>
+</ol>
+</li>
 <li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter.</li>
 </ul>
 </li>

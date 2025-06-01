@@ -352,6 +352,21 @@ rustree --sort-by ctime --show-last-modified ./my_project
 <pre><code class="language-bash">rustree --sort-by crtime -r ./my_photos
 </code></pre>
 </li>
+<li>
+<p><strong>Prune empty directories from the output:</strong>
+Imagine a project with many empty <code>build/</code> or <code>log/</code> subdirectories.</p>
+<pre><code class="language-bash">rustree --prune-empty-directories ./my_project
+# or using the alias
+rustree --prune ./my_project
+</code></pre>
+<p>This will list <code>my_project</code>, but any directories within it (or nested deeper) that become empty after other filters (like <code>-P</code>, <code>-I</code>, or gitignore) are applied will not be shown.</p>
+</li>
+<li>
+<p><strong>Prune empty directories while listing only <code>.rs</code> files:</strong></p>
+<pre><code class="language-bash">rustree -P "*.rs" --prune ./my_rust_project
+</code></pre>
+<p>In this case, if a directory <code>src/utils/</code> contains only <code>helper.txt</code> and <code>mod.rs</code>, after <code>-P "*.rs"</code> is applied, <code>helper.txt</code> is filtered out. If <code>src/utils/</code> now only effectively contains <code>mod.rs</code>, it's not empty. However, if <code>src/empty_module/</code> contained only <code>old_code.txt</code>, it would first be filtered by <code>-P</code>, then <code>src/empty_module/</code> would become empty and subsequently pruned by <code>--prune</code>.</p>
+</li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
 
