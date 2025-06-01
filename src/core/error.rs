@@ -19,6 +19,9 @@ pub enum RustreeError {
     /// An error originating from the `ignore` crate during directory traversal or gitignore processing.
     #[error("Ignore crate error: {0}")]
     IgnoreError(#[from] ignore::Error),
+    /// An error during the construction of the internal tree representation.
+    #[error("Tree building error: {0}")]
+    TreeBuildError(String),
     // Add other specific error types as needed
     /// An unspecified or unknown error.
     #[error("Unknown error")]

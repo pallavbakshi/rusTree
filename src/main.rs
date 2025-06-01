@@ -7,10 +7,10 @@
 //! It parses command-line arguments, translates them into library configurations,
 //! invokes the library's core logic, and prints the results to standard output.
 
-mod cli; // Make cli module (and its submodules) available
+// The CLI module is part of this crate (rustree library crate), but not exposed publicly
+use rustree::cli::{CliArgs, map_cli_to_lib_config, map_cli_to_lib_output_format};
 
 use clap::Parser;
-use cli::{CliArgs, map_cli_to_lib_config, map_cli_to_lib_output_format};
 use std::process::ExitCode;
 
 fn main() -> ExitCode {

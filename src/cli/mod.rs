@@ -1,6 +1,7 @@
 // src/cli/mod.rs
 mod args;
 mod mapping; // CLI to library configuration mapping functions
+pub mod pruning; // New module for pruning arguments
 
 // Re-export the main CLI args struct.
 pub use args::CliArgs;

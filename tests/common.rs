@@ -125,4 +125,12 @@ pub mod common_test_utils {
 
         Ok(dir)
     }
+
+    #[allow(dead_code)] // Helper function to get root name
+    pub fn get_root_name_from_path(path: &Path) -> String {
+        path.file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .into_owned()
+    }
 }

@@ -153,16 +153,13 @@ pub fn walk_directory(
             continue; // Not a dir, file, or symlink
         };
 
-        if config.listing.list_directories_only && node_type_for_filter != NodeType::Directory {
-            continue;
-        }
-
-        let final_node_type_for_storage = node_type_for_filter;
+        // The list_directories_only filter is now applied in lib.rs after pruning.
+        // let final_node_type_for_storage = node_type_for_filter; // This was used before, now node_type_for_filter is directly used.
 
         let mut node = NodeInfo {
             path: entry_path_obj.to_path_buf(),
             name,
-            node_type: final_node_type_for_storage,
+            node_type: node_type_for_filter, // Use the resolved node_type_for_filter
             depth,
             size: None,
             permissions: None,
