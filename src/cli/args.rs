@@ -4,6 +4,7 @@ use crate::cli::listing::{depth, directory_only, hidden};
 use crate::cli::metadata::{date, size, stats};
 use crate::cli::misc::llm;
 use crate::cli::output::format;
+use crate::cli::pruning; // Import the new pruning module
 use crate::cli::sorting::order;
 use clap::Parser;
 use std::path::PathBuf;
@@ -54,4 +55,7 @@ pub struct CliArgs {
 
     #[command(flatten)]
     pub llm: llm::LlmArgs,
+
+    #[command(flatten)]
+    pub pruning: pruning::PruningArgs,
 }

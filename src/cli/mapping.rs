@@ -7,11 +7,18 @@ use crate::cli::args::CliArgs;
 use crate::cli::metadata::CliBuiltInFunction;
 use crate::cli::output::CliOutputFormat;
 use crate::cli::sorting::CliSortKey;
-use rustree::{
-    BuiltInFunction as LibBuiltInFunction, FilteringOptions, InputSourceOptions, LibOutputFormat,
-    ListingOptions, MetadataOptions, MiscOptions, RustreeLibConfig, SortKey as LibSortKey,
-    SortingOptions,
-};
+
+// Corrected imports using explicit paths from crate::config
+use crate::config::BuiltInFunction as LibBuiltInFunction;
+use crate::config::FilteringOptions;
+use crate::config::InputSourceOptions;
+use crate::config::ListingOptions;
+use crate::config::MetadataOptions;
+use crate::config::MiscOptions;
+use crate::config::RustreeLibConfig;
+use crate::config::SortKey as LibSortKey;
+use crate::config::SortingOptions;
+use crate::config::output_format::OutputFormat as LibOutputFormat;
 
 /// Maps command-line arguments (`CliArgs`) to the library's configuration structure (`RustreeLibConfig`).
 ///
@@ -65,6 +72,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             use_gitignore_rules: cli_args.gitignore.use_gitignore_rules,
             gitignore_file: cli_args.gitignore.gitignore_file.clone(),
             case_insensitive_filter: cli_args.gitignore.case_insensitive_filter,
+            prune_empty_directories: cli_args.pruning.prune_empty_directories,
         },
         sorting: SortingOptions {
             sort_by: if cli_args.sort_order.legacy_no_sort {

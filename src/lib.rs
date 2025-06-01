@@ -71,6 +71,14 @@
 //! }
 //! ```
 
+// CLI module - WARNING: This is not part of the stable public API!
+// This module is only exposed publicly because the main binary needs access to it.
+// External library users should NOT depend on this module as it may change 
+// without notice in future versions. Use the public API functions like 
+// get_tree_nodes() and format_nodes() instead.
+#[doc(hidden)] // Hide from documentation
+pub mod cli;
+
 pub mod config;
 pub mod core;
 
@@ -142,13 +150,39 @@ pub fn get_tree_nodes(
     // 1. Walk and analyze (analyzer is called within walker)
     let mut nodes = walker::walk_directory(root_path, config)?;
 
-    // 2. Sort if requested in config
+    // 2. Prune empty directories if requested
+    if config.filtering.prune_empty_directories && !nodes.is_empty() {
+        // Build the tree structure from the flat list of nodes
+        let mut temp_roots = core::tree::builder::build_tree(std::mem::take(&mut nodes))
+            .map_err(RustreeError::TreeBuildError)?;
+
+        // Define the filter for pruning: keep only files.
+        // TreeManipulator::prune_tree will then keep directories that (recursively) contain files.
+        let prune_filter = |node_info: &NodeInfo| node_info.node_type == NodeType::File;
+
+        // Apply prune_tree to each root. Retain roots that are not empty after pruning.
+        temp_roots.retain_mut(|root_node| {
+            core::tree::manipulator::TreeManipulator::prune_tree(root_node, &prune_filter)
+        });
+
+        // Flatten the modified tree back into a flat list of NodeInfo
+        // `nodes` is empty at this point due to `std::mem::take`.
+        core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, &mut nodes);
+    }
+
+    // 3. Apply list_directories_only filter if enabled
+    // This happens *after* pruning, so pruning decisions are based on full content.
+    if config.listing.list_directories_only {
+        nodes.retain(|node| node.node_type == NodeType::Directory);
+    }
+
+    // 4. Sort if requested in config
     if config.sorting.sort_by.is_some() {
+        // sort_nodes_with_options internally handles building tree from `nodes` for sorting
         if let Err(e) = sorter::strategies::sort_nodes_with_options(&mut nodes, &config.sorting) {
-            // Convert sorting error to IO error since it's related to data structure processing
-            return Err(RustreeError::Io(std::io::Error::new(
-                std::io::ErrorKind::InvalidData,
-                format!("Sorting failed: {}", e),
+            return Err(RustreeError::TreeBuildError(format!(
+                "Sorting failed: {}",
+                e
             )));
         }
     }

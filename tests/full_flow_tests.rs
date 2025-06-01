@@ -2,10 +2,12 @@
 
 // Use your library as if you were an external user
 use anyhow::Result;
+use clap::Parser;
 use rustree::{
     BuiltInFunction, InputSourceOptions, LibOutputFormat, ListingOptions, MetadataOptions,
     NodeType, RustreeLibConfig, format_nodes, get_tree_nodes,
 }; // For test functions returning Result
+use std::fs; // Added import for fs module // Added import for Parser trait
 
 // Use the common module
 mod common;
@@ -67,6 +69,197 @@ fn test_get_nodes_basic_structure() -> Result<()> {
     assert_eq!(file3_node.line_count, Some(2)); // "data\nplus+plus" -> 2 lines
     let expected_parent_canonical = std::fs::canonicalize(root_path.join("sub_dir"))?;
     assert!(file3_node.path.starts_with(&expected_parent_canonical));
+
+    Ok(())
+}
+
+// --- Tests for Pruning Empty Directories ---
+
+fn setup_pruning_test_directory() -> Result<tempfile::TempDir> {
+    let dir = tempfile::tempdir()?;
+    let p = dir.path();
+
+    // Kept structure
+    fs::create_dir(p.join("dir_with_content"))?;
+    common_test_utils::create_file_with_content(
+        &p.join("dir_with_content"),
+        "file1.txt",
+        "content",
+    )?;
+    common_test_utils::create_file_with_content(p, "root_file.txt", "content")?;
+
+    // To be pruned
+    fs::create_dir(p.join("empty_dir1"))?;
+    fs::create_dir_all(p.join("parent_of_empty/empty_child"))?;
+    fs::create_dir(p.join(".hidden_empty_dir"))?; // Hidden but empty
+
+    // Kept hidden structure
+    fs::create_dir(p.join(".hidden_dir_with_content"))?;
+    common_test_utils::create_file_with_content(
+        &p.join(".hidden_dir_with_content"),
+        ".hidden_file.txt",
+        "secret",
+    )?;
+
+    Ok(dir)
+}
+
+#[test]
+fn test_prune_empty_directories_flag_long() -> Result<()> {
+    let temp_dir = setup_pruning_test_directory()?;
+    let root_path = temp_dir.path();
+
+    // Simulate CLI: rustree . --prune-empty-directories -a (to see hidden)
+    let cli_args = rustree::cli::CliArgs::parse_from([
+        // Changed crate::cli to rustree::cli
+        "rustree",
+        root_path.to_str().unwrap(),
+        "--prune-empty-directories",
+        "-a", // Show hidden to test pruning of hidden empty dirs
+        "--sort-by",
+        "name", // For stable output
+    ]);
+    let lib_config = rustree::cli::map_cli_to_lib_config(&cli_args); // Changed crate::cli to rustree::cli
+    let lib_output_format =
+        rustree::cli::map_cli_to_lib_output_format(cli_args.format.output_format); // Changed crate::cli to rustree::cli
+
+    let nodes = get_tree_nodes(root_path, &lib_config)?;
+    let output = format_nodes(&nodes, lib_output_format, &lib_config)?;
+
+    println!(
+        "[test_prune_empty_directories_flag_long]\nOutput:\n{}",
+        output
+    );
+
+    assert!(output.contains(".hidden_dir_with_content/"));
+    assert!(output.contains(".hidden_file.txt"));
+    assert!(output.contains("dir_with_content/"));
+    assert!(output.contains("file1.txt"));
+    assert!(output.contains("root_file.txt"));
+
+    assert!(
+        !output.contains("empty_dir1/"),
+        "empty_dir1 should be pruned"
+    );
+    assert!(
+        !output.contains("parent_of_empty/"),
+        "parent_of_empty should be pruned"
+    );
+    assert!(
+        !output.contains("empty_child/"),
+        "empty_child should be pruned"
+    );
+    assert!(
+        !output.contains(".hidden_empty_dir/"),
+        ".hidden_empty_dir should be pruned"
+    );
+
+    // Expected nodes: .hidden_dir_with_content, .hidden_file.txt (child), dir_with_content, file1.txt (child), root_file.txt
+    // Dirs: .hidden_dir_with_content, dir_with_content (2)
+    // Files: .hidden_file.txt, file1.txt, root_file.txt (3)
+    // Summary should reflect counts of *child* nodes displayed.
+    // Nodes list: .hidden_dir_with_content, .hidden_file.txt, dir_with_content, file1.txt, root_file.txt
+    // Child Dirs: .hidden_dir_with_content, dir_with_content (2)
+    // Child Files: .hidden_file.txt, file1.txt, root_file.txt (3)
+    assert!(
+        output.trim_end().ends_with("2 directories, 3 files"),
+        "Summary line mismatch. Output: {}",
+        output
+    );
+
+    Ok(())
+}
+
+#[test]
+fn test_prune_empty_directories_alias() -> Result<()> {
+    let temp_dir = setup_pruning_test_directory()?;
+    let root_path = temp_dir.path();
+
+    // Simulate CLI: rustree . --prune -a
+    let cli_args = rustree::cli::CliArgs::parse_from([
+        // Changed crate::cli to rustree::cli
+        "rustree",
+        root_path.to_str().unwrap(),
+        "--prune", // Alias
+        "-a",
+        "--sort-by",
+        "name",
+    ]);
+    let lib_config = rustree::cli::map_cli_to_lib_config(&cli_args); // Changed crate::cli to rustree::cli
+    let lib_output_format =
+        rustree::cli::map_cli_to_lib_output_format(cli_args.format.output_format); // Changed crate::cli to rustree::cli
+
+    let nodes = get_tree_nodes(root_path, &lib_config)?;
+    let output = format_nodes(&nodes, lib_output_format, &lib_config)?;
+
+    println!("[test_prune_empty_directories_alias]\nOutput:\n{}", output);
+
+    assert!(output.contains(".hidden_dir_with_content/"));
+    assert!(output.contains("dir_with_content/"));
+    assert!(!output.contains("empty_dir1/"));
+    assert!(!output.contains("parent_of_empty/"));
+    assert!(!output.contains(".hidden_empty_dir/"));
+    assert!(
+        output.trim_end().ends_with("2 directories, 3 files"),
+        "Summary line mismatch. Output: {}",
+        output
+    );
+
+    Ok(())
+}
+
+#[test]
+fn test_pruning_disabled_shows_empty_dirs() -> Result<()> {
+    let temp_dir = setup_pruning_test_directory()?;
+    let root_path = temp_dir.path();
+
+    // Simulate CLI: rustree . -a (no pruning flag)
+    let cli_args = rustree::cli::CliArgs::parse_from([
+        // Changed crate::cli to rustree::cli
+        "rustree",
+        root_path.to_str().unwrap(),
+        "-a",
+        "--sort-by",
+        "name",
+    ]);
+    let lib_config = rustree::cli::map_cli_to_lib_config(&cli_args); // Changed crate::cli to rustree::cli
+    let lib_output_format =
+        rustree::cli::map_cli_to_lib_output_format(cli_args.format.output_format); // Changed crate::cli to rustree::cli
+
+    let nodes = get_tree_nodes(root_path, &lib_config)?;
+    let output = format_nodes(&nodes, lib_output_format, &lib_config)?;
+
+    println!(
+        "[test_pruning_disabled_shows_empty_dirs]\nOutput:\n{}",
+        output
+    );
+
+    assert!(output.contains(".hidden_dir_with_content/"));
+    assert!(output.contains("dir_with_content/"));
+    assert!(
+        output.contains("empty_dir1/"),
+        "empty_dir1 should be present"
+    );
+    assert!(
+        output.contains("parent_of_empty/"),
+        "parent_of_empty should be present"
+    );
+    assert!(
+        output.contains("empty_child/"),
+        "empty_child should be present"
+    );
+    assert!(
+        output.contains(".hidden_empty_dir/"),
+        ".hidden_empty_dir should be present"
+    );
+
+    // Dirs: .hidden_dir_with_content, .hidden_empty_dir, dir_with_content, empty_child, empty_dir1, parent_of_empty (6)
+    // Files: .hidden_file.txt, file1.txt, root_file.txt (3)
+    assert!(
+        output.trim_end().ends_with("6 directories, 3 files"),
+        "Summary line mismatch. Output: {}",
+        output
+    );
 
     Ok(())
 }

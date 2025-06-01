@@ -20,4 +20,6 @@ pub struct FilteringOptions {
     pub gitignore_file: Option<Vec<PathBuf>>,
     /// If `true`, all pattern matching (-P, -I, gitignore) is case-insensitive.
     pub case_insensitive_filter: bool,
+    /// If `true`, prune empty directories after all other filtering.
+    pub prune_empty_directories: bool,
 }
