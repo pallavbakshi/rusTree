@@ -544,7 +544,7 @@ fn test_combination_i_and_gitignore() -> Result<()> {
     let config = RustreeLibConfig {
         filtering: FilteringOptions {
             ignore_patterns: Some(vec!["docs/".to_string()]), // -I docs/
-            use_gitignore_rules: true,                              // --gitignore
+            use_gitignore_rules: true,                        // --gitignore
             ..Default::default()
         },
         ..Default::default()

@@ -12,4 +12,4 @@ pub mod strategies;
 mod tests;
 
 // Re-export the main sorting functions
-pub use strategies::{sort_nodes, sort_nodes_with_options}; 
+pub use strategies::{sort_nodes, sort_nodes_with_options};

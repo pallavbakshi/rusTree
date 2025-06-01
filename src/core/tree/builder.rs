@@ -24,8 +24,9 @@ impl TempNode {
     /// Recursively sorts children at each level of the tree.
     pub fn sort_children_recursive(&mut self, key: &SortKey, reverse: bool) {
         if !self.children.is_empty() {
-            self.children
-                .sort_by(|a, b| crate::core::sorter::comparators::compare_siblings(a, b, key, reverse));
+            self.children.sort_by(|a, b| {
+                crate::core::sorter::comparators::compare_siblings(a, b, key, reverse)
+            });
             for child in &mut self.children {
                 child.sort_children_recursive(key, reverse);
             }
@@ -35,8 +36,9 @@ impl TempNode {
     /// Recursively sorts children at each level of the tree using SortingOptions.
     pub fn sort_children_recursive_with_options(&mut self, options: &SortingOptions) {
         if !self.children.is_empty() {
-            self.children
-                .sort_by(|a, b| crate::core::sorter::comparators::compare_siblings_with_options(a, b, options));
+            self.children.sort_by(|a, b| {
+                crate::core::sorter::comparators::compare_siblings_with_options(a, b, options)
+            });
             for child in &mut self.children {
                 child.sort_children_recursive_with_options(options);
             }
@@ -68,8 +70,9 @@ pub fn build_tree(nodes_info: Vec<NodeInfo>) -> Result<Vec<TempNode>, String> {
 
         // Pop from path until we find the correct parent depth
         while !path_stack.is_empty() {
-            let parent_node = get_node_by_path(&roots, &path_stack)
-                .ok_or_else(|| format!("Invalid path stack: unable to find parent node at depth"))?;
+            let parent_node = get_node_by_path(&roots, &path_stack).ok_or_else(|| {
+                "Invalid path stack: unable to find parent node at depth".to_string()
+            })?;
             let parent_depth = parent_node.node_info.depth;
             if current_depth <= parent_depth {
                 path_stack.pop();
@@ -84,8 +87,9 @@ pub fn build_tree(nodes_info: Vec<NodeInfo>) -> Result<Vec<TempNode>, String> {
             path_stack.push(roots.len() - 1);
         } else {
             // This node is a child of the node at path_stack
-            let parent = get_node_mut_by_path(&mut roots, &path_stack)
-                .ok_or_else(|| format!("Invalid path stack: unable to find parent node for insertion"))?;
+            let parent = get_node_mut_by_path(&mut roots, &path_stack).ok_or_else(|| {
+                "Invalid path stack: unable to find parent node for insertion".to_string()
+            })?;
             parent.children.push(new_temp_node);
             path_stack.push(parent.children.len() - 1);
         }
@@ -98,13 +102,13 @@ fn get_node_by_path<'a>(roots: &'a [TempNode], path: &[usize]) -> Option<&'a Tem
     if path.is_empty() {
         return None;
     }
-    
+
     let mut current = roots.get(path[0])?;
-    
+
     for &idx in &path[1..] {
         current = current.children.get(idx)?;
     }
-    
+
     Some(current)
 }
 
@@ -113,13 +117,13 @@ fn get_node_mut_by_path<'a>(roots: &'a mut [TempNode], path: &[usize]) -> Option
     if path.is_empty() {
         return None;
     }
-    
+
     let mut current = roots.get_mut(path[0])?;
-    
+
     for &idx in &path[1..] {
         current = current.children.get_mut(idx)?;
     }
-    
+
     Some(current)
 }
 
@@ -132,4 +136,4 @@ pub fn flatten_tree_to_dfs_consuming(roots: Vec<TempNode>, result: &mut Vec<Node
         result.push(temp_node.node_info); // NodeInfo is Clone
         flatten_tree_to_dfs_consuming(temp_node.children, result);
     }
-} 
+}

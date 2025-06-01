@@ -3,8 +3,8 @@
 // Use your library as if you were an external user
 use anyhow::Result;
 use rustree::{
-    format_nodes, get_tree_nodes, BuiltInFunction, InputSourceOptions,
-    LibOutputFormat, ListingOptions, MetadataOptions, NodeType, RustreeLibConfig,
+    BuiltInFunction, InputSourceOptions, LibOutputFormat, ListingOptions, MetadataOptions,
+    NodeType, RustreeLibConfig, format_nodes, get_tree_nodes,
 }; // For test functions returning Result
 
 // Use the common module
@@ -155,7 +155,7 @@ fn test_formatting_markdown() -> Result<()> {
     let markdown_output = format_nodes(&nodes, LibOutputFormat::Markdown, &config)?;
 
     println!("Markdown Output:\n{}", markdown_output);
-    
+
     // Test that we get proper Markdown formatting instead of placeholder
     assert!(markdown_output.starts_with("# test_root"));
     assert!(markdown_output.contains("* "));

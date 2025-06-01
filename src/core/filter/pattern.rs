@@ -135,4 +135,4 @@ pub fn entry_matches_glob_patterns(
         }
     }
     false
-} 
+}

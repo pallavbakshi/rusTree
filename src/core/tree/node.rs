@@ -47,4 +47,4 @@ pub enum NodeType {
     Directory,
     /// Represents a symbolic link.
     Symlink,
-} 
+}

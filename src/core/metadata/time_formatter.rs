@@ -62,7 +62,7 @@ pub fn format_relative_time(time: SystemTime, reference: SystemTime) -> String {
     match reference.duration_since(time) {
         Ok(duration) => {
             let secs = duration.as_secs();
-            
+
             if secs < 60 {
                 format!("{} second{} ago", secs, if secs == 1 { "" } else { "s" })
             } else if secs < 3600 {
@@ -102,35 +102,35 @@ mod tests {
     fn test_format_timestamp() {
         let time = UNIX_EPOCH + Duration::from_secs(1234567);
         assert_eq!(format_timestamp(time), 1234567);
-        
+
         // Test edge case with time before epoch (should return 0)
         if let Some(past) = UNIX_EPOCH.checked_sub(Duration::from_secs(100)) {
             assert_eq!(format_timestamp(past), 0);
         }
     }
 
-    #[test] 
+    #[test]
     fn test_format_relative_time() {
         let now = SystemTime::now();
-        
+
         // Test seconds ago
         let secs_ago = now - Duration::from_secs(30);
         let relative = format_relative_time(secs_ago, now);
         assert!(relative.contains("30 seconds ago"));
-        
+
         // Test minutes ago
         let mins_ago = now - Duration::from_secs(120);
         let relative = format_relative_time(mins_ago, now);
         assert!(relative.contains("2 minutes ago"));
-        
+
         // Test hours ago
         let hours_ago = now - Duration::from_secs(7200);
         let relative = format_relative_time(hours_ago, now);
         assert!(relative.contains("2 hours ago"));
-        
+
         // Test days ago
         let days_ago = now - Duration::from_secs(172800);
         let relative = format_relative_time(days_ago, now);
         assert!(relative.contains("2 days ago"));
     }
-} 
+}

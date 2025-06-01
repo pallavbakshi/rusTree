@@ -9,4 +9,4 @@ pub mod input_source;
 pub mod symlinks;
 
 // Re-export the main walk_directory function for backward compatibility
-pub use filesystem::walk_directory; 
+pub use filesystem::walk_directory;

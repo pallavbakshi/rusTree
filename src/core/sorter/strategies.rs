@@ -4,12 +4,12 @@
 //! tree building, comparison functions, and flattening to sort node collections.
 
 use crate::config::sorting::{SortKey, SortingOptions};
-use crate::core::tree::node::NodeInfo;
-use crate::core::tree::builder::{build_tree, flatten_tree_to_dfs_consuming};
 use crate::core::sorter::comparators::{compare_siblings, compare_siblings_with_options};
+use crate::core::tree::builder::{build_tree, flatten_tree_to_dfs_consuming};
+use crate::core::tree::node::NodeInfo;
 
 /// Sorts a vector of `NodeInfo` while preserving the tree structure.
-/// 
+///
 /// This function takes a flat vector of nodes in DFS order, builds a tree structure,
 /// sorts siblings at each level according to the specified criteria, and then
 /// flattens the tree back to a DFS-ordered vector.
@@ -44,7 +44,7 @@ pub fn sort_nodes(nodes: &mut Vec<NodeInfo>, key: &SortKey, reverse: bool) -> Re
 }
 
 /// Sorts a vector of `NodeInfo` while preserving the tree structure using SortingOptions.
-/// 
+///
 /// This is the newer version that accepts a SortingOptions struct for more flexible configuration.
 ///
 /// # Arguments
@@ -54,7 +54,10 @@ pub fn sort_nodes(nodes: &mut Vec<NodeInfo>, key: &SortKey, reverse: bool) -> Re
 ///
 /// # Returns
 /// * `Result<(), String>` - Ok(()) on success, Err with error message if tree building fails
-pub fn sort_nodes_with_options(nodes: &mut Vec<NodeInfo>, options: &SortingOptions) -> Result<(), String> {
+pub fn sort_nodes_with_options(
+    nodes: &mut Vec<NodeInfo>,
+    options: &SortingOptions,
+) -> Result<(), String> {
     if nodes.is_empty() {
         return Ok(());
     }
@@ -78,4 +81,4 @@ pub fn sort_nodes_with_options(nodes: &mut Vec<NodeInfo>, options: &SortingOptio
     // 4. Flatten the sorted tree back into the `nodes` vector
     flatten_tree_to_dfs_consuming(roots, nodes);
     Ok(())
-} 
+}

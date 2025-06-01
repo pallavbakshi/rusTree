@@ -9,4 +9,4 @@ pub mod size_calculator;
 
 // Stubs for future implementation
 pub mod extended_attrs;
-pub mod time_formatter; 
+pub mod time_formatter;

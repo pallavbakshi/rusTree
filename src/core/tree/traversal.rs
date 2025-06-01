@@ -133,7 +133,7 @@ impl TreeTraversal {
     ) {
         // Determine if this is a directory
         let is_directory = matches!(node.node_info.node_type, NodeType::Directory);
-        
+
         let should_continue = if is_directory {
             // For directories, call enter_directory hook
             visitor.enter_directory(&node.node_info, depth)
@@ -177,7 +177,7 @@ impl TreeTraversal {
     ) {
         // Determine if this is a directory
         let is_directory = matches!(node.node_info.node_type, NodeType::Directory);
-        
+
         // For directories in post-order, we need to decide whether to traverse children first
         // We'll call enter_directory to check if we should process this directory's children
         let should_traverse_children = if is_directory {
@@ -216,7 +216,7 @@ impl TreeTraversal {
     pub fn breadth_first<V: TreeVisitor>(root: &TempNode, visitor: &mut V) {
         let mut queue = VecDeque::new();
         let mut exit_hooks: VecDeque<(NodeInfo, usize)> = VecDeque::new(); // Queue for exit_directory calls
-        
+
         queue.push_back((root, 0));
         let mut current_depth = 0;
 
@@ -225,7 +225,7 @@ impl TreeTraversal {
             if depth != current_depth {
                 // Find the maximum depth in exit_hooks
                 let max_exit_depth = exit_hooks.iter().map(|(_, d)| *d).max().unwrap_or(0);
-                
+
                 // Process exit hooks from deepest to current depth
                 for target_depth in (depth..=max_exit_depth).rev() {
                     // Process all hooks at this depth in FIFO order
@@ -239,12 +239,12 @@ impl TreeTraversal {
                     }
                     exit_hooks = remaining_hooks;
                 }
-                
+
                 current_depth = depth;
             }
 
             let is_directory = matches!(node.node_info.node_type, NodeType::Directory);
-            
+
             let should_continue = if is_directory {
                 // For directories, call enter_directory hook
                 let result = visitor.enter_directory(&node.node_info, depth);
@@ -262,7 +262,7 @@ impl TreeTraversal {
                 }
             }
         }
-        
+
         // Process all remaining exit hooks (deepest first, FIFO within each depth)
         let max_exit_depth = exit_hooks.iter().map(|(_, d)| *d).max().unwrap_or(0);
         for target_depth in (0..=max_exit_depth).rev() {
@@ -533,9 +533,9 @@ mod tests {
     fn test_directory_hooks_breadth_first() {
         let tree = create_test_tree();
         let mut tracker = DirectoryHookTracker::new();
-        
+
         TreeTraversal::breadth_first(&tree, &mut tracker);
-        
+
         // In breadth-first, we should enter directories as we encounter them
         // and exit them when we finish processing their level
         assert_eq!(tracker.entries, vec!["root", "child1"]);
@@ -547,40 +547,40 @@ mod tests {
     fn test_breadth_first_exit_hooks_complex_tree() {
         // Create a more complex tree to test exit hook edge cases
         let mut root = create_test_node("root", NodeType::Directory, 0);
-        
+
         // Level 1: multiple directories and files
         let mut dir1 = create_test_node("dir1", NodeType::Directory, 1);
         let mut dir2 = create_test_node("dir2", NodeType::Directory, 1);
         let file1 = create_test_node("file1", NodeType::File, 1);
-        
+
         // Level 2: nested directories and files
         let mut subdir1 = create_test_node("subdir1", NodeType::Directory, 2);
         let file2 = create_test_node("file2", NodeType::File, 2);
         let file3 = create_test_node("file3", NodeType::File, 2);
-        
+
         // Level 3: deep nesting
         let file4 = create_test_node("file4", NodeType::File, 3);
-        
+
         // Build the tree structure
         subdir1.children.push(file4);
         dir1.children.push(subdir1);
         dir1.children.push(file2);
         dir2.children.push(file3);
-        
+
         root.children.push(dir1);
         root.children.push(dir2);
         root.children.push(file1);
-        
+
         let mut tracker = DirectoryHookTracker::new();
         TreeTraversal::breadth_first(&root, &mut tracker);
-        
+
         // Expected order of operations:
         // Level 0: enter root
         // Level 1: enter dir1, enter dir2, visit file1
         // Level 2: enter subdir1, visit file2, visit file3
         // Level 3: visit file4
         // Exit hooks: subdir1 (after level 3), dir1, dir2 (after level 2), root (after everything)
-        
+
         assert_eq!(tracker.entries, vec!["root", "dir1", "dir2", "subdir1"]);
         assert_eq!(tracker.exits, vec!["subdir1", "dir1", "dir2", "root"]);
         assert_eq!(tracker.visits, vec!["file1", "file2", "file3", "file4"]);
@@ -590,10 +590,10 @@ mod tests {
     fn test_breadth_first_exit_hooks_single_directory() {
         // Test edge case: single directory with no children
         let root = create_test_node("single_dir", NodeType::Directory, 0);
-        
+
         let mut tracker = DirectoryHookTracker::new();
         TreeTraversal::breadth_first(&root, &mut tracker);
-        
+
         assert_eq!(tracker.entries, vec!["single_dir"]);
         assert_eq!(tracker.exits, vec!["single_dir"]);
         assert_eq!(tracker.visits, Vec::<String>::new());
@@ -603,10 +603,10 @@ mod tests {
     fn test_breadth_first_exit_hooks_single_file() {
         // Test edge case: single file (no directory hooks)
         let root = create_test_node("single_file", NodeType::File, 0);
-        
+
         let mut tracker = DirectoryHookTracker::new();
         TreeTraversal::breadth_first(&root, &mut tracker);
-        
+
         assert_eq!(tracker.entries, Vec::<String>::new());
         assert_eq!(tracker.exits, Vec::<String>::new());
         assert_eq!(tracker.visits, vec!["single_file"]);
@@ -621,7 +621,7 @@ mod tests {
             visits: Vec<String>,
             skip_dir: String,
         }
-        
+
         impl EarlyTerminationVisitor {
             fn new(skip_dir: String) -> Self {
                 Self {
@@ -632,28 +632,28 @@ mod tests {
                 }
             }
         }
-        
+
         impl TreeVisitor for EarlyTerminationVisitor {
             fn visit(&mut self, node: &NodeInfo, _depth: usize) -> bool {
                 self.visits.push(node.name.clone());
                 true
             }
-            
+
             fn enter_directory(&mut self, node: &NodeInfo, _depth: usize) -> bool {
                 self.entries.push(node.name.clone());
                 node.name != self.skip_dir // Skip the specified directory
             }
-            
+
             fn exit_directory(&mut self, node: &NodeInfo, _depth: usize) {
                 self.exits.push(node.name.clone());
             }
         }
-        
+
         let tree = create_test_tree();
         let mut visitor = EarlyTerminationVisitor::new("child1".to_string());
-        
+
         TreeTraversal::breadth_first(&tree, &mut visitor);
-        
+
         // child1 should be entered but its children (grandchild) should not be processed
         // However, child1 should still get its exit hook called
         assert_eq!(visitor.entries, vec!["root", "child1"]);
@@ -666,26 +666,36 @@ mod tests {
         // Test a deeply nested structure to ensure exit hooks are processed correctly
         let mut root = create_test_node("root", NodeType::Directory, 0);
         let mut current = &mut root;
-        
+
         // Create a chain of nested directories
         for i in 1..=5 {
             let child = create_test_node(&format!("level_{}", i), NodeType::Directory, i);
             current.children.push(child);
             current = &mut current.children[0];
         }
-        
+
         // Add a file at the deepest level
         let deep_file = create_test_node("deep_file", NodeType::File, 6);
         current.children.push(deep_file);
-        
+
         let mut tracker = DirectoryHookTracker::new();
         TreeTraversal::breadth_first(&root, &mut tracker);
-        
+
         // All directories should be entered in order
-        assert_eq!(tracker.entries, vec!["root", "level_1", "level_2", "level_3", "level_4", "level_5"]);
+        assert_eq!(
+            tracker.entries,
+            vec![
+                "root", "level_1", "level_2", "level_3", "level_4", "level_5"
+            ]
+        );
         // And exited in reverse order (deepest first)
-        assert_eq!(tracker.exits, vec!["level_5", "level_4", "level_3", "level_2", "level_1", "root"]);
+        assert_eq!(
+            tracker.exits,
+            vec![
+                "level_5", "level_4", "level_3", "level_2", "level_1", "root"
+            ]
+        );
         // Only the file should be visited
         assert_eq!(tracker.visits, vec!["deep_file"]);
     }
-} 
+}

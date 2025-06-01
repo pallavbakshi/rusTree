@@ -68,7 +68,7 @@ pub fn format_size(bytes: u64) -> String {
 
     let bytes_f = bytes as f64;
     let unit_index = (bytes_f.log2() / THRESHOLD.log2()) as usize;
-    
+
     if unit_index == 0 {
         format!("{} B", bytes)
     } else if unit_index < UNITS.len() {
@@ -126,7 +126,7 @@ mod tests {
         assert!(is_hidden(Path::new(".hidden")));
         assert!(is_hidden(Path::new(".config")));
         assert!(is_hidden(Path::new("/path/to/.hidden")));
-        
+
         assert!(!is_hidden(Path::new("visible.txt")));
         assert!(!is_hidden(Path::new("normal_file")));
         assert!(!is_hidden(Path::new("/path/to/normal")));
@@ -147,9 +147,12 @@ mod tests {
         assert_eq!(truncate_string("short", 10), "short");
         assert_eq!(truncate_string("exact", 5), "exact");
         assert_eq!(truncate_string("toolong", 5), "to...");
-        assert_eq!(truncate_string("this is a very long string", 15), "this is a ve...");
-        
+        assert_eq!(
+            truncate_string("this is a very long string", 15),
+            "this is a ve..."
+        );
+
         // Edge case: max_len too small for ellipsis
         assert_eq!(truncate_string("test", 2), "te");
     }
-} 
+}

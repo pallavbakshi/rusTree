@@ -3,11 +3,11 @@
 //! This module provides utilities for extracting and processing file-specific
 //! information and metadata, including content analysis and metadata formatting.
 
-use crate::config::metadata::{ApplyFnError, BuiltInFunction};
 use crate::config::RustreeLibConfig;
+use crate::config::metadata::{ApplyFnError, BuiltInFunction};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fs;
-use std::time::{UNIX_EPOCH, SystemTime};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Represents different styles for formatting metadata display.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -47,7 +47,9 @@ pub fn format_node_metadata(
         if let Some(size) = node.size {
             match style {
                 MetadataStyle::Text => metadata_parts.push(format!("[{:>7}B]", size)),
-                MetadataStyle::Markdown | MetadataStyle::Plain => metadata_parts.push(format!("{}B", size)),
+                MetadataStyle::Markdown | MetadataStyle::Plain => {
+                    metadata_parts.push(format!("{}B", size))
+                }
             }
         } else if style == MetadataStyle::Text {
             // Text format shows placeholders for missing data
@@ -80,7 +82,9 @@ pub fn format_node_metadata(
             if let Some(lc) = node.line_count {
                 match style {
                     MetadataStyle::Text => metadata_parts.push(format!("[L:{:>4}]", lc)),
-                    MetadataStyle::Markdown | MetadataStyle::Plain => metadata_parts.push(format!("{}L", lc)),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push(format!("{}L", lc))
+                    }
                 }
             } else if style == MetadataStyle::Text {
                 metadata_parts.push("[L:    ]".to_string());
@@ -91,7 +95,9 @@ pub fn format_node_metadata(
             if let Some(wc) = node.word_count {
                 match style {
                     MetadataStyle::Text => metadata_parts.push(format!("[W:{:>4}]", wc)),
-                    MetadataStyle::Markdown | MetadataStyle::Plain => metadata_parts.push(format!("{}W", wc)),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push(format!("{}W", wc))
+                    }
                 }
             } else if style == MetadataStyle::Text {
                 metadata_parts.push("[W:    ]".to_string());
@@ -100,18 +106,18 @@ pub fn format_node_metadata(
 
         if config.metadata.apply_function.is_some() {
             match &node.custom_function_output {
-                Some(Ok(val)) => {
-                    match style {
-                        MetadataStyle::Text => metadata_parts.push(format!("[F: \"{}\"]", val)),
-                        MetadataStyle::Markdown | MetadataStyle::Plain => metadata_parts.push(format!("F:{}", val)),
+                Some(Ok(val)) => match style {
+                    MetadataStyle::Text => metadata_parts.push(format!("[F: \"{}\"]", val)),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push(format!("F:{}", val))
                     }
-                }
-                Some(Err(_)) => {
-                    match style {
-                        MetadataStyle::Text => metadata_parts.push("[F: error]".to_string()),
-                        MetadataStyle::Markdown | MetadataStyle::Plain => metadata_parts.push("F:error".to_string()),
+                },
+                Some(Err(_)) => match style {
+                    MetadataStyle::Text => metadata_parts.push("[F: error]".to_string()),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push("F:error".to_string())
                     }
-                }
+                },
                 None => {
                     if style == MetadataStyle::Text {
                         metadata_parts.push("[F: N/A]".to_string());
@@ -164,10 +170,14 @@ fn format_timestamp(
 ) -> Option<String> {
     match time_opt {
         Some(time) => {
-            let timestamp = time.duration_since(UNIX_EPOCH).map_or_else(|_| 0, |d| d.as_secs());
+            let timestamp = time
+                .duration_since(UNIX_EPOCH)
+                .map_or_else(|_| 0, |d| d.as_secs());
             let formatted = match style {
                 MetadataStyle::Text => format!("[{}: {:>10}s]", label, timestamp),
-                MetadataStyle::Markdown | MetadataStyle::Plain => format!("{}:{}s", label, timestamp),
+                MetadataStyle::Markdown | MetadataStyle::Plain => {
+                    format!("{}:{}s", label, timestamp)
+                }
             };
             Some(formatted)
         }
@@ -253,10 +263,10 @@ pub fn apply_builtin_function(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::metadata::BuiltInFunction;
     use crate::config::MetadataOptions;
+    use crate::config::metadata::BuiltInFunction;
     use std::path::PathBuf;
-    use std::time::{UNIX_EPOCH, Duration};
+    use std::time::{Duration, UNIX_EPOCH};
 
     fn create_test_node() -> NodeInfo {
         NodeInfo {
@@ -278,15 +288,15 @@ mod tests {
     #[test]
     fn test_format_timestamp_with_time() {
         let test_time = Some(UNIX_EPOCH + Duration::from_secs(1234567890));
-        
+
         // Test Text style
         let result = format_timestamp(test_time, "MTime", MetadataStyle::Text);
         assert_eq!(result, Some("[MTime: 1234567890s]".to_string()));
-        
+
         // Test Markdown style
         let result = format_timestamp(test_time, "MTime", MetadataStyle::Markdown);
         assert_eq!(result, Some("MTime:1234567890s".to_string()));
-        
+
         // Test Plain style
         let result = format_timestamp(test_time, "MTime", MetadataStyle::Plain);
         assert_eq!(result, Some("MTime:1234567890s".to_string()));
@@ -297,11 +307,11 @@ mod tests {
         // Test Text style - should return placeholder
         let result = format_timestamp(None, "CTime", MetadataStyle::Text);
         assert_eq!(result, Some("[CTime:            ]".to_string()));
-        
+
         // Test Markdown style - should return None
         let result = format_timestamp(None, "CTime", MetadataStyle::Markdown);
         assert_eq!(result, None);
-        
+
         // Test Plain style - should return None
         let result = format_timestamp(None, "CTime", MetadataStyle::Plain);
         assert_eq!(result, None);
@@ -323,7 +333,7 @@ mod tests {
         };
 
         let result = format_node_metadata(&node, &config, MetadataStyle::Text);
-        
+
         assert!(result.contains("[   1024B]")); // 3 spaces + 1024 = 7 chars total
         assert!(result.contains("[MTime: 1234567890s]"));
         assert!(result.contains("[L:  42]"));
@@ -345,7 +355,7 @@ mod tests {
         };
 
         let result = format_node_metadata(&node, &config, MetadataStyle::Markdown);
-        
+
         assert_eq!(result, " `1024B, 42L, 200W`");
     }
 
@@ -353,7 +363,7 @@ mod tests {
     fn test_format_node_metadata_directory() {
         let mut node = create_test_node();
         node.node_type = NodeType::Directory;
-        
+
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
                 show_size_bytes: true,
@@ -365,7 +375,7 @@ mod tests {
         };
 
         let result = format_node_metadata(&node, &config, MetadataStyle::Markdown);
-        
+
         // Only size should be shown for directories
         assert_eq!(result, " `1024B`");
     }
@@ -376,7 +386,7 @@ mod tests {
         let config = RustreeLibConfig::default(); // No metadata enabled
 
         let result = format_node_metadata(&node, &config, MetadataStyle::Text);
-        
+
         assert_eq!(result, "");
     }
-} 
+}

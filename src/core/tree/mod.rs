@@ -8,4 +8,4 @@ pub mod node;
 pub mod traversal;
 
 // Re-export commonly used types
-pub use node::{NodeInfo, NodeType}; 
+pub use node::{NodeInfo, NodeType};

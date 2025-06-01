@@ -38,7 +38,7 @@ impl TreeManipulator {
     ///
     /// # Returns
     ///
-    /// `true` if the node should be kept (either it passes the filter or has children 
+    /// `true` if the node should be kept (either it passes the filter or has children
     /// after pruning), `false` if it should be removed.
     ///
     /// # Examples
@@ -54,7 +54,8 @@ impl TreeManipulator {
     /// ```
     pub fn prune_tree(root: &mut TempNode, filter: &NodeFilter) -> bool {
         // Recursively prune children first, keeping only those that should be retained
-        root.children.retain_mut(|child| Self::prune_tree(child, filter));
+        root.children
+            .retain_mut(|child| Self::prune_tree(child, filter));
 
         // Keep this node if it passes the filter OR if it has children after pruning
         filter(&root.node_info) || !root.children.is_empty()
@@ -122,21 +123,21 @@ impl TreeManipulator {
     pub fn flatten_tree(root: TempNode) -> Vec<NodeInfo> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
-        
+
         // Start with the root node
         stack.push(root);
-        
+
         while let Some(current_node) = stack.pop() {
             // Add the current node to the result
             result.push(current_node.node_info);
-            
+
             // Push children to the stack in reverse order to maintain
             // depth-first left-to-right traversal order
             for child in current_node.children.into_iter().rev() {
                 stack.push(child);
             }
         }
-        
+
         result
     }
 
@@ -156,7 +157,7 @@ impl TreeManipulator {
         // 1. Collect paths to nodes at max_depth using iterative traversal
         // 2. Process each path to clear children
         let paths_to_clear = Self::collect_paths_at_max_depth_iterative(root, max_depth);
-        
+
         // Now process each path and clear children
         for path in paths_to_clear {
             Self::clear_children_at_path(root, &path);
@@ -170,23 +171,23 @@ impl TreeManipulator {
     fn collect_paths_at_max_depth_iterative(root: &TempNode, max_depth: usize) -> Vec<Vec<usize>> {
         let mut paths_to_clear = Vec::new();
         let mut queue = std::collections::VecDeque::new();
-        
+
         // Start with the root node (empty path, depth 0)
         queue.push_back((Vec::new(), 0));
-        
+
         while let Some((current_path, current_depth)) = queue.pop_front() {
             if current_depth >= max_depth {
                 // This node is at or beyond max depth, record its path for clearing
                 paths_to_clear.push(current_path);
                 continue;
             }
-            
+
             // Navigate to the current node to check its children
             let mut current_node = root;
             for &index in &current_path {
                 current_node = &current_node.children[index];
             }
-            
+
             // Add all children to the queue for further processing
             for (child_index, _) in current_node.children.iter().enumerate() {
                 let mut child_path = current_path.clone();
@@ -194,7 +195,7 @@ impl TreeManipulator {
                 queue.push_back((child_path, current_depth + 1));
             }
         }
-        
+
         paths_to_clear
     }
 
@@ -284,7 +285,7 @@ mod tests {
         let mut dir1 = create_test_node("dir1", NodeType::Directory, 1);
         let file1 = create_test_node("file1.txt", NodeType::File, 2);
         let file2 = create_test_node("file2.txt", NodeType::File, 1);
-        
+
         dir1.children.push(file1);
         root.children.push(dir1);
         root.children.push(file2);
@@ -298,7 +299,7 @@ mod tests {
         assert_eq!(root.children.len(), 2); // dir1 and file2
         assert_eq!(root.children[0].node_info.name, "dir1");
         assert_eq!(root.children[1].node_info.name, "file2.txt");
-        
+
         // dir1 should be kept because it has a file child
         assert_eq!(root.children[0].children.len(), 1);
         assert_eq!(root.children[0].children[0].node_info.name, "file1.txt");
@@ -310,7 +311,7 @@ mod tests {
         let mut root = create_test_node("root", NodeType::Directory, 0);
         let dir1 = create_test_node("dir1", NodeType::Directory, 1);
         let file1 = create_test_node("file1.txt", NodeType::File, 1);
-        
+
         root.children.push(dir1);
         root.children.push(file1);
 
@@ -330,7 +331,7 @@ mod tests {
         let mut root = create_test_node("root", NodeType::Directory, 0);
         let file1 = create_test_node("file1.txt", NodeType::File, 1);
         let file2 = create_test_node("file2.txt", NodeType::File, 1);
-        
+
         root.children.push(file1);
         root.children.push(file2);
 
@@ -347,41 +348,47 @@ mod tests {
     fn test_prune_tree_complex_structure() {
         // Test pruning with a more complex tree structure
         let mut root = create_test_node("root", NodeType::Directory, 0);
-        
+
         // Branch 1: dir1 -> file1.rs, file2.txt
         let mut dir1 = create_test_node("dir1", NodeType::Directory, 1);
-        dir1.children.push(create_test_node("file1.rs", NodeType::File, 2));
-        dir1.children.push(create_test_node("file2.txt", NodeType::File, 2));
-        
+        dir1.children
+            .push(create_test_node("file1.rs", NodeType::File, 2));
+        dir1.children
+            .push(create_test_node("file2.txt", NodeType::File, 2));
+
         // Branch 2: dir2 -> dir3 -> file3.rs
         let mut dir2 = create_test_node("dir2", NodeType::Directory, 1);
         let mut dir3 = create_test_node("dir3", NodeType::Directory, 2);
-        dir3.children.push(create_test_node("file3.rs", NodeType::File, 3));
+        dir3.children
+            .push(create_test_node("file3.rs", NodeType::File, 3));
         dir2.children.push(dir3);
-        
+
         // Branch 3: file4.txt (direct child)
         root.children.push(dir1);
         root.children.push(dir2);
-        root.children.push(create_test_node("file4.txt", NodeType::File, 1));
+        root.children
+            .push(create_test_node("file4.txt", NodeType::File, 1));
 
         // Filter to keep only .rs files
-        let filter = |node: &NodeInfo| {
-            node.node_type == NodeType::File && node.name.ends_with(".rs")
-        };
+        let filter =
+            |node: &NodeInfo| node.node_type == NodeType::File && node.name.ends_with(".rs");
         let should_keep_root = TreeManipulator::prune_tree(&mut root, &filter);
 
         // Root should be kept because it has descendants that match
         assert!(should_keep_root);
         assert_eq!(root.children.len(), 2); // dir1 and dir2 (file4.txt removed)
-        
+
         // dir1 should have only file1.rs
         assert_eq!(root.children[0].children.len(), 1);
         assert_eq!(root.children[0].children[0].node_info.name, "file1.rs");
-        
+
         // dir2 -> dir3 should have file3.rs
         assert_eq!(root.children[1].children.len(), 1);
         assert_eq!(root.children[1].children[0].children.len(), 1);
-        assert_eq!(root.children[1].children[0].children[0].node_info.name, "file3.rs");
+        assert_eq!(
+            root.children[1].children[0].children[0].node_info.name,
+            "file3.rs"
+        );
     }
 
     #[test]
@@ -392,7 +399,7 @@ mod tests {
         let mut deep_dir2 = create_test_node("deep2", NodeType::Directory, 2);
         let mut deep_dir3 = create_test_node("deep3", NodeType::Directory, 3);
         let target_file = create_test_node("target.txt", NodeType::File, 4);
-        
+
         deep_dir3.children.push(target_file);
         deep_dir2.children.push(deep_dir3);
         deep_dir1.children.push(deep_dir2);
@@ -409,29 +416,35 @@ mod tests {
         assert_eq!(root.children[0].children.len(), 1);
         assert_eq!(root.children[0].children[0].node_info.name, "deep2");
         assert_eq!(root.children[0].children[0].children.len(), 1);
-        assert_eq!(root.children[0].children[0].children[0].node_info.name, "deep3");
+        assert_eq!(
+            root.children[0].children[0].children[0].node_info.name,
+            "deep3"
+        );
         assert_eq!(root.children[0].children[0].children[0].children.len(), 1);
-        assert_eq!(root.children[0].children[0].children[0].children[0].node_info.name, "target.txt");
+        assert_eq!(
+            root.children[0].children[0].children[0].children[0]
+                .node_info
+                .name,
+            "target.txt"
+        );
     }
 
     #[test]
     fn test_transform_nodes() {
-        let mut nodes = vec![
-            NodeInfo {
-                name: "file.txt".to_string(),
-                path: PathBuf::from("file.txt"),
-                node_type: NodeType::File,
-                depth: 1,
-                size: None,
-                permissions: None,
-                line_count: None,
-                word_count: None,
-                mtime: None,
-                change_time: None,
-                create_time: None,
-                custom_function_output: None,
-            },
-        ];
+        let mut nodes = vec![NodeInfo {
+            name: "file.txt".to_string(),
+            path: PathBuf::from("file.txt"),
+            node_type: NodeType::File,
+            depth: 1,
+            size: None,
+            permissions: None,
+            line_count: None,
+            word_count: None,
+            mtime: None,
+            change_time: None,
+            create_time: None,
+            custom_function_output: None,
+        }];
 
         // Transform to uppercase names
         let mut transformer = |node: &mut NodeInfo| {
@@ -449,7 +462,7 @@ mod tests {
         let mut dir1 = create_test_node("src", NodeType::Directory, 1);
         let file1 = create_test_node("main.rs", NodeType::File, 2);
         let file2 = create_test_node("lib.rs", NodeType::File, 1);
-        
+
         dir1.children.push(file1);
         root.children.push(dir1);
         root.children.push(file2);
@@ -488,28 +501,28 @@ mod tests {
         // without stack overflow and maintains correct depth-first traversal order
         let mut root = create_test_node("root", NodeType::Directory, 0);
         let mut current = &mut root;
-        
+
         // Create a chain of 1000 nested directories to test deep tree handling
         for i in 1..=1000 {
             let child = create_test_node(&format!("level_{}", i), NodeType::Directory, i);
             current.children.push(child);
             current = &mut current.children[0];
         }
-        
+
         // Add a file at the deepest level
         let deep_file = create_test_node("deep_file", NodeType::File, 1001);
         current.children.push(deep_file);
-        
+
         // Flatten the deep tree - this should not cause stack overflow
         let flattened = TreeManipulator::flatten_tree(root);
-        
+
         // Verify that all nodes are present and in correct order
         assert_eq!(flattened.len(), 1002); // root + 1000 directories + 1 file
         assert_eq!(flattened[0].name, "root");
         assert_eq!(flattened[1].name, "level_1");
         assert_eq!(flattened[1000].name, "level_1000");
         assert_eq!(flattened[1001].name, "deep_file");
-        
+
         // Verify depth information is preserved
         assert_eq!(flattened[0].depth, 0);
         assert_eq!(flattened[500].depth, 500);
@@ -521,21 +534,27 @@ mod tests {
     fn test_flatten_tree_complex_structure() {
         // Test flattening a tree with multiple branches to ensure correct traversal order
         let mut root = create_test_node("root", NodeType::Directory, 0);
-        
+
         // Create first branch
         let mut branch1 = create_test_node("branch1", NodeType::Directory, 1);
-        branch1.children.push(create_test_node("file1", NodeType::File, 2));
-        branch1.children.push(create_test_node("file2", NodeType::File, 2));
-        
+        branch1
+            .children
+            .push(create_test_node("file1", NodeType::File, 2));
+        branch1
+            .children
+            .push(create_test_node("file2", NodeType::File, 2));
+
         // Create second branch
         let mut branch2 = create_test_node("branch2", NodeType::Directory, 1);
-        branch2.children.push(create_test_node("file3", NodeType::File, 2));
-        
+        branch2
+            .children
+            .push(create_test_node("file3", NodeType::File, 2));
+
         root.children.push(branch1);
         root.children.push(branch2);
-        
+
         let flattened = TreeManipulator::flatten_tree(root);
-        
+
         // Verify correct depth-first left-to-right traversal order
         assert_eq!(flattened.len(), 6);
         assert_eq!(flattened[0].name, "root");
@@ -565,7 +584,7 @@ mod tests {
         // doesn't cause stack overflow on deep structures
         let mut root = create_test_node("root", NodeType::Directory, 0);
         let mut current = &mut root;
-        
+
         // Create a chain of 1000 nested directories
         for i in 1..=1000 {
             let mut child = create_test_node(&format!("level_{}", i), NodeType::Directory, i);
@@ -577,19 +596,26 @@ mod tests {
             current.children.push(child);
             current = &mut current.children[0];
         }
-        
+
         // Limit depth to 10, which should prune most of the deep structure
         TreeManipulator::limit_depth(&mut root, 10);
-        
+
         // Verify that the tree was properly limited
         // We should be able to traverse to depth 10 but not beyond
         let mut current = &root;
         for i in 0..10 {
-            assert!(!current.children.is_empty(), "Should have children at depth {}", i);
+            assert!(
+                !current.children.is_empty(),
+                "Should have children at depth {}",
+                i
+            );
             current = &current.children[0];
         }
-        
+
         // At depth 10, there should be no children (they were pruned)
-        assert!(current.children.is_empty(), "Should have no children at max depth");
+        assert!(
+            current.children.is_empty(),
+            "Should have no children at max depth"
+        );
     }
-} 
+}
