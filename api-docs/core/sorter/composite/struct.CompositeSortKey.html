@@ -3,7 +3,7 @@
 but if two items are equal according to the first key, the second key is used,
 and so on.</p>
 <h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code> 
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
 <span class="comment">// Sort by type first (files before directories), then by name
 </span><span class="kw">let </span>composite = CompositeSortKey::new(<span class="macro">vec!</span>[
     (SortKey::Size, <span class="bool-val">false</span>),  <span class="comment">// Size sorting (which includes type sorting)
