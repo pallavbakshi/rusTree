@@ -66,6 +66,10 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Description: Perform case-insensitive matching for all patterns provided via `-P` (`--filter-include`), `-I` (`--filter-exclude`), `--use-gitignore-rules` (and its alias `--gitignore`), and `--gitignore-file`.
   - Example: `rustree -P "*.TXT" --case-insensitive-filter` (would match `file.txt`)
 
+- `--prune-empty-directories`, `--prune` (alias)
+  - Description: Remove empty directories from the output. An empty directory is one that contains no files and no non-empty subdirectories after all other filtering (e.g., `-P`, `-I`, gitignore rules) has been applied. This option is applied before sorting.
+  - Example: `rustree --prune-empty-directories`, `rustree --prune ./my_project`
+
 ## Metadata Reporting
 
 - `-s, --show-size-bytes`

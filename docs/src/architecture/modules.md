@@ -22,7 +22,7 @@ This top-level module centralizes all configuration-related definitions for the 
   - Defines `ListingOptions` struct for directory traversal settings.
 
 - **`filtering.rs`**:
-  - Defines `FilteringOptions` struct for inclusion/exclusion patterns and gitignore settings.
+  - Defines `FilteringOptions` struct for inclusion/exclusion patterns, gitignore settings, and the `prune_empty_directories` flag.
 
 - **`sorting.rs`**:
   - Defines the `SortKey` enum (e.g., `Name`, `Size`, `MTime`, `Version`, `ChangeTime`, `CreateTime`, `None`).
@@ -51,7 +51,7 @@ The `src/core/` directory houses the main operational logic of `rustree`.
   - `traversal.rs`: Implements various tree traversal algorithms (DFS pre-order, post-order, BFS) and a `TreeVisitor` trait for custom operations during traversal.
 
 - **`walker/`**: This sub-module is responsible for traversing the file system.
-  - `filesystem.rs`: Contains the `walk_directory` function. It uses the `ignore` crate (`ignore::WalkBuilder`) for directory walking. It implements initial filtering logic based on `RustreeLibConfig` (hidden files, max depth, gitignore rules, ignore patterns). After the `ignore` crate yields an entry, it applies further filtering (match patterns, list_directories_only). It handles symlink resolution and populates `NodeInfo` structs with basic metadata, triggering content analysis via the `metadata` module.
+  - `filesystem.rs`: Contains the `walk_directory` function. It uses the `ignore` crate (`ignore::WalkBuilder`) for directory walking. It implements initial filtering logic based on `RustreeLibConfig` (hidden files, max depth, gitignore rules, ignore patterns). After the `ignore` crate yields an entry, it applies further filtering (match patterns). The `list_directories_only` filter is applied later in `lib.rs` after potential pruning. It handles symlink resolution and populates `NodeInfo` structs with basic metadata, triggering content analysis via the `metadata` module.
   - `depth_control.rs`: (Placeholder for future depth-specific control logic).
   - `input_source.rs`: (Placeholder for future advanced input source handling).
   - `symlinks.rs`: (Placeholder for future advanced symlink resolution strategies).
@@ -85,7 +85,7 @@ The `src/core/` directory houses the main operational logic of `rustree`.
 - **`util.rs`**: Contains general utility functions like `is_hidden`, `format_size`, `truncate_string`.
 
 - **`error.rs`**:
-  - Defines `RustreeError`, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, and errors from the `ignore` crate (`IgnoreError`).
+  - Defines `RustreeError`, the common error type used throughout the library. This includes variants for I/O errors, glob pattern errors, errors from the `ignore` crate (`IgnoreError`), and `TreeBuildError` (for errors during internal tree construction for sorting or pruning).
 
 ### Top-Level Library File (`src/lib.rs`)
 
@@ -95,8 +95,13 @@ The `src/core/` directory houses the main operational logic of `rustree`.
   - `LibOutputFormat` (an alias for `OutputFormat`).
 
 - Core types: `NodeInfo` (from `core::tree::node`), `NodeType`, and `RustreeError`.
+- The `cli` module, while part of the crate, is marked `#[doc(hidden)]` and is not part of the stable public API.
 - Provides the main entry-point functions:
-  - `get_tree_nodes()`: Orchestrates walking (via `core::walker`), analysis (via `core::metadata`), and sorting (via `core::sorter::strategies::sort_nodes_with_options`).
+  - `get_tree_nodes()`: Orchestrates the main logic:
+    1. Walking the file system (via `core::walker`), applying initial filters and collecting metadata.
+    2. If `config.filtering.prune_empty_directories` is true, prunes empty directories from the results (using `core::tree::manipulator` and `core::tree::builder`).
+    3. If `config.listing.list_directories_only` is true, filters the results to include only directories. This occurs *after* pruning.
+    4. If sorting is requested, sorts the nodes (via `core::sorter::strategies::sort_nodes_with_options`). Errors during sorting or tree building for pruning now map to `RustreeError::TreeBuildError`.
   - `format_nodes()`: Takes the processed nodes and applies the chosen formatter.
 
 This modular structure aims to make the codebase maintainable and extensible.
