@@ -216,4 +216,21 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --sort-by crtime -r ./my_photos
     ```
 
+27. **Prune empty directories from the output:**
+    Imagine a project with many empty `build/` or `log/` subdirectories.
+
+    ```bash
+    rustree --prune-empty-directories ./my_project
+    # or using the alias
+    rustree --prune ./my_project
+    ```
+    This will list `my_project`, but any directories within it (or nested deeper) that become empty after other filters (like `-P`, `-I`, or gitignore) are applied will not be shown.
+
+28. **Prune empty directories while listing only `.rs` files:**
+
+    ```bash
+    rustree -P "*.rs" --prune ./my_rust_project
+    ```
+    In this case, if a directory `src/utils/` contains only `helper.txt` and `mod.rs`, after `-P "*.rs"` is applied, `helper.txt` is filtered out. If `src/utils/` now only effectively contains `mod.rs`, it's not empty. However, if `src/empty_module/` contained only `old_code.txt`, it would first be filtered by `-P`, then `src/empty_module/` would become empty and subsequently pruned by `--prune`.
+
 Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.

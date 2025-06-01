@@ -10,8 +10,9 @@ RusTree is a command-line tool and Rust library designed to display directory st
 - **Filter and Ignore Entries:**
   - List only files/directories matching specific wildcard patterns (`-P` or `--filter-include`).
   - Exclude files/directories using glob patterns (`-I` or `--filter-exclude`).
-  - Respect `.gitignore` files (`--gitignore`) and custom ignore files (`--git-ignore-files`).
-  - Perform case-insensitive pattern matching (`--ignore-case`).
+  - Respect `.gitignore` files (`--use-gitignore-rules`) and custom ignore files (`--gitignore-file`).
+  - Perform case-insensitive pattern matching (`--case-insensitive-filter`).
+  - Prune empty directories from the output (`--prune-empty-directories`).
 - **Analyze Content:** Get insights like file sizes, modification dates, line counts, and word counts.
 - **Apply Custom Logic:** Use built-in functions (or extend with your own) to process file contents and report results.
 - **Sort Entries:** Organize the tree output by name, size, modification time, or other criteria.
