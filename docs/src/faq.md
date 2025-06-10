@@ -44,3 +44,38 @@ A:
 - If you use `-D` (or `--show-last-modified`) alone, it displays the last modification time (mtime).
 - If you use `-c` alone, it sorts by change time (ctime), but `-D` (or `--show-last-modified`) is needed to _display_ a time.
 - If you use both `-D` (or `--show-last-modified`) and `-c` (or `-D` and `--sort-by ctime`), then `-D` (or `--show-last-modified`) will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.
+
+**Q: What are apply functions and how do they work?**
+A: Apply functions let you analyze and process file or directory contents. They come in two types:
+
+- **File functions** work on file content:
+  - `count-pluses`: Counts '+' characters in each file
+  - `cat`: Displays file contents after the tree structure
+- **Directory functions** work on directory children:
+  - `count-files`: Counts files in each directory
+  - `count-dirs`: Counts subdirectories in each directory  
+  - `size-total`: Calculates total size of files in each directory
+  - `dir-stats`: Shows combined statistics (files, dirs, total size)
+
+Use `--apply-function <FUNCTION_NAME>` to enable a function. The results appear in metadata like `[F: "5"]` or after the tree (for `cat`).
+
+**Q: Can I apply functions only to specific files or directories?**
+A: Yes! Use apply-function filtering:
+
+- `--apply-include <PATTERN>`: Apply function only to matching files/directories
+- `--apply-exclude <PATTERN>`: Don't apply function to matching files/directories
+- `--apply-include-from <FILE>`: Read include patterns from a file
+- `--apply-exclude-from <FILE>`: Read exclude patterns from a file
+
+These use the same wildcard syntax as `--filter-include` and can be combined. Pattern files support comments (lines starting with `#`) and ignore empty lines.
+
+**Q: Why do I get `[F: "0"]` for all directories when using `size-total`?**
+A: The `size-total` function requires file size information to work. Make sure to use `--show-size-bytes` (or `-s`) along with `--apply-function size-total`. Without this flag, file sizes aren't collected and the total will always be 0.
+
+**Q: How do apply functions work with sorting?**
+A: You can sort by apply function results using `--sort-by custom`. This sorts by the function output:
+- Numeric results (like counts) are sorted numerically
+- String results are sorted lexicographically
+- Use `--reverse-sort` to reverse the order
+
+For example: `rustree --apply-function dir-stats --sort-by custom -r` sorts directories by complexity (most files/subdirs first).

@@ -103,29 +103,33 @@ pub fn format_node_metadata(
                 metadata_parts.push("[W:    ]".to_string());
             }
         }
+    }
 
-        if config.metadata.apply_function.is_some() {
-            // Don't display cat content in metadata since it's shown separately
-            if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
-                // Skip displaying cat content in metadata
-            } else {
-                match &node.custom_function_output {
-                    Some(Ok(val)) => match style {
-                        MetadataStyle::Text => metadata_parts.push(format!("[F: \"{}\"]", val)),
-                        MetadataStyle::Markdown | MetadataStyle::Plain => {
-                            metadata_parts.push(format!("F:{}", val))
-                        }
-                    },
-                    Some(Err(_)) => match style {
-                        MetadataStyle::Text => metadata_parts.push("[F: error]".to_string()),
-                        MetadataStyle::Markdown | MetadataStyle::Plain => {
-                            metadata_parts.push("F:error".to_string())
-                        }
-                    },
-                    None => {
-                        if style == MetadataStyle::Text {
-                            metadata_parts.push("[F: N/A]".to_string());
-                        }
+    // Apply function metadata: show only when function is applicable and has output
+    if config.metadata.apply_function.is_some() {
+        // Don't display cat content in metadata since it's shown separately
+        if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
+            // Skip displaying cat content in metadata
+        } else {
+            match &node.custom_function_output {
+                Some(Ok(val)) => match style {
+                    MetadataStyle::Text => metadata_parts.push(format!("[F: \"{}\"]", val)),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push(format!("F:{}", val))
+                    }
+                },
+                Some(Err(_)) => match style {
+                    MetadataStyle::Text => metadata_parts.push("[F: error]".to_string()),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push("F:error".to_string())
+                    }
+                },
+                None => {
+                    // Only show [F: N/A] if the function should apply to this node type
+                    if style == MetadataStyle::Text
+                        && should_show_function_na_for_node(node, config)
+                    {
+                        metadata_parts.push("[F: N/A]".to_string());
                     }
                 }
             }
@@ -262,8 +266,92 @@ pub fn apply_builtin_function(
             let count = content.chars().filter(|&c| c == '+').count();
             Ok(count.to_string())
         }
-        BuiltInFunction::Cat => {
-            Ok(content.to_string())
+        BuiltInFunction::Cat => Ok(content.to_string()),
+        // Directory functions should not be called with string content
+        BuiltInFunction::CountFiles
+        | BuiltInFunction::CountDirs
+        | BuiltInFunction::SizeTotal
+        | BuiltInFunction::DirStats => Err(ApplyFnError::CalculationFailed(
+            "Directory functions require tree context".to_string(),
+        )),
+    }
+}
+
+/// Determines if we should show [F: N/A] for a node when function output is None.
+/// Only show it if the function type matches the node type.
+fn should_show_function_na_for_node(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
+    if let Some(func) = &config.metadata.apply_function {
+        match func {
+            // File functions should only show N/A for files
+            BuiltInFunction::CountPluses | BuiltInFunction::Cat => node.node_type == NodeType::File,
+            // Directory functions should only show N/A for directories
+            BuiltInFunction::CountFiles
+            | BuiltInFunction::CountDirs
+            | BuiltInFunction::SizeTotal
+            | BuiltInFunction::DirStats => node.node_type == NodeType::Directory,
+        }
+    } else {
+        false
+    }
+}
+
+/// Applies a built-in function to a directory using tree context.
+///
+/// This function is used for directory-specific operations that require knowledge
+/// of the directory's contents and structure.
+///
+/// # Arguments
+///
+/// * `children` - Vector of child nodes in the directory
+/// * `func` - The [`BuiltInFunction`] to apply
+///
+/// # Returns
+///
+/// A `Result` containing the string representation of the function's output on success,
+/// or an [`ApplyFnError`] on failure.
+pub fn apply_builtin_to_directory(
+    children: &[crate::core::tree::node::NodeInfo],
+    func: &BuiltInFunction,
+) -> Result<String, ApplyFnError> {
+    use crate::core::tree::node::NodeType;
+
+    match func {
+        BuiltInFunction::CountFiles => {
+            let count = children
+                .iter()
+                .filter(|child| child.node_type == NodeType::File)
+                .count();
+            Ok(count.to_string())
+        }
+        BuiltInFunction::CountDirs => {
+            let count = children
+                .iter()
+                .filter(|child| child.node_type == NodeType::Directory)
+                .count();
+            Ok(count.to_string())
+        }
+        BuiltInFunction::SizeTotal => {
+            let total_size: u64 = children.iter().filter_map(|child| child.size).sum();
+            Ok(total_size.to_string())
+        }
+        BuiltInFunction::DirStats => {
+            let file_count = children
+                .iter()
+                .filter(|child| child.node_type == NodeType::File)
+                .count();
+            let dir_count = children
+                .iter()
+                .filter(|child| child.node_type == NodeType::Directory)
+                .count();
+            let total_size: u64 = children.iter().filter_map(|child| child.size).sum();
+
+            Ok(format!("{}f,{}d,{}B", file_count, dir_count, total_size))
+        }
+        // File functions should not be called with directory context
+        BuiltInFunction::CountPluses | BuiltInFunction::Cat => {
+            Err(ApplyFnError::CalculationFailed(
+                "File functions cannot be applied to directories".to_string(),
+            ))
         }
     }
 }
@@ -402,7 +490,7 @@ mod tests {
     fn test_apply_builtin_function_cat() {
         let test_content = "Hello, World!\nThis is a test file.";
         let result = apply_builtin_function(test_content, &BuiltInFunction::Cat);
-        
+
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), test_content);
     }
@@ -411,7 +499,7 @@ mod tests {
     fn test_apply_builtin_function_cat_empty_content() {
         let test_content = "";
         let result = apply_builtin_function(test_content, &BuiltInFunction::Cat);
-        
+
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "");
     }
@@ -420,7 +508,7 @@ mod tests {
     fn test_apply_builtin_function_cat_multiline() {
         let test_content = "Line 1\nLine 2\nLine 3\n";
         let result = apply_builtin_function(test_content, &BuiltInFunction::Cat);
-        
+
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), test_content);
     }
@@ -429,7 +517,7 @@ mod tests {
     fn test_format_node_metadata_with_cat_function() {
         let mut node = create_test_node();
         node.custom_function_output = Some(Ok("File content here".to_string()));
-        
+
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
                 apply_function: Some(BuiltInFunction::Cat),
@@ -440,7 +528,7 @@ mod tests {
         };
 
         let result = format_node_metadata(&node, &config, MetadataStyle::Text);
-        
+
         // Should show size but NOT show cat content in metadata (it's displayed separately)
         assert!(result.contains("[   1024B]"));
         assert!(!result.contains("File content here"));
@@ -451,7 +539,7 @@ mod tests {
     fn test_format_node_metadata_with_count_pluses_function() {
         let mut node = create_test_node();
         node.custom_function_output = Some(Ok("5".to_string()));
-        
+
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
                 apply_function: Some(BuiltInFunction::CountPluses),
@@ -462,7 +550,7 @@ mod tests {
         };
 
         let result = format_node_metadata(&node, &config, MetadataStyle::Text);
-        
+
         // Should show both size and function result for non-Cat functions
         assert!(result.contains("[   1024B]"));
         assert!(result.contains("[F: \"5\"]"));

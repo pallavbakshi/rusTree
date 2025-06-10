@@ -8,8 +8,17 @@ The basic syntax is:
 rustree [OPTIONS] [PATH]
 ```
 
-- `[OPTIONS]`: Various flags to control behavior (e.g., depth, sorting, output format).
+- `[OPTIONS]`: Various flags to control behavior (e.g., depth, sorting, output format, apply functions).
 - `[PATH]`: Optional path to the directory to scan. Defaults to the current directory (`.`).
+
+## Key Features
+
+- **Tree visualization** with customizable depth and formatting
+- **Metadata display** including sizes, timestamps, line/word counts
+- **Apply functions** to analyze file contents and directory statistics
+- **Flexible filtering** with patterns, gitignore support, and function-specific filtering
+- **Advanced sorting** by various criteria including custom function output
+- **Multiple output formats** (text, markdown) for different use cases
 
 ## Sub-sections:
 

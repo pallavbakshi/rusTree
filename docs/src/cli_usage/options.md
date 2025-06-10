@@ -91,11 +91,33 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Example: `rustree --calculate-words`
 
 - `--apply-function <FUNCTION_NAME>`
-  - Description: Apply a built-in function to file contents and display the result. When using the `cat` function, the tree structure is displayed first, followed by the contents of each file.
+  - Description: Apply a built-in function to file or directory contents and display the result. When using the `cat` function, the tree structure is displayed first, followed by the contents of each file.
   - Available functions: 
-    - `count-pluses`: Counts '+' characters in each file and displays the count in metadata
-    - `cat`: Displays the full content of each file after the tree structure
-  - Example: `rustree --apply-function cat`, `rustree --apply-function count-pluses`
+    - **File functions** (work with file content):
+      - `count-pluses`: Counts '+' characters in each file and displays the count in metadata
+      - `cat`: Displays the full content of each file after the tree structure
+    - **Directory functions** (work with directory children):
+      - `count-files`: Counts the number of files in each directory
+      - `count-dirs`: Counts the number of subdirectories in each directory
+      - `size-total`: Calculates the total size of all files in each directory
+      - `dir-stats`: Shows combined statistics (files, directories, total size) for each directory
+  - Example: `rustree --apply-function cat`, `rustree --apply-function count-pluses`, `rustree --apply-function dir-stats`
+
+- `--apply-include <PATTERN>`
+  - Description: Apply the function only to files/directories matching the specified pattern. Can be used multiple times. Uses the same wildcard syntax as `--filter-include`.
+  - Example: `rustree --apply-function count-pluses --apply-include "*.rs"`
+
+- `--apply-exclude <PATTERN>`
+  - Description: Do not apply the function to files/directories matching the specified pattern. Can be used multiple times. Uses the same wildcard syntax as `--filter-exclude`.
+  - Example: `rustree --apply-function dir-stats --apply-exclude "target/*"`
+
+- `--apply-include-from <FILE_PATH>`
+  - Description: Read include patterns for apply-function from the specified file. One pattern per line. Lines starting with `#` and empty lines are ignored.
+  - Example: `rustree --apply-function cat --apply-include-from ./include-patterns.txt`
+
+- `--apply-exclude-from <FILE_PATH>`
+  - Description: Read exclude patterns for apply-function from the specified file. One pattern per line. Lines starting with `#` and empty lines are ignored.
+  - Example: `rustree --apply-function dir-stats --apply-exclude-from ./exclude-patterns.txt`
 
 ## Sorting
 

@@ -1,5 +1,5 @@
 // src/cli/args.rs
-use crate::cli::filtering::{exclude, gitignore_rules, include};
+use crate::cli::filtering::{apply_function, exclude, gitignore_rules, include};
 use crate::cli::listing::{depth, directory_only, hidden};
 use crate::cli::metadata::{date, size, stats};
 use crate::cli::misc::llm;
@@ -49,6 +49,9 @@ pub struct CliArgs {
 
     #[command(flatten)]
     pub gitignore: gitignore_rules::GitignoreArgs,
+
+    #[command(flatten)]
+    pub apply_function_filter: apply_function::ApplyFunctionFilterArgs,
 
     #[command(flatten)]
     pub format: format::FormatArgs,

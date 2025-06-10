@@ -119,7 +119,8 @@ fn test_prune_empty_directories_flag_long() -> Result<()> {
         "--sort-by",
         "name", // For stable output
     ]);
-    let lib_config = rustree::cli::map_cli_to_lib_config(&cli_args); // Changed crate::cli to rustree::cli
+    let lib_config =
+        rustree::cli::map_cli_to_lib_config(&cli_args).expect("Failed to map CLI config"); // Changed crate::cli to rustree::cli
     let lib_output_format =
         rustree::cli::map_cli_to_lib_output_format(cli_args.format.output_format); // Changed crate::cli to rustree::cli
 
@@ -185,7 +186,8 @@ fn test_prune_empty_directories_alias() -> Result<()> {
         "--sort-by",
         "name",
     ]);
-    let lib_config = rustree::cli::map_cli_to_lib_config(&cli_args); // Changed crate::cli to rustree::cli
+    let lib_config =
+        rustree::cli::map_cli_to_lib_config(&cli_args).expect("Failed to map CLI config"); // Changed crate::cli to rustree::cli
     let lib_output_format =
         rustree::cli::map_cli_to_lib_output_format(cli_args.format.output_format); // Changed crate::cli to rustree::cli
 
@@ -222,7 +224,8 @@ fn test_pruning_disabled_shows_empty_dirs() -> Result<()> {
         "--sort-by",
         "name",
     ]);
-    let lib_config = rustree::cli::map_cli_to_lib_config(&cli_args); // Changed crate::cli to rustree::cli
+    let lib_config =
+        rustree::cli::map_cli_to_lib_config(&cli_args).expect("Failed to map CLI config"); // Changed crate::cli to rustree::cli
     let lib_output_format =
         rustree::cli::map_cli_to_lib_output_format(cli_args.format.output_format); // Changed crate::cli to rustree::cli
 

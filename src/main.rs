@@ -17,7 +17,13 @@ fn main() -> ExitCode {
     let cli_args = CliArgs::parse();
 
     // 1. Map CLI args to Library config
-    let lib_config = map_cli_to_lib_config(&cli_args);
+    let lib_config = match map_cli_to_lib_config(&cli_args) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("Error reading pattern files: {}", e);
+            return ExitCode::FAILURE;
+        }
+    };
 
     let lib_output_format = map_cli_to_lib_output_format(cli_args.format.output_format.clone());
 

@@ -22,4 +22,12 @@ pub struct FilteringOptions {
     pub case_insensitive_filter: bool,
     /// If `true`, prune empty directories after all other filtering.
     pub prune_empty_directories: bool,
+
+    // Apply-function specific filtering
+    /// Patterns to include when applying functions. Only files/dirs matching these patterns will have the function applied.
+    /// Corresponds to CLI --apply-include.
+    pub apply_include_patterns: Option<Vec<String>>,
+    /// Patterns to exclude when applying functions. Files/dirs matching these patterns will skip function application.
+    /// Corresponds to CLI --apply-exclude.
+    pub apply_exclude_patterns: Option<Vec<String>>,
 }

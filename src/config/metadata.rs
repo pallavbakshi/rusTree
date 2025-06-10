@@ -9,13 +9,24 @@ pub enum ApplyFnError {
     // Add other specific error types for apply functions if needed
 }
 
-/// Enumerates built-in functions that can be applied to file contents.
+/// Enumerates built-in functions that can be applied to file and directory contents.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BuiltInFunction {
+    // File functions
     /// Counts the occurrences of the '+' character in the content.
     CountPluses,
     /// Displays the content of each file.
     Cat,
+
+    // Directory functions
+    /// Counts the number of files (non-directories) in the directory.
+    CountFiles,
+    /// Counts the number of subdirectories in the directory.
+    CountDirs,
+    /// Calculates the total size of all contents recursively.
+    SizeTotal,
+    /// Shows combined statistics for the directory (files, dirs, total size).
+    DirStats,
 }
 
 /// Configuration for metadata collection and display.

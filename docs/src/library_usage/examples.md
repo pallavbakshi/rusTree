@@ -225,4 +225,194 @@ fn main() -> Result<(), RustreeError> {
 }
 ```
 
+### Example 6: Directory Analysis with Built-in Functions
+
+This example demonstrates using directory functions to analyze project structure.
+
+```rust
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, SortKey, RustreeError,
+    InputSourceOptions, MetadataOptions, SortingOptions, ListingOptions,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./my_project";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Project Analysis".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            list_directories_only: true, // Only show directories
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::DirStats), // Get comprehensive directory stats
+            show_size_bytes: true, // Required for size calculations
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Custom), // Sort by directory stats (complexity)
+            reverse_sort: true, // Most complex directories first
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
+    println!("{}", output);
+    
+    // Output will show directories with stats like [F: "15f,3d,52KB"]
+    // meaning 15 files, 3 subdirectories, 52KB total size
+
+    Ok(())
+}
+```
+
+### Example 7: Selective Function Application with Filtering
+
+This example shows how to apply functions only to specific files or directories using patterns.
+
+```rust
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, FilteringOptions,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./workspace";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Workspace Analysis".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::CountFiles), // Count files in directories
+            show_size_bytes: true,
+            ..Default::default()
+        },
+        filtering: FilteringOptions {
+            // Apply function only to source directories, exclude build artifacts
+            apply_include_patterns: Some(vec!["src*".to_string(), "lib*".to_string()]),
+            apply_exclude_patterns: Some(vec!["*target*".to_string(), "*build*".to_string()]),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
+    println!("{}", output);
+
+    Ok(())
+}
+```
+
+### Example 8: File Content Analysis with Filtering
+
+This example demonstrates using the cat function with selective application for code review.
+
+```rust
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, FilteringOptions,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Code Review".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::Cat), // Show file contents
+            calculate_line_count: true,
+            ..Default::default()
+        },
+        filtering: FilteringOptions {
+            // Only show Rust files and exclude test files
+            match_patterns: Some(vec!["*.rs".to_string()]),
+            apply_exclude_patterns: Some(vec!["*test*".to_string(), "*tests*".to_string()]),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
+    println!("{}", output);
+    
+    // This will show:
+    // 1. Tree structure of all .rs files
+    // 2. File contents for non-test .rs files only
+
+    Ok(())
+}
+```
+
+### Example 9: Working with NodeInfo Directly
+
+This example shows how to work with the raw `NodeInfo` data for custom processing.
+
+```rust
+use rustree::{
+    get_tree_nodes, RustreeLibConfig, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, NodeType,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./project";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::CountFiles),
+            show_size_bytes: true,
+            calculate_line_count: true,
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+
+    // Custom analysis of the nodes
+    for node in &nodes {
+        match node.node_type {
+            NodeType::Directory => {
+                if let Some(Ok(file_count)) = &node.custom_function_output {
+                    println!("Directory '{}' contains {} files", node.name, file_count);
+                }
+            }
+            NodeType::File => {
+                if let Some(lines) = node.line_count {
+                    println!("File '{}' has {} lines", node.name, lines);
+                }
+                if let Some(size) = node.size {
+                    println!("File '{}' is {} bytes", node.name, size);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Ok(())
+}
+```
+
 These examples should give you a good starting point for integrating `rustree` into your applications. Remember to handle the `Result` types appropriately in production code.

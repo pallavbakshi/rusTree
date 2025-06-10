@@ -232,8 +232,13 @@ pub fn walk_directory(
                                 Some(size_calculator::count_words_from_string(&content));
                         }
                         if let Some(func_type) = &config.metadata.apply_function {
-                            node.custom_function_output =
-                                Some(file_info::apply_builtin_to_file(&node.path, func_type));
+                            // Check if this is a file function and if it should be applied based on filtering
+                            if is_file_function(func_type)
+                                && should_apply_function_to_file(&node, config)
+                            {
+                                node.custom_function_output =
+                                    Some(file_info::apply_builtin_to_file(&node.path, func_type));
+                            }
                         }
                     }
                     Err(_e) => { /* Log error or store in NodeInfo */ }
@@ -243,4 +248,55 @@ pub fn walk_directory(
         intermediate_nodes.push(node);
     }
     Ok(intermediate_nodes)
+}
+
+/// Checks if a function is a file-specific function.
+fn is_file_function(func: &crate::config::metadata::BuiltInFunction) -> bool {
+    matches!(
+        func,
+        crate::config::metadata::BuiltInFunction::CountPluses
+            | crate::config::metadata::BuiltInFunction::Cat
+    )
+}
+
+/// Checks if a function should be applied to a specific file based on filtering patterns.
+fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
+    use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_path_with_patterns};
+
+    // Check apply_exclude_patterns first - if it matches, skip
+    if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
+        if !exclude_patterns.is_empty() {
+            if let Ok(compiled_patterns) = compile_glob_patterns(
+                &Some(exclude_patterns.clone()),
+                config.filtering.case_insensitive_filter,
+                config.listing.show_hidden,
+            ) {
+                if let Some(patterns) = compiled_patterns {
+                    if entry_matches_path_with_patterns(&node.path, &patterns) {
+                        return false; // Skip this node
+                    }
+                }
+            }
+        }
+    }
+
+    // Check apply_include_patterns - if specified, node must match
+    if let Some(include_patterns) = &config.filtering.apply_include_patterns {
+        if !include_patterns.is_empty() {
+            if let Ok(compiled_patterns) = compile_glob_patterns(
+                &Some(include_patterns.clone()),
+                config.filtering.case_insensitive_filter,
+                config.listing.show_hidden,
+            ) {
+                if let Some(patterns) = compiled_patterns {
+                    return entry_matches_path_with_patterns(&node.path, &patterns);
+                }
+            }
+            // If we have include patterns but compilation failed, don't apply
+            return false;
+        }
+    }
+
+    // If no include patterns specified, or node passed all checks, apply the function
+    true
 }

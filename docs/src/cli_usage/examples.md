@@ -286,4 +286,96 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
     ```
 
+## Apply Function Examples
+
+35. **Get directory statistics showing file count, directory count, and total size:**
+
+    ```bash
+    rustree --apply-function dir-stats --show-size-bytes ./my_project
+    ```
+    
+    This shows statistics like `[F: "5f,2d,1024B"]` for each directory, indicating 5 files, 2 subdirectories, and 1024 bytes total.
+
+36. **Count files in each directory:**
+
+    ```bash
+    rustree --apply-function count-files ./project
+    ```
+    
+    Shows `[F: "3"]` for directories containing 3 files.
+
+37. **Calculate total size of files in each directory:**
+
+    ```bash
+    rustree --apply-function size-total --show-size-bytes ./downloads
+    ```
+    
+    Note: `--show-size-bytes` must be enabled for size-total to work properly.
+
+38. **Apply function only to specific directories using patterns:**
+
+    ```bash
+    # Only apply dir-stats to src directories
+    rustree --apply-function dir-stats --apply-include "src*" ./workspace
+
+    # Apply count-files to all directories except target and build
+    rustree --apply-function count-files --apply-exclude "target/*" --apply-exclude "build/*" ./project
+    ```
+
+39. **Use pattern files for complex filtering:**
+
+    Create a file `include-patterns.txt`:
+    ```
+    # Include source directories
+    src/*
+    lib/*
+    # Include documentation
+    docs/*
+    ```
+
+    Create a file `exclude-patterns.txt`:
+    ```
+    # Exclude build artifacts
+    *target*
+    *build*
+    # Exclude temporary files
+    *.tmp
+    ```
+
+    Then use:
+    ```bash
+    rustree --apply-function dir-stats \
+            --apply-include-from ./include-patterns.txt \
+            --apply-exclude-from ./exclude-patterns.txt ./project
+    ```
+
+40. **Combine cat function with selective application:**
+
+    ```bash
+    # Show contents of only configuration files
+    rustree --apply-function cat --apply-include "*.toml" --apply-include "*.yml" ./config
+    
+    # Show contents excluding sensitive files
+    rustree --apply-function cat --apply-exclude "*secret*" --apply-exclude "*key*" ./scripts
+    ```
+
+41. **Directory analysis for large projects:**
+
+    ```bash
+    # Get overview of all subdirectories with statistics
+    rustree -d --apply-function dir-stats --show-size-bytes --sort-by custom -r ./large_project
+    ```
+    
+    This shows only directories (`-d`), applies statistics function, enables size collection, and sorts by the statistics output in reverse order (largest/most complex directories first).
+
+42. **Analyze code organization:**
+
+    ```bash
+    # Count Rust files in each module directory
+    rustree --apply-function count-files --apply-include "*.rs" -d ./src
+    
+    # Get comprehensive statistics for source directories only
+    rustree --apply-function dir-stats --apply-include "src*" --apply-include "lib*" ./workspace
+    ```
+
 Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.
