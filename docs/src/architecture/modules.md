@@ -26,7 +26,8 @@ This top-level module centralizes all configuration-related definitions for the 
 
 - **`sorting.rs`**:
   - Defines the `SortKey` enum (e.g., `Name`, `Size`, `MTime`, `Version`, `ChangeTime`, `CreateTime`, `None`).
-  - Defines `SortingOptions` struct, used in `RustreeLibConfig` to specify sorting criteria, order, and whether files should appear before directories in size-based sorts.
+  - Defines `DirectoryFileOrder` enum to control directory vs. file ordering (`Default`, `DirsFirst`, `FilesFirst`).
+  - Defines `SortingOptions` struct, used in `RustreeLibConfig` to specify sorting criteria, order, directory/file ordering preference, and backward compatibility options.
 
 - **`metadata.rs`**:
   - Defines `MetadataOptions` struct for metadata collection and content analysis flags (e.g., `show_size_bytes`, `show_last_modified`, `report_change_time`, `report_creation_time`).
@@ -73,7 +74,7 @@ The `src/core/` directory houses the main operational logic of `rustree`.
 
 - **`sorter/`**: This sub-module is responsible for sorting nodes while preserving the tree hierarchy.
   - `strategies.rs`: Contains `sort_nodes_with_options` (and the older `sort_nodes`), which orchestrates tree building, sorting of sibling nodes, and tree flattening.
-  - `comparators.rs`: Defines `compare_siblings_with_options` which implements the comparison logic for various `SortKey`s, considering `SortingOptions` like `reverse_sort` and `files_before_directories`. It includes improved version string comparison and new size sorting logic (defaulting to largest first, files before directories).
+  - `comparators.rs`: Defines `compare_siblings_with_options` which implements the comparison logic for various `SortKey`s, considering `SortingOptions` like `reverse_sort`, `files_before_directories` (legacy), and the new `directory_file_order` enum. It includes universal directory/file ordering that applies to all sort keys, improved version string comparison, and enhanced size sorting logic. The `apply_directory_file_ordering` function provides consistent directory vs. file ordering across all sorting modes.
   - `composite.rs`: (Placeholder for defining and using composite sort keys).
 
 - **`formatter/`**: This sub-module is responsible for generating the final output string.
@@ -90,8 +91,8 @@ The `src/core/` directory houses the main operational logic of `rustree`.
 ### Top-Level Library File (`src/lib.rs`)
 
 - Re-exports key public types from the `config` and `core` modules to form the library's public API. This includes:
-  - `RustreeLibConfig` and its constituent option structs: `InputSourceOptions`, `ListingOptions`, `FilteringOptions`, `SortingOptions` (including `files_before_directories`), `MetadataOptions`, `MiscOptions`.
-  - Enums and related types: `SortKey`, `BuiltInFunction`, `ApplyFnError`.
+  - `RustreeLibConfig` and its constituent option structs: `InputSourceOptions`, `ListingOptions`, `FilteringOptions`, `SortingOptions` (including `directory_file_order` and legacy `files_before_directories`), `MetadataOptions`, `MiscOptions`.
+  - Enums and related types: `SortKey`, `DirectoryFileOrder`, `BuiltInFunction`, `ApplyFnError`.
   - `LibOutputFormat` (an alias for `OutputFormat`).
 
 - Core types: `NodeInfo` (from `core::tree::node`), `NodeType`, and `RustreeError`.

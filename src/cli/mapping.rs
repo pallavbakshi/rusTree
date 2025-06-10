@@ -19,6 +19,7 @@ use crate::config::RustreeLibConfig;
 use crate::config::SortKey as LibSortKey;
 use crate::config::SortingOptions;
 use crate::config::output_format::OutputFormat as LibOutputFormat;
+use crate::config::sorting::DirectoryFileOrder;
 
 /// Maps command-line arguments (`CliArgs`) to the library's configuration structure (`RustreeLibConfig`).
 ///
@@ -104,6 +105,13 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             },
             reverse_sort: cli_args.sort_order.reverse_sort,
             files_before_directories: true, // Default to traditional behavior
+            directory_file_order: if cli_args.sort_order.dirs_first {
+                DirectoryFileOrder::DirsFirst
+            } else if cli_args.sort_order.files_first {
+                DirectoryFileOrder::FilesFirst
+            } else {
+                DirectoryFileOrder::Default
+            },
         },
         metadata: MetadataOptions {
             show_size_bytes: cli_args.size.show_size_bytes,
