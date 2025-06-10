@@ -1,3 +1,16 @@
+/// Defines the ordering preference for directories vs files.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DirectoryFileOrder {
+    /// Default behavior - ordering depends on the sort key.
+    /// For size sorting, files come before directories.
+    /// For other sort keys, files and directories are intermixed.
+    Default,
+    /// Directories are listed before files at each level.
+    DirsFirst,
+    /// Files (and symlinks) are listed before directories at each level.
+    FilesFirst,
+}
+
 /// Defines the keys by which directory entries can be sorted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SortKey {
@@ -35,7 +48,10 @@ pub struct SortingOptions {
     /// Whether to sort files before directories when sorting by size.
     /// When true (default), files and symlinks appear before directories.
     /// When false, files and directories are intermixed based purely on size.
+    /// DEPRECATED: Use directory_file_order instead.
     pub files_before_directories: bool,
+    /// Determines the ordering of directories vs files.
+    pub directory_file_order: DirectoryFileOrder,
 }
 
 impl Default for SortingOptions {
@@ -44,6 +60,7 @@ impl Default for SortingOptions {
             sort_by: Some(SortKey::Name),
             reverse_sort: false,
             files_before_directories: true, // Default to traditional behavior
+            directory_file_order: DirectoryFileOrder::Default,
         }
     }
 }

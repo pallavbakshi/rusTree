@@ -233,4 +233,41 @@ Here are some practical examples of how to use `rustree` from the command line.
     ```
     In this case, if a directory `src/utils/` contains only `helper.txt` and `mod.rs`, after `-P "*.rs"` is applied, `helper.txt` is filtered out. If `src/utils/` now only effectively contains `mod.rs`, it's not empty. However, if `src/empty_module/` contained only `old_code.txt`, it would first be filtered by `-P`, then `src/empty_module/` would become empty and subsequently pruned by `--prune`.
 
+29. **List directories before files for better readability:**
+
+    ```bash
+    rustree --dirs-first ./my_project
+    ```
+    This will show all directories before any files at each level, making the structure more readable by grouping similar types together.
+
+30. **List files before directories:**
+
+    ```bash
+    rustree --files-first ./my_project
+    ```
+    This will show all files before any directories at each level.
+
+31. **Combine directory ordering with different sort modes:**
+
+    ```bash
+    # Directories first, sorted by modification time
+    rustree --dirs-first --sort-by mtime ./my_project
+
+    # Files first, sorted by size (largest first)
+    rustree --files-first --sort-by size -r ./my_project
+
+    # Directories first with version sorting
+    rustree --dirs-first -v ./releases
+    ```
+
+32. **Directory ordering with metadata and filtering:**
+
+    ```bash
+    # Show directories first with sizes and modification times, only for .rs files and directories
+    rustree --dirs-first -s -D -P "*.rs|*/" ./src
+
+    # Files first, showing line counts for text files
+    rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
+    ```
+
 Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.

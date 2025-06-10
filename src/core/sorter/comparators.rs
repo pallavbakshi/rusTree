@@ -3,10 +3,35 @@
 //! This module contains the core comparison logic for sorting nodes based on
 //! various attributes like name, size, modification time, etc.
 
-use crate::config::sorting::{SortKey, SortingOptions};
+use crate::config::sorting::{DirectoryFileOrder, SortKey, SortingOptions};
 use crate::core::tree::builder::TempNode;
 use crate::core::tree::node::NodeType;
 use std::cmp::Ordering;
+
+/// Applies directory/file ordering based on the specified preference.
+/// Returns Some(Ordering) if nodes should be ordered by type, None if they are the same type.
+fn apply_directory_file_ordering(
+    a: &TempNode,
+    b: &TempNode,
+    directory_file_order: &DirectoryFileOrder,
+) -> Option<Ordering> {
+    let type_a = &a.node_info.node_type;
+    let type_b = &b.node_info.node_type;
+
+    match directory_file_order {
+        DirectoryFileOrder::DirsFirst => match (type_a, type_b) {
+            (NodeType::Directory, NodeType::File | NodeType::Symlink) => Some(Ordering::Less),
+            (NodeType::File | NodeType::Symlink, NodeType::Directory) => Some(Ordering::Greater),
+            _ => None, // Same types, continue with regular sorting
+        },
+        DirectoryFileOrder::FilesFirst => match (type_a, type_b) {
+            (NodeType::File | NodeType::Symlink, NodeType::Directory) => Some(Ordering::Less),
+            (NodeType::Directory, NodeType::File | NodeType::Symlink) => Some(Ordering::Greater),
+            _ => None, // Same types, continue with regular sorting
+        },
+        DirectoryFileOrder::Default => None, // Use existing behavior per sort key
+    }
+}
 
 /// Helper function to compare nodes by name (case-insensitive).
 fn compare_by_name(a: &TempNode, b: &TempNode) -> Ordering {
@@ -129,12 +154,14 @@ fn compare_by_sort_key(
     a: &TempNode,
     b: &TempNode,
     key: &SortKey,
-    files_before_directories: bool,
+    options: &SortingOptions,
 ) -> Ordering {
+    // This function now only handles the sort key comparison
+    // Directory/file ordering is handled at a higher level
     match key {
         SortKey::Name => compare_by_name(a, b),
         SortKey::Version => compare_by_version(a, b),
-        SortKey::Size => compare_by_size(a, b, files_before_directories),
+        SortKey::Size => compare_by_size(a, b, options.files_before_directories),
         SortKey::MTime => compare_by_mtime(a, b),
         SortKey::ChangeTime => compare_by_change_time(a, b),
         SortKey::CreateTime => compare_by_create_time(a, b),
@@ -150,7 +177,15 @@ fn compare_by_sort_key(
 /// This function implements the core comparison logic for all supported sort keys.
 /// It handles the reverse flag by inverting the comparison result when needed.
 pub fn compare_siblings(a: &TempNode, b: &TempNode, key: &SortKey, reverse: bool) -> Ordering {
-    let ord = compare_by_sort_key(a, b, key, true); // Use default files_before_directories = true for backwards compatibility
+    // Create a default SortingOptions for backward compatibility
+    let options = SortingOptions {
+        sort_by: Some(key.clone()),
+        reverse_sort: reverse,
+        files_before_directories: true,
+        directory_file_order: DirectoryFileOrder::Default,
+    };
+
+    let ord = compare_by_sort_key(a, b, key, &options);
 
     if reverse { ord.reverse() } else { ord }
 }
@@ -168,7 +203,28 @@ pub fn compare_siblings_with_options(
         None => return Ordering::Equal, // No sorting
     };
 
-    let ord = compare_by_sort_key(a, b, key, options.files_before_directories);
+    // First, apply directory/file ordering if specified (except for None sort key)
+    if *key != SortKey::None {
+        if let Some(type_ordering) =
+            apply_directory_file_ordering(a, b, &options.directory_file_order)
+        {
+            return type_ordering;
+        }
+    }
+
+    // If same types or Default ordering, proceed with sort key comparison
+    let ord = match key {
+        SortKey::Name => compare_by_name(a, b),
+        SortKey::Version => compare_by_version(a, b),
+        SortKey::Size => compare_by_size(a, b, options.files_before_directories),
+        SortKey::MTime => compare_by_mtime(a, b),
+        SortKey::ChangeTime => compare_by_change_time(a, b),
+        SortKey::CreateTime => compare_by_create_time(a, b),
+        SortKey::Words => compare_by_words(a, b),
+        SortKey::Lines => compare_by_lines(a, b),
+        SortKey::Custom => compare_by_custom(a, b),
+        SortKey::None => Ordering::Equal, // No sorting, preserve original order
+    };
 
     if options.reverse_sort {
         ord.reverse()
@@ -489,5 +545,468 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_apply_directory_file_ordering_dirs_first() {
+        use crate::core::tree::builder::TempNode;
+        use crate::core::tree::node::{NodeInfo, NodeType};
+        use std::path::PathBuf;
+
+        // Create test nodes
+        let file_node = TempNode {
+            node_info: NodeInfo {
+                name: "file.txt".to_string(),
+                path: PathBuf::from("file.txt"),
+                node_type: NodeType::File,
+                depth: 1,
+                size: Some(100),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let dir_node = TempNode {
+            node_info: NodeInfo {
+                name: "dir".to_string(),
+                path: PathBuf::from("dir"),
+                node_type: NodeType::Directory,
+                depth: 1,
+                size: None,
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let symlink_node = TempNode {
+            node_info: NodeInfo {
+                name: "symlink".to_string(),
+                path: PathBuf::from("symlink"),
+                node_type: NodeType::Symlink,
+                depth: 1,
+                size: Some(50),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        // Test DirsFirst ordering
+        assert_eq!(
+            apply_directory_file_ordering(&dir_node, &file_node, &DirectoryFileOrder::DirsFirst),
+            Some(Ordering::Less)
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&file_node, &dir_node, &DirectoryFileOrder::DirsFirst),
+            Some(Ordering::Greater)
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&dir_node, &symlink_node, &DirectoryFileOrder::DirsFirst),
+            Some(Ordering::Less)
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&symlink_node, &dir_node, &DirectoryFileOrder::DirsFirst),
+            Some(Ordering::Greater)
+        );
+
+        // Same types should return None
+        assert_eq!(
+            apply_directory_file_ordering(
+                &file_node,
+                &symlink_node,
+                &DirectoryFileOrder::DirsFirst
+            ),
+            None
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&dir_node, &dir_node, &DirectoryFileOrder::DirsFirst),
+            None
+        );
+    }
+
+    #[test]
+    fn test_apply_directory_file_ordering_files_first() {
+        use crate::core::tree::builder::TempNode;
+        use crate::core::tree::node::{NodeInfo, NodeType};
+        use std::path::PathBuf;
+
+        let file_node = TempNode {
+            node_info: NodeInfo {
+                name: "file.txt".to_string(),
+                path: PathBuf::from("file.txt"),
+                node_type: NodeType::File,
+                depth: 1,
+                size: Some(100),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let dir_node = TempNode {
+            node_info: NodeInfo {
+                name: "dir".to_string(),
+                path: PathBuf::from("dir"),
+                node_type: NodeType::Directory,
+                depth: 1,
+                size: None,
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let symlink_node = TempNode {
+            node_info: NodeInfo {
+                name: "symlink".to_string(),
+                path: PathBuf::from("symlink"),
+                node_type: NodeType::Symlink,
+                depth: 1,
+                size: Some(50),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        // Test FilesFirst ordering
+        assert_eq!(
+            apply_directory_file_ordering(&file_node, &dir_node, &DirectoryFileOrder::FilesFirst),
+            Some(Ordering::Less)
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&dir_node, &file_node, &DirectoryFileOrder::FilesFirst),
+            Some(Ordering::Greater)
+        );
+        assert_eq!(
+            apply_directory_file_ordering(
+                &symlink_node,
+                &dir_node,
+                &DirectoryFileOrder::FilesFirst
+            ),
+            Some(Ordering::Less)
+        );
+        assert_eq!(
+            apply_directory_file_ordering(
+                &dir_node,
+                &symlink_node,
+                &DirectoryFileOrder::FilesFirst
+            ),
+            Some(Ordering::Greater)
+        );
+
+        // Same types should return None
+        assert_eq!(
+            apply_directory_file_ordering(
+                &file_node,
+                &symlink_node,
+                &DirectoryFileOrder::FilesFirst
+            ),
+            None
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&dir_node, &dir_node, &DirectoryFileOrder::FilesFirst),
+            None
+        );
+    }
+
+    #[test]
+    fn test_apply_directory_file_ordering_default() {
+        use crate::core::tree::builder::TempNode;
+        use crate::core::tree::node::{NodeInfo, NodeType};
+        use std::path::PathBuf;
+
+        let file_node = TempNode {
+            node_info: NodeInfo {
+                name: "file.txt".to_string(),
+                path: PathBuf::from("file.txt"),
+                node_type: NodeType::File,
+                depth: 1,
+                size: Some(100),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let dir_node = TempNode {
+            node_info: NodeInfo {
+                name: "dir".to_string(),
+                path: PathBuf::from("dir"),
+                node_type: NodeType::Directory,
+                depth: 1,
+                size: None,
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        // Default ordering should always return None (no preference)
+        assert_eq!(
+            apply_directory_file_ordering(&file_node, &dir_node, &DirectoryFileOrder::Default),
+            None
+        );
+        assert_eq!(
+            apply_directory_file_ordering(&dir_node, &file_node, &DirectoryFileOrder::Default),
+            None
+        );
+    }
+
+    #[test]
+    fn test_compare_siblings_with_options_directory_ordering() {
+        use crate::core::tree::builder::TempNode;
+        use crate::core::tree::node::{NodeInfo, NodeType};
+        use std::path::PathBuf;
+
+        let file_node = TempNode {
+            node_info: NodeInfo {
+                name: "zfile.txt".to_string(), // Name that would come after directory alphabetically
+                path: PathBuf::from("zfile.txt"),
+                node_type: NodeType::File,
+                depth: 1,
+                size: Some(100),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let dir_node = TempNode {
+            node_info: NodeInfo {
+                name: "adir".to_string(), // Name that would come before file alphabetically
+                path: PathBuf::from("adir"),
+                node_type: NodeType::Directory,
+                depth: 1,
+                size: None,
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        // Test that DirsFirst overrides alphabetical ordering
+        let dirs_first_options = SortingOptions {
+            sort_by: Some(SortKey::Name),
+            reverse_sort: false,
+            files_before_directories: true,
+            directory_file_order: DirectoryFileOrder::DirsFirst,
+        };
+
+        assert_eq!(
+            compare_siblings_with_options(&dir_node, &file_node, &dirs_first_options),
+            Ordering::Less
+        );
+        assert_eq!(
+            compare_siblings_with_options(&file_node, &dir_node, &dirs_first_options),
+            Ordering::Greater
+        );
+
+        // Test that FilesFirst overrides alphabetical ordering
+        let files_first_options = SortingOptions {
+            sort_by: Some(SortKey::Name),
+            reverse_sort: false,
+            files_before_directories: true,
+            directory_file_order: DirectoryFileOrder::FilesFirst,
+        };
+
+        assert_eq!(
+            compare_siblings_with_options(&file_node, &dir_node, &files_first_options),
+            Ordering::Less
+        );
+        assert_eq!(
+            compare_siblings_with_options(&dir_node, &file_node, &files_first_options),
+            Ordering::Greater
+        );
+
+        // Test that Default uses alphabetical ordering
+        let default_options = SortingOptions {
+            sort_by: Some(SortKey::Name),
+            reverse_sort: false,
+            files_before_directories: true,
+            directory_file_order: DirectoryFileOrder::Default,
+        };
+
+        assert_eq!(
+            compare_siblings_with_options(&dir_node, &file_node, &default_options),
+            Ordering::Less // "adir" < "zfile.txt"
+        );
+        assert_eq!(
+            compare_siblings_with_options(&file_node, &dir_node, &default_options),
+            Ordering::Greater // "zfile.txt" > "adir"
+        );
+    }
+
+    #[test]
+    fn test_directory_ordering_with_reverse_sort() {
+        use crate::core::tree::builder::TempNode;
+        use crate::core::tree::node::{NodeInfo, NodeType};
+        use std::path::PathBuf;
+
+        let file_node = TempNode {
+            node_info: NodeInfo {
+                name: "file.txt".to_string(),
+                path: PathBuf::from("file.txt"),
+                node_type: NodeType::File,
+                depth: 1,
+                size: Some(100),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let dir_node = TempNode {
+            node_info: NodeInfo {
+                name: "dir".to_string(),
+                path: PathBuf::from("dir"),
+                node_type: NodeType::Directory,
+                depth: 1,
+                size: None,
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        // Test DirsFirst with reverse sort
+        let dirs_first_reverse_options = SortingOptions {
+            sort_by: Some(SortKey::Name),
+            reverse_sort: true,
+            files_before_directories: true,
+            directory_file_order: DirectoryFileOrder::DirsFirst,
+        };
+
+        // With reverse sort, directory/file ordering is NOT reversed, only the sort key comparison
+        assert_eq!(
+            compare_siblings_with_options(&dir_node, &file_node, &dirs_first_reverse_options),
+            Ordering::Less
+        );
+        assert_eq!(
+            compare_siblings_with_options(&file_node, &dir_node, &dirs_first_reverse_options),
+            Ordering::Greater
+        );
+    }
+
+    #[test]
+    fn test_directory_ordering_skipped_for_none_sort() {
+        use crate::core::tree::builder::TempNode;
+        use crate::core::tree::node::{NodeInfo, NodeType};
+        use std::path::PathBuf;
+
+        let file_node = TempNode {
+            node_info: NodeInfo {
+                name: "file.txt".to_string(),
+                path: PathBuf::from("file.txt"),
+                node_type: NodeType::File,
+                depth: 1,
+                size: Some(100),
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        let dir_node = TempNode {
+            node_info: NodeInfo {
+                name: "dir".to_string(),
+                path: PathBuf::from("dir"),
+                node_type: NodeType::Directory,
+                depth: 1,
+                size: None,
+                permissions: None,
+                mtime: None,
+                change_time: None,
+                create_time: None,
+                word_count: None,
+                line_count: None,
+                custom_function_output: None,
+            },
+            children: Vec::new(),
+        };
+
+        // When sort_by is None, directory ordering should be skipped
+        let none_sort_options = SortingOptions {
+            sort_by: None,
+            reverse_sort: false,
+            files_before_directories: true,
+            directory_file_order: DirectoryFileOrder::DirsFirst,
+        };
+
+        assert_eq!(
+            compare_siblings_with_options(&dir_node, &file_node, &none_sort_options),
+            Ordering::Equal
+        );
+        assert_eq!(
+            compare_siblings_with_options(&file_node, &dir_node, &none_sort_options),
+            Ordering::Equal
+        );
     }
 }

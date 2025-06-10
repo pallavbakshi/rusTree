@@ -134,3 +134,10 @@ pub mod common_test_utils {
             .into_owned()
     }
 }
+
+#[allow(dead_code)] // Used by CLI integration tests
+pub fn get_binary_path() -> String {
+    // Use the path to the built binary in target/debug/
+    let cargo_manifest_dir = env!("CARGO_MANIFEST_DIR");
+    format!("{}/target/debug/rustree", cargo_manifest_dir)
+}

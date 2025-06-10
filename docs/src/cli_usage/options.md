@@ -132,13 +132,13 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Description: Reverse the order of the sort.
   - Example: `rustree -t -r` (newest mtime first), `rustree --sort-by size -r` (smallest size first)
 
-- `--files-first`
-  - Description: When sorting by size, list all files and symlinks before directories. This is the default behavior for size sort.
-  - Example: `rustree --sort-by size --files-first` (explicitly stating default)
+- `--dirs-first`
+  - Description: List directories before files. More readable. This applies to all sorting modes and overrides the default mixing behavior. Conflicts with `--files-first`.
+  - Example: `rustree --dirs-first`, `rustree --sort-by size --dirs-first`
 
-- `--no-files-first`
-  - Description: When sorting by size, intermingle files, symlinks, and directories based purely on their size.
-  - Example: `rustree --sort-by size --no-files-first`
+- `--files-first`
+  - Description: List files before directories. More readable. This applies to all sorting modes and overrides the default mixing behavior. Conflicts with `--dirs-first`.
+  - Example: `rustree --files-first`, `rustree --sort-by mtime --files-first`
 
 ## Output Formatting
 

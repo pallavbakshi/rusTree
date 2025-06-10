@@ -36,4 +36,14 @@ pub struct SortOrderArgs {
     /// Incompatible with -U/--unsorted.
     #[arg(short = 'r', long)]
     pub reverse_sort: bool,
+
+    /// List directories before files. More readable.
+    /// Conflicts with --files-first.
+    #[arg(long = "dirs-first", conflicts_with = "files_first")]
+    pub dirs_first: bool,
+
+    /// List files before directories. More readable.
+    /// Conflicts with --dirs-first.
+    #[arg(long = "files-first", conflicts_with = "dirs_first")]
+    pub files_first: bool,
 }
