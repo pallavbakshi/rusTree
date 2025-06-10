@@ -413,6 +413,83 @@ rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
 </code></pre>
 </li>
 </ol>
+<h2 id="apply-function-examples"><a class="header" href="#apply-function-examples">Apply Function Examples</a></h2>
+<ol start="35">
+<li>
+<p><strong>Get directory statistics showing file count, directory count, and total size:</strong></p>
+<pre><code class="language-bash">rustree --apply-function dir-stats --show-size-bytes ./my_project
+</code></pre>
+<p>This shows statistics like <code>[F: "5f,2d,1024B"]</code> for each directory, indicating 5 files, 2 subdirectories, and 1024 bytes total.</p>
+</li>
+<li>
+<p><strong>Count files in each directory:</strong></p>
+<pre><code class="language-bash">rustree --apply-function count-files ./project
+</code></pre>
+<p>Shows <code>[F: "3"]</code> for directories containing 3 files.</p>
+</li>
+<li>
+<p><strong>Calculate total size of files in each directory:</strong></p>
+<pre><code class="language-bash">rustree --apply-function size-total --show-size-bytes ./downloads
+</code></pre>
+<p>Note: <code>--show-size-bytes</code> must be enabled for size-total to work properly.</p>
+</li>
+<li>
+<p><strong>Apply function only to specific directories using patterns:</strong></p>
+<pre><code class="language-bash"># Only apply dir-stats to src directories
+rustree --apply-function dir-stats --apply-include "src*" ./workspace
+
+# Apply count-files to all directories except target and build
+rustree --apply-function count-files --apply-exclude "target/*" --apply-exclude "build/*" ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Use pattern files for complex filtering:</strong></p>
+<p>Create a file <code>include-patterns.txt</code>:</p>
+<pre><code># Include source directories
+src/*
+lib/*
+# Include documentation
+docs/*
+</code></pre>
+<p>Create a file <code>exclude-patterns.txt</code>:</p>
+<pre><code># Exclude build artifacts
+*target*
+*build*
+# Exclude temporary files
+*.tmp
+</code></pre>
+<p>Then use:</p>
+<pre><code class="language-bash">rustree --apply-function dir-stats \
+        --apply-include-from ./include-patterns.txt \
+        --apply-exclude-from ./exclude-patterns.txt ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Combine cat function with selective application:</strong></p>
+<pre><code class="language-bash"># Show contents of only configuration files
+rustree --apply-function cat --apply-include "*.toml" --apply-include "*.yml" ./config
+
+# Show contents excluding sensitive files
+rustree --apply-function cat --apply-exclude "*secret*" --apply-exclude "*key*" ./scripts
+</code></pre>
+</li>
+<li>
+<p><strong>Directory analysis for large projects:</strong></p>
+<pre><code class="language-bash"># Get overview of all subdirectories with statistics
+rustree -d --apply-function dir-stats --show-size-bytes --sort-by custom -r ./large_project
+</code></pre>
+<p>This shows only directories (<code>-d</code>), applies statistics function, enables size collection, and sorts by the statistics output in reverse order (largest/most complex directories first).</p>
+</li>
+<li>
+<p><strong>Analyze code organization:</strong></p>
+<pre><code class="language-bash"># Count Rust files in each module directory
+rustree --apply-function count-files --apply-include "*.rs" -d ./src
+
+# Get comprehensive statistics for source directories only
+rustree --apply-function dir-stats --apply-include "src*" --apply-include "lib*" ./workspace
+</code></pre>
+</li>
+</ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
 
                     </main>

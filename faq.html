@@ -211,6 +211,44 @@ A:</p>
 <li>If you use <code>-c</code> alone, it sorts by change time (ctime), but <code>-D</code> (or <code>--show-last-modified</code>) is needed to <em>display</em> a time.</li>
 <li>If you use both <code>-D</code> (or <code>--show-last-modified</code>) and <code>-c</code> (or <code>-D</code> and <code>--sort-by ctime</code>), then <code>-D</code> (or <code>--show-last-modified</code>) will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.</li>
 </ul>
+<p><strong>Q: What are apply functions and how do they work?</strong>
+A: Apply functions let you analyze and process file or directory contents. They come in two types:</p>
+<ul>
+<li><strong>File functions</strong> work on file content:
+<ul>
+<li><code>count-pluses</code>: Counts '+' characters in each file</li>
+<li><code>cat</code>: Displays file contents after the tree structure</li>
+</ul>
+</li>
+<li><strong>Directory functions</strong> work on directory children:
+<ul>
+<li><code>count-files</code>: Counts files in each directory</li>
+<li><code>count-dirs</code>: Counts subdirectories in each directory</li>
+<li><code>size-total</code>: Calculates total size of files in each directory</li>
+<li><code>dir-stats</code>: Shows combined statistics (files, dirs, total size)</li>
+</ul>
+</li>
+</ul>
+<p>Use <code>--apply-function &lt;FUNCTION_NAME&gt;</code> to enable a function. The results appear in metadata like <code>[F: "5"]</code> or after the tree (for <code>cat</code>).</p>
+<p><strong>Q: Can I apply functions only to specific files or directories?</strong>
+A: Yes! Use apply-function filtering:</p>
+<ul>
+<li><code>--apply-include &lt;PATTERN&gt;</code>: Apply function only to matching files/directories</li>
+<li><code>--apply-exclude &lt;PATTERN&gt;</code>: Don't apply function to matching files/directories</li>
+<li><code>--apply-include-from &lt;FILE&gt;</code>: Read include patterns from a file</li>
+<li><code>--apply-exclude-from &lt;FILE&gt;</code>: Read exclude patterns from a file</li>
+</ul>
+<p>These use the same wildcard syntax as <code>--filter-include</code> and can be combined. Pattern files support comments (lines starting with <code>#</code>) and ignore empty lines.</p>
+<p><strong>Q: Why do I get <code>[F: "0"]</code> for all directories when using <code>size-total</code>?</strong>
+A: The <code>size-total</code> function requires file size information to work. Make sure to use <code>--show-size-bytes</code> (or <code>-s</code>) along with <code>--apply-function size-total</code>. Without this flag, file sizes aren't collected and the total will always be 0.</p>
+<p><strong>Q: How do apply functions work with sorting?</strong>
+A: You can sort by apply function results using <code>--sort-by custom</code>. This sorts by the function output:</p>
+<ul>
+<li>Numeric results (like counts) are sorted numerically</li>
+<li>String results are sorted lexicographically</li>
+<li>Use <code>--reverse-sort</code> to reverse the order</li>
+</ul>
+<p>For example: <code>rustree --apply-function dir-stats --sort-by custom -r</code> sorts directories by complexity (most files/subdirs first).</p>
 
                     </main>
 

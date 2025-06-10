@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["compile_glob_patterns","entry_matches_glob_patterns"],"struct":["CompiledGlobPattern"]};
+window.SIDEBAR_ITEMS = {"fn":["compile_glob_patterns","entry_matches_glob_patterns","entry_matches_path_with_patterns"],"struct":["CompiledGlobPattern"]};

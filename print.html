@@ -311,8 +311,17 @@ rustree --sort-by size --reverse-sort
 <pre><code class="language-bash">rustree [OPTIONS] [PATH]
 </code></pre>
 <ul>
-<li><code>[OPTIONS]</code>: Various flags to control behavior (e.g., depth, sorting, output format).</li>
+<li><code>[OPTIONS]</code>: Various flags to control behavior (e.g., depth, sorting, output format, apply functions).</li>
 <li><code>[PATH]</code>: Optional path to the directory to scan. Defaults to the current directory (<code>.</code>).</li>
+</ul>
+<h2 id="key-features"><a class="header" href="#key-features">Key Features</a></h2>
+<ul>
+<li><strong>Tree visualization</strong> with customizable depth and formatting</li>
+<li><strong>Metadata display</strong> including sizes, timestamps, line/word counts</li>
+<li><strong>Apply functions</strong> to analyze file contents and directory statistics</li>
+<li><strong>Flexible filtering</strong> with patterns, gitignore support, and function-specific filtering</li>
+<li><strong>Advanced sorting</strong> by various criteria including custom function output</li>
+<li><strong>Multiple output formats</strong> (text, markdown) for different use cases</li>
 </ul>
 <h2 id="sub-sections"><a class="header" href="#sub-sections">Sub-sections:</a></h2>
 <ul>
@@ -464,14 +473,54 @@ rustree --sort-by size --reverse-sort
 <li>
 <p><code>--apply-function &lt;FUNCTION_NAME&gt;</code></p>
 <ul>
-<li>Description: Apply a built-in function to file contents and display the result. When using the <code>cat</code> function, the tree structure is displayed first, followed by the contents of each file.</li>
+<li>Description: Apply a built-in function to file or directory contents and display the result. When using the <code>cat</code> function, the tree structure is displayed first, followed by the contents of each file.</li>
 <li>Available functions:
+<ul>
+<li><strong>File functions</strong> (work with file content):
 <ul>
 <li><code>count-pluses</code>: Counts '+' characters in each file and displays the count in metadata</li>
 <li><code>cat</code>: Displays the full content of each file after the tree structure</li>
 </ul>
 </li>
-<li>Example: <code>rustree --apply-function cat</code>, <code>rustree --apply-function count-pluses</code></li>
+<li><strong>Directory functions</strong> (work with directory children):
+<ul>
+<li><code>count-files</code>: Counts the number of files in each directory</li>
+<li><code>count-dirs</code>: Counts the number of subdirectories in each directory</li>
+<li><code>size-total</code>: Calculates the total size of all files in each directory</li>
+<li><code>dir-stats</code>: Shows combined statistics (files, directories, total size) for each directory</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Example: <code>rustree --apply-function cat</code>, <code>rustree --apply-function count-pluses</code>, <code>rustree --apply-function dir-stats</code></li>
+</ul>
+</li>
+<li>
+<p><code>--apply-include &lt;PATTERN&gt;</code></p>
+<ul>
+<li>Description: Apply the function only to files/directories matching the specified pattern. Can be used multiple times. Uses the same wildcard syntax as <code>--filter-include</code>.</li>
+<li>Example: <code>rustree --apply-function count-pluses --apply-include "*.rs"</code></li>
+</ul>
+</li>
+<li>
+<p><code>--apply-exclude &lt;PATTERN&gt;</code></p>
+<ul>
+<li>Description: Do not apply the function to files/directories matching the specified pattern. Can be used multiple times. Uses the same wildcard syntax as <code>--filter-exclude</code>.</li>
+<li>Example: <code>rustree --apply-function dir-stats --apply-exclude "target/*"</code></li>
+</ul>
+</li>
+<li>
+<p><code>--apply-include-from &lt;FILE_PATH&gt;</code></p>
+<ul>
+<li>Description: Read include patterns for apply-function from the specified file. One pattern per line. Lines starting with <code>#</code> and empty lines are ignored.</li>
+<li>Example: <code>rustree --apply-function cat --apply-include-from ./include-patterns.txt</code></li>
+</ul>
+</li>
+<li>
+<p><code>--apply-exclude-from &lt;FILE_PATH&gt;</code></p>
+<ul>
+<li>Description: Read exclude patterns for apply-function from the specified file. One pattern per line. Lines starting with <code>#</code> and empty lines are ignored.</li>
+<li>Example: <code>rustree --apply-function dir-stats --apply-exclude-from ./exclude-patterns.txt</code></li>
 </ul>
 </li>
 </ul>
@@ -834,6 +883,83 @@ rustree --dirs-first -s -D -P "*.rs|*/" ./src
 
 # Files first, showing line counts for text files
 rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
+</code></pre>
+</li>
+</ol>
+<h2 id="apply-function-examples"><a class="header" href="#apply-function-examples">Apply Function Examples</a></h2>
+<ol start="35">
+<li>
+<p><strong>Get directory statistics showing file count, directory count, and total size:</strong></p>
+<pre><code class="language-bash">rustree --apply-function dir-stats --show-size-bytes ./my_project
+</code></pre>
+<p>This shows statistics like <code>[F: "5f,2d,1024B"]</code> for each directory, indicating 5 files, 2 subdirectories, and 1024 bytes total.</p>
+</li>
+<li>
+<p><strong>Count files in each directory:</strong></p>
+<pre><code class="language-bash">rustree --apply-function count-files ./project
+</code></pre>
+<p>Shows <code>[F: "3"]</code> for directories containing 3 files.</p>
+</li>
+<li>
+<p><strong>Calculate total size of files in each directory:</strong></p>
+<pre><code class="language-bash">rustree --apply-function size-total --show-size-bytes ./downloads
+</code></pre>
+<p>Note: <code>--show-size-bytes</code> must be enabled for size-total to work properly.</p>
+</li>
+<li>
+<p><strong>Apply function only to specific directories using patterns:</strong></p>
+<pre><code class="language-bash"># Only apply dir-stats to src directories
+rustree --apply-function dir-stats --apply-include "src*" ./workspace
+
+# Apply count-files to all directories except target and build
+rustree --apply-function count-files --apply-exclude "target/*" --apply-exclude "build/*" ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Use pattern files for complex filtering:</strong></p>
+<p>Create a file <code>include-patterns.txt</code>:</p>
+<pre><code># Include source directories
+src/*
+lib/*
+# Include documentation
+docs/*
+</code></pre>
+<p>Create a file <code>exclude-patterns.txt</code>:</p>
+<pre><code># Exclude build artifacts
+*target*
+*build*
+# Exclude temporary files
+*.tmp
+</code></pre>
+<p>Then use:</p>
+<pre><code class="language-bash">rustree --apply-function dir-stats \
+        --apply-include-from ./include-patterns.txt \
+        --apply-exclude-from ./exclude-patterns.txt ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Combine cat function with selective application:</strong></p>
+<pre><code class="language-bash"># Show contents of only configuration files
+rustree --apply-function cat --apply-include "*.toml" --apply-include "*.yml" ./config
+
+# Show contents excluding sensitive files
+rustree --apply-function cat --apply-exclude "*secret*" --apply-exclude "*key*" ./scripts
+</code></pre>
+</li>
+<li>
+<p><strong>Directory analysis for large projects:</strong></p>
+<pre><code class="language-bash"># Get overview of all subdirectories with statistics
+rustree -d --apply-function dir-stats --show-size-bytes --sort-by custom -r ./large_project
+</code></pre>
+<p>This shows only directories (<code>-d</code>), applies statistics function, enables size collection, and sorts by the statistics output in reverse order (largest/most complex directories first).</p>
+</li>
+<li>
+<p><strong>Analyze code organization:</strong></p>
+<pre><code class="language-bash"># Count Rust files in each module directory
+rustree --apply-function count-files --apply-include "*.rs" -d ./src
+
+# Get comprehensive statistics for source directories only
+rustree --apply-function dir-stats --apply-include "src*" --apply-include "lib*" ./workspace
 </code></pre>
 </li>
 </ol>
@@ -1218,6 +1344,176 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 
     Ok(())
 }</code></pre></pre>
+<h3 id="example-6-directory-analysis-with-built-in-functions"><a class="header" href="#example-6-directory-analysis-with-built-in-functions">Example 6: Directory Analysis with Built-in Functions</a></h3>
+<p>This example demonstrates using directory functions to analyze project structure.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, SortKey, RustreeError,
+    InputSourceOptions, MetadataOptions, SortingOptions, ListingOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./my_project";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Project Analysis".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            list_directories_only: true, // Only show directories
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::DirStats), // Get comprehensive directory stats
+            show_size_bytes: true, // Required for size calculations
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Custom), // Sort by directory stats (complexity)
+            reverse_sort: true, // Most complex directories first
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    println!("{}", output);
+    
+    // Output will show directories with stats like [F: "15f,3d,52KB"]
+    // meaning 15 files, 3 subdirectories, 52KB total size
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-7-selective-function-application-with-filtering"><a class="header" href="#example-7-selective-function-application-with-filtering">Example 7: Selective Function Application with Filtering</a></h3>
+<p>This example shows how to apply functions only to specific files or directories using patterns.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, FilteringOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./workspace";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Workspace Analysis".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::CountFiles), // Count files in directories
+            show_size_bytes: true,
+            ..Default::default()
+        },
+        filtering: FilteringOptions {
+            // Apply function only to source directories, exclude build artifacts
+            apply_include_patterns: Some(vec!["src*".to_string(), "lib*".to_string()]),
+            apply_exclude_patterns: Some(vec!["*target*".to_string(), "*build*".to_string()]),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    println!("{}", output);
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-8-file-content-analysis-with-filtering"><a class="header" href="#example-8-file-content-analysis-with-filtering">Example 8: File Content Analysis with Filtering</a></h3>
+<p>This example demonstrates using the cat function with selective application for code review.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, FilteringOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Code Review".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::Cat), // Show file contents
+            calculate_line_count: true,
+            ..Default::default()
+        },
+        filtering: FilteringOptions {
+            // Only show Rust files and exclude test files
+            match_patterns: Some(vec!["*.rs".to_string()]),
+            apply_exclude_patterns: Some(vec!["*test*".to_string(), "*tests*".to_string()]),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    println!("{}", output);
+    
+    // This will show:
+    // 1. Tree structure of all .rs files
+    // 2. File contents for non-test .rs files only
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-9-working-with-nodeinfo-directly"><a class="header" href="#example-9-working-with-nodeinfo-directly">Example 9: Working with NodeInfo Directly</a></h3>
+<p>This example shows how to work with the raw <code>NodeInfo</code> data for custom processing.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, RustreeLibConfig, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, NodeType,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./project";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::CountFiles),
+            show_size_bytes: true,
+            calculate_line_count: true,
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+
+    // Custom analysis of the nodes
+    for node in &amp;nodes {
+        match node.node_type {
+            NodeType::Directory =&gt; {
+                if let Some(Ok(file_count)) = &amp;node.custom_function_output {
+                    println!("Directory '{}' contains {} files", node.name, file_count);
+                }
+            }
+            NodeType::File =&gt; {
+                if let Some(lines) = node.line_count {
+                    println!("File '{}' has {} lines", node.name, lines);
+                }
+                if let Some(size) = node.size {
+                    println!("File '{}' is {} bytes", node.name, size);
+                }
+            }
+            _ =&gt; {}
+        }
+    }
+
+    Ok(())
+}</code></pre></pre>
 <p>These examples should give you a good starting point for integrating <code>rustree</code> into your applications. Remember to handle the <code>Result</code> types appropriately in production code.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="architecture"><a class="header" href="#architecture">Architecture</a></h1>
 <p>This section provides an overview of RusTree's internal architecture.</p>
@@ -1596,6 +1892,44 @@ A:</p>
 <li>If you use <code>-c</code> alone, it sorts by change time (ctime), but <code>-D</code> (or <code>--show-last-modified</code>) is needed to <em>display</em> a time.</li>
 <li>If you use both <code>-D</code> (or <code>--show-last-modified</code>) and <code>-c</code> (or <code>-D</code> and <code>--sort-by ctime</code>), then <code>-D</code> (or <code>--show-last-modified</code>) will display the last status change time (ctime) instead of the modification time. This allows you to see the ctime for entries when sorting by ctime.</li>
 </ul>
+<p><strong>Q: What are apply functions and how do they work?</strong>
+A: Apply functions let you analyze and process file or directory contents. They come in two types:</p>
+<ul>
+<li><strong>File functions</strong> work on file content:
+<ul>
+<li><code>count-pluses</code>: Counts '+' characters in each file</li>
+<li><code>cat</code>: Displays file contents after the tree structure</li>
+</ul>
+</li>
+<li><strong>Directory functions</strong> work on directory children:
+<ul>
+<li><code>count-files</code>: Counts files in each directory</li>
+<li><code>count-dirs</code>: Counts subdirectories in each directory</li>
+<li><code>size-total</code>: Calculates total size of files in each directory</li>
+<li><code>dir-stats</code>: Shows combined statistics (files, dirs, total size)</li>
+</ul>
+</li>
+</ul>
+<p>Use <code>--apply-function &lt;FUNCTION_NAME&gt;</code> to enable a function. The results appear in metadata like <code>[F: "5"]</code> or after the tree (for <code>cat</code>).</p>
+<p><strong>Q: Can I apply functions only to specific files or directories?</strong>
+A: Yes! Use apply-function filtering:</p>
+<ul>
+<li><code>--apply-include &lt;PATTERN&gt;</code>: Apply function only to matching files/directories</li>
+<li><code>--apply-exclude &lt;PATTERN&gt;</code>: Don't apply function to matching files/directories</li>
+<li><code>--apply-include-from &lt;FILE&gt;</code>: Read include patterns from a file</li>
+<li><code>--apply-exclude-from &lt;FILE&gt;</code>: Read exclude patterns from a file</li>
+</ul>
+<p>These use the same wildcard syntax as <code>--filter-include</code> and can be combined. Pattern files support comments (lines starting with <code>#</code>) and ignore empty lines.</p>
+<p><strong>Q: Why do I get <code>[F: "0"]</code> for all directories when using <code>size-total</code>?</strong>
+A: The <code>size-total</code> function requires file size information to work. Make sure to use <code>--show-size-bytes</code> (or <code>-s</code>) along with <code>--apply-function size-total</code>. Without this flag, file sizes aren't collected and the total will always be 0.</p>
+<p><strong>Q: How do apply functions work with sorting?</strong>
+A: You can sort by apply function results using <code>--sort-by custom</code>. This sorts by the function output:</p>
+<ul>
+<li>Numeric results (like counts) are sorted numerically</li>
+<li>String results are sorted lexicographically</li>
+<li>Use <code>--reverse-sort</code> to reverse the order</li>
+</ul>
+<p>For example: <code>rustree --apply-function dir-stats --sort-by custom -r</code> sorts directories by complexity (most files/subdirs first).</p>
 
                     </main>
 
