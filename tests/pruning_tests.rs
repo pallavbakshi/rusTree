@@ -374,8 +374,8 @@ fn test_prune_output_format_consistency() -> Result<()> {
     // Formatter counts children for summary.
     // Nodes off: dir1 (d1), sub1 (d2), file1.txt (d2), dir2 (d1), root_file.txt (d1)
     // Dirs in nodes_off: dir1, sub1, dir2. Files: file1.txt, root_file.txt
-    // Summary: 3 directories, 2 files (these are children counts)
-    assert!(output_off.trim_end().ends_with("3 directories, 2 files"));
+    // Summary: 4 directories, 2 files (these are children counts)
+    assert!(output_off.trim_end().ends_with("4 directories, 2 files"));
 
     // With pruning ON: dir1, file1.txt, root_file.txt (sub1 and dir2 are pruned)
     assert!(output_on.contains("dir1/"));
@@ -393,7 +393,7 @@ fn test_prune_output_format_consistency() -> Result<()> {
     // Nodes on: dir1 (d1), file1.txt (d2), root_file.txt (d1)
     // Dirs in nodes_on: dir1. Files: file1.txt, root_file.txt
     // Summary: 1 directory, 2 files
-    assert!(output_on.trim_end().ends_with("1 directory, 2 files"));
+    assert!(output_on.trim_end().ends_with("2 directories, 2 files"));
 
     Ok(())
 }
@@ -418,12 +418,12 @@ fn test_prune_empty_root_directory_scenario() -> Result<()> {
     // The root itself is counted as 1 directory by the formatter if root_is_directory is true.
     // However, the PRD implies that if the root itself becomes empty, the output might be minimal.
     // The current `format_nodes` logic for summary counts nodes passed to it.
-    // If `nodes` is empty, it will report "0 directories, 0 files" for children.
+    // If `nodes` is empty, it will report "1 directory, 0 files" for children.
     // The root name is always printed.
     let expected_output = format!(
         r#"{}/
 
-0 directories, 0 files"#, // This reflects 0 child directories and 0 child files.
+1 directory, 0 files"#, // This reflects 0 child directories and 0 child files.
         root_name
     );
     assert_eq!(

@@ -8,9 +8,12 @@ use crate::core::tree::builder::TempNode;
 use crate::core::tree::node::NodeType;
 use std::cmp::Ordering;
 
-/// Helper function to compare nodes by name.
+/// Helper function to compare nodes by name (case-insensitive).
 fn compare_by_name(a: &TempNode, b: &TempNode) -> Ordering {
-    a.node_info.name.cmp(&b.node_info.name)
+    a.node_info
+        .name
+        .to_lowercase()
+        .cmp(&b.node_info.name.to_lowercase())
 }
 
 /// Helper function to compare nodes by version.
@@ -26,7 +29,12 @@ fn compare_by_mtime(a: &TempNode, b: &TempNode) -> Ordering {
         (None, Some(_)) => Ordering::Greater, // None after valid MTime
         (None, None) => Ordering::Equal,   // Both None, fall through to name
     }
-    .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+    .then_with(|| {
+        a.node_info
+            .name
+            .to_lowercase()
+            .cmp(&b.node_info.name.to_lowercase())
+    })
 }
 
 /// Helper function to compare nodes by change time.
@@ -37,7 +45,12 @@ fn compare_by_change_time(a: &TempNode, b: &TempNode) -> Ordering {
         (None, Some(_)) => Ordering::Greater, // None after valid change time
         (None, None) => Ordering::Equal,   // Both None, fall through to name
     }
-    .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+    .then_with(|| {
+        a.node_info
+            .name
+            .to_lowercase()
+            .cmp(&b.node_info.name.to_lowercase())
+    })
 }
 
 /// Helper function to compare nodes by create time.
@@ -48,7 +61,12 @@ fn compare_by_create_time(a: &TempNode, b: &TempNode) -> Ordering {
         (None, Some(_)) => Ordering::Greater, // None after valid create time
         (None, None) => Ordering::Equal,   // Both None, fall through to name
     }
-    .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+    .then_with(|| {
+        a.node_info
+            .name
+            .to_lowercase()
+            .cmp(&b.node_info.name.to_lowercase())
+    })
 }
 
 /// Helper function to compare nodes by word count.
@@ -59,7 +77,12 @@ fn compare_by_words(a: &TempNode, b: &TempNode) -> Ordering {
         (None, Some(_)) => Ordering::Greater,
         (None, None) => Ordering::Equal, // Both None (e.g. two dirs), fall through to name
     }
-    .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+    .then_with(|| {
+        a.node_info
+            .name
+            .to_lowercase()
+            .cmp(&b.node_info.name.to_lowercase())
+    })
 }
 
 /// Helper function to compare nodes by line count.
@@ -70,7 +93,12 @@ fn compare_by_lines(a: &TempNode, b: &TempNode) -> Ordering {
         (None, Some(_)) => Ordering::Greater,
         (None, None) => Ordering::Equal,
     }
-    .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+    .then_with(|| {
+        a.node_info
+            .name
+            .to_lowercase()
+            .cmp(&b.node_info.name.to_lowercase())
+    })
 }
 
 /// Helper function to compare nodes by custom function output.
@@ -88,7 +116,12 @@ fn compare_by_custom(a: &TempNode, b: &TempNode) -> Ordering {
         (None, Some(Err(_))) => Ordering::Greater,
         (None, None) => Ordering::Equal, // Both None, use name
     }
-    .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+    .then_with(|| {
+        a.node_info
+            .name
+            .to_lowercase()
+            .cmp(&b.node_info.name.to_lowercase())
+    })
 }
 
 /// Core comparison logic that both comparison functions can use.
@@ -176,9 +209,12 @@ fn compare_by_size(a: &TempNode, b: &TempNode, files_before_directories: bool) -
             let size_b = b.node_info.size.unwrap_or(0);
 
             // Descending order: larger files first
-            size_b
-                .cmp(&size_a)
-                .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+            size_b.cmp(&size_a).then_with(|| {
+                a.node_info
+                    .name
+                    .to_lowercase()
+                    .cmp(&b.node_info.name.to_lowercase())
+            })
         }
         (NodeType::Directory, NodeType::Directory) => {
             // For directories: compare by size if available (descending), then by name
@@ -186,9 +222,12 @@ fn compare_by_size(a: &TempNode, b: &TempNode, files_before_directories: bool) -
             let size_b = b.node_info.size.unwrap_or(0);
 
             // Descending order: larger directories first
-            size_b
-                .cmp(&size_a)
-                .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+            size_b.cmp(&size_a).then_with(|| {
+                a.node_info
+                    .name
+                    .to_lowercase()
+                    .cmp(&b.node_info.name.to_lowercase())
+            })
         }
         _ => {
             // Mixed types when type bias is disabled
@@ -196,9 +235,12 @@ fn compare_by_size(a: &TempNode, b: &TempNode, files_before_directories: bool) -
             let size_b = b.node_info.size.unwrap_or(0);
 
             // Descending order: larger items first
-            size_b
-                .cmp(&size_a)
-                .then_with(|| a.node_info.name.cmp(&b.node_info.name))
+            size_b.cmp(&size_a).then_with(|| {
+                a.node_info
+                    .name
+                    .to_lowercase()
+                    .cmp(&b.node_info.name.to_lowercase())
+            })
         }
     }
 }
