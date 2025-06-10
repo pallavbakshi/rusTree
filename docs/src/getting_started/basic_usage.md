@@ -68,6 +68,22 @@ Here are a few common options to get you started:
   rustree --sort-by size --reverse-sort
   ```
 
+- **Display file contents after tree structure:**
+
+  ```bash
+  rustree --apply-function cat
+  ```
+
+  This shows the directory tree first, then displays the content of each file with clear headers.
+
+- **Count specific characters in files:**
+
+  ```bash
+  rustree --apply-function count-pluses
+  ```
+
+  This counts '+' characters in each file and displays the count in metadata.
+
 ### Getting Help
 
 For a full list of options and commands, use the help flag:

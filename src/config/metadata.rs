@@ -14,7 +14,8 @@ pub enum ApplyFnError {
 pub enum BuiltInFunction {
     /// Counts the occurrences of the '+' character in the content.
     CountPluses,
-    // Add other built-in functions here
+    /// Displays the content of each file.
+    Cat,
 }
 
 /// Configuration for metadata collection and display.

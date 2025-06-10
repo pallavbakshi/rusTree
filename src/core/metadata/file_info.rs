@@ -105,22 +105,27 @@ pub fn format_node_metadata(
         }
 
         if config.metadata.apply_function.is_some() {
-            match &node.custom_function_output {
-                Some(Ok(val)) => match style {
-                    MetadataStyle::Text => metadata_parts.push(format!("[F: \"{}\"]", val)),
-                    MetadataStyle::Markdown | MetadataStyle::Plain => {
-                        metadata_parts.push(format!("F:{}", val))
-                    }
-                },
-                Some(Err(_)) => match style {
-                    MetadataStyle::Text => metadata_parts.push("[F: error]".to_string()),
-                    MetadataStyle::Markdown | MetadataStyle::Plain => {
-                        metadata_parts.push("F:error".to_string())
-                    }
-                },
-                None => {
-                    if style == MetadataStyle::Text {
-                        metadata_parts.push("[F: N/A]".to_string());
+            // Don't display cat content in metadata since it's shown separately
+            if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
+                // Skip displaying cat content in metadata
+            } else {
+                match &node.custom_function_output {
+                    Some(Ok(val)) => match style {
+                        MetadataStyle::Text => metadata_parts.push(format!("[F: \"{}\"]", val)),
+                        MetadataStyle::Markdown | MetadataStyle::Plain => {
+                            metadata_parts.push(format!("F:{}", val))
+                        }
+                    },
+                    Some(Err(_)) => match style {
+                        MetadataStyle::Text => metadata_parts.push("[F: error]".to_string()),
+                        MetadataStyle::Markdown | MetadataStyle::Plain => {
+                            metadata_parts.push("F:error".to_string())
+                        }
+                    },
+                    None => {
+                        if style == MetadataStyle::Text {
+                            metadata_parts.push("[F: N/A]".to_string());
+                        }
                     }
                 }
             }
@@ -257,6 +262,9 @@ pub fn apply_builtin_function(
             let count = content.chars().filter(|&c| c == '+').count();
             Ok(count.to_string())
         }
+        BuiltInFunction::Cat => {
+            Ok(content.to_string())
+        }
     }
 }
 
@@ -388,5 +396,75 @@ mod tests {
         let result = format_node_metadata(&node, &config, MetadataStyle::Text);
 
         assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_apply_builtin_function_cat() {
+        let test_content = "Hello, World!\nThis is a test file.";
+        let result = apply_builtin_function(test_content, &BuiltInFunction::Cat);
+        
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), test_content);
+    }
+
+    #[test]
+    fn test_apply_builtin_function_cat_empty_content() {
+        let test_content = "";
+        let result = apply_builtin_function(test_content, &BuiltInFunction::Cat);
+        
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "");
+    }
+
+    #[test]
+    fn test_apply_builtin_function_cat_multiline() {
+        let test_content = "Line 1\nLine 2\nLine 3\n";
+        let result = apply_builtin_function(test_content, &BuiltInFunction::Cat);
+        
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), test_content);
+    }
+
+    #[test]
+    fn test_format_node_metadata_with_cat_function() {
+        let mut node = create_test_node();
+        node.custom_function_output = Some(Ok("File content here".to_string()));
+        
+        let config = RustreeLibConfig {
+            metadata: MetadataOptions {
+                apply_function: Some(BuiltInFunction::Cat),
+                show_size_bytes: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        
+        // Should show size but NOT show cat content in metadata (it's displayed separately)
+        assert!(result.contains("[   1024B]"));
+        assert!(!result.contains("File content here"));
+        assert!(!result.contains("[F:"));
+    }
+
+    #[test]
+    fn test_format_node_metadata_with_count_pluses_function() {
+        let mut node = create_test_node();
+        node.custom_function_output = Some(Ok("5".to_string()));
+        
+        let config = RustreeLibConfig {
+            metadata: MetadataOptions {
+                apply_function: Some(BuiltInFunction::CountPluses),
+                show_size_bytes: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        
+        // Should show both size and function result for non-Cat functions
+        assert!(result.contains("[   1024B]"));
+        assert!(result.contains("[F: \"5\"]"));
     }
 }

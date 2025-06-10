@@ -91,9 +91,11 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Example: `rustree --calculate-words`
 
 - `--apply-function <FUNCTION_NAME>`
-  - Description: Apply a built-in function to file contents and display the result.
-  - Available functions: `CountPluses` (example function, counts '+' characters). More can be added.
-  - Example: `rustree --apply-function CountPluses`
+  - Description: Apply a built-in function to file contents and display the result. When using the `cat` function, the tree structure is displayed first, followed by the contents of each file.
+  - Available functions: 
+    - `count-pluses`: Counts '+' characters in each file and displays the count in metadata
+    - `cat`: Displays the full content of each file after the tree structure
+  - Example: `rustree --apply-function cat`, `rustree --apply-function count-pluses`
 
 ## Sorting
 

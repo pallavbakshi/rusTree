@@ -133,4 +133,96 @@ fn main() -> Result<(), RustreeError> {
 }
 ```
 
+### Example 4: Using the Cat Function to Display File Contents
+
+This example demonstrates using the `Cat` built-in function to display file contents after the tree structure.
+
+```rust
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, FilteringOptions,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./config"; // Directory with configuration files
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Configuration Files".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::Cat), // Display file contents
+            show_size_bytes: true, // Also show file sizes
+            ..Default::default()
+        },
+        filtering: FilteringOptions {
+            // Only show text-based config files
+            match_patterns: Some(vec!["*.toml".to_string(), "*.json".to_string(), "*.yaml".to_string()]),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+    
+    // format_nodes will automatically display the tree first, then file contents
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
+    println!("{}", output);
+    
+    // The output will show:
+    // 1. Directory tree structure with file sizes
+    // 2. "--- File Contents ---" section
+    // 3. Each file's content with clear headers
+
+    Ok(())
+}
+```
+
+### Example 5: Combining Apply Functions with Custom Sorting
+
+This example shows how to use built-in functions and sort by their results.
+
+```rust
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, SortKey, RustreeError,
+    InputSourceOptions, MetadataOptions, SortingOptions,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./text_files";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Text Analysis".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::CountPluses), // Count '+' characters
+            calculate_line_count: true,
+            calculate_word_count: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Custom), // Sort by the apply_function result
+            reverse_sort: true, // Files with most '+' characters first
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
+    println!("{}", output);
+
+    Ok(())
+}
+```
+
 These examples should give you a good starting point for integrating `rustree` into your applications. Remember to handle the `Result` types appropriately in production code.

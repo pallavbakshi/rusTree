@@ -31,7 +31,7 @@ This top-level module centralizes all configuration-related definitions for the 
 
 - **`metadata.rs`**:
   - Defines `MetadataOptions` struct for metadata collection and content analysis flags (e.g., `show_size_bytes`, `show_last_modified`, `report_change_time`, `report_creation_time`).
-  - Defines `BuiltInFunction` enum for functions applicable to file content.
+  - Defines `BuiltInFunction` enum for functions applicable to file content, including `CountPluses` (counts '+' characters) and `Cat` (returns full file content).
   - Defines `ApplyFnError` for errors during custom function application.
 
 - **`output_format.rs`** (formerly `output.rs`):
@@ -66,8 +66,8 @@ The `src/core/` directory houses the main operational logic of `rustree`.
 
 - **`metadata/`**: This sub-module handles metadata collection, calculation, and content analysis.
   - `file_info.rs`:
-    - Defines `format_node_metadata` for consistently formatting metadata strings for display (used by formatters).
-    - Contains `apply_builtin_to_file` and `apply_builtin_function` for applying `BuiltInFunction`s to file content, handling `ApplyFnError`.
+    - Defines `format_node_metadata` for consistently formatting metadata strings for display (used by formatters). For the `Cat` function, metadata display is suppressed since content is shown separately.
+    - Contains `apply_builtin_to_file` and `apply_builtin_function` for applying `BuiltInFunction`s to file content, handling `ApplyFnError`. The `Cat` function simply returns the full file content.
   - `size_calculator.rs`: Provides functions like `count_lines_from_string` and `count_words_from_string`.
   - `time_formatter.rs`: (Placeholder for advanced time formatting utilities).
   - `extended_attrs.rs`: (Placeholder for reading extended file attributes).
@@ -103,6 +103,6 @@ The `src/core/` directory houses the main operational logic of `rustree`.
     2. If `config.filtering.prune_empty_directories` is true, prunes empty directories from the results (using `core::tree::manipulator` and `core::tree::builder`).
     3. If `config.listing.list_directories_only` is true, filters the results to include only directories. This occurs *after* pruning.
     4. If sorting is requested, sorts the nodes (via `core::sorter::strategies::sort_nodes_with_options`). Errors during sorting or tree building for pruning now map to `RustreeError::TreeBuildError`.
-  - `format_nodes()`: Takes the processed nodes and applies the chosen formatter.
+  - `format_nodes()`: Takes the processed nodes and applies the chosen formatter. For the `Cat` function, it first generates the normal tree output, then appends a "--- File Contents ---" section with the content of each file.
 
 This modular structure aims to make the codebase maintainable and extensible.

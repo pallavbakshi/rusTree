@@ -129,6 +129,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
                 .as_ref()
                 .map(|f| match f {
                     CliBuiltInFunction::CountPluses => LibBuiltInFunction::CountPluses,
+                    CliBuiltInFunction::Cat => LibBuiltInFunction::Cat,
                 }),
         },
         misc: MiscOptions::default(),

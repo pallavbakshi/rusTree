@@ -220,5 +220,35 @@ pub fn format_nodes(
         LibOutputFormat::Text => Box::new(TextTreeFormatter),
         LibOutputFormat::Markdown => Box::new(MarkdownFormatter),
     };
-    formatter_instance.format(nodes, config) // Pass config to formatter
+    let tree_output = formatter_instance.format(nodes, config)?;
+    
+    // Check if cat function is applied - if so, append file contents after the tree
+    if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
+        let mut result = tree_output;
+        
+        // Only show file contents section if there are files with content
+        let file_nodes_with_content: Vec<_> = nodes
+            .iter()
+            .filter(|node| {
+                node.node_type == NodeType::File 
+                && node.custom_function_output.is_some() 
+                && matches!(node.custom_function_output, Some(Ok(_)))
+            })
+            .collect();
+            
+        if !file_nodes_with_content.is_empty() {
+            result.push_str("\n\n--- File Contents ---\n");
+            
+            for node in file_nodes_with_content {
+                if let Some(Ok(content)) = &node.custom_function_output {
+                    result.push_str(&format!("\n=== {} ===\n", node.path.display()));
+                    result.push_str(content);
+                    result.push('\n');
+                }
+            }
+        }
+        Ok(result)
+    } else {
+        Ok(tree_output)
+    }
 }

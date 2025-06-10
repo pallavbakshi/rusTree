@@ -7,5 +7,6 @@ pub mod stats;
 pub enum CliBuiltInFunction {
     /// Counts occurrences of the '+' character.
     CountPluses,
-    // Add other function names here
+    /// Displays the content of each file.
+    Cat,
 }

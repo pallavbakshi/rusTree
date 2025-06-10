@@ -72,15 +72,31 @@ Here are some practical examples of how to use `rustree` from the command line.
    rustree --sort-by none ./my_project
    ```
 
-10. **Apply the `CountPluses` function to files and sort by its custom output:**
+10. **Apply the `count-pluses` function to files and sort by its custom output:**
 
     ```bash
-    rustree --apply-function CountPluses --sort-by custom ./config_files
+    rustree --apply-function count-pluses --sort-by custom ./config_files
     ```
 
-    _(This assumes `CountPluses` is a meaningful function for your files, e.g., counting '+' characters)._
+    _(This counts '+' characters in each file and displays the count in metadata)._
 
-11. **Pipe `rustree` output to an LLM for summarization:**
+11. **Display file contents after the tree structure using the `cat` function:**
+
+    ```bash
+    rustree --apply-function cat ./small_project
+    ```
+
+    This will first display the directory tree, then show the full contents of each file in the project. Useful for getting a complete view of small projects or configuration directories.
+
+12. **Combine `cat` function with filtering to show contents of specific files:**
+
+    ```bash
+    rustree --apply-function cat --filter-include "*.md|*.txt" ./docs
+    ```
+
+    Shows the tree structure and then displays the contents of only Markdown and text files.
+
+13. **Pipe `rustree` output to an LLM for summarization:**
 
     ```bash
     rustree --depth 1 --show-size-bytes ./src --llm-ask "What are the main components in the src directory based on this tree?"
@@ -94,7 +110,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -L 1 -s ./src --llm-ask "Summarize these components" | ollama run mistral
     ```
 
-12. **List only Rust source files (`*.rs`):**
+14. **List only Rust source files (`*.rs`):**
 
     ```bash
     rustree --filter-include "*.rs" ./my_project
@@ -102,7 +118,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "*.rs" ./my_project
     ```
 
-13. **List only Markdown (`*.md`) or text (`*.txt`) files:**
+15. **List only Markdown (`*.md`) or text (`*.txt`) files:**
 
     ```bash
     rustree --filter-include "*.md|*.txt" ./notes
@@ -110,7 +126,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "*.md" -P "*.txt" ./notes
     ```
 
-14. **List only directories named `build` or `target`:**
+16. **List only directories named `build` or `target`:**
     (Note: `-P` or `--filter-include` matches files and directories. A trailing `/` makes it specific to directories.)
     ```bash
     rustree --filter-include "build/|target/" ./my_project
@@ -118,7 +134,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "build/|target/" ./my_project
     ```
 
-15. **List all Markdown files, including hidden ones (e.g., in `.github/`):**
+17. **List all Markdown files, including hidden ones (e.g., in `.github/`):**
 
     ```bash
     rustree --include-hidden --filter-include "*.md"
@@ -126,7 +142,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -a -P "*.md"
     ```
 
-16. **List files starting with `test_` followed by any single character and then `.py`:**
+18. **List files starting with `test_` followed by any single character and then `.py`:**
 
     ```bash
     rustree --filter-include "test_?.py" ./tests
@@ -134,7 +150,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "test_?.py" ./tests
     ```
 
-17. **List all files within any subdirectory named `docs`:**
+19. **List all files within any subdirectory named `docs`:**
 
     ```bash
     rustree --filter-include "docs/**" ./project_root
@@ -142,7 +158,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "docs/**" ./project_root
     ```
 
-18. **Ignore all `.log` files:**
+20. **Ignore all `.log` files:**
 
     ```bash
     rustree --filter-exclude "*.log" ./my_project
@@ -150,7 +166,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -I "*.log" ./my_project
     ```
 
-19. **Ignore the `target/` directory and all `*.tmp` files:**
+21. **Ignore the `target/` directory and all `*.tmp` files:**
 
     ```bash
     rustree --filter-exclude "target/" --filter-exclude "*.tmp" ./my_project
@@ -158,14 +174,14 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -I "target/" -I "*.tmp" ./my_project
     ```
 
-20. **Use `.gitignore` files to filter the output:**
+22. **Use `.gitignore` files to filter the output:**
 
     ```bash
     rustree --use-gitignore-rules ./my_git_repo
     # or using the deprecated alias: rustree --gitignore ./my_git_repo
     ```
 
-21. **Use a custom ignore file in addition to (or instead of) `.gitignore`:**
+23. **Use a custom ignore file in addition to (or instead of) `.gitignore`:**
 
     ```bash
     rustree --gitignore-file ./.my_custom_ignores ./my_project
@@ -177,7 +193,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --use-gitignore-rules --gitignore-file ./.my_custom_ignores ./my_project
     ```
 
-22. **List only `.TXT` files, case-insensitively (matching `file.txt`, `FILE.TXT`, etc.):**
+24. **List only `.TXT` files, case-insensitively (matching `file.txt`, `FILE.TXT`, etc.):**
 
     ```bash
     rustree --filter-include "*.TXT" --case-insensitive-filter ./my_project
@@ -185,7 +201,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "*.TXT" --case-insensitive-filter ./my_project
     ```
 
-23. **Ignore all files ending with `.bak`, case-insensitively, using `-I`:**
+25. **Ignore all files ending with `.bak`, case-insensitively, using `-I`:**
 
     ```bash
     rustree --filter-exclude "*.bak" --case-insensitive-filter ./my_project
@@ -193,7 +209,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -I "*.bak" --case-insensitive-filter ./my_project
     ```
 
-24. **Sort files by version (e.g., `file-1.0.0`, `file-1.2.0`, `file-2.0.0`):**
+26. **Sort files by version (e.g., `file-1.0.0`, `file-1.2.0`, `file-2.0.0`):**
 
     ```bash
     rustree -v ./my_scripts
@@ -201,7 +217,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --sort-by version ./my_scripts
     ```
 
-25. **Sort files by change time (ctime) and display change times:**
+27. **Sort files by change time (ctime) and display change times:**
 
     ```bash
     rustree -c -D ./my_project
@@ -210,13 +226,13 @@ Here are some practical examples of how to use `rustree` from the command line.
     ```
     This will sort by ctime (oldest first). The `-D` (or `--show-last-modified`) flag, when combined with `-c` (or `--sort-by ctime`), will display these ctimes.
 
-26. **Sort files by creation time (crtime/btime), newest first:**
+28. **Sort files by creation time (crtime/btime), newest first:**
     (Note: Creation time might not be available on all filesystems or OS versions.)
     ```bash
     rustree --sort-by crtime -r ./my_photos
     ```
 
-27. **Prune empty directories from the output:**
+29. **Prune empty directories from the output:**
     Imagine a project with many empty `build/` or `log/` subdirectories.
 
     ```bash
@@ -226,28 +242,28 @@ Here are some practical examples of how to use `rustree` from the command line.
     ```
     This will list `my_project`, but any directories within it (or nested deeper) that become empty after other filters (like `-P`, `-I`, or gitignore) are applied will not be shown.
 
-28. **Prune empty directories while listing only `.rs` files:**
+30. **Prune empty directories while listing only `.rs` files:**
 
     ```bash
     rustree -P "*.rs" --prune ./my_rust_project
     ```
     In this case, if a directory `src/utils/` contains only `helper.txt` and `mod.rs`, after `-P "*.rs"` is applied, `helper.txt` is filtered out. If `src/utils/` now only effectively contains `mod.rs`, it's not empty. However, if `src/empty_module/` contained only `old_code.txt`, it would first be filtered by `-P`, then `src/empty_module/` would become empty and subsequently pruned by `--prune`.
 
-29. **List directories before files for better readability:**
+31. **List directories before files for better readability:**
 
     ```bash
     rustree --dirs-first ./my_project
     ```
     This will show all directories before any files at each level, making the structure more readable by grouping similar types together.
 
-30. **List files before directories:**
+32. **List files before directories:**
 
     ```bash
     rustree --files-first ./my_project
     ```
     This will show all files before any directories at each level.
 
-31. **Combine directory ordering with different sort modes:**
+33. **Combine directory ordering with different sort modes:**
 
     ```bash
     # Directories first, sorted by modification time
@@ -260,7 +276,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --dirs-first -v ./releases
     ```
 
-32. **Directory ordering with metadata and filtering:**
+34. **Directory ordering with metadata and filtering:**
 
     ```bash
     # Show directories first with sizes and modification times, only for .rs files and directories
