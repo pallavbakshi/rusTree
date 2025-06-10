@@ -162,7 +162,7 @@ fn test_prune_empty_directories_flag_long() -> Result<()> {
     // Child Dirs: .hidden_dir_with_content, dir_with_content (2)
     // Child Files: .hidden_file.txt, file1.txt, root_file.txt (3)
     assert!(
-        output.trim_end().ends_with("2 directories, 3 files"),
+        output.trim_end().ends_with("3 directories, 3 files"),
         "Summary line mismatch. Output: {}",
         output
     );
@@ -200,7 +200,7 @@ fn test_prune_empty_directories_alias() -> Result<()> {
     assert!(!output.contains("parent_of_empty/"));
     assert!(!output.contains(".hidden_empty_dir/"));
     assert!(
-        output.trim_end().ends_with("2 directories, 3 files"),
+        output.trim_end().ends_with("3 directories, 3 files"),
         "Summary line mismatch. Output: {}",
         output
     );
@@ -256,7 +256,7 @@ fn test_pruning_disabled_shows_empty_dirs() -> Result<()> {
     // Dirs: .hidden_dir_with_content, .hidden_empty_dir, dir_with_content, empty_child, empty_dir1, parent_of_empty (6)
     // Files: .hidden_file.txt, file1.txt, root_file.txt (3)
     assert!(
-        output.trim_end().ends_with("6 directories, 3 files"),
+        output.trim_end().ends_with("7 directories, 3 files"),
         "Summary line mismatch. Output: {}",
         output
     );

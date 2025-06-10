@@ -41,7 +41,7 @@ pub struct SortingOptions {
 impl Default for SortingOptions {
     fn default() -> Self {
         Self {
-            sort_by: None,
+            sort_by: Some(SortKey::Name),
             reverse_sort: false,
             files_before_directories: true, // Default to traditional behavior
         }

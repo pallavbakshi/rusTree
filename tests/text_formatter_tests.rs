@@ -99,7 +99,7 @@ fn test_formatter_basic_structure() -> Result<()> {
     ├── empty_dir/
     └── file3.dat
 
-3 directories, 4 files"#,
+4 directories, 4 files"#,
         root_name
     );
 
@@ -318,7 +318,7 @@ fn test_formatter_with_max_depth() -> Result<()> {
 ├── file2.log
 └── sub_dir/
 
-1 directory, 2 files"#, // sub_dir is 1 dir, file1, file2 are 2 files
+2 directories, 2 files"#, // sub_dir is 1 dir, file1, file2 are 2 files
         root_name
     );
     assert_eq!(output_depth_1.trim(), expected_output_depth_1.trim());
@@ -353,7 +353,7 @@ fn test_formatter_with_max_depth() -> Result<()> {
     ├── empty_dir/
     └── file3.dat
 
-3 directories, 3 files"#, // sub_dir, another_sub_dir, empty_dir (3 dirs); file1, file2, file3 (3 files)
+4 directories, 3 files"#, // sub_dir, another_sub_dir, empty_dir (3 dirs); file1, file2, file3 (3 files)
         root_name
     );
     assert_eq!(output_depth_2.trim(), expected_output_depth_2.trim());
@@ -399,7 +399,7 @@ fn test_formatter_with_show_hidden() -> Result<()> {
     ├── empty_dir/
     └── file3.dat
 
-3 directories, 5 files"#,
+4 directories, 5 files"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -435,7 +435,7 @@ fn test_formatter_with_empty_directory() -> Result<()> {
     let expected_output = format!(
         r#"{}/
 
-0 directories, 0 files"#, // Expect a blank line before summary
+1 directory, 0 files"#, // Expect a blank line before summary
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -495,7 +495,7 @@ fn test_formatter_with_show_size_bytes() -> Result<()> {
     ├── [     64B] empty_dir/
     └── [     15B] file3.dat
 
-3 directories, 3 files"#,
+4 directories, 3 files"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -542,7 +542,7 @@ fn test_formatter_with_show_last_modified() -> Result<()> {
 ├── {}file2.log
 └── {}sub_dir/
 
-1 directory, 2 files"#,
+2 directories, 2 files"#,
         root_name, mtime_file1, mtime_file2, mtime_subdir
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -589,7 +589,7 @@ fn test_formatter_with_calculate_lines() -> Result<()> {
     ├── empty_dir/
     └── [L:   2] file3.dat
 
-3 directories, 3 files"#,
+4 directories, 3 files"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -636,7 +636,7 @@ fn test_formatter_with_calculate_words() -> Result<()> {
     ├── empty_dir/
     └── [W:   2] file3.dat
 
-3 directories, 3 files"#,
+4 directories, 3 files"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -683,7 +683,7 @@ fn test_formatter_with_apply_function() -> Result<()> {
     ├── empty_dir/
     └── [F: "2"] file3.dat
 
-3 directories, 3 files"#,
+4 directories, 3 files"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -737,7 +737,7 @@ fn test_formatter_with_multiple_metadata() -> Result<()> {
 ├── [     12B] {}[L:   1] [W:   2] [F: "0"] file2.log
 └── [    192B] {}sub_dir/
 
-1 directory, 2 files"#,
+2 directories, 2 files"#,
         root_name, mtime_f1, mtime_f2, mtime_sd
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -773,8 +773,8 @@ fn test_formatter_summary_line() -> Result<()> {
     let nodes_basic = get_tree_nodes(root_path, &config_basic)?;
     let output_basic = format_nodes(&nodes_basic, LibOutputFormat::Text, &config_basic)?;
 
-    // From basic_structure: 3 directories, 4 files
-    assert!(output_basic.trim().ends_with("\n\n3 directories, 4 files"));
+    // From basic_structure: 4 directories, 4 files
+    assert!(output_basic.trim().ends_with("\n\n4 directories, 4 files"));
 
     let config_hidden = RustreeLibConfig {
         input_source: InputSourceOptions {
@@ -795,8 +795,8 @@ fn test_formatter_summary_line() -> Result<()> {
     };
     let nodes_hidden = get_tree_nodes(root_path, &config_hidden)?;
     let output_hidden = format_nodes(&nodes_hidden, LibOutputFormat::Text, &config_hidden)?;
-    // From show_hidden: 3 directories, 5 files
-    assert!(output_hidden.trim().ends_with("\n\n3 directories, 5 files"));
+    // From show_hidden: 4 directories, 5 files
+    assert!(output_hidden.trim().ends_with("\n\n4 directories, 5 files"));
 
     Ok(())
 }
@@ -845,7 +845,7 @@ fn test_formatter_sort_integration() -> Result<()> {
     ├── empty_dir/
     └── file3.dat
 
-3 directories, 3 files"#,
+4 directories, 3 files"#,
         root_name
     );
     assert_eq!(
@@ -893,7 +893,7 @@ fn test_formatter_sort_integration() -> Result<()> {
 ├── [     12B] file2.log
 └── [    192B] sub_dir/
 
-1 directory, 2 files"#,
+2 directories, 2 files"#,
         root_name
     );
     assert_eq!(

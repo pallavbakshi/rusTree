@@ -63,7 +63,13 @@ impl TreeFormatter for MarkdownFormatter {
                     NodeType::Symlink => { /* Not counted in summary */ }
                 }
             }
-            (dc, fc)
+            // Include root directory in count if it's a directory
+            let root_dir_increment = if config.input_source.root_is_directory {
+                1
+            } else {
+                0
+            };
+            (dc + root_dir_increment, fc)
         };
 
         writeln!(output)?;

@@ -73,8 +73,8 @@
 
 // CLI module - WARNING: This is not part of the stable public API!
 // This module is only exposed publicly because the main binary needs access to it.
-// External library users should NOT depend on this module as it may change 
-// without notice in future versions. Use the public API functions like 
+// External library users should NOT depend on this module as it may change
+// without notice in future versions. Use the public API functions like
 // get_tree_nodes() and format_nodes() instead.
 #[doc(hidden)] // Hide from documentation
 pub mod cli;
