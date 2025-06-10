@@ -216,7 +216,7 @@
 <p><strong><code>metadata.rs</code></strong>:</p>
 <ul>
 <li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>show_size_bytes</code>, <code>show_last_modified</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
-<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content.</li>
+<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content, including <code>CountPluses</code> (counts '+' characters) and <code>Cat</code> (returns full file content).</li>
 <li>Defines <code>ApplyFnError</code> for errors during custom function application.</li>
 </ul>
 </li>
@@ -269,8 +269,8 @@
 <ul>
 <li><code>file_info.rs</code>:
 <ul>
-<li>Defines <code>format_node_metadata</code> for consistently formatting metadata strings for display (used by formatters).</li>
-<li>Contains <code>apply_builtin_to_file</code> and <code>apply_builtin_function</code> for applying <code>BuiltInFunction</code>s to file content, handling <code>ApplyFnError</code>.</li>
+<li>Defines <code>format_node_metadata</code> for consistently formatting metadata strings for display (used by formatters). For the <code>Cat</code> function, metadata display is suppressed since content is shown separately.</li>
+<li>Contains <code>apply_builtin_to_file</code> and <code>apply_builtin_function</code> for applying <code>BuiltInFunction</code>s to file content, handling <code>ApplyFnError</code>. The <code>Cat</code> function simply returns the full file content.</li>
 </ul>
 </li>
 <li><code>size_calculator.rs</code>: Provides functions like <code>count_lines_from_string</code> and <code>count_words_from_string</code>.</li>
@@ -332,7 +332,7 @@
 <li>If sorting is requested, sorts the nodes (via <code>core::sorter::strategies::sort_nodes_with_options</code>). Errors during sorting or tree building for pruning now map to <code>RustreeError::TreeBuildError</code>.</li>
 </ol>
 </li>
-<li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter.</li>
+<li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter. For the <code>Cat</code> function, it first generates the normal tree output, then appends a "--- File Contents ---" section with the content of each file.</li>
 </ul>
 </li>
 </ul>

@@ -308,9 +308,14 @@
 <li>
 <p><code>--apply-function &lt;FUNCTION_NAME&gt;</code></p>
 <ul>
-<li>Description: Apply a built-in function to file contents and display the result.</li>
-<li>Available functions: <code>CountPluses</code> (example function, counts '+' characters). More can be added.</li>
-<li>Example: <code>rustree --apply-function CountPluses</code></li>
+<li>Description: Apply a built-in function to file contents and display the result. When using the <code>cat</code> function, the tree structure is displayed first, followed by the contents of each file.</li>
+<li>Available functions:
+<ul>
+<li><code>count-pluses</code>: Counts '+' characters in each file and displays the count in metadata</li>
+<li><code>cat</code>: Displays the full content of each file after the tree structure</li>
+</ul>
+</li>
+<li>Example: <code>rustree --apply-function cat</code>, <code>rustree --apply-function count-pluses</code></li>
 </ul>
 </li>
 </ul>

@@ -231,10 +231,22 @@ rustree --sort-by none ./my_project
 </code></pre>
 </li>
 <li>
-<p><strong>Apply the <code>CountPluses</code> function to files and sort by its custom output:</strong></p>
-<pre><code class="language-bash">rustree --apply-function CountPluses --sort-by custom ./config_files
+<p><strong>Apply the <code>count-pluses</code> function to files and sort by its custom output:</strong></p>
+<pre><code class="language-bash">rustree --apply-function count-pluses --sort-by custom ./config_files
 </code></pre>
-<p><em>(This assumes <code>CountPluses</code> is a meaningful function for your files, e.g., counting '+' characters).</em></p>
+<p><em>(This counts '+' characters in each file and displays the count in metadata).</em></p>
+</li>
+<li>
+<p><strong>Display file contents after the tree structure using the <code>cat</code> function:</strong></p>
+<pre><code class="language-bash">rustree --apply-function cat ./small_project
+</code></pre>
+<p>This will first display the directory tree, then show the full contents of each file in the project. Useful for getting a complete view of small projects or configuration directories.</p>
+</li>
+<li>
+<p><strong>Combine <code>cat</code> function with filtering to show contents of specific files:</strong></p>
+<pre><code class="language-bash">rustree --apply-function cat --filter-include "*.md|*.txt" ./docs
+</code></pre>
+<p>Shows the tree structure and then displays the contents of only Markdown and text files.</p>
 </li>
 <li>
 <p><strong>Pipe <code>rustree</code> output to an LLM for summarization:</strong></p>

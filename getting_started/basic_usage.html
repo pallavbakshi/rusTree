@@ -216,6 +216,18 @@ rustree --show-size-bytes
 rustree --sort-by size --reverse-sort
 </code></pre>
 </li>
+<li>
+<p><strong>Display file contents after tree structure:</strong></p>
+<pre><code class="language-bash">rustree --apply-function cat
+</code></pre>
+<p>This shows the directory tree first, then displays the content of each file with clear headers.</p>
+</li>
+<li>
+<p><strong>Count specific characters in files:</strong></p>
+<pre><code class="language-bash">rustree --apply-function count-pluses
+</code></pre>
+<p>This counts '+' characters in each file and displays the count in metadata.</p>
+</li>
 </ul>
 <h3 id="getting-help"><a class="header" href="#getting-help">Getting Help</a></h3>
 <p>For a full list of options and commands, use the help flag:</p>

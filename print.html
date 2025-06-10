@@ -286,6 +286,18 @@ rustree --show-size-bytes
 rustree --sort-by size --reverse-sort
 </code></pre>
 </li>
+<li>
+<p><strong>Display file contents after tree structure:</strong></p>
+<pre><code class="language-bash">rustree --apply-function cat
+</code></pre>
+<p>This shows the directory tree first, then displays the content of each file with clear headers.</p>
+</li>
+<li>
+<p><strong>Count specific characters in files:</strong></p>
+<pre><code class="language-bash">rustree --apply-function count-pluses
+</code></pre>
+<p>This counts '+' characters in each file and displays the count in metadata.</p>
+</li>
 </ul>
 <h3 id="getting-help"><a class="header" href="#getting-help">Getting Help</a></h3>
 <p>For a full list of options and commands, use the help flag:</p>
@@ -452,9 +464,14 @@ rustree --sort-by size --reverse-sort
 <li>
 <p><code>--apply-function &lt;FUNCTION_NAME&gt;</code></p>
 <ul>
-<li>Description: Apply a built-in function to file contents and display the result.</li>
-<li>Available functions: <code>CountPluses</code> (example function, counts '+' characters). More can be added.</li>
-<li>Example: <code>rustree --apply-function CountPluses</code></li>
+<li>Description: Apply a built-in function to file contents and display the result. When using the <code>cat</code> function, the tree structure is displayed first, followed by the contents of each file.</li>
+<li>Available functions:
+<ul>
+<li><code>count-pluses</code>: Counts '+' characters in each file and displays the count in metadata</li>
+<li><code>cat</code>: Displays the full content of each file after the tree structure</li>
+</ul>
+</li>
+<li>Example: <code>rustree --apply-function cat</code>, <code>rustree --apply-function count-pluses</code></li>
 </ul>
 </li>
 </ul>
@@ -638,10 +655,22 @@ rustree --sort-by none ./my_project
 </code></pre>
 </li>
 <li>
-<p><strong>Apply the <code>CountPluses</code> function to files and sort by its custom output:</strong></p>
-<pre><code class="language-bash">rustree --apply-function CountPluses --sort-by custom ./config_files
+<p><strong>Apply the <code>count-pluses</code> function to files and sort by its custom output:</strong></p>
+<pre><code class="language-bash">rustree --apply-function count-pluses --sort-by custom ./config_files
 </code></pre>
-<p><em>(This assumes <code>CountPluses</code> is a meaningful function for your files, e.g., counting '+' characters).</em></p>
+<p><em>(This counts '+' characters in each file and displays the count in metadata).</em></p>
+</li>
+<li>
+<p><strong>Display file contents after the tree structure using the <code>cat</code> function:</strong></p>
+<pre><code class="language-bash">rustree --apply-function cat ./small_project
+</code></pre>
+<p>This will first display the directory tree, then show the full contents of each file in the project. Useful for getting a complete view of small projects or configuration directories.</p>
+</li>
+<li>
+<p><strong>Combine <code>cat</code> function with filtering to show contents of specific files:</strong></p>
+<pre><code class="language-bash">rustree --apply-function cat --filter-include "*.md|*.txt" ./docs
+</code></pre>
+<p>Shows the tree structure and then displays the contents of only Markdown and text files.</p>
 </li>
 <li>
 <p><strong>Pipe <code>rustree</code> output to an LLM for summarization:</strong></p>
@@ -926,7 +955,7 @@ let config = RustreeLibConfig {
         report_change_time: false,
         report_creation_time: false,
         calculate_line_count: false, // Example: not calculating line count
-        apply_function: Some(BuiltInFunction::CountPluses), // Example: applying a function
+        apply_function: Some(BuiltInFunction::Cat), // Example: applying cat function to display file contents
         ..Default::default()
     },
     ..Default::default() // Use defaults for misc and other fields if not specified
@@ -983,7 +1012,7 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
 <ul>
 <li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
 <li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
-<li><strong><code>BuiltInFunction</code></strong>: e.g., <code>CountPluses</code>. Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>.</li>
+<li><strong><code>BuiltInFunction</code></strong>: <code>CountPluses</code> (counts '+' characters), <code>Cat</code> (returns full file content). Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>. When using <code>Cat</code>, the <code>format_nodes()</code> function automatically displays file contents after the tree structure.</li>
 <li><strong><code>ApplyFnError</code></strong>: Error type for <code>BuiltInFunction</code> application. Defined in <code>src/config/metadata.rs</code>.</li>
 <li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Defined in <code>src/core/tree/node.rs</code>. Found in <code>NodeInfo</code>.</li>
 <li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Defined in <code>src/core/error.rs</code>. Includes variants like <code>Io</code>, <code>GlobPattern</code>, <code>IgnoreError</code>, and <code>TreeBuildError</code> (for errors during internal tree construction or sorting).</li>
@@ -1104,6 +1133,88 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
     println!("\n--- Markdown Output ---");
     println!("{}", markdown_output);
     // You could write this string to a .md file
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-4-using-the-cat-function-to-display-file-contents"><a class="header" href="#example-4-using-the-cat-function-to-display-file-contents">Example 4: Using the Cat Function to Display File Contents</a></h3>
+<p>This example demonstrates using the <code>Cat</code> built-in function to display file contents after the tree structure.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, RustreeError,
+    InputSourceOptions, MetadataOptions, FilteringOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./config"; // Directory with configuration files
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Configuration Files".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::Cat), // Display file contents
+            show_size_bytes: true, // Also show file sizes
+            ..Default::default()
+        },
+        filtering: FilteringOptions {
+            // Only show text-based config files
+            match_patterns: Some(vec!["*.toml".to_string(), "*.json".to_string(), "*.yaml".to_string()]),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    
+    // format_nodes will automatically display the tree first, then file contents
+    let output = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    println!("{}", output);
+    
+    // The output will show:
+    // 1. Directory tree structure with file sizes
+    // 2. "--- File Contents ---" section
+    // 3. Each file's content with clear headers
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-5-combining-apply-functions-with-custom-sorting"><a class="header" href="#example-5-combining-apply-functions-with-custom-sorting">Example 5: Combining Apply Functions with Custom Sorting</a></h3>
+<p>This example shows how to use built-in functions and sort by their results.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, BuiltInFunction, SortKey, RustreeError,
+    InputSourceOptions, MetadataOptions, SortingOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./text_files";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "Text Analysis".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        metadata: MetadataOptions {
+            apply_function: Some(BuiltInFunction::CountPluses), // Count '+' characters
+            calculate_line_count: true,
+            calculate_word_count: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Custom), // Sort by the apply_function result
+            reverse_sort: true, // Files with most '+' characters first
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    println!("{}", output);
 
     Ok(())
 }</code></pre></pre>
@@ -1258,7 +1369,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong><code>metadata.rs</code></strong>:</p>
 <ul>
 <li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>show_size_bytes</code>, <code>show_last_modified</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
-<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content.</li>
+<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content, including <code>CountPluses</code> (counts '+' characters) and <code>Cat</code> (returns full file content).</li>
 <li>Defines <code>ApplyFnError</code> for errors during custom function application.</li>
 </ul>
 </li>
@@ -1311,8 +1422,8 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <ul>
 <li><code>file_info.rs</code>:
 <ul>
-<li>Defines <code>format_node_metadata</code> for consistently formatting metadata strings for display (used by formatters).</li>
-<li>Contains <code>apply_builtin_to_file</code> and <code>apply_builtin_function</code> for applying <code>BuiltInFunction</code>s to file content, handling <code>ApplyFnError</code>.</li>
+<li>Defines <code>format_node_metadata</code> for consistently formatting metadata strings for display (used by formatters). For the <code>Cat</code> function, metadata display is suppressed since content is shown separately.</li>
+<li>Contains <code>apply_builtin_to_file</code> and <code>apply_builtin_function</code> for applying <code>BuiltInFunction</code>s to file content, handling <code>ApplyFnError</code>. The <code>Cat</code> function simply returns the full file content.</li>
 </ul>
 </li>
 <li><code>size_calculator.rs</code>: Provides functions like <code>count_lines_from_string</code> and <code>count_words_from_string</code>.</li>
@@ -1374,7 +1485,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>If sorting is requested, sorts the nodes (via <code>core::sorter::strategies::sort_nodes_with_options</code>). Errors during sorting or tree building for pruning now map to <code>RustreeError::TreeBuildError</code>.</li>
 </ol>
 </li>
-<li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter.</li>
+<li><code>format_nodes()</code>: Takes the processed nodes and applies the chosen formatter. For the <code>Cat</code> function, it first generates the normal tree output, then appends a "--- File Contents ---" section with the content of each file.</li>
 </ul>
 </li>
 </ul>
