@@ -136,3 +136,43 @@ pub fn entry_matches_glob_patterns(
     }
     false
 }
+
+/// Checks if a path matches any of the compiled glob patterns.
+/// This is similar to entry_matches_glob_patterns but works with Path instead of DirEntry.
+pub fn entry_matches_path_with_patterns(
+    path: &Path,
+    compiled_patterns: &Vec<CompiledGlobPattern>,
+) -> bool {
+    // Validate that we have patterns to match against
+    if compiled_patterns.is_empty() {
+        return false; // No patterns means no matches
+    }
+
+    let file_name_lossy = path
+        .file_name()
+        .map(|name| name.to_string_lossy())
+        .unwrap_or_else(|| std::borrow::Cow::Borrowed(""));
+    let is_dir = path.is_dir();
+
+    for p_info in compiled_patterns {
+        let matches = if p_info.is_dir_only_match {
+            // Pattern like "dir/" - matches directory name
+            is_dir
+                && p_info
+                    .pattern
+                    .matches_with(&file_name_lossy, p_info.options)
+        } else if p_info.is_path_pattern {
+            // Pattern like "src/*.rs" or "**/*.tmp"
+            p_info.pattern.matches_path_with(path, p_info.options)
+        } else {
+            // Basename match, e.g., "*.log"
+            p_info
+                .pattern
+                .matches_with(&file_name_lossy, p_info.options)
+        };
+        if matches {
+            return true;
+        }
+    }
+    false
+}

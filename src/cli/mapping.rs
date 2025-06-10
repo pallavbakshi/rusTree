@@ -31,8 +31,8 @@ use crate::config::sorting::DirectoryFileOrder;
 ///
 /// # Returns
 ///
-/// A `RustreeLibConfig` instance populated from the `cli_args`.
-pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
+/// A `RustreeLibConfig` instance populated from the `cli_args`, or an error if pattern files cannot be read.
+pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std::io::Error> {
     let root_display_name = if cli_args.path.to_string_lossy() == "." {
         ".".to_string()
     } else {
@@ -56,7 +56,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
         .map(|meta| meta.is_dir())
         .unwrap_or(false); // Default to false if metadata fails or it's not a dir
 
-    RustreeLibConfig {
+    Ok(RustreeLibConfig {
         input_source: InputSourceOptions {
             root_display_name,
             root_node_size,
@@ -74,6 +74,8 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
             gitignore_file: cli_args.gitignore.gitignore_file.clone(),
             case_insensitive_filter: cli_args.gitignore.case_insensitive_filter,
             prune_empty_directories: cli_args.pruning.prune_empty_directories,
+            apply_include_patterns: cli_args.apply_function_filter.get_all_include_patterns()?,
+            apply_exclude_patterns: cli_args.apply_function_filter.get_all_exclude_patterns()?,
         },
         sorting: SortingOptions {
             sort_by: if cli_args.sort_order.legacy_no_sort {
@@ -130,10 +132,14 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> RustreeLibConfig {
                 .map(|f| match f {
                     CliBuiltInFunction::CountPluses => LibBuiltInFunction::CountPluses,
                     CliBuiltInFunction::Cat => LibBuiltInFunction::Cat,
+                    CliBuiltInFunction::CountFiles => LibBuiltInFunction::CountFiles,
+                    CliBuiltInFunction::CountDirs => LibBuiltInFunction::CountDirs,
+                    CliBuiltInFunction::SizeTotal => LibBuiltInFunction::SizeTotal,
+                    CliBuiltInFunction::DirStats => LibBuiltInFunction::DirStats,
                 }),
         },
         misc: MiscOptions::default(),
-    }
+    })
 }
 
 /// Maps the CLI output format enum (`CliOutputFormat`) to the library's output format enum (`LibOutputFormat`).

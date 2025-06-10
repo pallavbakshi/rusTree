@@ -115,7 +115,7 @@ pub use crate::core::formatter::{
 };
 
 // Internal imports
-use crate::core::{sorter, walker};
+use crate::core::{metadata::file_info, sorter, tree::builder::TempNode, walker};
 use std::path::Path;
 
 /// Walks the directory, analyzes files, and sorts them based on the provided configuration.
@@ -150,24 +150,38 @@ pub fn get_tree_nodes(
     // 1. Walk and analyze (analyzer is called within walker)
     let mut nodes = walker::walk_directory(root_path, config)?;
 
-    // 2. Prune empty directories if requested
-    if config.filtering.prune_empty_directories && !nodes.is_empty() {
-        // Build the tree structure from the flat list of nodes
-        let mut temp_roots = core::tree::builder::build_tree(std::mem::take(&mut nodes))
-            .map_err(RustreeError::TreeBuildError)?;
+    // 2. Apply directory functions if needed or prune empty directories if requested
+    if (config.metadata.apply_function.is_some() && needs_directory_function_processing(config))
+        || config.filtering.prune_empty_directories
+    {
+        if !nodes.is_empty() {
+            // Build the tree structure from the flat list of nodes
+            let mut temp_roots = core::tree::builder::build_tree(std::mem::take(&mut nodes))
+                .map_err(RustreeError::TreeBuildError)?;
 
-        // Define the filter for pruning: keep only files.
-        // TreeManipulator::prune_tree will then keep directories that (recursively) contain files.
-        let prune_filter = |node_info: &NodeInfo| node_info.node_type == NodeType::File;
+            // Apply directory functions if configured
+            if let Some(apply_func) = &config.metadata.apply_function {
+                if is_directory_function(apply_func) {
+                    apply_directory_functions_to_tree(&mut temp_roots, apply_func, config);
+                }
+            }
 
-        // Apply prune_tree to each root. Retain roots that are not empty after pruning.
-        temp_roots.retain_mut(|root_node| {
-            core::tree::manipulator::TreeManipulator::prune_tree(root_node, &prune_filter)
-        });
+            // Prune empty directories if requested
+            if config.filtering.prune_empty_directories {
+                // Define the filter for pruning: keep only files.
+                // TreeManipulator::prune_tree will then keep directories that (recursively) contain files.
+                let prune_filter = |node_info: &NodeInfo| node_info.node_type == NodeType::File;
 
-        // Flatten the modified tree back into a flat list of NodeInfo
-        // `nodes` is empty at this point due to `std::mem::take`.
-        core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, &mut nodes);
+                // Apply prune_tree to each root. Retain roots that are not empty after pruning.
+                temp_roots.retain_mut(|root_node| {
+                    core::tree::manipulator::TreeManipulator::prune_tree(root_node, &prune_filter)
+                });
+            }
+
+            // Flatten the modified tree back into a flat list of NodeInfo
+            // `nodes` is empty at this point due to `std::mem::take`.
+            core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, &mut nodes);
+        }
     }
 
     // 3. Apply list_directories_only filter if enabled
@@ -221,24 +235,24 @@ pub fn format_nodes(
         LibOutputFormat::Markdown => Box::new(MarkdownFormatter),
     };
     let tree_output = formatter_instance.format(nodes, config)?;
-    
+
     // Check if cat function is applied - if so, append file contents after the tree
     if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
         let mut result = tree_output;
-        
+
         // Only show file contents section if there are files with content
         let file_nodes_with_content: Vec<_> = nodes
             .iter()
             .filter(|node| {
-                node.node_type == NodeType::File 
-                && node.custom_function_output.is_some() 
-                && matches!(node.custom_function_output, Some(Ok(_)))
+                node.node_type == NodeType::File
+                    && node.custom_function_output.is_some()
+                    && matches!(node.custom_function_output, Some(Ok(_)))
             })
             .collect();
-            
+
         if !file_nodes_with_content.is_empty() {
             result.push_str("\n\n--- File Contents ---\n");
-            
+
             for node in file_nodes_with_content {
                 if let Some(Ok(content)) = &node.custom_function_output {
                     result.push_str(&format!("\n=== {} ===\n", node.path.display()));
@@ -251,4 +265,105 @@ pub fn format_nodes(
     } else {
         Ok(tree_output)
     }
+}
+
+/// Checks if the current configuration needs directory function processing.
+fn needs_directory_function_processing(config: &RustreeLibConfig) -> bool {
+    if let Some(func) = &config.metadata.apply_function {
+        is_directory_function(func)
+    } else {
+        false
+    }
+}
+
+/// Checks if a function is a directory-specific function.
+fn is_directory_function(func: &BuiltInFunction) -> bool {
+    matches!(
+        func,
+        BuiltInFunction::CountFiles
+            | BuiltInFunction::CountDirs
+            | BuiltInFunction::SizeTotal
+            | BuiltInFunction::DirStats
+    )
+}
+
+/// Recursively applies directory functions to all directories in the tree.
+fn apply_directory_functions_to_tree(
+    roots: &mut [TempNode],
+    func: &BuiltInFunction,
+    config: &RustreeLibConfig,
+) {
+    for root in roots {
+        apply_directory_functions_to_node(root, func, config);
+    }
+}
+
+/// Recursively applies directory functions to a single node and its children.
+fn apply_directory_functions_to_node(
+    node: &mut TempNode,
+    func: &BuiltInFunction,
+    config: &RustreeLibConfig,
+) {
+    // First, recursively process all children
+    for child in &mut node.children {
+        apply_directory_functions_to_node(child, func, config);
+    }
+
+    // Then process this node if it's a directory and should have the function applied
+    if node.node_info.node_type == NodeType::Directory
+        && should_apply_function_to_node(&node.node_info, config)
+    {
+        // Collect child NodeInfo objects for the function
+        let child_infos: Vec<NodeInfo> = node
+            .children
+            .iter()
+            .map(|child| child.node_info.clone())
+            .collect();
+
+        // Apply the directory function
+        let result = file_info::apply_builtin_to_directory(&child_infos, func);
+        node.node_info.custom_function_output = Some(result);
+    }
+}
+
+/// Checks if a function should be applied to a specific node based on filtering patterns.
+fn should_apply_function_to_node(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
+    use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_path_with_patterns};
+
+    // Check apply_exclude_patterns first - if it matches, skip
+    if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
+        if !exclude_patterns.is_empty() {
+            if let Ok(compiled_patterns) = compile_glob_patterns(
+                &Some(exclude_patterns.clone()),
+                config.filtering.case_insensitive_filter,
+                config.listing.show_hidden,
+            ) {
+                if let Some(patterns) = compiled_patterns {
+                    if entry_matches_path_with_patterns(&node.path, &patterns) {
+                        return false; // Skip this node
+                    }
+                }
+            }
+        }
+    }
+
+    // Check apply_include_patterns - if specified, node must match
+    if let Some(include_patterns) = &config.filtering.apply_include_patterns {
+        if !include_patterns.is_empty() {
+            if let Ok(compiled_patterns) = compile_glob_patterns(
+                &Some(include_patterns.clone()),
+                config.filtering.case_insensitive_filter,
+                config.listing.show_hidden,
+            ) {
+                if let Some(patterns) = compiled_patterns {
+                    return entry_matches_path_with_patterns(&node.path, &patterns);
+                }
+            }
+            // If we have include patterns but compilation failed, don't apply
+            return false;
+        }
+    }
+
+    // If no include patterns specified, or node passed all checks, apply the function
+    true
 }
