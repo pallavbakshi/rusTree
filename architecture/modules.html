@@ -208,7 +208,8 @@
 <p><strong><code>sorting.rs</code></strong>:</p>
 <ul>
 <li>Defines the <code>SortKey</code> enum (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>).</li>
-<li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria, order, and whether files should appear before directories in size-based sorts.</li>
+<li>Defines <code>DirectoryFileOrder</code> enum to control directory vs. file ordering (<code>Default</code>, <code>DirsFirst</code>, <code>FilesFirst</code>).</li>
+<li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria, order, directory/file ordering preference, and backward compatibility options.</li>
 </ul>
 </li>
 <li>
@@ -281,7 +282,7 @@
 <p><strong><code>sorter/</code></strong>: This sub-module is responsible for sorting nodes while preserving the tree hierarchy.</p>
 <ul>
 <li><code>strategies.rs</code>: Contains <code>sort_nodes_with_options</code> (and the older <code>sort_nodes</code>), which orchestrates tree building, sorting of sibling nodes, and tree flattening.</li>
-<li><code>comparators.rs</code>: Defines <code>compare_siblings_with_options</code> which implements the comparison logic for various <code>SortKey</code>s, considering <code>SortingOptions</code> like <code>reverse_sort</code> and <code>files_before_directories</code>. It includes improved version string comparison and new size sorting logic (defaulting to largest first, files before directories).</li>
+<li><code>comparators.rs</code>: Defines <code>compare_siblings_with_options</code> which implements the comparison logic for various <code>SortKey</code>s, considering <code>SortingOptions</code> like <code>reverse_sort</code>, <code>files_before_directories</code> (legacy), and the new <code>directory_file_order</code> enum. It includes universal directory/file ordering that applies to all sort keys, improved version string comparison, and enhanced size sorting logic. The <code>apply_directory_file_ordering</code> function provides consistent directory vs. file ordering across all sorting modes.</li>
 <li><code>composite.rs</code>: (Placeholder for defining and using composite sort keys).</li>
 </ul>
 </li>
@@ -309,8 +310,8 @@
 <li>
 <p>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:</p>
 <ul>
-<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code> (including <code>files_before_directories</code>), <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
-<li>Enums and related types: <code>SortKey</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>.</li>
+<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code> (including <code>directory_file_order</code> and legacy <code>files_before_directories</code>), <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
+<li>Enums and related types: <code>SortKey</code>, <code>DirectoryFileOrder</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>.</li>
 <li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code>).</li>
 </ul>
 </li>

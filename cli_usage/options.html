@@ -373,17 +373,17 @@
 </ul>
 </li>
 <li>
-<p><code>--files-first</code></p>
+<p><code>--dirs-first</code></p>
 <ul>
-<li>Description: When sorting by size, list all files and symlinks before directories. This is the default behavior for size sort.</li>
-<li>Example: <code>rustree --sort-by size --files-first</code> (explicitly stating default)</li>
+<li>Description: List directories before files. More readable. This applies to all sorting modes and overrides the default mixing behavior. Conflicts with <code>--files-first</code>.</li>
+<li>Example: <code>rustree --dirs-first</code>, <code>rustree --sort-by size --dirs-first</code></li>
 </ul>
 </li>
 <li>
-<p><code>--no-files-first</code></p>
+<p><code>--files-first</code></p>
 <ul>
-<li>Description: When sorting by size, intermingle files, symlinks, and directories based purely on their size.</li>
-<li>Example: <code>rustree --sort-by size --no-files-first</code></li>
+<li>Description: List files before directories. More readable. This applies to all sorting modes and overrides the default mixing behavior. Conflicts with <code>--dirs-first</code>.</li>
+<li>Example: <code>rustree --files-first</code>, <code>rustree --sort-by mtime --files-first</code></li>
 </ul>
 </li>
 </ul>

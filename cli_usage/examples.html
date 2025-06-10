@@ -367,6 +367,39 @@ rustree --prune ./my_project
 </code></pre>
 <p>In this case, if a directory <code>src/utils/</code> contains only <code>helper.txt</code> and <code>mod.rs</code>, after <code>-P "*.rs"</code> is applied, <code>helper.txt</code> is filtered out. If <code>src/utils/</code> now only effectively contains <code>mod.rs</code>, it's not empty. However, if <code>src/empty_module/</code> contained only <code>old_code.txt</code>, it would first be filtered by <code>-P</code>, then <code>src/empty_module/</code> would become empty and subsequently pruned by <code>--prune</code>.</p>
 </li>
+<li>
+<p><strong>List directories before files for better readability:</strong></p>
+<pre><code class="language-bash">rustree --dirs-first ./my_project
+</code></pre>
+<p>This will show all directories before any files at each level, making the structure more readable by grouping similar types together.</p>
+</li>
+<li>
+<p><strong>List files before directories:</strong></p>
+<pre><code class="language-bash">rustree --files-first ./my_project
+</code></pre>
+<p>This will show all files before any directories at each level.</p>
+</li>
+<li>
+<p><strong>Combine directory ordering with different sort modes:</strong></p>
+<pre><code class="language-bash"># Directories first, sorted by modification time
+rustree --dirs-first --sort-by mtime ./my_project
+
+# Files first, sorted by size (largest first)
+rustree --files-first --sort-by size -r ./my_project
+
+# Directories first with version sorting
+rustree --dirs-first -v ./releases
+</code></pre>
+</li>
+<li>
+<p><strong>Directory ordering with metadata and filtering:</strong></p>
+<pre><code class="language-bash"># Show directories first with sizes and modification times, only for .rs files and directories
+rustree --dirs-first -s -D -P "*.rs|*/" ./src
+
+# Files first, showing line counts for text files
+rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
+</code></pre>
+</li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
 

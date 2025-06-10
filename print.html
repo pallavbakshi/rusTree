@@ -517,17 +517,17 @@ rustree --sort-by size --reverse-sort
 </ul>
 </li>
 <li>
-<p><code>--files-first</code></p>
+<p><code>--dirs-first</code></p>
 <ul>
-<li>Description: When sorting by size, list all files and symlinks before directories. This is the default behavior for size sort.</li>
-<li>Example: <code>rustree --sort-by size --files-first</code> (explicitly stating default)</li>
+<li>Description: List directories before files. More readable. This applies to all sorting modes and overrides the default mixing behavior. Conflicts with <code>--files-first</code>.</li>
+<li>Example: <code>rustree --dirs-first</code>, <code>rustree --sort-by size --dirs-first</code></li>
 </ul>
 </li>
 <li>
-<p><code>--no-files-first</code></p>
+<p><code>--files-first</code></p>
 <ul>
-<li>Description: When sorting by size, intermingle files, symlinks, and directories based purely on their size.</li>
-<li>Example: <code>rustree --sort-by size --no-files-first</code></li>
+<li>Description: List files before directories. More readable. This applies to all sorting modes and overrides the default mixing behavior. Conflicts with <code>--dirs-first</code>.</li>
+<li>Example: <code>rustree --files-first</code>, <code>rustree --sort-by mtime --files-first</code></li>
 </ul>
 </li>
 </ul>
@@ -773,6 +773,39 @@ rustree --prune ./my_project
 <pre><code class="language-bash">rustree -P "*.rs" --prune ./my_rust_project
 </code></pre>
 <p>In this case, if a directory <code>src/utils/</code> contains only <code>helper.txt</code> and <code>mod.rs</code>, after <code>-P "*.rs"</code> is applied, <code>helper.txt</code> is filtered out. If <code>src/utils/</code> now only effectively contains <code>mod.rs</code>, it's not empty. However, if <code>src/empty_module/</code> contained only <code>old_code.txt</code>, it would first be filtered by <code>-P</code>, then <code>src/empty_module/</code> would become empty and subsequently pruned by <code>--prune</code>.</p>
+</li>
+<li>
+<p><strong>List directories before files for better readability:</strong></p>
+<pre><code class="language-bash">rustree --dirs-first ./my_project
+</code></pre>
+<p>This will show all directories before any files at each level, making the structure more readable by grouping similar types together.</p>
+</li>
+<li>
+<p><strong>List files before directories:</strong></p>
+<pre><code class="language-bash">rustree --files-first ./my_project
+</code></pre>
+<p>This will show all files before any directories at each level.</p>
+</li>
+<li>
+<p><strong>Combine directory ordering with different sort modes:</strong></p>
+<pre><code class="language-bash"># Directories first, sorted by modification time
+rustree --dirs-first --sort-by mtime ./my_project
+
+# Files first, sorted by size (largest first)
+rustree --files-first --sort-by size -r ./my_project
+
+# Directories first with version sorting
+rustree --dirs-first -v ./releases
+</code></pre>
+</li>
+<li>
+<p><strong>Directory ordering with metadata and filtering:</strong></p>
+<pre><code class="language-bash"># Show directories first with sizes and modification times, only for .rs files and directories
+rustree --dirs-first -s -D -P "*.rs|*/" ./src
+
+# Files first, showing line counts for text files
+rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
+</code></pre>
 </li>
 </ol>
 <p>Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
@@ -1217,7 +1250,8 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong><code>sorting.rs</code></strong>:</p>
 <ul>
 <li>Defines the <code>SortKey</code> enum (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>).</li>
-<li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria, order, and whether files should appear before directories in size-based sorts.</li>
+<li>Defines <code>DirectoryFileOrder</code> enum to control directory vs. file ordering (<code>Default</code>, <code>DirsFirst</code>, <code>FilesFirst</code>).</li>
+<li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria, order, directory/file ordering preference, and backward compatibility options.</li>
 </ul>
 </li>
 <li>
@@ -1290,7 +1324,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong><code>sorter/</code></strong>: This sub-module is responsible for sorting nodes while preserving the tree hierarchy.</p>
 <ul>
 <li><code>strategies.rs</code>: Contains <code>sort_nodes_with_options</code> (and the older <code>sort_nodes</code>), which orchestrates tree building, sorting of sibling nodes, and tree flattening.</li>
-<li><code>comparators.rs</code>: Defines <code>compare_siblings_with_options</code> which implements the comparison logic for various <code>SortKey</code>s, considering <code>SortingOptions</code> like <code>reverse_sort</code> and <code>files_before_directories</code>. It includes improved version string comparison and new size sorting logic (defaulting to largest first, files before directories).</li>
+<li><code>comparators.rs</code>: Defines <code>compare_siblings_with_options</code> which implements the comparison logic for various <code>SortKey</code>s, considering <code>SortingOptions</code> like <code>reverse_sort</code>, <code>files_before_directories</code> (legacy), and the new <code>directory_file_order</code> enum. It includes universal directory/file ordering that applies to all sort keys, improved version string comparison, and enhanced size sorting logic. The <code>apply_directory_file_ordering</code> function provides consistent directory vs. file ordering across all sorting modes.</li>
 <li><code>composite.rs</code>: (Placeholder for defining and using composite sort keys).</li>
 </ul>
 </li>
@@ -1318,8 +1352,8 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <li>
 <p>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:</p>
 <ul>
-<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code> (including <code>files_before_directories</code>), <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
-<li>Enums and related types: <code>SortKey</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>.</li>
+<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code> (including <code>directory_file_order</code> and legacy <code>files_before_directories</code>), <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
+<li>Enums and related types: <code>SortKey</code>, <code>DirectoryFileOrder</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>.</li>
 <li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code>).</li>
 </ul>
 </li>

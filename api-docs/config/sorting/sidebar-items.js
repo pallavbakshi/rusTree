@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["SortKey"],"struct":["SortingOptions"]};
+window.SIDEBAR_ITEMS = {"enum":["DirectoryFileOrder","SortKey"],"struct":["SortingOptions"]};
