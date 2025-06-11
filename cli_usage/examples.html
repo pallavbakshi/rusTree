@@ -215,21 +215,35 @@ rustree -d -s -L 1 ./src
 </code></pre>
 </li>
 <li>
+<p><strong>Output tree without the summary report at the end:</strong></p>
+<pre><code class="language-bash">rustree --no-summary-report ./my_project
+</code></pre>
+<p>This will display the tree structure without the "4 directories, 6 files" summary line at the end.</p>
+</li>
+<li>
+<p><strong>Generate clean markdown output without summary for documentation:</strong></p>
+<pre><code class="language-bash">rustree --output-format markdown --no-summary-report ./src &gt; code_structure.md
+</code></pre>
+<p>Perfect for including in documentation where you want just the tree structure without file counts.</p>
+</li>
+<li>
 <p><strong>Sort by modification time (oldest first using <code>-t</code>):</strong></p>
+</li>
+</ol>
 <pre><code class="language-bash">rustree -t ./my_project
 # or using --sort-by
 rustree --sort-by mtime ./my_project
 </code></pre>
-</li>
-<li>
-<p><strong>List files in directory order (unsorted using <code>-U</code>):</strong></p>
+<ol start="11">
+<li><strong>List files in directory order (unsorted using <code>-U</code>):</strong></li>
+</ol>
 <pre><code class="language-bash">rustree -U ./my_project
 # or using long flag
 rustree --unsorted ./my_project
 # or using --sort-by
 rustree --sort-by none ./my_project
 </code></pre>
-</li>
+<ol start="12">
 <li>
 <p><strong>Apply the <code>count-pluses</code> function to files and sort by its custom output:</strong></p>
 <pre><code class="language-bash">rustree --apply-function count-pluses --sort-by custom ./config_files
@@ -414,7 +428,7 @@ rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
 </li>
 </ol>
 <h2 id="apply-function-examples"><a class="header" href="#apply-function-examples">Apply Function Examples</a></h2>
-<ol start="35">
+<ol start="37">
 <li>
 <p><strong>Get directory statistics showing file count, directory count, and total size:</strong></p>
 <pre><code class="language-bash">rustree --apply-function dir-stats --show-size-bytes ./my_project
