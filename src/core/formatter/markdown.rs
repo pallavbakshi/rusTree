@@ -26,16 +26,40 @@ impl TreeFormatter for MarkdownFormatter {
         writeln!(output, "# {}", config.input_source.root_display_name)?;
         writeln!(output)?;
 
+        // Determine the effective root path from the nodes themselves
+        let scan_root_path_opt = nodes
+            .iter()
+            .find(|n| n.depth == 1)
+            .and_then(|n| n.path.parent().map(|p| p.to_path_buf()));
+
         // Convert nodes to markdown list
         for node in nodes {
             // Create indentation based on depth (depth 1 = no extra indent, depth 2 = 2 spaces, etc.)
             let indent = "  ".repeat(node.depth.saturating_sub(1));
 
-            // Format the node name with directory indicator
-            let name_with_suffix = if node.node_type == NodeType::Directory {
-                format!("{}/", node.name)
+            // Get the display name (full path or just name)
+            let display_name = if config.listing.show_full_path {
+                // For full path, we need to make it relative to the current directory
+                if let Some(scan_root) = &scan_root_path_opt {
+                    // Make path relative to scan root
+                    node.path
+                        .strip_prefix(scan_root)
+                        .unwrap_or(&node.path)
+                        .to_string_lossy()
+                        .to_string()
+                } else {
+                    // Fallback to just the name if no scan root
+                    node.name.clone()
+                }
             } else {
                 node.name.clone()
+            };
+
+            // Format the node name with directory indicator
+            let name_with_suffix = if node.node_type == NodeType::Directory {
+                format!("{}/", display_name)
+            } else {
+                display_name
             };
 
             // Add metadata if configured using centralized formatting

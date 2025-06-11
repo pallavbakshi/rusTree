@@ -45,6 +45,58 @@ fn main() -> Result<(), RustreeError> {
 }
 ```
 
+### Example 1b: Tree Listing with Full Paths
+
+This example demonstrates using the `show_full_path` option to display complete relative paths.
+
+```rust
+use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError,
+    InputSourceOptions, ListingOptions,
+};
+use std::path::Path;
+
+fn main() -> Result<(), RustreeError> {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "src".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_full_path: true, // Enable full path display
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &config)?;
+    let output_string = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
+    
+    println!("{}", output_string);
+    
+    // Output will show:
+    // src/
+    // ├── src/main.rs
+    // ├── src/lib.rs
+    // └── src/utils/
+    //     └── src/utils/helper.rs
+    // 
+    // Instead of just:
+    // src/
+    // ├── main.rs
+    // ├── lib.rs
+    // └── utils/
+    //     └── helper.rs
+
+    Ok(())
+}
+```
+
 ### Example 2: Reporting Sizes and Sorting
 
 This example demonstrates reporting file sizes and sorting by size in descending order.

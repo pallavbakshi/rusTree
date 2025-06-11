@@ -7,4 +7,6 @@ pub struct ListingOptions {
     pub show_hidden: bool,
     /// Whether to list only directories, excluding files.
     pub list_directories_only: bool,
+    /// Whether to show the full relative path for each file/directory.
+    pub show_full_path: bool,
 }

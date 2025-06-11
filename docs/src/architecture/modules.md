@@ -20,6 +20,7 @@ This top-level module centralizes all configuration-related definitions for the 
 
 - **`listing.rs`**:
   - Defines `ListingOptions` struct for directory traversal settings.
+  - Includes `show_full_path` option to control whether formatters display full relative paths or just filenames.
 
 - **`filtering.rs`**:
   - Defines `FilteringOptions` struct for inclusion/exclusion patterns, gitignore settings, and the `prune_empty_directories` flag.
@@ -79,8 +80,8 @@ The `src/core/` directory houses the main operational logic of `rustree`.
 
 - **`formatter/`**: This sub-module is responsible for generating the final output string.
   - `base.rs`: Defines the `TreeFormatter` trait, which all specific formatters implement.
-  - `text_tree.rs`: Implements `TextTreeFormatter` for the classic `tree`-like text output. It uses `core::metadata::file_info::format_node_metadata` for consistent metadata display.
-  - `markdown.rs`: Implements `MarkdownFormatter` for generating Markdown lists. It also uses `core::metadata::file_info::format_node_metadata`.
+  - `text_tree.rs`: Implements `TextTreeFormatter` for the classic `tree`-like text output. It uses `core::metadata::file_info::format_node_metadata` for consistent metadata display. Supports full path display when `config.listing.show_full_path` is enabled.
+  - `markdown.rs`: Implements `MarkdownFormatter` for generating Markdown lists. It also uses `core::metadata::file_info::format_node_metadata`. Supports full path display when `config.listing.show_full_path` is enabled.
   - `mod.rs` (in `formatter`): Re-exports `OutputFormat` (as `LibOutputFormat`) from `src/config/output_format.rs`.
 
 - **`util.rs`**: Contains general utility functions like `is_hidden`, `format_size`, `truncate_string`.

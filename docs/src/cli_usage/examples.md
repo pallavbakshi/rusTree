@@ -100,6 +100,78 @@ Here are some practical examples of how to use `rustree` from the command line.
    rustree --sort-by none ./my_project
    ```
 
+11b. **Show full paths for all files (similar to tree -f):**
+
+   ```bash
+   rustree --full-path ./my_project
+   # or using short flag
+   rustree -f ./my_project
+   ```
+   
+   **Example output:**
+   ```
+   my_project/
+   ├── README.md
+   ├── src/
+   │   ├── src/main.rs
+   │   ├── src/lib.rs
+   │   └── src/utils/
+   │       └── src/utils/helper.rs
+   └── tests/
+       └── tests/integration_test.rs
+   
+   3 directories, 5 files
+   ```
+   
+   Notice how nested files show their full relative path from the scan root (e.g., `src/main.rs` instead of just `main.rs`).
+
+11c. **Combine full-path with other metadata for detailed analysis:**
+
+   ```bash
+   rustree -f -s --calculate-lines ./my_project
+   ```
+   
+   **Example output:**
+   ```
+   my_project/
+   ├── [   1024B] [L:  50] README.md
+   ├── src/
+   │   ├── [   2048B] [L: 150] src/main.rs
+   │   ├── [   1536B] [L: 100] src/lib.rs
+   │   └── src/utils/
+   │       └── [    512B] [L:  25] src/utils/helper.rs
+   └── tests/
+       └── [   1280B] [L:  75] tests/integration_test.rs
+   
+   3 directories, 4 files, 400 total lines, 6.25 KB total
+   ```
+   
+   This combines full paths with size and line count information, making it easy to identify specific files and their characteristics.
+
+11d. **Full-path output in Markdown format:**
+
+   ```bash
+   rustree -f --output-format markdown ./docs > file_structure.md
+   ```
+   
+   **Generated Markdown:**
+   ```markdown
+   # docs
+   
+   * README.md
+   * guides/
+     * guides/installation.md
+     * guides/usage.md
+     * guides/advanced/
+       * guides/advanced/configuration.md
+   * api/
+     * api/reference.md
+   
+   __3 directories, 5 files total__
+   ```
+   
+   Perfect for documentation where you want to show the complete file paths in a structured format.
+
 12. **Apply the `count-pluses` function to files and sort by its custom output:**
 
     ```bash
