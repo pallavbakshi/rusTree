@@ -8,4 +8,8 @@ pub struct FormatArgs {
     /// Defaults to "text".
     #[arg(long, default_value = "text")]
     pub output_format: Option<CliOutputFormat>,
+
+    /// Omits printing of the file and directory report at the end of the tree listing.
+    #[arg(long)]
+    pub no_summary_report: bool,
 }

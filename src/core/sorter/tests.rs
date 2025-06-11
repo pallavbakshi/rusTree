@@ -1,5 +1,7 @@
 //! Tests for the sorter module functionality.
 
+#![allow(clippy::module_inception, clippy::useless_vec)]
+
 #[cfg(test)]
 mod tests {
     use crate::config::sorting::SortKey;

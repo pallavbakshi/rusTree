@@ -138,7 +138,9 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
                     CliBuiltInFunction::DirStats => LibBuiltInFunction::DirStats,
                 }),
         },
-        misc: MiscOptions::default(),
+        misc: MiscOptions {
+            no_summary_report: cli_args.format.no_summary_report,
+        },
     })
 }
 

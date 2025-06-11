@@ -3,7 +3,6 @@ use rustree::{
     ListingOptions, MetadataOptions, RustreeLibConfig, SortKey, SortingOptions, get_tree_nodes,
 };
 use std::fs;
-use std::path::Path;
 use tempfile::TempDir;
 
 fn create_benchmark_directory() -> TempDir {
@@ -101,6 +100,7 @@ fn benchmark_sorting(c: &mut Criterion) {
         sorting: SortingOptions {
             sort_by: Some(SortKey::Size),
             reverse_sort: false,
+            ..Default::default()
         },
         ..Default::default()
     };

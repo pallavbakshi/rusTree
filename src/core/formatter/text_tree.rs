@@ -156,48 +156,51 @@ impl TreeFormatter for TextTreeFormatter {
         }
 
         // FR4 & FR7: Summary Line
-        let (dir_count, file_count) = if config.listing.list_directories_only {
-            // If -d is active, nodes contains child directories.
-            // The total directory count includes these children plus the root if it's a directory.
-            let child_dir_count = nodes.len();
-            let root_dir_increment = if config.input_source.root_is_directory {
-                1
+        if !config.misc.no_summary_report {
+            let (dir_count, file_count) = if config.listing.list_directories_only {
+                // If -d is active, nodes contains child directories.
+                // The total directory count includes these children plus the root if it's a directory.
+                let child_dir_count = nodes.len();
+                let root_dir_increment = if config.input_source.root_is_directory {
+                    1
+                } else {
+                    0
+                };
+                (child_dir_count + root_dir_increment, 0)
             } else {
-                0
-            };
-            (child_dir_count + root_dir_increment, 0)
-        } else {
-            let mut dc = 0;
-            let mut fc = 0;
-            for node in nodes {
-                match node.node_type {
-                    NodeType::Directory => dc += 1,
-                    NodeType::File => fc += 1,
-                    NodeType::Symlink => { /* Symlinks are not explicitly counted in summary */ }
+                let mut dc = 0;
+                let mut fc = 0;
+                for node in nodes {
+                    match node.node_type {
+                        NodeType::Directory => dc += 1,
+                        NodeType::File => fc += 1,
+                        NodeType::Symlink => { /* Symlinks are not explicitly counted in summary */
+                        }
+                    }
                 }
-            }
-            // Include root directory in count if it's a directory
-            let root_dir_increment = if config.input_source.root_is_directory {
-                1
-            } else {
-                0
+                // Include root directory in count if it's a directory
+                let root_dir_increment = if config.input_source.root_is_directory {
+                    1
+                } else {
+                    0
+                };
+                (dc + root_dir_increment, fc)
             };
-            (dc + root_dir_increment, fc)
-        };
-        // FR8: Handling Empty Directories (covered by walker providing them)
+            // FR8: Handling Empty Directories (covered by walker providing them)
 
-        // Add a blank line after the tree content (or root name if tree is empty)
-        // before the summary line.
-        writeln!(output)?;
+            // Add a blank line after the tree content (or root name if tree is empty)
+            // before the summary line.
+            writeln!(output)?;
 
-        write!(
-            output,
-            "{} director{}, {} file{}",
-            dir_count,
-            if dir_count == 1 { "y" } else { "ies" },
-            file_count, // Will be 0 if config.list_directories_only is true
-            if file_count == 1 { "" } else { "s" }
-        )?;
+            write!(
+                output,
+                "{} director{}, {} file{}",
+                dir_count,
+                if dir_count == 1 { "y" } else { "ies" },
+                file_count, // Will be 0 if config.list_directories_only is true
+                if file_count == 1 { "" } else { "s" }
+            )?;
+        }
 
         Ok(output)
     }

@@ -45,42 +45,44 @@ impl TreeFormatter for MarkdownFormatter {
         }
 
         // Add summary
-        let (dir_count, file_count) = if config.listing.list_directories_only {
-            let child_dir_count = nodes.len();
-            let root_dir_increment = if config.input_source.root_is_directory {
-                1
+        if !config.misc.no_summary_report {
+            let (dir_count, file_count) = if config.listing.list_directories_only {
+                let child_dir_count = nodes.len();
+                let root_dir_increment = if config.input_source.root_is_directory {
+                    1
+                } else {
+                    0
+                };
+                (child_dir_count + root_dir_increment, 0)
             } else {
-                0
-            };
-            (child_dir_count + root_dir_increment, 0)
-        } else {
-            let mut dc = 0;
-            let mut fc = 0;
-            for node in nodes {
-                match node.node_type {
-                    NodeType::Directory => dc += 1,
-                    NodeType::File => fc += 1,
-                    NodeType::Symlink => { /* Not counted in summary */ }
+                let mut dc = 0;
+                let mut fc = 0;
+                for node in nodes {
+                    match node.node_type {
+                        NodeType::Directory => dc += 1,
+                        NodeType::File => fc += 1,
+                        NodeType::Symlink => { /* Not counted in summary */ }
+                    }
                 }
-            }
-            // Include root directory in count if it's a directory
-            let root_dir_increment = if config.input_source.root_is_directory {
-                1
-            } else {
-                0
+                // Include root directory in count if it's a directory
+                let root_dir_increment = if config.input_source.root_is_directory {
+                    1
+                } else {
+                    0
+                };
+                (dc + root_dir_increment, fc)
             };
-            (dc + root_dir_increment, fc)
-        };
 
-        writeln!(output)?;
-        write!(
-            output,
-            "__{} director{}, {} file{} total__",
-            dir_count,
-            if dir_count == 1 { "y" } else { "ies" },
-            file_count,
-            if file_count == 1 { "" } else { "s" }
-        )?;
+            writeln!(output)?;
+            write!(
+                output,
+                "__{} director{}, {} file{} total__",
+                dir_count,
+                if dir_count == 1 { "y" } else { "ies" },
+                file_count,
+                if file_count == 1 { "" } else { "s" }
+            )?;
+        }
 
         Ok(output)
     }

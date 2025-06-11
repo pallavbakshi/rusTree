@@ -4,6 +4,8 @@ prd*
 tests*.md
 tree.txt
 diff.txt
+.cargo/
+.tmp/
 
 # For supercat
 .hide

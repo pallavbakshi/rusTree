@@ -544,7 +544,8 @@ fn test_apply_function_filtering_from_files() {
     writeln!(include_patterns_file, "# This is a comment")
         .expect("Failed to write to include file");
     writeln!(include_patterns_file, "include*").expect("Failed to write to include file");
-    writeln!(include_patterns_file, "").expect("Failed to write to include file"); // Empty line
+    // Write an empty line (writeln! without arguments adds a newline)
+    writeln!(include_patterns_file).expect("Failed to write to include file");
     writeln!(include_patterns_file, "regular*").expect("Failed to write to include file");
 
     writeln!(exclude_patterns_file, "exclude*").expect("Failed to write to exclude file");
