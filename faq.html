@@ -249,6 +249,72 @@ A: You can sort by apply function results using <code>--sort-by custom</code>. T
 <li>Use <code>--reverse-sort</code> to reverse the order</li>
 </ul>
 <p>For example: <code>rustree --apply-function dir-stats --sort-by custom -r</code> sorts directories by complexity (most files/subdirs first).</p>
+<p><strong>Q: What's the difference between <code>--dry-run</code> and normal LLM queries?</strong>
+A: The <code>--dry-run</code> flag previews what would be sent to the LLM without actually making the API call:</p>
+<ul>
+<li>Shows exactly what request would be sent (headers, body, endpoint)</li>
+<li>Displays token estimation for cost planning</li>
+<li>No API key required and no network traffic</li>
+<li>Perfect for debugging prompts and verifying configurations</li>
+<li>Can be combined with <code>--human-friendly</code> for better readability</li>
+</ul>
+<p><strong>Q: When should I use <code>--human-friendly</code> with <code>--dry-run</code>?</strong>
+A: Use <code>--human-friendly</code> when you want easier-to-read output:</p>
+<ul>
+<li>Organizes information into clear sections (Configuration, Headers, Messages, etc.)</li>
+<li>Formats JSON in a more readable way</li>
+<li>Shows key parameters prominently</li>
+<li>Great for sharing dry-run outputs or documentation</li>
+<li>Note: <code>--human-friendly</code> requires <code>--dry-run</code> to be enabled</li>
+</ul>
+<p><strong>Q: How do I estimate LLM costs before making requests?</strong>
+A: Use <code>--dry-run</code> to see token estimates:</p>
+<pre><code class="language-bash">rustree --llm-ask "Your question" --dry-run
+# Shows: "Estimated tokens: 356 prompt + 1000 completion ≈ 1356 total"
+</code></pre>
+<p>Then calculate costs based on your provider's pricing (e.g., OpenAI charges per 1000 tokens).</p>
+<p><strong>Q: How accurate are the token estimates shown in <code>--dry-run</code>?</strong>
+A: The token estimates are <strong>rough approximations</strong> using simple heuristics:</p>
+<p><strong>Estimation Method:</strong></p>
+<ul>
+<li><strong>Prompt tokens</strong>: Uses a 4:1 character-to-token ratio (<code>prompt_length / 4</code>)</li>
+<li><strong>Completion tokens</strong>: Uses your <code>--llm-max-tokens</code> setting (assumes full usage)</li>
+<li><strong>Total</strong>: Simple addition of prompt + completion estimates</li>
+</ul>
+<p><strong>Limitations &amp; Accuracy:</strong></p>
+<ul>
+<li>⚠️ <strong>This is a ballpark estimate, not precise billing calculation</strong></li>
+<li>Character-to-token ratios vary significantly by content type:
+<ul>
+<li>Code/structured text: Often more tokens per character</li>
+<li>Natural language: Closer to 4:1 ratio</li>
+<li>Special characters/punctuation: Affects ratio</li>
+</ul>
+</li>
+<li>Different providers use different tokenizers (OpenAI/tiktoken, Anthropic, Cohere)</li>
+<li>Assumes maximum completion token usage (rarely happens in practice)</li>
+<li>Doesn't account for JSON request overhead</li>
+</ul>
+<p><strong>Recommendations:</strong></p>
+<ul>
+<li>Use estimates for rough cost planning and comparing prompt sizes</li>
+<li>For precise billing, use provider-specific tokenization tools:
+<ul>
+<li>OpenAI: <code>tiktoken</code> library</li>
+<li>Anthropic: Claude API token counting</li>
+<li>Check your provider's dashboard for actual usage</li>
+</ul>
+</li>
+<li>Consider estimates as "worst-case" scenarios for budgeting</li>
+</ul>
+<p><strong>Q: How are the <code>&lt;tree_output&gt;</code> and <code>&lt;user_request&gt;</code> tags used?</strong>
+A: These XML-style tags help the LLM understand the prompt structure:</p>
+<ul>
+<li><code>&lt;tree_output&gt;...&lt;/tree_output&gt;</code> contains the directory tree from the tree command</li>
+<li><code>&lt;user_request&gt;...&lt;/user_request&gt;</code> contains your question/request</li>
+<li>This clear separation helps LLMs provide more relevant and focused responses</li>
+<li>The tags are automatically added to all LLM requests</li>
+</ul>
 
                     </main>
 

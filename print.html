@@ -723,6 +723,21 @@ rustree --sort-by size --reverse-sort
 <li>Example: <code>rustree --llm-generate-env &gt; .env</code></li>
 </ul>
 </li>
+<li>
+<p><code>--dry-run</code></p>
+<ul>
+<li>Description: Preview the LLM request without actually sending it. When used with <code>--llm-ask</code>, RusTree builds the full HTTP request that would be sent to the provider, displays it, and exits without making the API call. This is useful for debugging, cost estimation, and verifying the request structure before sending.</li>
+<li><strong>Token Estimation</strong>: Shows approximate token counts using a 4:1 character-to-token ratio for prompts and max_tokens setting for completion. These are rough estimates for planning purposes only - actual token usage may vary significantly based on content type and provider tokenization.</li>
+<li>Example: <code>rustree --llm-ask "What is this project?" --dry-run</code></li>
+</ul>
+</li>
+<li>
+<p><code>--human-friendly</code></p>
+<ul>
+<li>Description: Format dry-run output in a human-friendly markdown format instead of the default plain text. This option requires <code>--dry-run</code> to be enabled. The markdown format provides better structure with organized sections for configuration, headers, messages, and JSON body.</li>
+<li>Example: <code>rustree --llm-ask "Analyze this project" --dry-run --human-friendly</code></li>
+</ul>
+</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
 <p>Here are some practical examples of how to use <code>rustree</code> from the command line.</p>
@@ -929,15 +944,40 @@ rustree --llm-ask "What documentation is missing?" \
 </code></pre>
 </li>
 <li>
+<p><strong>LLM request preview and debugging:</strong></p>
+<pre><code class="language-bash"># Preview what would be sent to the LLM (no API call, no cost)
+rustree --llm-ask "What's the architecture of this project?" --dry-run
+
+# Human-readable markdown format for better readability
+rustree --llm-ask "Analyze the code organization" \
+  --dry-run --human-friendly
+
+# Cost estimation for complex queries
+rustree --llm-ask "Detailed security analysis with recommendations" \
+  --llm-max-tokens 3000 --dry-run
+
+# Debug prompt structure before sending
+rustree --llm-ask "Custom analysis question" \
+  --include "*.rs" --depth 3 --size --dry-run --human-friendly
+
+# Verify API configuration without making requests
+rustree --llm-ask "Test question" --llm-provider anthropic \
+  --llm-model claude-3-haiku --dry-run
+</code></pre>
+</li>
+<li>
 <p><strong>LLM workflow examples:</strong></p>
-<pre><code class="language-bash"># Step 1: Export for review
-rustree --llm-export "Initial analysis" &gt; project-analysis.txt
+<pre><code class="language-bash"># Step 1: Preview and refine your question
+rustree --llm-ask "Initial analysis" --dry-run --human-friendly
 
-# Step 2: Direct analysis with specific focus
+# Step 2: Export for review
+rustree --llm-export "Refined analysis question" &gt; project-analysis.txt
+
+# Step 3: Direct analysis with verified prompt
 rustree --llm-ask "Focus on error handling patterns" \
-  --include "*.rs" --grep-pattern "Result\|Error"
+  --include "*.rs" --llm-temperature 0.3
 
-# Step 3: Compare with external tool
+# Step 4: Compare with external tool
 rustree --llm-export "Compare with previous analysis" | your-llm-tool
 </code></pre>
 </li>
@@ -1442,7 +1482,13 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
 <ul>
 <li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
 <li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
-<li><strong><code>BuiltInFunction</code></strong>: <code>CountPluses</code> (counts '+' characters), <code>Cat</code> (returns full file content). Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>. When using <code>Cat</code>, the <code>format_nodes()</code> function automatically displays file contents after the tree structure.</li>
+<li><strong><code>BuiltInFunction</code></strong>:
+<ul>
+<li>File functions: <code>CountPluses</code> (counts '+' characters), <code>Cat</code> (returns full file content)</li>
+<li>Directory functions: <code>CountFiles</code>, <code>CountDirectories</code>, <code>SizeTotal</code>, <code>DirStats</code></li>
+<li>Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>. When using <code>Cat</code>, the <code>format_nodes()</code> function automatically displays file contents after the tree structure.</li>
+</ul>
+</li>
 <li><strong><code>ApplyFnError</code></strong>: Error type for <code>BuiltInFunction</code> application. Defined in <code>src/config/metadata.rs</code>.</li>
 <li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Defined in <code>src/core/tree/node.rs</code>. Found in <code>NodeInfo</code>.</li>
 <li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Defined in <code>src/core/error.rs</code>. Includes variants like <code>Io</code>, <code>GlobPattern</code>, <code>IgnoreError</code>, and <code>TreeBuildError</code> (for errors during internal tree construction or sorting).</li>
@@ -2234,6 +2280,72 @@ A: You can sort by apply function results using <code>--sort-by custom</code>. T
 <li>Use <code>--reverse-sort</code> to reverse the order</li>
 </ul>
 <p>For example: <code>rustree --apply-function dir-stats --sort-by custom -r</code> sorts directories by complexity (most files/subdirs first).</p>
+<p><strong>Q: What's the difference between <code>--dry-run</code> and normal LLM queries?</strong>
+A: The <code>--dry-run</code> flag previews what would be sent to the LLM without actually making the API call:</p>
+<ul>
+<li>Shows exactly what request would be sent (headers, body, endpoint)</li>
+<li>Displays token estimation for cost planning</li>
+<li>No API key required and no network traffic</li>
+<li>Perfect for debugging prompts and verifying configurations</li>
+<li>Can be combined with <code>--human-friendly</code> for better readability</li>
+</ul>
+<p><strong>Q: When should I use <code>--human-friendly</code> with <code>--dry-run</code>?</strong>
+A: Use <code>--human-friendly</code> when you want easier-to-read output:</p>
+<ul>
+<li>Organizes information into clear sections (Configuration, Headers, Messages, etc.)</li>
+<li>Formats JSON in a more readable way</li>
+<li>Shows key parameters prominently</li>
+<li>Great for sharing dry-run outputs or documentation</li>
+<li>Note: <code>--human-friendly</code> requires <code>--dry-run</code> to be enabled</li>
+</ul>
+<p><strong>Q: How do I estimate LLM costs before making requests?</strong>
+A: Use <code>--dry-run</code> to see token estimates:</p>
+<pre><code class="language-bash">rustree --llm-ask "Your question" --dry-run
+# Shows: "Estimated tokens: 356 prompt + 1000 completion ≈ 1356 total"
+</code></pre>
+<p>Then calculate costs based on your provider's pricing (e.g., OpenAI charges per 1000 tokens).</p>
+<p><strong>Q: How accurate are the token estimates shown in <code>--dry-run</code>?</strong>
+A: The token estimates are <strong>rough approximations</strong> using simple heuristics:</p>
+<p><strong>Estimation Method:</strong></p>
+<ul>
+<li><strong>Prompt tokens</strong>: Uses a 4:1 character-to-token ratio (<code>prompt_length / 4</code>)</li>
+<li><strong>Completion tokens</strong>: Uses your <code>--llm-max-tokens</code> setting (assumes full usage)</li>
+<li><strong>Total</strong>: Simple addition of prompt + completion estimates</li>
+</ul>
+<p><strong>Limitations &amp; Accuracy:</strong></p>
+<ul>
+<li>⚠️ <strong>This is a ballpark estimate, not precise billing calculation</strong></li>
+<li>Character-to-token ratios vary significantly by content type:
+<ul>
+<li>Code/structured text: Often more tokens per character</li>
+<li>Natural language: Closer to 4:1 ratio</li>
+<li>Special characters/punctuation: Affects ratio</li>
+</ul>
+</li>
+<li>Different providers use different tokenizers (OpenAI/tiktoken, Anthropic, Cohere)</li>
+<li>Assumes maximum completion token usage (rarely happens in practice)</li>
+<li>Doesn't account for JSON request overhead</li>
+</ul>
+<p><strong>Recommendations:</strong></p>
+<ul>
+<li>Use estimates for rough cost planning and comparing prompt sizes</li>
+<li>For precise billing, use provider-specific tokenization tools:
+<ul>
+<li>OpenAI: <code>tiktoken</code> library</li>
+<li>Anthropic: Claude API token counting</li>
+<li>Check your provider's dashboard for actual usage</li>
+</ul>
+</li>
+<li>Consider estimates as "worst-case" scenarios for budgeting</li>
+</ul>
+<p><strong>Q: How are the <code>&lt;tree_output&gt;</code> and <code>&lt;user_request&gt;</code> tags used?</strong>
+A: These XML-style tags help the LLM understand the prompt structure:</p>
+<ul>
+<li><code>&lt;tree_output&gt;...&lt;/tree_output&gt;</code> contains the directory tree from the tree command</li>
+<li><code>&lt;user_request&gt;...&lt;/user_request&gt;</code> contains your question/request</li>
+<li>This clear separation helps LLMs provide more relevant and focused responses</li>
+<li>The tags are automatically added to all LLM requests</li>
+</ul>
 
                     </main>
 

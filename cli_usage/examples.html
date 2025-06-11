@@ -371,15 +371,40 @@ rustree --llm-ask "What documentation is missing?" \
 </code></pre>
 </li>
 <li>
+<p><strong>LLM request preview and debugging:</strong></p>
+<pre><code class="language-bash"># Preview what would be sent to the LLM (no API call, no cost)
+rustree --llm-ask "What's the architecture of this project?" --dry-run
+
+# Human-readable markdown format for better readability
+rustree --llm-ask "Analyze the code organization" \
+  --dry-run --human-friendly
+
+# Cost estimation for complex queries
+rustree --llm-ask "Detailed security analysis with recommendations" \
+  --llm-max-tokens 3000 --dry-run
+
+# Debug prompt structure before sending
+rustree --llm-ask "Custom analysis question" \
+  --include "*.rs" --depth 3 --size --dry-run --human-friendly
+
+# Verify API configuration without making requests
+rustree --llm-ask "Test question" --llm-provider anthropic \
+  --llm-model claude-3-haiku --dry-run
+</code></pre>
+</li>
+<li>
 <p><strong>LLM workflow examples:</strong></p>
-<pre><code class="language-bash"># Step 1: Export for review
-rustree --llm-export "Initial analysis" &gt; project-analysis.txt
+<pre><code class="language-bash"># Step 1: Preview and refine your question
+rustree --llm-ask "Initial analysis" --dry-run --human-friendly
 
-# Step 2: Direct analysis with specific focus
+# Step 2: Export for review
+rustree --llm-export "Refined analysis question" &gt; project-analysis.txt
+
+# Step 3: Direct analysis with verified prompt
 rustree --llm-ask "Focus on error handling patterns" \
-  --include "*.rs" --grep-pattern "Result\|Error"
+  --include "*.rs" --llm-temperature 0.3
 
-# Step 3: Compare with external tool
+# Step 4: Compare with external tool
 rustree --llm-export "Compare with previous analysis" | your-llm-tool
 </code></pre>
 </li>
