@@ -10,6 +10,7 @@ pub use mapping::{map_cli_to_lib_config, map_cli_to_lib_output_format};
 // Declare the new sub-modules
 pub mod filtering;
 pub mod listing;
+pub mod llm;
 pub mod metadata;
 pub mod misc;
 pub mod output;

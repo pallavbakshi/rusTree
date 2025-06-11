@@ -2,6 +2,7 @@
 pub mod filtering;
 pub mod input_source;
 pub mod listing;
+pub mod llm;
 pub mod metadata;
 pub mod misc;
 pub mod output_format;
@@ -16,6 +17,7 @@ pub use tree_options::RustreeLibConfig;
 pub use filtering::FilteringOptions;
 pub use input_source::InputSourceOptions;
 pub use listing::ListingOptions;
+pub use llm::LlmOptions;
 pub use metadata::{ApplyFnError, BuiltInFunction, MetadataOptions}; // Re-export BuiltInFunction, ApplyFnError
 pub use misc::MiscOptions;
 pub use sorting::{SortKey, SortingOptions}; // Re-export SortKey directly as it's a common enum
