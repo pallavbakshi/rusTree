@@ -1,10 +1,9 @@
 // src/cli/args.rs
-use crate::cli::filtering::{apply_function, exclude, gitignore_rules, include};
-use crate::cli::listing::{depth, directory_only, hidden};
+use crate::cli::filtering::{apply_function, exclude, gitignore_rules, include, pruning};
+use crate::cli::listing::{depth, directory_only, full_path, hidden};
 use crate::cli::llm;
 use crate::cli::metadata::{date, size, stats};
 use crate::cli::output::format;
-use crate::cli::pruning; // Import the new pruning module
 use crate::cli::sorting::order;
 use clap::Parser;
 use std::path::PathBuf;
@@ -28,6 +27,9 @@ pub struct CliArgs {
 
     #[command(flatten)]
     pub directory_only: directory_only::DirectoryOnlyArgs,
+
+    #[command(flatten)]
+    pub full_path: full_path::FullPathArgs,
 
     #[command(flatten)]
     pub size: size::SizeArgs,

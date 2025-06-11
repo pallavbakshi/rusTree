@@ -14,6 +14,7 @@ This struct (defined in `src/config/tree_options.rs`) is central to controlling 
   - `max_depth`: The maximum depth of traversal.
   - `show_hidden`: Whether to include hidden files/directories.
   - `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
+  - `show_full_path`: If `true`, formatters display the full relative path for each entry instead of just the filename. Equivalent to the CLI `-f`/`--full-path` flag.
 - **`filtering: FilteringOptions`** (from `src/config/filtering.rs`):
   - `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--filter-include` options.
   - `ignore_patterns`: `Option<Vec<String>>` containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI `-I`/`--filter-exclude` options.
@@ -56,6 +57,7 @@ let config = RustreeLibConfig {
         max_depth: Some(3),
         show_hidden: false,
         list_directories_only: false,
+        show_full_path: true, // Show full relative paths for files
         ..Default::default()
     },
     filtering: FilteringOptions {

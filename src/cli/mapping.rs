@@ -66,6 +66,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
             max_depth: cli_args.depth.max_depth,
             show_hidden: cli_args.all_files.show_hidden,
             list_directories_only: cli_args.directory_only.list_directories_only,
+            show_full_path: cli_args.full_path.show_full_path,
         },
         filtering: FilteringOptions {
             match_patterns: cli_args.include.match_patterns.clone(),

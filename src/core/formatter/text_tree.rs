@@ -149,7 +149,24 @@ impl TreeFormatter for TextTreeFormatter {
             let metadata_string = format_node_metadata(node, config, MetadataStyle::Text);
             write!(output, "{}", metadata_string)?;
 
-            write!(output, "{}", node.name)?;
+            // Show full path or just name based on configuration
+            if config.listing.show_full_path {
+                // For full path, we need to make it relative to the current directory
+                let display_path = if let Some(scan_root) = &scan_root_path_opt {
+                    // Make path relative to scan root
+                    node.path
+                        .strip_prefix(scan_root)
+                        .unwrap_or(&node.path)
+                        .to_string_lossy()
+                        .to_string()
+                } else {
+                    // Fallback to just the name if no scan root
+                    node.name.clone()
+                };
+                write!(output, "{}", display_path)?;
+            } else {
+                write!(output, "{}", node.name)?;
+            }
             if node.node_type == NodeType::Directory {
                 write!(output, "/")?;
             }
