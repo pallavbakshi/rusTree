@@ -179,10 +179,24 @@
 <ul>
 <li><strong>Tree visualization</strong> with customizable depth and formatting</li>
 <li><strong>Metadata display</strong> including sizes, timestamps, line/word counts</li>
+<li><strong>Enhanced summary report</strong> with automatic aggregation of metadata totals</li>
 <li><strong>Apply functions</strong> to analyze file contents and directory statistics</li>
 <li><strong>Flexible filtering</strong> with patterns, gitignore support, and function-specific filtering</li>
 <li><strong>Advanced sorting</strong> by various criteria including custom function output</li>
 <li><strong>Multiple output formats</strong> (text, markdown) for different use cases</li>
+</ul>
+<h3 id="enhanced-summary-reports"><a class="header" href="#enhanced-summary-reports">Enhanced Summary Reports</a></h3>
+<p>When using metadata flags like <code>--calculate-lines</code>, <code>--calculate-words</code>, or <code>--show-size-bytes</code>, the summary line automatically includes aggregated totals:</p>
+<pre><code class="language-bash"># Instead of just: "3 directories, 15 files"
+# You now get: "3 directories, 15 files, 1,234 total lines, 5,678 total words, 2.1 MB total"
+</code></pre>
+<p>This feature works with:</p>
+<ul>
+<li>Line counts (<code>--calculate-lines</code>)</li>
+<li>Word counts (<code>--calculate-words</code>)</li>
+<li>File sizes (<code>--show-size-bytes</code>)</li>
+<li>Apply function outputs (when numeric)</li>
+<li>Large numbers are formatted with thousand separators for readability</li>
 </ul>
 <h2 id="sub-sections"><a class="header" href="#sub-sections">Sub-sections:</a></h2>
 <ul>

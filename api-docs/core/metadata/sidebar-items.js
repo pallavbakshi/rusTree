@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["extended_attrs","file_info","size_calculator","time_formatter"]};
+window.SIDEBAR_ITEMS = {"mod":["extended_attrs","file_info","size_calculator","time_formatter"],"struct":["MetadataAggregator"]};
