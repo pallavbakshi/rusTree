@@ -9,11 +9,15 @@
 
 // The CLI module is part of this crate (rustree library crate), but not exposed publicly
 use rustree::cli::{CliArgs, map_cli_to_lib_config, map_cli_to_lib_output_format};
+use rustree::core::llm::{
+    LlmClientFactory, LlmConfig, LlmError, LlmResponseProcessor, TreePromptFormatter,
+};
 
 use clap::Parser;
 use std::process::ExitCode;
 
-fn main() -> ExitCode {
+#[tokio::main]
+async fn main() -> ExitCode {
     let cli_args = CliArgs::parse();
 
     // 1. Map CLI args to Library config
@@ -45,9 +49,19 @@ fn main() -> ExitCode {
         }
     };
 
-    // 4. Handle output based on CLI options
-    if let Some(question) = &cli_args.llm.llm_ask {
-        // Prepare for piping (as discussed, user handles the actual pipe)
+    // 4. Handle LLM env generation first
+    if cli_args.llm.llm_generate_env {
+        println!(
+            "{}",
+            rustree::core::llm::LlmConfig::generate_sample_env_file()
+        );
+        eprintln!("💡 Save this content to a .env file in your project root or current directory");
+        return ExitCode::SUCCESS;
+    }
+
+    // 5. Handle output based on CLI options
+    if let Some(question) = &cli_args.llm.llm_export {
+        // Export formatted query for external LLM tools (preserves existing behavior)
         println!("---BEGIN RUSTREE OUTPUT---");
         println!("{}", output_string);
         println!("---END RUSTREE OUTPUT---");
@@ -55,9 +69,42 @@ fn main() -> ExitCode {
         println!("{}", question);
         println!("---END LLM QUESTION---");
         eprintln!("\nHint: Pipe the above to your LLM tool.");
+    } else if let Some(question) = &cli_args.llm.llm_ask {
+        // Send directly to LLM service (new functionality)
+        match handle_llm_query(&cli_args, question, &output_string).await {
+            Ok(response) => println!("{}", response),
+            Err(e) => {
+                eprintln!("LLM Error: {}", e);
+                return ExitCode::FAILURE;
+            }
+        }
     } else {
         println!("{}", output_string);
     }
 
     ExitCode::SUCCESS
+}
+
+async fn handle_llm_query(
+    cli_args: &CliArgs,
+    question: &str,
+    tree_output: &str,
+) -> Result<String, LlmError> {
+    // 1. Create LLM config from CLI args
+    let llm_config = LlmConfig::from_cli_args(&cli_args.llm)?;
+
+    // 2. Map CLI args to library config for prompt formatting
+    let lib_config = match rustree::cli::map_cli_to_lib_config(cli_args) {
+        Ok(config) => config,
+        Err(e) => return Err(LlmError::Config(e.to_string())),
+    };
+
+    // 3. Format prompt with tree output and question
+    let prompt = TreePromptFormatter::format_prompt(tree_output, question, &lib_config);
+
+    // 4. Send to LLM and get response
+    let response = LlmClientFactory::create_and_query(&llm_config, &prompt).await?;
+
+    // 5. Format response for display
+    Ok(LlmResponseProcessor::format_response(&response, question))
 }

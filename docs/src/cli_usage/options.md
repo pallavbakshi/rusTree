@@ -189,6 +189,45 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Description: Print help information and exit.
   - Example: `rustree --help`
 
-- `--llm-ask <PROMPT>`
-  - Description: Prepend the tree output with a specific prompt string, useful for piping to Large Language Models (LLMs). The prompt is followed by "--- TREE ---" and then the actual tree output.
-  - Example: `rustree --llm-ask "Summarize this project structure:" | ollama run mistral`
+## LLM Integration
+
+- `--llm-export <QUESTION>`
+  - Description: Export a formatted query for external LLM tools. This preserves the original behavior of outputting specially formatted text for piping to external LLM command-line tools.
+  - Example: `rustree --llm-export "Analyze this project structure" | claude-cli`
+
+- `--llm-ask <QUESTION>`
+  - Description: Ask a question directly to an LLM service. Requires API key configuration.
+  - Example: `rustree --llm-ask "What's the architecture of this project?"`
+
+- `--llm-provider <PROVIDER>`
+  - Description: Choose the LLM provider for direct queries. Supported providers: `openai`, `anthropic`, `cohere`, `openrouter`.
+  - Default: `openai`
+  - Example: `rustree --llm-ask "Analyze this" --llm-provider anthropic`
+
+- `--llm-model <MODEL>`
+  - Description: Specify the model to use with the chosen provider.
+  - Default models: OpenAI (`gpt-4`), Anthropic (`claude-3-sonnet-20240229`), Cohere (`command-r`), OpenRouter (`openai/gpt-4`)
+  - Example: `rustree --llm-ask "Review this" --llm-model gpt-3.5-turbo`
+
+- `--llm-api-key <KEY>`
+  - Description: Provide API key via command line. Can also be set via environment variables or `.env` file.
+  - Environment variables: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `COHERE_API_KEY`, `OPENROUTER_API_KEY`
+  - Example: `rustree --llm-ask "Question" --llm-api-key "your-api-key"`
+
+- `--llm-endpoint <URL>`
+  - Description: Custom endpoint URL for self-hosted or proxy services.
+  - Example: `rustree --llm-ask "Question" --llm-endpoint "https://api.custom.com/v1"`
+
+- `--llm-temperature <FLOAT>`
+  - Description: Control response randomness. Range: 0.0 (deterministic) to 2.0 (very random).
+  - Default: `0.7`
+  - Example: `rustree --llm-ask "Precise analysis" --llm-temperature 0.1`
+
+- `--llm-max-tokens <INT>`
+  - Description: Maximum number of tokens in the LLM response. Range: 1 to 32000.
+  - Default: `1000`
+  - Example: `rustree --llm-ask "Brief summary" --llm-max-tokens 200`
+
+- `--llm-generate-env`
+  - Description: Generate a sample `.env` file template with all supported API key variables.
+  - Example: `rustree --llm-generate-env > .env`
