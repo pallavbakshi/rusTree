@@ -29,6 +29,8 @@ fn test_env_variable_loading() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let config = LlmConfig::from_cli_args(&llm_args).expect("Should create config from env var");
@@ -59,6 +61,8 @@ fn test_cli_key_overrides_env() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let config = LlmConfig::from_cli_args(&llm_args).expect("Should create config with CLI key");
@@ -88,6 +92,8 @@ fn test_missing_api_key_error() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let result = LlmConfig::from_cli_args(&llm_args);

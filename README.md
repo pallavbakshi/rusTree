@@ -101,6 +101,8 @@ rustree --llm-ask "Brief analysis" --llm-temperature 0.3 --llm-max-tokens 500
 - `--llm-temperature <float>`: Response randomness (0.0-2.0)
 - `--llm-max-tokens <int>`: Maximum response length
 - `--llm-generate-env`: Generate .env template
+- `--dry-run`: Preview LLM request without sending (for debugging/rough cost estimation)
+- `--human-friendly`: Format dry-run output in readable markdown (requires --dry-run)
 
 ## Examples
 
@@ -126,9 +128,25 @@ rustree --llm-ask "What could be optimized for better performance?" \
 ```bash
 # Use with external LLM CLI
 rustree --llm-export "Suggest refactoring opportunities" | some-llm-tool
+```
+
+### Request Preview and Debugging
+```bash
+# Preview what would be sent to the LLM (no API call)
+rustree --llm-ask "What's this project about?" --dry-run
+
+# Human-readable markdown format for better readability
+rustree --llm-ask "Analyze the architecture" --dry-run --human-friendly
+
+# Perfect for cost estimation and debugging prompts
+rustree --llm-ask "Complex analysis question" --llm-max-tokens 2000 --dry-run
+
+# Note: Token estimates are rough approximations (4:1 char ratio)
+# Use for planning only - actual usage may vary by content/provider
 
 # Save for later analysis
 rustree --llm-export "Technical debt assessment" > analysis-prompt.txt
+```
 ```
 
 ## For Developers

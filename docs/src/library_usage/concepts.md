@@ -142,7 +142,10 @@ This function takes the nodes, a `LibOutputFormat` enum (`Text` or `Markdown`, f
 
 - **`SortKey`**: `Name`, `Version`, `Size`, `MTime`, `ChangeTime`, `CreateTime`, `Words`, `Lines`, `Custom`, `None`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig.sorting.sort_by`.
 - **`LibOutputFormat`**: `Text`, `Markdown`. Defined in `src/config/output_format.rs` (as `OutputFormat`). Used with `format_nodes()`.
-- **`BuiltInFunction`**: `CountPluses` (counts '+' characters), `Cat` (returns full file content). Defined in `src/config/metadata.rs`. Used in `RustreeLibConfig.metadata.apply_function`. When using `Cat`, the `format_nodes()` function automatically displays file contents after the tree structure.
+- **`BuiltInFunction`**: 
+  - File functions: `CountPluses` (counts '+' characters), `Cat` (returns full file content)
+  - Directory functions: `CountFiles`, `CountDirectories`, `SizeTotal`, `DirStats`
+  - Defined in `src/config/metadata.rs`. Used in `RustreeLibConfig.metadata.apply_function`. When using `Cat`, the `format_nodes()` function automatically displays file contents after the tree structure.
 - **`ApplyFnError`**: Error type for `BuiltInFunction` application. Defined in `src/config/metadata.rs`.
 - **`NodeType`**: `File`, `Directory`, `Symlink`. Defined in `src/core/tree/node.rs`. Found in `NodeInfo`.
 - **`RustreeError`**: The error type returned by library functions. Defined in `src/core/error.rs`. Includes variants like `Io`, `GlobPattern`, `IgnoreError`, and `TreeBuildError` (for errors during internal tree construction or sorting).

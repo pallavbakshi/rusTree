@@ -72,12 +72,22 @@ async fn main() -> ExitCode {
     } else if let Some(question) = &cli_args.llm.llm_ask {
         // Send directly to LLM service (new functionality)
         match handle_llm_query(&cli_args, question, &output_string).await {
-            Ok(response) => println!("{}", response),
+            Ok(response) => {
+                if !response.is_empty() {
+                    println!("{}", response)
+                }
+            }
             Err(e) => {
                 eprintln!("LLM Error: {}", e);
                 return ExitCode::FAILURE;
             }
         }
+    } else if cli_args.llm.dry_run {
+        // --dry-run without --llm-ask
+        eprintln!(
+            "⚠️  --dry-run flag has no effect without --llm-ask. Showing tree output only.\n"
+        );
+        println!("{}", output_string);
     } else {
         println!("{}", output_string);
     }
@@ -102,9 +112,21 @@ async fn handle_llm_query(
     // 3. Format prompt with tree output and question
     let prompt = TreePromptFormatter::format_prompt(tree_output, question, &lib_config);
 
-    // 4. Send to LLM and get response
+    // 4. Handle dry-run: build preview and skip network
+    if cli_args.llm.dry_run {
+        let preview = rustree::core::llm::RequestPreview::from_config(&llm_config, &prompt);
+        let output = if cli_args.llm.human_friendly {
+            preview.pretty_print_markdown()
+        } else {
+            preview.pretty_print()
+        };
+        println!("{}", output);
+        return Ok(String::new());
+    }
+
+    // 5. Send to LLM and get response
     let response = LlmClientFactory::create_and_query(&llm_config, &prompt).await?;
 
-    // 5. Format response for display
+    // 6. Format response for display
     Ok(LlmResponseProcessor::format_response(&response, question))
 }

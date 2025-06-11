@@ -13,13 +13,10 @@ impl TreePromptFormatter {
         let metadata_info = Self::extract_metadata_info(tree_output, tree_config);
 
         format!(
-            "You are analyzing a directory tree structure. Here's the tree output:\n\n\
-            ```\n{}\n```\n\n\
+            "You are analyzing a directory tree structure.\n\n\
+            <tree_output>\n{}\n</tree_output>\n\n\
             {}\
-            Question: {}\n\n\
-            Please provide a helpful analysis based on the directory structure above. \
-            Focus on architectural patterns, code organization, potential issues, \
-            and actionable insights.",
+            <user_request>{}</user_request>",
             tree_output, metadata_info, user_question
         )
     }

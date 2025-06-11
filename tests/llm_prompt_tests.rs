@@ -15,8 +15,11 @@ fn test_basic_prompt_formatting() {
     assert!(prompt.contains("You are analyzing a directory tree structure"));
     assert!(prompt.contains(tree_output));
     assert!(prompt.contains(question));
-    assert!(prompt.contains("architectural patterns"));
-    assert!(prompt.contains("actionable insights"));
+    // Check for XML tags in new structure
+    assert!(prompt.contains("<tree_output>"));
+    assert!(prompt.contains("</tree_output>"));
+    assert!(prompt.contains("<user_request>"));
+    assert!(prompt.contains("</user_request>"));
 }
 
 #[test]
@@ -158,7 +161,8 @@ fn test_empty_inputs() {
 
     // Should handle empty inputs gracefully
     assert!(prompt.contains("You are analyzing"));
-    assert!(prompt.contains("Question:"));
+    assert!(prompt.contains("<user_request>"));
+    assert!(prompt.contains("</user_request>"));
     // Should not crash or panic
 }
 
@@ -194,9 +198,9 @@ fn test_prompt_structure() {
     // Should start with the system instruction
     assert!(lines[0].contains("You are analyzing"));
 
-    // Should have code block markers
-    assert!(prompt.contains("```"));
-
-    // Should end with guidance
-    assert!(prompt.contains("Focus on architectural patterns"));
+    // Should have XML tag structure
+    assert!(prompt.contains("<tree_output>"));
+    assert!(prompt.contains("</tree_output>"));
+    assert!(prompt.contains("<user_request>"));
+    assert!(prompt.contains("</user_request>"));
 }

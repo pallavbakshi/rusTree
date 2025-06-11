@@ -80,4 +80,17 @@ pub struct LlmArgs {
     /// Generate a sample .env file template for LLM API keys
     #[arg(long)]
     pub llm_generate_env: bool,
+
+    /// Preview the LLM request without actually sending it.
+    ///
+    /// When used together with `--llm-ask`, RusTree will build the full HTTP
+    /// request that would be sent to the provider, print it to stdout, and
+    /// exit without incurring any API cost. Supplying `--dry-run` without
+    /// `--llm-ask` has no effect other than a short notice.
+    #[arg(long)]
+    pub dry_run: bool,
+
+    /// Format dry-run output in a human-friendly markdown format
+    #[arg(long, requires = "dry_run")]
+    pub human_friendly: bool,
 }
