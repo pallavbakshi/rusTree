@@ -826,6 +826,60 @@ rustree --unsorted ./my_project
 # or using --sort-by
 rustree --sort-by none ./my_project
 </code></pre>
+<p>11b. <strong>Show full paths for all files (similar to tree -f):</strong></p>
+<pre><code class="language-bash">rustree --full-path ./my_project
+# or using short flag
+rustree -f ./my_project
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── README.md
+├── src/
+│   ├── src/main.rs
+│   ├── src/lib.rs
+│   └── src/utils/
+│       └── src/utils/helper.rs
+└── tests/
+    └── tests/integration_test.rs
+
+3 directories, 5 files
+</code></pre>
+<p>Notice how nested files show their full relative path from the scan root (e.g., <code>src/main.rs</code> instead of just <code>main.rs</code>).</p>
+<p>11c. <strong>Combine full-path with other metadata for detailed analysis:</strong></p>
+<pre><code class="language-bash">rustree -f -s --calculate-lines ./my_project
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── [   1024B] [L:  50] README.md
+├── src/
+│   ├── [   2048B] [L: 150] src/main.rs
+│   ├── [   1536B] [L: 100] src/lib.rs
+│   └── src/utils/
+│       └── [    512B] [L:  25] src/utils/helper.rs
+└── tests/
+    └── [   1280B] [L:  75] tests/integration_test.rs
+
+3 directories, 4 files, 400 total lines, 6.25 KB total
+</code></pre>
+<p>This combines full paths with size and line count information, making it easy to identify specific files and their characteristics.</p>
+<p>11d. <strong>Full-path output in Markdown format:</strong></p>
+<pre><code class="language-bash">rustree -f --output-format markdown ./docs &gt; file_structure.md
+</code></pre>
+<p><strong>Generated Markdown:</strong></p>
+<pre><code class="language-markdown"># docs
+
+* README.md
+* guides/
+  * guides/installation.md
+  * guides/usage.md
+  * guides/advanced/
+    * guides/advanced/configuration.md
+* api/
+  * api/reference.md
+
+__3 directories, 5 files total__
+</code></pre>
+<p>Perfect for documentation where you want to show the complete file paths in a structured format.</p>
 <ol start="12">
 <li>
 <p><strong>Apply the <code>count-pluses</code> function to files and sort by its custom output:</strong></p>
@@ -1347,6 +1401,7 @@ rustree = "0.1.0" # Replace with the desired version
 <li><code>max_depth</code>: The maximum depth of traversal.</li>
 <li><code>show_hidden</code>: Whether to include hidden files/directories.</li>
 <li><code>list_directories_only</code>: If <code>true</code>, only directories (including symlinks to directories) are included in the results.</li>
+<li><code>show_full_path</code>: If <code>true</code>, formatters display the full relative path for each entry instead of just the filename. Equivalent to the CLI <code>-f</code>/<code>--full-path</code> flag.</li>
 </ul>
 </li>
 <li><strong><code>filtering: FilteringOptions</code></strong> (from <code>src/config/filtering.rs</code>):
@@ -1403,6 +1458,7 @@ let config = RustreeLibConfig {
         max_depth: Some(3),
         show_hidden: false,
         list_directories_only: false,
+        show_full_path: true, // Show full relative paths for files
         ..Default::default()
     },
     filtering: FilteringOptions {
@@ -1531,6 +1587,53 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 
     // 3. Print the output
     println!("{}", output_string);
+
+    Ok(())
+}</code></pre></pre>
+<h3 id="example-1b-tree-listing-with-full-paths"><a class="header" href="#example-1b-tree-listing-with-full-paths">Example 1b: Tree Listing with Full Paths</a></h3>
+<p>This example demonstrates using the <code>show_full_path</code> option to display complete relative paths.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError,
+    InputSourceOptions, ListingOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "src".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_full_path: true, // Enable full path display
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output_string = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    
+    println!("{}", output_string);
+    
+    // Output will show:
+    // src/
+    // ├── src/main.rs
+    // ├── src/lib.rs
+    // └── src/utils/
+    //     └── src/utils/helper.rs
+    // 
+    // Instead of just:
+    // src/
+    // ├── main.rs
+    // ├── lib.rs
+    // └── utils/
+    //     └── helper.rs
 
     Ok(())
 }</code></pre></pre>
@@ -1995,6 +2098,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong><code>listing.rs</code></strong>:</p>
 <ul>
 <li>Defines <code>ListingOptions</code> struct for directory traversal settings.</li>
+<li>Includes <code>show_full_path</code> option to control whether formatters display full relative paths or just filenames.</li>
 </ul>
 </li>
 <li>
@@ -2089,8 +2193,8 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <p><strong><code>formatter/</code></strong>: This sub-module is responsible for generating the final output string.</p>
 <ul>
 <li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
-<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It uses <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display.</li>
-<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists. It also uses <code>core::metadata::file_info::format_node_metadata</code>.</li>
+<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It uses <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display. Supports full path display when <code>config.listing.show_full_path</code> is enabled.</li>
+<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists. It also uses <code>core::metadata::file_info::format_node_metadata</code>. Supports full path display when <code>config.listing.show_full_path</code> is enabled.</li>
 <li><code>mod.rs</code> (in <code>formatter</code>): Re-exports <code>OutputFormat</code> (as <code>LibOutputFormat</code>) from <code>src/config/output_format.rs</code>.</li>
 </ul>
 </li>

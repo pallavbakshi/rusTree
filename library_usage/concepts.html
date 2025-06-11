@@ -183,6 +183,7 @@
 <li><code>max_depth</code>: The maximum depth of traversal.</li>
 <li><code>show_hidden</code>: Whether to include hidden files/directories.</li>
 <li><code>list_directories_only</code>: If <code>true</code>, only directories (including symlinks to directories) are included in the results.</li>
+<li><code>show_full_path</code>: If <code>true</code>, formatters display the full relative path for each entry instead of just the filename. Equivalent to the CLI <code>-f</code>/<code>--full-path</code> flag.</li>
 </ul>
 </li>
 <li><strong><code>filtering: FilteringOptions</code></strong> (from <code>src/config/filtering.rs</code>):
@@ -239,6 +240,7 @@ let config = RustreeLibConfig {
         max_depth: Some(3),
         show_hidden: false,
         list_directories_only: false,
+        show_full_path: true, // Show full relative paths for files
         ..Default::default()
     },
     filtering: FilteringOptions {

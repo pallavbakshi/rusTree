@@ -206,6 +206,53 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 
     Ok(())
 }</code></pre></pre>
+<h3 id="example-1b-tree-listing-with-full-paths"><a class="header" href="#example-1b-tree-listing-with-full-paths">Example 1b: Tree Listing with Full Paths</a></h3>
+<p>This example demonstrates using the <code>show_full_path</code> option to display complete relative paths.</p>
+<pre><pre class="playground"><code class="language-rust">use rustree::{
+    get_tree_nodes, format_nodes, RustreeLibConfig, LibOutputFormat, RustreeError,
+    InputSourceOptions, ListingOptions,
+};
+use std::path::Path;
+
+fn main() -&gt; Result&lt;(), RustreeError&gt; {
+    let target_path = "./src";
+    let path_obj = Path::new(target_path);
+
+    let config = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "src".to_string(),
+            root_is_directory: path_obj.is_dir(),
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_full_path: true, // Enable full path display
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(path_obj, &amp;config)?;
+    let output_string = format_nodes(&amp;nodes, LibOutputFormat::Text, &amp;config)?;
+    
+    println!("{}", output_string);
+    
+    // Output will show:
+    // src/
+    // ├── src/main.rs
+    // ├── src/lib.rs
+    // └── src/utils/
+    //     └── src/utils/helper.rs
+    // 
+    // Instead of just:
+    // src/
+    // ├── main.rs
+    // ├── lib.rs
+    // └── utils/
+    //     └── helper.rs
+
+    Ok(())
+}</code></pre></pre>
 <h3 id="example-2-reporting-sizes-and-sorting"><a class="header" href="#example-2-reporting-sizes-and-sorting">Example 2: Reporting Sizes and Sorting</a></h3>
 <p>This example demonstrates reporting file sizes and sorting by size in descending order.</p>
 <pre><pre class="playground"><code class="language-rust">use rustree::{

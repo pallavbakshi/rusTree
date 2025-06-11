@@ -196,6 +196,7 @@
 <p><strong><code>listing.rs</code></strong>:</p>
 <ul>
 <li>Defines <code>ListingOptions</code> struct for directory traversal settings.</li>
+<li>Includes <code>show_full_path</code> option to control whether formatters display full relative paths or just filenames.</li>
 </ul>
 </li>
 <li>
@@ -290,8 +291,8 @@
 <p><strong><code>formatter/</code></strong>: This sub-module is responsible for generating the final output string.</p>
 <ul>
 <li><code>base.rs</code>: Defines the <code>TreeFormatter</code> trait, which all specific formatters implement.</li>
-<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It uses <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display.</li>
-<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists. It also uses <code>core::metadata::file_info::format_node_metadata</code>.</li>
+<li><code>text_tree.rs</code>: Implements <code>TextTreeFormatter</code> for the classic <code>tree</code>-like text output. It uses <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display. Supports full path display when <code>config.listing.show_full_path</code> is enabled.</li>
+<li><code>markdown.rs</code>: Implements <code>MarkdownFormatter</code> for generating Markdown lists. It also uses <code>core::metadata::file_info::format_node_metadata</code>. Supports full path display when <code>config.listing.show_full_path</code> is enabled.</li>
 <li><code>mod.rs</code> (in <code>formatter</code>): Re-exports <code>OutputFormat</code> (as <code>LibOutputFormat</code>) from <code>src/config/output_format.rs</code>.</li>
 </ul>
 </li>

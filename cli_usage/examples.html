@@ -253,6 +253,60 @@ rustree --unsorted ./my_project
 # or using --sort-by
 rustree --sort-by none ./my_project
 </code></pre>
+<p>11b. <strong>Show full paths for all files (similar to tree -f):</strong></p>
+<pre><code class="language-bash">rustree --full-path ./my_project
+# or using short flag
+rustree -f ./my_project
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── README.md
+├── src/
+│   ├── src/main.rs
+│   ├── src/lib.rs
+│   └── src/utils/
+│       └── src/utils/helper.rs
+└── tests/
+    └── tests/integration_test.rs
+
+3 directories, 5 files
+</code></pre>
+<p>Notice how nested files show their full relative path from the scan root (e.g., <code>src/main.rs</code> instead of just <code>main.rs</code>).</p>
+<p>11c. <strong>Combine full-path with other metadata for detailed analysis:</strong></p>
+<pre><code class="language-bash">rustree -f -s --calculate-lines ./my_project
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── [   1024B] [L:  50] README.md
+├── src/
+│   ├── [   2048B] [L: 150] src/main.rs
+│   ├── [   1536B] [L: 100] src/lib.rs
+│   └── src/utils/
+│       └── [    512B] [L:  25] src/utils/helper.rs
+└── tests/
+    └── [   1280B] [L:  75] tests/integration_test.rs
+
+3 directories, 4 files, 400 total lines, 6.25 KB total
+</code></pre>
+<p>This combines full paths with size and line count information, making it easy to identify specific files and their characteristics.</p>
+<p>11d. <strong>Full-path output in Markdown format:</strong></p>
+<pre><code class="language-bash">rustree -f --output-format markdown ./docs &gt; file_structure.md
+</code></pre>
+<p><strong>Generated Markdown:</strong></p>
+<pre><code class="language-markdown"># docs
+
+* README.md
+* guides/
+  * guides/installation.md
+  * guides/usage.md
+  * guides/advanced/
+    * guides/advanced/configuration.md
+* api/
+  * api/reference.md
+
+__3 directories, 5 files total__
+</code></pre>
+<p>Perfect for documentation where you want to show the complete file paths in a structured format.</p>
 <ol start="12">
 <li>
 <p><strong>Apply the <code>count-pluses</code> function to files and sort by its custom output:</strong></p>
