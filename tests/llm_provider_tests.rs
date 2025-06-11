@@ -88,6 +88,8 @@ fn test_config_with_custom_model() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let config = LlmConfig::from_cli_args(&args).expect("Should create config");
@@ -116,6 +118,8 @@ fn test_config_validation_temperature() {
         llm_temperature: Some(1.5),
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let config = LlmConfig::from_cli_args(&args).expect("Should create config");
@@ -170,6 +174,8 @@ fn test_config_validation_max_tokens() {
         llm_temperature: None,
         llm_max_tokens: Some(500),
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let config = LlmConfig::from_cli_args(&args).expect("Should create config");
@@ -223,6 +229,8 @@ fn test_config_defaults() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let config = LlmConfig::from_cli_args(&args).expect("Should create config");
@@ -268,6 +276,8 @@ impl LlmArgsBuilder {
                 llm_temperature: None,
                 llm_max_tokens: None,
                 llm_generate_env: false,
+                dry_run: false,
+                human_friendly: false,
             },
         }
     }

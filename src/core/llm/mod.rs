@@ -45,12 +45,14 @@
 
 pub mod client;
 pub mod error;
+pub mod preview;
 pub mod prompt;
 pub mod providers;
 pub mod response;
 
 pub use client::LlmClientFactory;
 pub use error::LlmError;
+pub use preview::RequestPreview;
 pub use prompt::TreePromptFormatter;
 pub use providers::{LlmConfig, LlmProvider};
 pub use response::LlmResponseProcessor;

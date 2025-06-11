@@ -15,6 +15,8 @@ fn test_llm_args_default() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     // Test that defaults are sensible
@@ -36,6 +38,8 @@ fn test_llm_options_from_export_args() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let options = LlmOptions::from_cli_args(&args);
@@ -57,6 +61,8 @@ fn test_llm_options_from_ask_args() {
         llm_temperature: Some(0.5),
         llm_max_tokens: Some(1500),
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let options = LlmOptions::from_cli_args(&args);
@@ -78,6 +84,8 @@ fn test_llm_options_from_both_args() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let options = LlmOptions::from_cli_args(&args);
@@ -100,6 +108,8 @@ fn test_llm_options_from_empty_args() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let options = LlmOptions::from_cli_args(&args);
@@ -130,6 +140,8 @@ fn test_generate_env_flag() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: true,
+        dry_run: false,
+        human_friendly: false,
     };
 
     assert!(args.llm_generate_env);
@@ -151,6 +163,8 @@ fn test_complex_args_configuration() {
         llm_temperature: Some(0.2),
         llm_max_tokens: Some(2000),
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     // All fields should be preserved
@@ -186,6 +200,8 @@ fn test_edge_case_empty_strings() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let options = LlmOptions::from_cli_args(&args);
@@ -208,6 +224,8 @@ fn test_boundary_values() {
         llm_temperature: Some(0.0), // Minimum temperature
         llm_max_tokens: Some(1),    // Minimum tokens
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     assert_eq!(args.llm_temperature.unwrap(), 0.0);
@@ -226,6 +244,8 @@ fn test_maximum_boundary_values() {
         llm_temperature: Some(2.0),  // Maximum temperature
         llm_max_tokens: Some(32000), // Maximum tokens (for our validation)
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     assert_eq!(args.llm_temperature.unwrap(), 2.0);
@@ -245,6 +265,8 @@ fn test_debug_implementation() {
         llm_temperature: None,
         llm_max_tokens: None,
         llm_generate_env: false,
+        dry_run: false,
+        human_friendly: false,
     };
 
     let debug_string = format!("{:?}", args);
@@ -282,6 +304,8 @@ fn test_provider_case_handling() {
             llm_temperature: None,
             llm_max_tokens: None,
             llm_generate_env: false,
+            dry_run: false,
+            human_friendly: false,
         };
 
         // Should not panic when creating LlmOptions

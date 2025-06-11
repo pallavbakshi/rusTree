@@ -231,3 +231,12 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
 - `--llm-generate-env`
   - Description: Generate a sample `.env` file template with all supported API key variables.
   - Example: `rustree --llm-generate-env > .env`
+
+- `--dry-run`
+  - Description: Preview the LLM request without actually sending it. When used with `--llm-ask`, RusTree builds the full HTTP request that would be sent to the provider, displays it, and exits without making the API call. This is useful for debugging, cost estimation, and verifying the request structure before sending.
+  - **Token Estimation**: Shows approximate token counts using a 4:1 character-to-token ratio for prompts and max_tokens setting for completion. These are rough estimates for planning purposes only - actual token usage may vary significantly based on content type and provider tokenization.
+  - Example: `rustree --llm-ask "What is this project?" --dry-run`
+
+- `--human-friendly`
+  - Description: Format dry-run output in a human-friendly markdown format instead of the default plain text. This option requires `--dry-run` to be enabled. The markdown format provides better structure with organized sections for configuration, headers, messages, and JSON body.
+  - Example: `rustree --llm-ask "Analyze this project" --dry-run --human-friendly`

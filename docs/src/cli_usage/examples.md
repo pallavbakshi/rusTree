@@ -231,21 +231,47 @@ Here are some practical examples of how to use `rustree` from the command line.
       --include "*.md" --include "*.rs" --calculate-words
     ```
 
-21. **LLM workflow examples:**
+21. **LLM request preview and debugging:**
 
     ```bash
-    # Step 1: Export for review
-    rustree --llm-export "Initial analysis" > project-analysis.txt
+    # Preview what would be sent to the LLM (no API call, no cost)
+    rustree --llm-ask "What's the architecture of this project?" --dry-run
     
-    # Step 2: Direct analysis with specific focus
+    # Human-readable markdown format for better readability
+    rustree --llm-ask "Analyze the code organization" \
+      --dry-run --human-friendly
+    
+    # Cost estimation for complex queries
+    rustree --llm-ask "Detailed security analysis with recommendations" \
+      --llm-max-tokens 3000 --dry-run
+    
+    # Debug prompt structure before sending
+    rustree --llm-ask "Custom analysis question" \
+      --include "*.rs" --depth 3 --size --dry-run --human-friendly
+    
+    # Verify API configuration without making requests
+    rustree --llm-ask "Test question" --llm-provider anthropic \
+      --llm-model claude-3-haiku --dry-run
+    ```
+
+22. **LLM workflow examples:**
+
+    ```bash
+    # Step 1: Preview and refine your question
+    rustree --llm-ask "Initial analysis" --dry-run --human-friendly
+    
+    # Step 2: Export for review
+    rustree --llm-export "Refined analysis question" > project-analysis.txt
+    
+    # Step 3: Direct analysis with verified prompt
     rustree --llm-ask "Focus on error handling patterns" \
-      --include "*.rs" --grep-pattern "Result\|Error"
+      --include "*.rs" --llm-temperature 0.3
     
-    # Step 3: Compare with external tool
+    # Step 4: Compare with external tool
     rustree --llm-export "Compare with previous analysis" | your-llm-tool
     ```
 
-22. **List only Rust source files (`*.rs`):**
+23. **List only Rust source files (`*.rs`):**
 
     ```bash
     rustree --filter-include "*.rs" ./my_project
@@ -253,7 +279,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "*.rs" ./my_project
     ```
 
-23. **List only Markdown (`*.md`) or text (`*.txt`) files:**
+24. **List only Markdown (`*.md`) or text (`*.txt`) files:**
 
     ```bash
     rustree --filter-include "*.md|*.txt" ./notes
@@ -261,7 +287,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "*.md" -P "*.txt" ./notes
     ```
 
-24. **List only directories named `build` or `target`:**
+25. **List only directories named `build` or `target`:**
     (Note: `-P` or `--filter-include` matches files and directories. A trailing `/` makes it specific to directories.)
     ```bash
     rustree --filter-include "build/|target/" ./my_project
@@ -269,7 +295,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "build/|target/" ./my_project
     ```
 
-25. **List all Markdown files, including hidden ones (e.g., in `.github/`):**
+26. **List all Markdown files, including hidden ones (e.g., in `.github/`):**
 
     ```bash
     rustree --include-hidden --filter-include "*.md"
@@ -277,7 +303,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -a -P "*.md"
     ```
 
-26. **List files starting with `test_` followed by any single character and then `.py`:**
+27. **List files starting with `test_` followed by any single character and then `.py`:**
 
     ```bash
     rustree --filter-include "test_?.py" ./tests
@@ -285,7 +311,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "test_?.py" ./tests
     ```
 
-27. **List all files within any subdirectory named `docs`:**
+28. **List all files within any subdirectory named `docs`:**
 
     ```bash
     rustree --filter-include "docs/**" ./project_root
@@ -293,7 +319,7 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree -P "docs/**" ./project_root
     ```
 
-28. **Ignore all `.log` files:**
+29. **Ignore all `.log` files:**
 
     ```bash
     rustree --filter-exclude "*.log" ./my_project
