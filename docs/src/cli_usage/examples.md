@@ -31,6 +31,18 @@ Here are some practical examples of how to use `rustree` from the command line.
    ```bash
    rustree --calculate-lines --calculate-words --sort-by lines -r ./my_project_src
    ```
+   
+   **Enhanced Summary Report**: The output now includes aggregated totals in the summary:
+   ```
+   src/
+   ├── [L:  364] [W:1498] lib.rs
+   ├── [L:   63] [W: 243] main.rs
+   └── core/
+       ├── [L:  119] [W: 264] mod.rs
+       └── [L:  200] [W: 450] util.rs
+   
+   2 directories, 4 files, 746 total lines, 2,455 total words
+   ```
 
 5. **List directories only in the current path:**
 
@@ -60,7 +72,7 @@ Here are some practical examples of how to use `rustree` from the command line.
    rustree --no-summary-report ./my_project
    ```
    
-   This will display the tree structure without the "4 directories, 6 files" summary line at the end.
+   This will display the tree structure without the summary line that normally shows directory/file counts and metadata totals like "4 directories, 6 files, 1,234 total lines".
 
 9. **Generate clean markdown output without summary for documentation:**
 
@@ -394,4 +406,117 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --apply-function dir-stats --apply-include "src*" --apply-include "lib*" ./workspace
     ```
 
-Note: These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.
+## Metadata Aggregation Examples
+
+The summary report now automatically aggregates metadata values, providing totals for lines, words, sizes, and apply function outputs.
+
+45. **Get comprehensive project statistics:**
+
+    ```bash
+    rustree --calculate-lines --calculate-words --show-size-bytes ./my_project
+    ```
+    
+    Output includes totals in the summary:
+    ```
+    my_project/
+    ├── [   1024B] [L:  50] [W: 250] README.md
+    ├── [   2048B] [L: 100] [W: 500] main.rs
+    └── src/
+        ├── [   3072B] [L: 150] [W: 750] lib.rs
+        └── [   1536B] [L:  75] [W: 375] util.rs
+    
+    2 directories, 4 files, 375 total lines, 1,875 total words, 7.7 KB total
+    ```
+
+46. **Analyze large codebases with human-readable totals:**
+
+    ```bash
+    rustree --calculate-lines --depth 2 ./large_project
+    ```
+    
+    Automatically formats large numbers with thousand separators:
+    ```
+    large_project/
+    ├── [L:12345] frontend/
+    ├── [L: 8765] backend/
+    └── [L: 4321] docs/
+    
+    4 directories, 156 files, 125,431 total lines
+    ```
+
+47. **Combine size analysis with directory statistics:**
+
+    ```bash
+    rustree --show-size-bytes --apply-function dir-stats ./project
+    ```
+    
+    Shows both individual file sizes and aggregated directory statistics:
+    ```
+    project/
+    ├── [   512B] config.toml
+    ├── [F: "3f,0d,1536B"] src/
+    │   ├── [  1024B] main.rs
+    │   └── [   512B] lib.rs
+    └── [F: "2f,0d,256B"] tests/
+        ├── [  128B] test1.rs
+        └── [  128B] test2.rs
+    
+    3 directories, 5 files, 2.3 KB total, 1.8 KB total (from function)
+    ```
+
+48. **Quick project overview with multiple metadata types:**
+
+    ```bash
+    rustree --depth 1 --calculate-lines --calculate-words --show-size-bytes ./workspace
+    ```
+    
+    Perfect for getting a high-level overview of project complexity:
+    ```
+    workspace/
+    ├── [  45.2 KB] [L:1200] [W:6000] frontend/
+    ├── [  32.1 KB] [L: 900] [W:4500] backend/
+    ├── [  12.8 KB] [L: 400] [W:2000] shared/
+    └── [   5.5 KB] [L: 150] [W: 750] docs/
+    
+    5 directories, 87 files, 2,650 total lines, 13,250 total words, 95.6 KB total
+    ```
+
+49. **Compare module sizes in a Rust project:**
+
+    ```bash
+    rustree --depth 2 --show-size-bytes --filter-include "*.rs|*/" --sort-by size -r ./src
+    ```
+    
+    Shows Rust modules sorted by size with total calculations:
+    ```
+    src/
+    ├── [  15.2 KB] core/
+    ├── [  12.8 KB] utils/
+    ├── [   8.4 KB] cli/
+    ├── [   3.2 KB] main.rs
+    └── [   1.1 KB] lib.rs
+    
+    4 directories, 45 files, 40.7 KB total
+    ```
+
+50. **Markdown output with metadata aggregation for documentation:**
+
+    ```bash
+    rustree --output-format markdown --calculate-lines --depth 2 ./api > api_overview.md
+    ```
+    
+    Generates markdown with totals:
+    ```markdown
+    # ./api
+    
+    * handlers/ 1250L
+    * models/ 800L
+    * routes/ 600L
+    * main.rs 150L
+    
+    __2 directories, 25 files, 2,800 total lines total__
+    ```
+
+Note: The enhanced summary report automatically detects which metadata types are being displayed and includes appropriate totals. No additional flags are needed - the aggregation happens automatically when metadata options like `--calculate-lines`, `--calculate-words`, or `--show-size-bytes` are used.
+
+These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use `rustree --help` for a full list of options.

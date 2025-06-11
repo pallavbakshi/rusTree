@@ -1,6 +1,7 @@
 use super::base::TreeFormatter;
 use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
+use crate::core::metadata::MetadataAggregator;
 use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::collections::HashMap;
@@ -200,6 +201,13 @@ impl TreeFormatter for TextTreeFormatter {
                 file_count, // Will be 0 if config.list_directories_only is true
                 if file_count == 1 { "" } else { "s" }
             )?;
+
+            // Aggregate metadata and add to summary
+            let aggregator = MetadataAggregator::aggregate_from_nodes(nodes, config);
+            let summary_additions = aggregator.format_summary_additions();
+            if !summary_additions.is_empty() {
+                write!(output, "{}", summary_additions)?;
+            }
         }
 
         Ok(output)

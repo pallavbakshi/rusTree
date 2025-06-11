@@ -2,6 +2,7 @@
 use super::base::TreeFormatter;
 use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
+use crate::core::metadata::MetadataAggregator;
 use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fmt::Write;
@@ -76,12 +77,21 @@ impl TreeFormatter for MarkdownFormatter {
             writeln!(output)?;
             write!(
                 output,
-                "__{} director{}, {} file{} total__",
+                "__{} director{}, {} file{}",
                 dir_count,
                 if dir_count == 1 { "y" } else { "ies" },
                 file_count,
                 if file_count == 1 { "" } else { "s" }
             )?;
+
+            // Aggregate metadata and add to summary
+            let aggregator = MetadataAggregator::aggregate_from_nodes(nodes, config);
+            let summary_additions = aggregator.format_summary_additions();
+            if !summary_additions.is_empty() {
+                write!(output, "{}", summary_additions)?;
+            }
+
+            write!(output, " total__")?;
         }
 
         Ok(output)

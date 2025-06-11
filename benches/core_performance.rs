@@ -1,4 +1,5 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use rustree::config::metadata::BuiltInFunction;
 use rustree::{
     ListingOptions, MetadataOptions, RustreeLibConfig, SortKey, SortingOptions, get_tree_nodes,
 };
@@ -110,10 +111,108 @@ fn benchmark_sorting(c: &mut Criterion) {
     });
 }
 
+fn benchmark_metadata_aggregation(c: &mut Criterion) {
+    use rustree::core::metadata::MetadataAggregator;
+    use rustree::core::tree::node::{NodeInfo, NodeType};
+    use std::path::PathBuf;
+
+    // Create a large dataset of nodes to test aggregation performance
+    let mut nodes = Vec::new();
+
+    // Create nodes with various metadata combinations
+    for i in 0..10000 {
+        let node = NodeInfo {
+            name: format!("file_{}.txt", i),
+            path: PathBuf::from(format!("test/file_{}.txt", i)),
+            node_type: if i % 10 == 0 {
+                NodeType::Directory
+            } else {
+                NodeType::File
+            },
+            depth: (i % 5) + 1,
+            size: Some((i * 1024) as u64),
+            permissions: None,
+            mtime: None,
+            change_time: None,
+            create_time: None,
+            line_count: Some(i * 10),
+            word_count: Some(i * 50),
+            custom_function_output: if i % 10 == 0 {
+                Some(Ok(format!("{}f,{}d,{}B", i % 20, i % 5, i * 512)))
+            } else {
+                None
+            },
+        };
+        nodes.push(node);
+    }
+
+    let config = RustreeLibConfig {
+        metadata: MetadataOptions {
+            calculate_line_count: true,
+            calculate_word_count: true,
+            show_size_bytes: true,
+            apply_function: Some(BuiltInFunction::DirStats),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    c.bench_function("metadata_aggregation", |b| {
+        b.iter(|| {
+            let aggregator =
+                MetadataAggregator::aggregate_from_nodes(black_box(&nodes), black_box(&config));
+            black_box(aggregator.format_summary_additions())
+        })
+    });
+}
+
+fn benchmark_number_formatting(c: &mut Criterion) {
+    use rustree::core::metadata::MetadataAggregator;
+
+    let numbers = vec![
+        0, 1, 12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890,
+    ];
+
+    c.bench_function("number_formatting", |b| {
+        b.iter(|| {
+            for &num in &numbers {
+                black_box(MetadataAggregator::format_number(black_box(num)));
+            }
+        })
+    });
+}
+
+fn benchmark_size_formatting(c: &mut Criterion) {
+    use rustree::core::metadata::MetadataAggregator;
+
+    let sizes = vec![
+        0,
+        512,
+        1024,
+        1536,
+        2048,
+        1048576,
+        2097152,
+        1073741824,
+        1099511627776,
+    ];
+
+    c.bench_function("size_formatting", |b| {
+        b.iter(|| {
+            for &size in &sizes {
+                black_box(MetadataAggregator::format_size(black_box(size)));
+            }
+        })
+    });
+}
+
 criterion_group!(
     benches,
     benchmark_tree_walking,
     benchmark_tree_walking_with_analysis,
-    benchmark_sorting
+    benchmark_sorting,
+    benchmark_metadata_aggregation,
+    benchmark_number_formatting,
+    benchmark_size_formatting
 );
 criterion_main!(benches);

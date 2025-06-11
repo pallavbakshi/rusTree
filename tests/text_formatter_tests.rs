@@ -498,7 +498,7 @@ fn test_formatter_with_show_size_bytes() -> Result<()> {
     ├── [     64B] empty_dir/
     └── [     15B] file3.dat
 
-4 directories, 3 files"#,
+4 directories, 3 files, 43 B total"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -592,7 +592,7 @@ fn test_formatter_with_calculate_lines() -> Result<()> {
     ├── empty_dir/
     └── [L:   2] file3.dat
 
-4 directories, 3 files"#,
+4 directories, 3 files, 6 total lines"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -639,7 +639,7 @@ fn test_formatter_with_calculate_words() -> Result<()> {
     ├── empty_dir/
     └── [W:   2] file3.dat
 
-4 directories, 3 files"#,
+4 directories, 3 files, 7 total words"#,
         root_name
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -740,7 +740,7 @@ fn test_formatter_with_multiple_metadata() -> Result<()> {
 ├── [     12B] {}[L:   1] [W:   2] [F: "0"] file2.log
 └── [    192B] {}sub_dir/
 
-2 directories, 2 files"#,
+2 directories, 2 files, 4 total lines, 5 total words, 28 B total"#,
         root_name, mtime_f1, mtime_f2, mtime_sd
     );
     assert_eq!(output.trim(), expected_output.trim());
@@ -896,7 +896,7 @@ fn test_formatter_sort_integration() -> Result<()> {
 ├── [     12B] file2.log
 └── [    192B] sub_dir/
 
-2 directories, 2 files"#,
+2 directories, 2 files, 28 B total"#,
         root_name
     );
     assert_eq!(
