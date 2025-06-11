@@ -1,11 +1,12 @@
 // tests/full_flow_tests.rs
 
+#![allow(clippy::needless_update)]
 // Use your library as if you were an external user
 use anyhow::Result;
 use clap::Parser;
 use rustree::{
     BuiltInFunction, InputSourceOptions, LibOutputFormat, ListingOptions, MetadataOptions,
-    NodeType, RustreeLibConfig, format_nodes, get_tree_nodes,
+    NodeType, RustreeLibConfig, SortKey, SortingOptions, format_nodes, get_tree_nodes,
 }; // For test functions returning Result
 use std::fs; // Added import for fs module // Added import for Parser trait
 
@@ -357,6 +358,130 @@ fn test_formatting_markdown() -> Result<()> {
     assert!(markdown_output.contains("* "));
     assert!(markdown_output.contains("director"));
     assert!(markdown_output.contains("file"));
+
+    Ok(())
+}
+
+#[test]
+fn test_formatting_markdown_no_summary_report() -> Result<()> {
+    let temp_dir = common_test_utils::setup_test_directory()?;
+    let root_path = temp_dir.path();
+
+    // Test with summary report enabled (default)
+    let config_with_summary = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "test_root".to_string(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(2),
+            show_hidden: false,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(root_path, &config_with_summary)?;
+    let markdown_output_with_summary =
+        format_nodes(&nodes, LibOutputFormat::Markdown, &config_with_summary)?;
+
+    // Should contain summary line in markdown format
+    assert!(markdown_output_with_summary.contains("__"));
+    assert!(markdown_output_with_summary.contains("total__"));
+    assert!(markdown_output_with_summary.contains("director"));
+    assert!(markdown_output_with_summary.contains("file"));
+
+    // Test with summary report disabled
+    let config_no_summary = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "test_root".to_string(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(2),
+            show_hidden: false,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        misc: rustree::MiscOptions {
+            no_summary_report: true,
+        },
+        ..Default::default()
+    };
+
+    let markdown_output_no_summary =
+        format_nodes(&nodes, LibOutputFormat::Markdown, &config_no_summary)?;
+
+    // Should NOT contain summary line
+    assert!(!markdown_output_no_summary.contains("total__"));
+    assert!(!markdown_output_no_summary.contains("__"));
+
+    // But should still contain the main structure
+    assert!(markdown_output_no_summary.starts_with("# test_root"));
+    assert!(markdown_output_no_summary.contains("* "));
+
+    // Verify no summary-related words appear
+    let lines: Vec<&str> = markdown_output_no_summary.lines().collect();
+    let has_summary_words = lines
+        .iter()
+        .any(|line| line.contains("directories") || line.contains("files"));
+    assert!(!has_summary_words);
+
+    Ok(())
+}
+
+#[test]
+fn test_formatting_markdown_no_summary_with_directories_only() -> Result<()> {
+    let temp_dir = common_test_utils::setup_test_directory()?;
+    let root_path = temp_dir.path();
+
+    // Test directories only with no summary
+    let config_dirs_only_no_summary = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: "test_root".to_string(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(2),
+            show_hidden: false,
+            list_directories_only: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        misc: rustree::MiscOptions {
+            no_summary_report: true,
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(root_path, &config_dirs_only_no_summary)?;
+    let markdown_output = format_nodes(
+        &nodes,
+        LibOutputFormat::Markdown,
+        &config_dirs_only_no_summary,
+    )?;
+
+    // Should NOT contain summary line
+    assert!(!markdown_output.contains("total__"));
+    assert!(!markdown_output.contains("directories"));
+    assert!(!markdown_output.contains("files"));
+
+    // Should still show directory structure
+    assert!(markdown_output.starts_with("# test_root"));
+    assert!(markdown_output.contains("* sub_dir"));
 
     Ok(())
 }

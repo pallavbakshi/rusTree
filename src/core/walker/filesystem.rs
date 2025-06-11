@@ -266,15 +266,13 @@ fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> 
     // Check apply_exclude_patterns first - if it matches, skip
     if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
         if !exclude_patterns.is_empty() {
-            if let Ok(compiled_patterns) = compile_glob_patterns(
+            if let Ok(Some(patterns)) = compile_glob_patterns(
                 &Some(exclude_patterns.clone()),
                 config.filtering.case_insensitive_filter,
                 config.listing.show_hidden,
             ) {
-                if let Some(patterns) = compiled_patterns {
-                    if entry_matches_path_with_patterns(&node.path, &patterns) {
-                        return false; // Skip this node
-                    }
+                if entry_matches_path_with_patterns(&node.path, &patterns) {
+                    return false; // Skip this node
                 }
             }
         }
@@ -283,14 +281,12 @@ fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> 
     // Check apply_include_patterns - if specified, node must match
     if let Some(include_patterns) = &config.filtering.apply_include_patterns {
         if !include_patterns.is_empty() {
-            if let Ok(compiled_patterns) = compile_glob_patterns(
+            if let Ok(Some(patterns)) = compile_glob_patterns(
                 &Some(include_patterns.clone()),
                 config.filtering.case_insensitive_filter,
                 config.listing.show_hidden,
             ) {
-                if let Some(patterns) = compiled_patterns {
-                    return entry_matches_path_with_patterns(&node.path, &patterns);
-                }
+                return entry_matches_path_with_patterns(&node.path, &patterns);
             }
             // If we have include patterns but compilation failed, don't apply
             return false;

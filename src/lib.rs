@@ -151,37 +151,36 @@ pub fn get_tree_nodes(
     let mut nodes = walker::walk_directory(root_path, config)?;
 
     // 2. Apply directory functions if needed or prune empty directories if requested
-    if (config.metadata.apply_function.is_some() && needs_directory_function_processing(config))
-        || config.filtering.prune_empty_directories
+    if ((config.metadata.apply_function.is_some() && needs_directory_function_processing(config))
+        || config.filtering.prune_empty_directories)
+        && !nodes.is_empty()
     {
-        if !nodes.is_empty() {
-            // Build the tree structure from the flat list of nodes
-            let mut temp_roots = core::tree::builder::build_tree(std::mem::take(&mut nodes))
-                .map_err(RustreeError::TreeBuildError)?;
+        // Build the tree structure from the flat list of nodes
+        let mut temp_roots = core::tree::builder::build_tree(std::mem::take(&mut nodes))
+            .map_err(RustreeError::TreeBuildError)?;
 
-            // Apply directory functions if configured
-            if let Some(apply_func) = &config.metadata.apply_function {
-                if is_directory_function(apply_func) {
-                    apply_directory_functions_to_tree(&mut temp_roots, apply_func, config);
-                }
+        // Apply directory functions if configured
+        if let Some(apply_func) = &config.metadata.apply_function {
+            if is_directory_function(apply_func) {
+                apply_directory_functions_to_tree(&mut temp_roots, apply_func, config);
             }
-
-            // Prune empty directories if requested
-            if config.filtering.prune_empty_directories {
-                // Define the filter for pruning: keep only files.
-                // TreeManipulator::prune_tree will then keep directories that (recursively) contain files.
-                let prune_filter = |node_info: &NodeInfo| node_info.node_type == NodeType::File;
-
-                // Apply prune_tree to each root. Retain roots that are not empty after pruning.
-                temp_roots.retain_mut(|root_node| {
-                    core::tree::manipulator::TreeManipulator::prune_tree(root_node, &prune_filter)
-                });
-            }
-
-            // Flatten the modified tree back into a flat list of NodeInfo
-            // `nodes` is empty at this point due to `std::mem::take`.
-            core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, &mut nodes);
         }
+
+        // Prune empty directories if requested
+        if config.filtering.prune_empty_directories {
+            // Define the filter for pruning: keep only files.
+            // TreeManipulator::prune_tree will then keep directories that (recursively) contain files.
+            let prune_filter = |node_info: &NodeInfo| node_info.node_type == NodeType::File;
+
+            // Apply prune_tree to each root. Retain roots that are not empty after pruning.
+            temp_roots.retain_mut(|root_node| {
+                core::tree::manipulator::TreeManipulator::prune_tree(root_node, &prune_filter)
+            });
+        }
+
+        // Flatten the modified tree back into a flat list of NodeInfo
+        // `nodes` is empty at this point due to `std::mem::take`.
+        core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, &mut nodes);
     }
 
     // 3. Apply list_directories_only filter if enabled
@@ -333,15 +332,13 @@ fn should_apply_function_to_node(node: &NodeInfo, config: &RustreeLibConfig) -> 
     // Check apply_exclude_patterns first - if it matches, skip
     if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
         if !exclude_patterns.is_empty() {
-            if let Ok(compiled_patterns) = compile_glob_patterns(
+            if let Ok(Some(patterns)) = compile_glob_patterns(
                 &Some(exclude_patterns.clone()),
                 config.filtering.case_insensitive_filter,
                 config.listing.show_hidden,
             ) {
-                if let Some(patterns) = compiled_patterns {
-                    if entry_matches_path_with_patterns(&node.path, &patterns) {
-                        return false; // Skip this node
-                    }
+                if entry_matches_path_with_patterns(&node.path, &patterns) {
+                    return false; // Skip this node
                 }
             }
         }
@@ -350,14 +347,12 @@ fn should_apply_function_to_node(node: &NodeInfo, config: &RustreeLibConfig) -> 
     // Check apply_include_patterns - if specified, node must match
     if let Some(include_patterns) = &config.filtering.apply_include_patterns {
         if !include_patterns.is_empty() {
-            if let Ok(compiled_patterns) = compile_glob_patterns(
+            if let Ok(Some(patterns)) = compile_glob_patterns(
                 &Some(include_patterns.clone()),
                 config.filtering.case_insensitive_filter,
                 config.listing.show_hidden,
             ) {
-                if let Some(patterns) = compiled_patterns {
-                    return entry_matches_path_with_patterns(&node.path, &patterns);
-                }
+                return entry_matches_path_with_patterns(&node.path, &patterns);
             }
             // If we have include patterns but compilation failed, don't apply
             return false;

@@ -1,5 +1,7 @@
 // tests/text_formatter_tests.rs
 
+#![allow(clippy::needless_update)]
+
 use anyhow::Result; // For returning errors from test functions
 use rustree::{
     BuiltInFunction,
@@ -7,6 +9,7 @@ use rustree::{
     LibOutputFormat,
     ListingOptions,
     MetadataOptions,
+    MiscOptions,
     NodeInfo,
     NodeType, // Added NodeInfo, NodeType
     RustreeLibConfig,
@@ -900,6 +903,169 @@ fn test_formatter_sort_integration() -> Result<()> {
         output_size_sorted.trim(),
         expected_output_size_sorted.trim()
     );
+
+    Ok(())
+}
+
+// --- No Summary Report Tests ---
+
+#[test]
+fn test_formatter_no_summary_report_text() -> Result<()> {
+    let temp_dir = setup_formatter_test_directory()?;
+    let root_path = temp_dir.path();
+    let root_name = get_root_name(root_path);
+
+    // Test with summary report enabled (default)
+    let config_with_summary = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: root_name.clone(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_hidden: false,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(root_path, &config_with_summary)?;
+    let output_with_summary = format_nodes(&nodes, LibOutputFormat::Text, &config_with_summary)?;
+
+    // Should have summary line at the end
+    assert!(
+        output_with_summary
+            .trim()
+            .ends_with("4 directories, 4 files")
+    );
+    assert!(output_with_summary.contains("\n\n4 directories, 4 files"));
+
+    // Test with summary report disabled
+    let config_no_summary = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: root_name.clone(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_hidden: false,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        misc: MiscOptions {
+            no_summary_report: true,
+        },
+        ..Default::default()
+    };
+
+    let output_no_summary = format_nodes(&nodes, LibOutputFormat::Text, &config_no_summary)?;
+
+    // Should NOT have summary line
+    assert!(!output_no_summary.contains("directories"));
+    assert!(!output_no_summary.contains("files"));
+    assert!(!output_no_summary.trim().ends_with("4 directories, 4 files"));
+
+    // Verify the tree structure itself is still present (just without summary)
+    assert!(output_no_summary.contains("file1.txt"));
+    assert!(output_no_summary.contains("file2.log"));
+    assert!(output_no_summary.contains("sub_dir"));
+
+    Ok(())
+}
+
+#[test]
+fn test_formatter_no_summary_report_with_hidden_files() -> Result<()> {
+    let temp_dir = setup_formatter_test_directory()?;
+    let root_path = temp_dir.path();
+    let root_name = get_root_name(root_path);
+
+    // Test with hidden files and no summary report
+    let config_no_summary_hidden = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: root_name.clone(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_hidden: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        misc: MiscOptions {
+            no_summary_report: true,
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(root_path, &config_no_summary_hidden)?;
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config_no_summary_hidden)?;
+
+    // Should NOT have summary line even with hidden files
+    assert!(!output.contains("5 files"));
+    assert!(!output.contains("directories"));
+    assert!(!output.contains("files"));
+
+    // Verify hidden files are still shown in tree structure
+    assert!(output.contains(".hidden_file"));
+
+    Ok(())
+}
+
+#[test]
+fn test_formatter_no_summary_report_directories_only() -> Result<()> {
+    let temp_dir = setup_formatter_test_directory()?;
+    let root_path = temp_dir.path();
+    let root_name = get_root_name(root_path);
+
+    // Test with directories only and no summary report
+    let config_no_summary_dirs_only = RustreeLibConfig {
+        input_source: InputSourceOptions {
+            root_display_name: root_name.clone(),
+            root_is_directory: true,
+            ..Default::default()
+        },
+        listing: ListingOptions {
+            max_depth: Some(3),
+            show_hidden: false,
+            list_directories_only: true,
+            ..Default::default()
+        },
+        sorting: SortingOptions {
+            sort_by: Some(SortKey::Name),
+            ..Default::default()
+        },
+        misc: MiscOptions {
+            no_summary_report: true,
+        },
+        ..Default::default()
+    };
+
+    let nodes = get_tree_nodes(root_path, &config_no_summary_dirs_only)?;
+    let output = format_nodes(&nodes, LibOutputFormat::Text, &config_no_summary_dirs_only)?;
+
+    // Should NOT have summary line
+    assert!(!output.contains("directories"));
+    assert!(!output.contains("files"));
+
+    // Verify only directories are shown
+    assert!(output.contains("sub_dir"));
+    assert!(output.contains("another_sub_dir"));
+    assert!(output.contains("empty_dir"));
+    assert!(!output.contains("file1.txt"));
+    assert!(!output.contains("file2.log"));
 
     Ok(())
 }

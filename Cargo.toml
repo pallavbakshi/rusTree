@@ -39,3 +39,6 @@ clap = { version = "4.5", features = ["derive"] }
 tempfile = "3.20"
 anyhow = "1.0"
 criterion = "0.5"
+# assert_cmd was previously used for locating binaries in tests, but the tests
+# now rely on the `CARGO_BIN_EXE_<name>` environment variable provided by
+# Cargo itself, so the dependency is no longer required.

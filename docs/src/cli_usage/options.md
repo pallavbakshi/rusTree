@@ -171,6 +171,10 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Possible values: `text` (default), `markdown`.
   - Example: `rustree --output-format markdown`
 
+- `--no-summary-report`
+  - Description: Omits printing of the file and directory report at the end of the tree listing. By default, `rustree` displays a summary line like "4 directories, 6 files" at the end of the output. This flag removes that summary line entirely.
+  - Example: `rustree --no-summary-report`, `rustree --output-format markdown --no-summary-report`
+
 - `--no-indent`
   - Description: Turn off file/directory indentation. (Original `tree` flag: `-i`)
   - Example: `rustree --no-indent`
