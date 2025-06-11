@@ -273,13 +273,114 @@ rustree --sort-by none ./my_project
 <p>Shows the tree structure and then displays the contents of only Markdown and text files.</p>
 </li>
 <li>
-<p><strong>Pipe <code>rustree</code> output to an LLM for summarization:</strong></p>
-<pre><code class="language-bash">rustree --depth 1 --show-size-bytes ./src --llm-ask "What are the main components in the src directory based on this tree?"
-# or using short flags
-rustree -L 1 -s ./src --llm-ask "What are the main components in the src directory based on this tree?"
+<p><strong>Export formatted query for external LLM tools:</strong></p>
+<pre><code class="language-bash">rustree --llm-export "What are the main components in this project?" ./src
 </code></pre>
-<p>Then, you would typically pipe this entire output to your LLM command-line tool. For example:</p>
-<pre><code class="language-bash">rustree -L 1 -s ./src --llm-ask "Summarize these components" | ollama run mistral
+<p>This outputs a specially formatted query that can be piped to external LLM tools:</p>
+<pre><code class="language-bash">rustree --llm-export "Analyze the architecture" | claude-cli
+rustree --llm-export "Security review" | ollama run mistral
+rustree --llm-export "Code quality assessment" &gt; analysis-prompt.txt
+</code></pre>
+</li>
+<li>
+<p><strong>Direct LLM integration (requires API keys):</strong></p>
+<pre><code class="language-bash"># Basic LLM query with OpenAI (default provider)
+rustree --llm-ask "What's the architecture of this project?"
+
+# With specific provider and model
+rustree --llm-ask "Analyze this codebase structure" \
+  --llm-provider anthropic \
+  --llm-model claude-3-sonnet
+
+# With custom settings for focused analysis
+rustree --llm-ask "Brief security review" \
+  --llm-temperature 0.3 \
+  --llm-max-tokens 500
+</code></pre>
+</li>
+<li>
+<p><strong>LLM analysis with tree filtering:</strong></p>
+<pre><code class="language-bash"># Analyze only source code structure
+rustree --llm-ask "What patterns do you see?" \
+  --include "*.rs" --exclude "**/target/**" \
+  --depth 3
+
+# Focus on documentation structure
+rustree --llm-ask "How is documentation organized?" \
+  --include "*.md" --dirs-only
+
+# Analyze project architecture at high level
+rustree --llm-ask "Describe the overall architecture" \
+  --depth 2 --dirs-only --size
+</code></pre>
+</li>
+<li>
+<p><strong>LLM setup and configuration:</strong></p>
+<pre><code class="language-bash"># Generate .env template for API keys
+rustree --llm-generate-env &gt; .env
+# Then edit .env file to add your API keys
+
+# Use with environment variables
+export OPENAI_API_KEY="your-key-here"
+rustree --llm-ask "Analyze this project"
+
+# Override with CLI argument
+rustree --llm-ask "Quick analysis" --llm-api-key "your-key"
+
+# Use different providers
+rustree --llm-ask "Code review" --llm-provider anthropic
+rustree --llm-ask "Performance analysis" --llm-provider cohere
+rustree --llm-ask "Multi-model analysis" --llm-provider openrouter
+</code></pre>
+</li>
+<li>
+<p><strong>Advanced LLM analysis examples:</strong></p>
+<pre><code class="language-bash"># Architecture analysis with context
+rustree --llm-ask "What architectural patterns do you see? Suggest improvements." \
+  --depth 4 --dirs-only --size --llm-temperature 0.2
+
+# Security-focused analysis
+rustree --llm-ask "Are there any potential security concerns in this structure?" \
+  --include "*.rs" --include "*.toml" --include "*.yml" \
+  --llm-provider anthropic --llm-model claude-3-sonnet
+
+# Performance optimization suggestions
+rustree --llm-ask "What could be optimized for better performance?" \
+  --size --file-stats --calculate-lines \
+  --llm-max-tokens 1000
+
+# Code organization review
+rustree --llm-ask "How would you reorganize this codebase?" \
+  --include "*.rs" --depth 3 \
+  --llm-temperature 0.7 --llm-max-tokens 1500
+</code></pre>
+</li>
+<li>
+<p><strong>Combining LLM with metadata analysis:</strong></p>
+<pre><code class="language-bash"># Analyze large files and complexity
+rustree --llm-ask "Which files seem overly complex based on size and line count?" \
+  --size --calculate-lines --sort-by size --reverse-sort
+
+# Module organization analysis
+rustree --llm-ask "How well are the modules organized?" \
+  --apply-function dir-stats --dirs-only --depth 2
+
+# Documentation coverage analysis
+rustree --llm-ask "What documentation is missing?" \
+  --include "*.md" --include "*.rs" --calculate-words
+</code></pre>
+</li>
+<li>
+<p><strong>LLM workflow examples:</strong></p>
+<pre><code class="language-bash"># Step 1: Export for review
+rustree --llm-export "Initial analysis" &gt; project-analysis.txt
+
+# Step 2: Direct analysis with specific focus
+rustree --llm-ask "Focus on error handling patterns" \
+  --include "*.rs" --grep-pattern "Result\|Error"
+
+# Step 3: Compare with external tool
+rustree --llm-export "Compare with previous analysis" | your-llm-tool
 </code></pre>
 </li>
 <li>
@@ -438,7 +539,7 @@ rustree --files-first --calculate-lines -P "*.txt|*.md|*/" ./docs
 </li>
 </ol>
 <h2 id="apply-function-examples"><a class="header" href="#apply-function-examples">Apply Function Examples</a></h2>
-<ol start="37">
+<ol start="43">
 <li>
 <p><strong>Get directory statistics showing file count, directory count, and total size:</strong></p>
 <pre><code class="language-bash">rustree --apply-function dir-stats --show-size-bytes ./my_project
@@ -516,7 +617,7 @@ rustree --apply-function dir-stats --apply-include "src*" --apply-include "lib*"
 </ol>
 <h2 id="metadata-aggregation-examples"><a class="header" href="#metadata-aggregation-examples">Metadata Aggregation Examples</a></h2>
 <p>The summary report now automatically aggregates metadata values, providing totals for lines, words, sizes, and apply function outputs.</p>
-<ol start="45">
+<ol start="51">
 <li>
 <p><strong>Get comprehensive project statistics:</strong></p>
 <pre><code class="language-bash">rustree --calculate-lines --calculate-words --show-size-bytes ./my_project

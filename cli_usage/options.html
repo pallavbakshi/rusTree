@@ -473,11 +473,75 @@
 <li>Example: <code>rustree --help</code></li>
 </ul>
 </li>
-<li>
-<p><code>--llm-ask &lt;PROMPT&gt;</code></p>
+</ul>
+<h2 id="llm-integration"><a class="header" href="#llm-integration">LLM Integration</a></h2>
 <ul>
-<li>Description: Prepend the tree output with a specific prompt string, useful for piping to Large Language Models (LLMs). The prompt is followed by "--- TREE ---" and then the actual tree output.</li>
-<li>Example: <code>rustree --llm-ask "Summarize this project structure:" | ollama run mistral</code></li>
+<li>
+<p><code>--llm-export &lt;QUESTION&gt;</code></p>
+<ul>
+<li>Description: Export a formatted query for external LLM tools. This preserves the original behavior of outputting specially formatted text for piping to external LLM command-line tools.</li>
+<li>Example: <code>rustree --llm-export "Analyze this project structure" | claude-cli</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-ask &lt;QUESTION&gt;</code></p>
+<ul>
+<li>Description: Ask a question directly to an LLM service. Requires API key configuration.</li>
+<li>Example: <code>rustree --llm-ask "What's the architecture of this project?"</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-provider &lt;PROVIDER&gt;</code></p>
+<ul>
+<li>Description: Choose the LLM provider for direct queries. Supported providers: <code>openai</code>, <code>anthropic</code>, <code>cohere</code>, <code>openrouter</code>.</li>
+<li>Default: <code>openai</code></li>
+<li>Example: <code>rustree --llm-ask "Analyze this" --llm-provider anthropic</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-model &lt;MODEL&gt;</code></p>
+<ul>
+<li>Description: Specify the model to use with the chosen provider.</li>
+<li>Default models: OpenAI (<code>gpt-4</code>), Anthropic (<code>claude-3-sonnet-20240229</code>), Cohere (<code>command-r</code>), OpenRouter (<code>openai/gpt-4</code>)</li>
+<li>Example: <code>rustree --llm-ask "Review this" --llm-model gpt-3.5-turbo</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-api-key &lt;KEY&gt;</code></p>
+<ul>
+<li>Description: Provide API key via command line. Can also be set via environment variables or <code>.env</code> file.</li>
+<li>Environment variables: <code>OPENAI_API_KEY</code>, <code>ANTHROPIC_API_KEY</code>, <code>COHERE_API_KEY</code>, <code>OPENROUTER_API_KEY</code></li>
+<li>Example: <code>rustree --llm-ask "Question" --llm-api-key "your-api-key"</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-endpoint &lt;URL&gt;</code></p>
+<ul>
+<li>Description: Custom endpoint URL for self-hosted or proxy services.</li>
+<li>Example: <code>rustree --llm-ask "Question" --llm-endpoint "https://api.custom.com/v1"</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-temperature &lt;FLOAT&gt;</code></p>
+<ul>
+<li>Description: Control response randomness. Range: 0.0 (deterministic) to 2.0 (very random).</li>
+<li>Default: <code>0.7</code></li>
+<li>Example: <code>rustree --llm-ask "Precise analysis" --llm-temperature 0.1</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-max-tokens &lt;INT&gt;</code></p>
+<ul>
+<li>Description: Maximum number of tokens in the LLM response. Range: 1 to 32000.</li>
+<li>Default: <code>1000</code></li>
+<li>Example: <code>rustree --llm-ask "Brief summary" --llm-max-tokens 200</code></li>
+</ul>
+</li>
+<li>
+<p><code>--llm-generate-env</code></p>
+<ul>
+<li>Description: Generate a sample <code>.env</code> file template with all supported API key variables.</li>
+<li>Example: <code>rustree --llm-generate-env &gt; .env</code></li>
 </ul>
 </li>
 </ul>
