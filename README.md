@@ -184,4 +184,4 @@ cargo test my_test_function_name
 
 # Run all tests in that module
 cargo test core::analyzer::file_stats
-```
+```# Test change for smart-pr

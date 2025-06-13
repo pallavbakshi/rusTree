@@ -13,12 +13,16 @@ pub struct FileStatsArgs {
     pub calculate_words: bool,
 
     /// Apply a built-in function to file contents and display the result.
-    #[arg(long)]
+    #[arg(long, help_heading = "\x1b[1;32mApply Functions\x1b[0m")]
     pub apply_function: Option<CliBuiltInFunction>,
 
     /// Apply an external command to file contents; mutually exclusive with
     /// `--apply-function`.
-    #[arg(long = "apply-function-cmd", value_name = "CMD")]
+    #[arg(
+        long = "apply-function-cmd",
+        value_name = "CMD",
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
+    )]
     pub apply_function_cmd: Option<String>,
 
     /// Specify the result kind for the external command: "number", "bytes", or "text".
@@ -26,11 +30,16 @@ pub struct FileStatsArgs {
     #[arg(
         long = "apply-function-cmd-kind",
         value_name = "KIND",
-        default_value = "text"
+        default_value = "text",
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
     )]
     pub apply_function_cmd_kind: String,
 
     /// Timeout in seconds for the external command (default 5 seconds).
-    #[arg(long = "apply-timeout", default_value_t = 5)]
+    #[arg(
+        long = "apply-timeout",
+        default_value_t = 5,
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
+    )]
     pub apply_function_timeout: u64,
 }

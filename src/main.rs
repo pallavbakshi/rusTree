@@ -13,13 +13,26 @@ use rustree::core::llm::{
     LlmClientFactory, LlmConfig, LlmError, LlmResponseProcessor, TreePromptFormatter,
 };
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::{Shell, generate};
 use serde_json::{self, json};
 use std::process::ExitCode;
 
 #[tokio::main]
 async fn main() -> ExitCode {
+    // Early custom help handling (e.g. `rustree help apply`)
+    if let Some(section) = detect_section_help() {
+        print_section_help(&section);
+        return ExitCode::SUCCESS;
+    }
+
     let cli_args = CliArgs::parse();
+
+    // Handle shell-completion generation and exit early
+    if let Some(shell) = cli_args.generate_completions {
+        generate_shell_completions(shell);
+        return ExitCode::SUCCESS;
+    }
 
     // 1. Map CLI args to Library config
     let lib_config = match map_cli_to_lib_config(&cli_args) {
@@ -114,6 +127,72 @@ async fn main() -> ExitCode {
     }
 
     ExitCode::SUCCESS
+}
+
+/// Detects `rustree help <section>` style invocation before clap parsing.
+fn detect_section_help() -> Option<String> {
+    let mut args = std::env::args().skip(1); // skip bin name
+    if let Some(first) = args.next() {
+        if first == "help" {
+            if let Some(section) = args.next() {
+                return Some(section);
+            }
+        }
+    }
+    None
+}
+
+/// Prints only the requested help section.
+fn print_section_help(section: &str) {
+    let mut cmd = CliArgs::command();
+    let help = cmd.render_long_help().to_string();
+
+    let section_lc = section.to_lowercase();
+    let mut printing = false;
+    for line in help.lines() {
+        let line_lc = strip_ansi_codes(line).to_lowercase();
+        if line_lc.starts_with(&section_lc) && line_lc.ends_with(":") {
+            printing = true;
+            println!("{}", line);
+            continue;
+        }
+
+        if printing {
+            // another heading? detect by pattern "<Title>:"
+            if line.trim_end().ends_with(":") && !line.starts_with(" ") {
+                break;
+            }
+            println!("{}", line);
+        }
+    }
+}
+
+/// Naïve removal of ANSI colour escape sequences.
+fn strip_ansi_codes(input: &str) -> String {
+    let mut output = String::with_capacity(input.len());
+    #[allow(clippy::while_let_on_iterator)]
+    {
+        let mut chars = input.chars();
+        while let Some(c) = chars.next() {
+            if c == '\u{1b}' {
+                // skip until 'm'
+                for nc in &mut chars {
+                    if nc == 'm' {
+                        break;
+                    }
+                }
+            } else {
+                output.push(c);
+            }
+        }
+    }
+    output
+}
+
+/// Generate shell completions to stdout
+fn generate_shell_completions(shell: Shell) {
+    let mut cmd = CliArgs::command();
+    generate(shell, &mut cmd, "rustree", &mut std::io::stdout());
 }
 
 async fn handle_llm_query(

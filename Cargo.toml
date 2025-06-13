@@ -22,22 +22,20 @@ ignore = "0.4" # For gitignore processing and directory walking
 # regex = "1.7" # If used for ignore patterns or apply functions in the lib
 # rayon = "1.8" # For potential parallelism in the library
 
-# CLI-specific dependencies (only needed for the binary)
-clap = { version = "4.5", features = ["derive"] }
-
-# LLM integration dependencies
+# LLM integration and other runtime dependencies
 rig-core = "0.3"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 url = "2.0"
-dotenvy = "0.15"  # For .env file support
-reqwest = { version = "0.11", features = ["json"] }  # For custom endpoint support
+dotenvy = "0.15"
+reqwest = { version = "0.11", features = ["json"] }
 
-# If the library directly offered LLM client functionality (which we decided against for V1,
-# but if it did, it would go here, potentially as optional features for the lib)
-# reqwest = { version = "0.11", features = ["json"], optional = true }
-# tokio = { version = "1", features = ["full"], optional = true }
+# CLI-specific dependencies (only needed for the binary)
+clap = { version = "4.5", features = ["derive", "color"] }
+clap_complete = "4.5"
+
+# (No build dependencies currently)
 
 [features]
 # Potentially, if some library features were heavy and optional
