@@ -359,6 +359,24 @@
 </ul>
 </li>
 </ul>
+<h3 id="size-based-filtering-new"><a class="header" href="#size-based-filtering-new">Size-based Filtering (new)</a></h3>
+<ul>
+<li>
+<p><code>--min-file-size &lt;SIZE&gt;</code></p>
+<ul>
+<li>Description: Include only files <strong>at least</strong> <code>&lt;SIZE&gt;</code> bytes. Directories are never filtered by size; only their child files are tested. Accepts optional suffixes <code>K</code>, <code>M</code>, <code>G</code> (base-1024) for kibibytes, mebibytes, and gibibytes. Examples: <code>10K</code>, <code>2M</code>, <code>1G</code>.</li>
+<li>Example: <code>rustree --min-file-size 100K</code> (shows files ≥ 100 KiB)</li>
+</ul>
+</li>
+<li>
+<p><code>--max-file-size &lt;SIZE&gt;</code></p>
+<ul>
+<li>Description: Include only files <strong>no larger than</strong> <code>&lt;SIZE&gt;</code> bytes. Same suffix rules as above.</li>
+<li>Example: <code>rustree --max-file-size 2M</code> (shows files ≤ 2 MiB)</li>
+</ul>
+</li>
+</ul>
+<p>These flags can be combined to specify a size range, e.g. <code>--min-file-size 10K --max-file-size 1M</code>.</p>
 <h2 id="sorting"><a class="header" href="#sorting">Sorting</a></h2>
 <ul>
 <li>
@@ -437,9 +455,32 @@
 <li>
 <p><code>--output-format &lt;FORMAT&gt;</code></p>
 <ul>
-<li>Description: Specifies the output format.</li>
-<li>Possible values: <code>text</code> (default), <code>markdown</code>.</li>
-<li>Example: <code>rustree --output-format markdown</code></li>
+<li>
+<p>Description: Specifies the output format.</p>
+</li>
+<li>
+<p>Possible values: <code>text</code> (default), <code>markdown</code>, <code>json</code>.</p>
+</li>
+<li>
+<p>Example: <code>rustree --output-format json | jq '.'</code></p>
+</li>
+<li>
+<p>When combined with LLM flags (<code>--llm-ask</code>, <code>--llm-export</code>, or <code>--dry-run</code>) the program emits a single JSON object that bundles both the tree and the LLM section.  This makes it trivial to post-process or archive the entire interaction.  Example:</p>
+<pre><code class="language-bash">rustree -L 1 \
+        --output-format json \
+        --llm-ask "Summarise this repo" --dry-run | jq .
+</code></pre>
+<p>yields</p>
+<pre><code class="language-json">{
+  "tree": [ { "type": "directory", "name": ".", "contents": [ … ] } ],
+  "llm": {
+    "dry_run": true,
+    "request": { "provider": "openai", "model": "gpt-4", ... },
+    "question": "Summarise this repo"
+  }
+}
+</code></pre>
+</li>
 </ul>
 </li>
 <li>
@@ -558,6 +599,7 @@
 <li>Description: Format dry-run output in a human-friendly markdown format instead of the default plain text. This option requires <code>--dry-run</code> to be enabled. The markdown format provides better structure with organized sections for configuration, headers, messages, and JSON body.</li>
 <li>Example: <code>rustree --llm-ask "Analyze this project" --dry-run --human-friendly</code></li>
 </ul>
+<p><strong>Additional effect:</strong> When combined with <code>--size</code> / <code>-s</code>, tree listings will display file sizes in a readable form (e.g. <code>1.2 MB</code> instead of <code>1234567B</code>).</p>
 </li>
 </ul>
 

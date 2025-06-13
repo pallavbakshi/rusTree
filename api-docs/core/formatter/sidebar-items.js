@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["base","markdown","text_tree"]};
+window.SIDEBAR_ITEMS = {"mod":["base","json","markdown","text_tree"]};
