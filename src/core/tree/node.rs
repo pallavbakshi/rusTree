@@ -6,7 +6,9 @@ use std::time::SystemTime;
 ///
 /// This struct is populated by the directory walker and contains metadata and analysis
 /// results for each node in the directory tree.
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
 pub struct NodeInfo {
     /// The full path to the file system entry.
     pub path: PathBuf,
@@ -39,7 +41,7 @@ pub struct NodeInfo {
 }
 
 /// Enumerates the types of file system entries that `rustree` can represent.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum NodeType {
     /// Represents a regular file.
     File,

@@ -7,4 +7,7 @@ pub enum CliOutputFormat {
     Text,
     /// Markdown list format.
     Markdown,
+
+    /// JSON format (pretty-printed array).
+    Json,
 }

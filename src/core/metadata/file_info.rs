@@ -45,10 +45,20 @@ pub fn format_node_metadata(
     // Size: applies to files and directories if config.show_size_bytes is true
     if config.metadata.show_size_bytes {
         if let Some(size) = node.size {
-            match style {
-                MetadataStyle::Text => metadata_parts.push(format!("[{:>7}B]", size)),
-                MetadataStyle::Markdown | MetadataStyle::Plain => {
-                    metadata_parts.push(format!("{}B", size))
+            if config.metadata.human_readable_size {
+                // Use nicer units like KB, MB …
+                let size_str = crate::core::util::format_size(size);
+                match style {
+                    MetadataStyle::Text => metadata_parts.push(format!("[{}]", size_str)),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => metadata_parts.push(size_str),
+                }
+            } else {
+                // Preserve the original formatting behaviour
+                match style {
+                    MetadataStyle::Text => metadata_parts.push(format!("[{:>7}B]", size)),
+                    MetadataStyle::Markdown | MetadataStyle::Plain => {
+                        metadata_parts.push(format!("{}B", size))
+                    }
                 }
             }
         } else if style == MetadataStyle::Text {
@@ -154,6 +164,42 @@ pub fn format_node_metadata(
                 metadata_parts.join(" ")
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod human_size_tests {
+    use super::*;
+    use crate::config::{MetadataOptions, RustreeLibConfig};
+
+    #[test]
+    fn test_format_node_metadata_human_size() {
+        let node = NodeInfo {
+            path: std::path::PathBuf::from("sample.txt"),
+            name: "sample.txt".into(),
+            node_type: NodeType::File,
+            depth: 1,
+            size: Some(2048),
+            permissions: None,
+            mtime: None,
+            change_time: None,
+            create_time: None,
+            line_count: None,
+            word_count: None,
+            custom_function_output: None,
+        };
+
+        let config = RustreeLibConfig {
+            metadata: MetadataOptions {
+                show_size_bytes: true,
+                human_readable_size: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        assert!(result.contains("2.0 KB"));
     }
 }
 

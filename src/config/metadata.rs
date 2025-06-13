@@ -1,7 +1,9 @@
 use thiserror::Error;
 
 /// Errors that can occur when applying a function to file content.
-#[derive(Error, Debug, Clone, PartialEq, Eq)]
+use serde::Serialize;
+
+#[derive(Error, Debug, Clone, PartialEq, Eq, Serialize)]
 pub enum ApplyFnError {
     /// Indicates that the function execution or calculation failed.
     #[error("Function calculation failed: {0}")]
@@ -34,6 +36,9 @@ pub enum BuiltInFunction {
 pub struct MetadataOptions {
     /// Whether to report file and directory sizes.
     pub show_size_bytes: bool,
+    /// Whether to format sizes in a human-readable form (e.g. "1.2 KB" instead of raw bytes).
+    /// This flag has an effect only when `show_size_bytes` is `true`.
+    pub human_readable_size: bool,
     /// Whether to report file permissions.
     pub report_permissions: bool,
     /// Whether to report last modification time.

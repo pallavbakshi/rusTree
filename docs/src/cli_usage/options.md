@@ -119,6 +119,18 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - Description: Read exclude patterns for apply-function from the specified file. One pattern per line. Lines starting with `#` and empty lines are ignored.
   - Example: `rustree --apply-function dir-stats --apply-exclude-from ./exclude-patterns.txt`
 
+### Size-based Filtering (new)
+
+- `--min-file-size <SIZE>`
+  - Description: Include only files **at least** `<SIZE>` bytes. Directories are never filtered by size; only their child files are tested. Accepts optional suffixes `K`, `M`, `G` (base-1024) for kibibytes, mebibytes, and gibibytes. Examples: `10K`, `2M`, `1G`.
+  - Example: `rustree --min-file-size 100K` (shows files ≥ 100 KiB)
+
+- `--max-file-size <SIZE>`
+  - Description: Include only files **no larger than** `<SIZE>` bytes. Same suffix rules as above.
+  - Example: `rustree --max-file-size 2M` (shows files ≤ 2 MiB)
+
+These flags can be combined to specify a size range, e.g. `--min-file-size 10K --max-file-size 1M`.
+
 ## Sorting
 
 - `-U, --unsorted`
@@ -168,8 +180,28 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
 
 - `--output-format <FORMAT>`
   - Description: Specifies the output format.
-  - Possible values: `text` (default), `markdown`.
-  - Example: `rustree --output-format markdown`
+  - Possible values: `text` (default), `markdown`, `json`.
+  - Example: `rustree --output-format json | jq '.'`
+  - When combined with LLM flags (`--llm-ask`, `--llm-export`, or `--dry-run`) the program emits a single JSON object that bundles both the tree and the LLM section.  This makes it trivial to post-process or archive the entire interaction.  Example:
+
+    ```bash
+    rustree -L 1 \
+            --output-format json \
+            --llm-ask "Summarise this repo" --dry-run | jq .
+    ```
+
+    yields
+
+    ```json
+    {
+      "tree": [ { "type": "directory", "name": ".", "contents": [ … ] } ],
+      "llm": {
+        "dry_run": true,
+        "request": { "provider": "openai", "model": "gpt-4", ... },
+        "question": "Summarise this repo"
+      }
+    }
+    ```
 
 - `--no-summary-report`
   - Description: Omits printing of the file and directory report at the end of the tree listing. By default, `rustree` displays a summary line like "4 directories, 6 files" at the end of the output. This flag removes that summary line entirely.
@@ -240,3 +272,5 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
 - `--human-friendly`
   - Description: Format dry-run output in a human-friendly markdown format instead of the default plain text. This option requires `--dry-run` to be enabled. The markdown format provides better structure with organized sections for configuration, headers, messages, and JSON body.
   - Example: `rustree --llm-ask "Analyze this project" --dry-run --human-friendly`
+
+  **Additional effect:** When combined with `--size` / `-s`, tree listings will display file sizes in a readable form (e.g. `1.2 MB` instead of `1234567B`).

@@ -9,7 +9,9 @@ use super::providers::LlmConfig;
 use serde_json::json;
 
 /// A human-readable preview of the outgoing LLM request.
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
 pub struct RequestPreview {
     pub provider: String,
     pub endpoint: String,
@@ -250,6 +252,31 @@ impl RequestPreview {
         }
 
         out
+    }
+}
+
+// first small serialization test
+#[cfg(test)]
+mod tests_serialization {
+    use super::*;
+    use crate::core::llm::providers::{LlmConfig, LlmProvider};
+    use std::time::Duration;
+
+    #[test]
+    fn preview_serializes_to_json_short() {
+        let cfg = LlmConfig {
+            provider: LlmProvider::OpenAi,
+            model: "gpt-4".to_string(),
+            api_key: "sk-abc".to_string(),
+            endpoint: None,
+            temperature: 0.2,
+            max_tokens: 64,
+            timeout: Duration::from_secs(30),
+        };
+        let preview = RequestPreview::from_config(&cfg, "hello");
+        let s = serde_json::to_string(&preview).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&s).unwrap();
+        assert_eq!(v["provider"], "openai");
     }
 }
 

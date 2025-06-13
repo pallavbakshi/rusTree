@@ -13,6 +13,7 @@ pub mod time_formatter;
 
 use crate::config::{RustreeLibConfig, metadata::BuiltInFunction};
 use crate::core::tree::node::{NodeInfo, NodeType};
+use crate::core::util::format_size;
 
 /// Aggregates metadata values from a collection of nodes.
 /// Used to calculate totals for the summary report.
@@ -140,14 +141,14 @@ impl MetadataAggregator {
         }
 
         if let Some(size) = self.size_total {
-            parts.push(format!("{} total", Self::format_size(size)));
+            parts.push(format!("{} total", format_size(size)));
         }
 
         // If we have function-based totals, include them separately
         if let Some(size) = self.size_from_function {
             if self.size_total.is_none() {
                 // Only show if not already showing size_total
-                parts.push(format!("{} total (from function)", Self::format_size(size)));
+                parts.push(format!("{} total (from function)", format_size(size)));
             }
         }
 
@@ -176,23 +177,11 @@ impl MetadataAggregator {
         result.chars().rev().collect()
     }
 
-    /// Formats a size in bytes to a human-readable format.
+    /// Formats a size in bytes to a human-readable string by delegating to the
+    /// shared helper in `core::util`.  This wrapper is kept to avoid breaking
+    /// existing public API and unit tests, while ensuring the formatting logic
+    /// itself lives in a single place.
     pub fn format_size(bytes: u64) -> String {
-        const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
-        const THRESHOLD: f64 = 1024.0;
-
-        let mut size = bytes as f64;
-        let mut unit_index = 0;
-
-        while size >= THRESHOLD && unit_index < UNITS.len() - 1 {
-            size /= THRESHOLD;
-            unit_index += 1;
-        }
-
-        if unit_index == 0 {
-            format!("{} {}", bytes, UNITS[unit_index])
-        } else {
-            format!("{:.1} {}", size, UNITS[unit_index])
-        }
+        format_size(bytes)
     }
 }

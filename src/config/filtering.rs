@@ -30,4 +30,10 @@ pub struct FilteringOptions {
     /// Patterns to exclude when applying functions. Files/dirs matching these patterns will skip function application.
     /// Corresponds to CLI --apply-exclude.
     pub apply_exclude_patterns: Option<Vec<String>>,
+
+    // Size-based filtering
+    /// Minimum file size (in bytes) to include. `None` means no lower bound.
+    pub min_file_size: Option<u64>,
+    /// Maximum file size (in bytes) to include. `None` means no upper bound.
+    pub max_file_size: Option<u64>,
 }
