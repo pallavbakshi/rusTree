@@ -77,6 +77,10 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
             prune_empty_directories: cli_args.pruning.prune_empty_directories,
             apply_include_patterns: cli_args.apply_function_filter.get_all_include_patterns()?,
             apply_exclude_patterns: cli_args.apply_function_filter.get_all_exclude_patterns()?,
+
+            // Size filters will be parsed below
+            min_file_size: parse_size_arg(&cli_args.size_filter.min_file_size)?,
+            max_file_size: parse_size_arg(&cli_args.size_filter.max_file_size)?,
         },
         sorting: SortingOptions {
             sort_by: if cli_args.sort_order.legacy_no_sort {
@@ -138,6 +142,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
                     CliBuiltInFunction::SizeTotal => LibBuiltInFunction::SizeTotal,
                     CliBuiltInFunction::DirStats => LibBuiltInFunction::DirStats,
                 }),
+            human_readable_size: cli_args.llm.human_friendly,
         },
         misc: MiscOptions {
             no_summary_report: cli_args.format.no_summary_report,
@@ -145,6 +150,55 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
     })
 }
 
+/// Converts a human-readable size string (e.g. "12K", "3M", "1G") into bytes.
+/// The conversion uses base-1024 (1K = 1024 bytes).
+fn parse_size_arg(arg: &Option<String>) -> Result<Option<u64>, std::io::Error> {
+    match arg {
+        None => Ok(None),
+        Some(raw) => {
+            let bytes = parse_size_string(raw).map_err(|e| {
+                std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    format!("Invalid size specification '{}': {}", raw, e),
+                )
+            })?;
+            Ok(Some(bytes))
+        }
+    }
+}
+
+fn parse_size_string(s: &str) -> Result<u64, &'static str> {
+    if s.is_empty() {
+        return Err("empty string");
+    }
+
+    let (num_part, unit_part) = s.trim().split_at(
+        s.trim()
+            .char_indices()
+            .take_while(|(_, c)| c.is_ascii_digit())
+            .map(|(i, _)| i + 1)
+            .last()
+            .unwrap_or(0),
+    );
+
+    let value: u64 = num_part.parse().map_err(|_| "failed to parse number")?;
+
+    // No suffix => bytes
+    if unit_part.is_empty() {
+        return Ok(value);
+    }
+
+    let factor: u64 = match unit_part.trim().to_ascii_lowercase().as_str() {
+        "k" | "kb" => 1024,
+        "m" | "mb" => 1024 * 1024,
+        "g" | "gb" => 1024 * 1024 * 1024,
+        _ => return Err("unrecognized size suffix"),
+    };
+
+    Ok(value.saturating_mul(factor))
+}
+
+/// Maps the CLI output format enum (`CliOutputFormat`) to the library's output format enum (`LibOutputFormat`).
 /// Maps the CLI output format enum (`CliOutputFormat`) to the library's output format enum (`LibOutputFormat`).
 ///
 /// # Arguments
@@ -157,6 +211,39 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
 pub fn map_cli_to_lib_output_format(cli_output_format: Option<CliOutputFormat>) -> LibOutputFormat {
     match cli_output_format {
         Some(CliOutputFormat::Markdown) => LibOutputFormat::Markdown,
+        Some(CliOutputFormat::Json) => LibOutputFormat::Json,
         Some(CliOutputFormat::Text) | None => LibOutputFormat::Text, // Default to Text
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_size_string_no_suffix() {
+        assert_eq!(parse_size_string("123").unwrap(), 123);
+    }
+
+    #[test]
+    fn test_parse_size_string_kib() {
+        assert_eq!(parse_size_string("1K").unwrap(), 1024);
+        assert_eq!(parse_size_string("2k").unwrap(), 2048);
+    }
+
+    #[test]
+    fn test_parse_size_string_mib() {
+        assert_eq!(parse_size_string("1M").unwrap(), 1024 * 1024);
+    }
+
+    #[test]
+    fn test_parse_size_string_gib() {
+        assert_eq!(parse_size_string("1G").unwrap(), 1024 * 1024 * 1024);
+    }
+
+    #[test]
+    fn test_parse_size_string_invalid() {
+        assert!(parse_size_string("12X").is_err());
+        assert!(parse_size_string("").is_err());
     }
 }

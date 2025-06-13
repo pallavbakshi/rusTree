@@ -90,7 +90,13 @@ pub struct LlmArgs {
     #[arg(long)]
     pub dry_run: bool,
 
-    /// Format dry-run output in a human-friendly markdown format
-    #[arg(long, requires = "dry_run")]
+    /// If present, format certain outputs in a more human-readable style.
+    ///
+    /// Originally this flag controlled the LLM `--dry-run` pretty printer.
+    /// It is now reused by the core listing functionality to display file
+    /// sizes in a human-readable form (e.g. `1.2 MB` instead of `1234567B`).
+    /// Retains its original role for LLM dry-run but no longer requires
+    /// `--dry-run` to be passed.
+    #[arg(long)]
     pub human_friendly: bool,
 }

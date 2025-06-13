@@ -111,7 +111,8 @@ pub use crate::core::tree::node::{NodeInfo, NodeType};
 
 // Formatter types (for advanced usage)
 pub use crate::core::formatter::{
-    base::TreeFormatter, markdown::MarkdownFormatter, text_tree::TextTreeFormatter,
+    base::TreeFormatter, json::JsonFormatter, markdown::MarkdownFormatter,
+    text_tree::TextTreeFormatter,
 };
 
 // Internal imports
@@ -149,6 +150,44 @@ pub fn get_tree_nodes(
 ) -> Result<Vec<NodeInfo>, RustreeError> {
     // 1. Walk and analyze (analyzer is called within walker)
     let mut nodes = walker::walk_directory(root_path, config)?;
+
+    // 1b. Apply size-based file filtering prior to any tree manipulations
+    if config.filtering.min_file_size.is_some() || config.filtering.max_file_size.is_some() {
+        let min_opt = config.filtering.min_file_size;
+        let max_opt = config.filtering.max_file_size;
+
+        nodes.retain(|node| {
+            // Apply filter only to regular files; always keep directories and symlinks.
+            if node.node_type != NodeType::File {
+                return true;
+            }
+
+            // If the walker did not collect size information (either due to I/O
+            // error or because `show_size_bytes` was disabled), `node.size` will
+            // be `None`.  In that case we keep the file instead of treating the
+            // size as 0, otherwise legitimate files could be filtered out when a
+            // minimum size constraint is specified.
+
+            match node.size {
+                None => true, // unknown size – keep the entry
+                Some(size) => {
+                    if let Some(min) = min_opt {
+                        if size < min {
+                            return false;
+                        }
+                    }
+
+                    if let Some(max) = max_opt {
+                        if size > max {
+                            return false;
+                        }
+                    }
+
+                    true
+                }
+            }
+        });
+    }
 
     // 2. Apply directory functions if needed or prune empty directories if requested
     if ((config.metadata.apply_function.is_some() && needs_directory_function_processing(config))
@@ -232,6 +271,7 @@ pub fn format_nodes(
     let formatter_instance: Box<dyn TreeFormatter> = match format {
         LibOutputFormat::Text => Box::new(TextTreeFormatter),
         LibOutputFormat::Markdown => Box::new(MarkdownFormatter),
+        LibOutputFormat::Json => Box::new(core::formatter::JsonFormatter),
     };
     let tree_output = formatter_instance.format(nodes, config)?;
 

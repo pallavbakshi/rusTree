@@ -14,6 +14,7 @@ use rustree::core::llm::{
 };
 
 use clap::Parser;
+use serde_json::{self, json};
 use std::process::ExitCode;
 
 #[tokio::main]
@@ -61,20 +62,40 @@ async fn main() -> ExitCode {
 
     // 5. Handle output based on CLI options
     if let Some(question) = &cli_args.llm.llm_export {
-        // Export formatted query for external LLM tools (preserves existing behavior)
-        println!("---BEGIN RUSTREE OUTPUT---");
-        println!("{}", output_string);
-        println!("---END RUSTREE OUTPUT---");
-        println!("\n---BEGIN LLM QUESTION---");
-        println!("{}", question);
-        println!("---END LLM QUESTION---");
-        eprintln!("\nHint: Pipe the above to your LLM tool.");
+        let want_json = matches!(
+            cli_args.format.output_format,
+            Some(rustree::cli::output::CliOutputFormat::Json)
+        );
+
+        if want_json {
+            let tree_json: serde_json::Value =
+                serde_json::from_str(&output_string).unwrap_or_else(|_| json!(output_string));
+            let out_val = json!({
+                "tree": tree_json,
+                "export_question": question
+            });
+            println!("{}", serde_json::to_string_pretty(&out_val).unwrap());
+        } else {
+            // Original text blocks
+            println!("---BEGIN RUSTREE OUTPUT---");
+            println!("{}", output_string);
+            println!("---END RUSTREE OUTPUT---");
+            println!("\n---BEGIN LLM QUESTION---");
+            println!("{}", question);
+            println!("---END LLM QUESTION---");
+            eprintln!("\nHint: Pipe the above to your LLM tool.");
+        }
     } else if let Some(question) = &cli_args.llm.llm_ask {
-        // Send directly to LLM service (new functionality)
-        match handle_llm_query(&cli_args, question, &output_string).await {
-            Ok(response) => {
-                if !response.is_empty() {
-                    println!("{}", response)
+        // Send directly to LLM service
+        let want_json = matches!(
+            cli_args.format.output_format,
+            Some(rustree::cli::output::CliOutputFormat::Json)
+        );
+
+        match handle_llm_query(&cli_args, question, &output_string, want_json).await {
+            Ok(output_json_or_text) => {
+                if !output_json_or_text.is_empty() {
+                    println!("{}", output_json_or_text);
                 }
             }
             Err(e) => {
@@ -99,6 +120,7 @@ async fn handle_llm_query(
     cli_args: &CliArgs,
     question: &str,
     tree_output: &str,
+    json_mode: bool,
 ) -> Result<String, LlmError> {
     // 1. Create LLM config from CLI args
     let llm_config = LlmConfig::from_cli_args(&cli_args.llm)?;
@@ -112,9 +134,28 @@ async fn handle_llm_query(
     // 3. Format prompt with tree output and question
     let prompt = TreePromptFormatter::format_prompt(tree_output, question, &lib_config);
 
+    use serde_json::json;
+
     // 4. Handle dry-run: build preview and skip network
     if cli_args.llm.dry_run {
         let preview = rustree::core::llm::RequestPreview::from_config(&llm_config, &prompt);
+
+        if json_mode {
+            // Attempt to parse tree_output as JSON, fallback to string
+            let tree_json: serde_json::Value =
+                serde_json::from_str(tree_output).unwrap_or_else(|_| json!(tree_output));
+
+            let out_val = json!({
+                "tree": tree_json,
+                "llm": {
+                    "dry_run": true,
+                    "request": preview,
+                    "question": question
+                }
+            });
+            return Ok(serde_json::to_string_pretty(&out_val).unwrap());
+        }
+
         let output = if cli_args.llm.human_friendly {
             preview.pretty_print_markdown()
         } else {
@@ -127,6 +168,22 @@ async fn handle_llm_query(
     // 5. Send to LLM and get response
     let response = LlmClientFactory::create_and_query(&llm_config, &prompt).await?;
 
-    // 6. Format response for display
-    Ok(LlmResponseProcessor::format_response(&response, question))
+    if json_mode {
+        let tree_json: serde_json::Value =
+            serde_json::from_str(tree_output).unwrap_or_else(|_| json!(tree_output));
+        let out_val = json!({
+            "tree": tree_json,
+            "llm": {
+                "dry_run": false,
+                "provider": llm_config.provider.name(),
+                "model": llm_config.model,
+                "question": question,
+                "response": response
+            }
+        });
+        Ok(serde_json::to_string_pretty(&out_val).unwrap())
+    } else {
+        // 6. Format response for display
+        Ok(LlmResponseProcessor::format_response(&response, question))
+    }
 }

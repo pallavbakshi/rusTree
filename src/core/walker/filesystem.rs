@@ -172,7 +172,10 @@ pub fn walk_directory(
         };
 
         if let Some(meta) = resolved_metadata_for_node {
-            if config.metadata.show_size_bytes {
+            if config.metadata.show_size_bytes
+                || config.filtering.min_file_size.is_some()
+                || config.filtering.max_file_size.is_some()
+            {
                 node.size = Some(meta.len());
             }
             if config.metadata.show_last_modified {

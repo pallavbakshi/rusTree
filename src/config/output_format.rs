@@ -5,4 +5,7 @@ pub enum OutputFormat {
     Text,
     /// Markdown list format.
     Markdown,
+
+    /// JSON array of NodeInfo structs (pretty-printed).
+    Json,
 }
