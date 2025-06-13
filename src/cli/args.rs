@@ -86,6 +86,9 @@ pub struct CliArgs {
     #[command(flatten, next_help_heading = "\x1b[1;37mOutput Options\x1b[0m")]
     pub format: format::FormatArgs,
 
+    #[command(flatten)]
+    pub html_output: crate::cli::output::html::HtmlOutputArgs,
+
     // LLM Options
     #[command(flatten, next_help_heading = "\x1b[1;31mLLM Options\x1b[0m")]
     pub llm: llm::LlmArgs,

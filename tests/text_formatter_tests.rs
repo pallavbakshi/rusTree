@@ -150,6 +150,7 @@ fn test_formatter_summary_line_correct_for_dirs_only_mode() -> Result<()> {
             metadata: config.metadata.clone(),
             filtering: config.filtering.clone(),
             misc: config.misc.clone(),
+            html: Default::default(),
         },
     )?;
 
@@ -236,6 +237,7 @@ fn test_formatter_no_file_specific_metadata_prefixes_in_dirs_only_mode() -> Resu
             input_source: config.input_source.clone(),
             filtering: config.filtering.clone(),
             misc: config.misc.clone(),
+            html: Default::default(),
         },
     )?;
     let mut dir_nodes_only: Vec<NodeInfo> = original_nodes_for_filtering

@@ -8,4 +8,8 @@ pub enum OutputFormat {
 
     /// JSON array of NodeInfo structs (pretty-printed).
     Json,
+
+    /// HTML output wrapped in basic boilerplate, with the tree inside a <pre>
+    /// block. Mimics GNU tree's -H output (without hyperlinks for now).
+    Html,
 }

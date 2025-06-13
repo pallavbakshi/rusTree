@@ -25,6 +25,7 @@
 //! ```
 
 pub mod base;
+pub mod html;
 pub mod json;
 pub mod markdown;
 pub mod text_tree;
@@ -34,6 +35,7 @@ pub use crate::config::output_format::OutputFormat;
 
 // Re-export the core types for external use
 pub use base::TreeFormatter;
+pub use html::HtmlFormatter;
 pub use json::JsonFormatter;
 pub use markdown::MarkdownFormatter;
 pub use text_tree::TextTreeFormatter;

@@ -11,6 +11,7 @@ use crate::cli::sorting::CliSortKey;
 // Corrected imports using explicit paths from crate::config
 use crate::config::BuiltInFunction as LibBuiltInFunction;
 use crate::config::FilteringOptions;
+use crate::config::HtmlOptions;
 use crate::config::InputSourceOptions;
 use crate::config::ListingOptions;
 use crate::config::MetadataOptions;
@@ -180,6 +181,14 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
         misc: MiscOptions {
             no_summary_report: cli_args.format.no_summary_report,
         },
+
+        html: HtmlOptions {
+            base_href: cli_args.html_output.html_base_href.clone(),
+            strip_first_component: cli_args.html_output.html_strip_first_component,
+            custom_intro: cli_args.html_output.html_intro_file.clone(),
+            custom_outro: cli_args.html_output.html_outro_file.clone(),
+            include_links: !cli_args.html_output.html_no_links,
+        },
     })
 }
 
@@ -245,6 +254,7 @@ pub fn map_cli_to_lib_output_format(cli_output_format: Option<CliOutputFormat>) 
     match cli_output_format {
         Some(CliOutputFormat::Markdown) => LibOutputFormat::Markdown,
         Some(CliOutputFormat::Json) => LibOutputFormat::Json,
+        Some(CliOutputFormat::Html) => LibOutputFormat::Html,
         Some(CliOutputFormat::Text) | None => LibOutputFormat::Text, // Default to Text
     }
 }

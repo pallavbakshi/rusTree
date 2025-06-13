@@ -1,5 +1,6 @@
 // src/config/mod.rs
 pub mod filtering;
+pub mod html;
 pub mod input_source;
 pub mod listing;
 pub mod llm;
@@ -15,6 +16,7 @@ pub use tree_options::RustreeLibConfig;
 
 // Re-export specific enums for convenience in other modules
 pub use filtering::FilteringOptions;
+pub use html::HtmlOptions;
 pub use input_source::InputSourceOptions;
 pub use listing::ListingOptions;
 pub use llm::LlmOptions;
