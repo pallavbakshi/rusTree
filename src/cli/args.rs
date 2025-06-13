@@ -8,20 +8,38 @@ use crate::cli::metadata::{date, size, stats};
 use crate::cli::output::format;
 use crate::cli::sorting::order;
 use clap::Parser;
+use clap_complete::Shell;
 use std::path::PathBuf;
 
 /// Defines the command-line arguments accepted by the `rustree` executable.
 ///
 /// This struct uses `clap` for parsing and automatically generates help messages.
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(
+    author,
+    version,
+    about,
+    long_about = None,
+    color = clap::ColorChoice::Auto
+)]
 pub struct CliArgs {
     /// The root path to start scanning from.
     /// Defaults to the current directory (`.`).
     #[arg(default_value = ".")]
     pub path: PathBuf,
 
-    #[command(flatten)]
+    // Utility options
+    /// Generate shell completion script for the specified shell and exit.
+    #[arg(
+        long = "generate-completions",
+        value_enum,
+        help_heading = "Utility Options",
+        value_name = "SHELL"
+    )]
+    pub generate_completions: Option<Shell>,
+
+    // Listing Options
+    #[command(flatten, next_help_heading = "\x1b[1;36mListing Options\x1b[0m")]
     pub depth: depth::DepthArgs,
 
     #[command(flatten)]
@@ -33,7 +51,8 @@ pub struct CliArgs {
     #[command(flatten)]
     pub full_path: full_path::FullPathArgs,
 
-    #[command(flatten)]
+    // Metadata Options
+    #[command(flatten, next_help_heading = "\x1b[1;35mMetadata Options\x1b[0m")]
     pub size: size::SizeArgs,
 
     #[command(flatten)]
@@ -42,10 +61,12 @@ pub struct CliArgs {
     #[command(flatten)]
     pub file_stats: stats::FileStatsArgs,
 
-    #[command(flatten)]
+    // Sorting Options
+    #[command(flatten, next_help_heading = "\x1b[1;34mSorting Options\x1b[0m")]
     pub sort_order: order::SortOrderArgs,
 
-    #[command(flatten)]
+    // Filtering Options
+    #[command(flatten, next_help_heading = "\x1b[1;33mFiltering Options\x1b[0m")]
     pub include: include::IncludeArgs,
 
     #[command(flatten)]
@@ -57,15 +78,18 @@ pub struct CliArgs {
     #[command(flatten)]
     pub size_filter: size_filter::SizeFilterArgs,
 
-    #[command(flatten)]
+    // Apply-functions patterns
+    #[command(flatten, next_help_heading = "\x1b[1;32mApply Functions\x1b[0m")]
     pub apply_function_filter: apply_function::ApplyFunctionFilterArgs,
 
-    #[command(flatten)]
+    // Output Options
+    #[command(flatten, next_help_heading = "\x1b[1;37mOutput Options\x1b[0m")]
     pub format: format::FormatArgs,
 
-    #[command(flatten)]
+    // LLM Options
+    #[command(flatten, next_help_heading = "\x1b[1;31mLLM Options\x1b[0m")]
     pub llm: llm::LlmArgs,
 
-    #[command(flatten)]
+    #[command(flatten, next_help_heading = "\x1b[1;33mFiltering Options\x1b[0m")]
     pub pruning: pruning::PruningArgs,
 }

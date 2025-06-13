@@ -8,22 +8,38 @@ use std::path::PathBuf;
 pub struct ApplyFunctionFilterArgs {
     /// Only apply function to files/dirs matching these patterns.
     /// Multiple patterns can be specified.
-    #[arg(long = "apply-include", value_name = "PATTERN")]
+    #[arg(
+        long = "apply-include",
+        value_name = "PATTERN",
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
+    )]
     pub apply_include: Option<Vec<String>>,
 
     /// Skip applying function to files/dirs matching these patterns.
     /// Multiple patterns can be specified.
-    #[arg(long = "apply-exclude", value_name = "PATTERN")]
+    #[arg(
+        long = "apply-exclude",
+        value_name = "PATTERN",
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
+    )]
     pub apply_exclude: Option<Vec<String>>,
 
     /// Read include patterns for apply-function from a file.
     /// Each line in the file should contain one pattern.
-    #[arg(long = "apply-include-from", value_name = "FILE_PATH")]
+    #[arg(
+        long = "apply-include-from",
+        value_name = "FILE_PATH",
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
+    )]
     pub apply_include_from: Option<PathBuf>,
 
     /// Read exclude patterns for apply-function from a file.
     /// Each line in the file should contain one pattern.
-    #[arg(long = "apply-exclude-from", value_name = "FILE_PATH")]
+    #[arg(
+        long = "apply-exclude-from",
+        value_name = "FILE_PATH",
+        help_heading = "\x1b[1;32mApply Functions\x1b[0m"
+    )]
     pub apply_exclude_from: Option<PathBuf>,
 }
 
