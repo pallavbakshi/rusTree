@@ -11,6 +11,7 @@ pub mod size_calculator;
 pub mod extended_attrs;
 pub mod time_formatter;
 
+use crate::config::metadata::FunctionOutputKind;
 use crate::config::{RustreeLibConfig, metadata::BuiltInFunction};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use crate::core::util::format_size;
@@ -31,6 +32,11 @@ pub struct MetadataAggregator {
     pub dir_count_from_function: Option<usize>,
     /// Size total extracted from apply functions
     pub size_from_function: Option<u64>,
+
+    /// Generic numeric total aggregated from custom apply-functions that yield numbers.
+    pub custom_number_total: Option<u64>,
+    /// Generic bytes total aggregated from custom apply-functions that yield byte counts.
+    pub custom_bytes_total: Option<u64>,
 }
 
 impl MetadataAggregator {
@@ -42,7 +48,6 @@ impl MetadataAggregator {
         let should_aggregate_size = config.metadata.show_size_bytes;
         let should_aggregate_lines = config.metadata.calculate_line_count;
         let should_aggregate_words = config.metadata.calculate_word_count;
-        let has_apply_function = config.metadata.apply_function.is_some();
 
         for node in nodes {
             // Aggregate built-in metadata for files
@@ -67,10 +72,17 @@ impl MetadataAggregator {
             }
 
             // Aggregate apply function outputs
-            if has_apply_function {
-                if let Some(Ok(output)) = &node.custom_function_output {
-                    aggregator.aggregate_function_output(output, &config.metadata.apply_function);
-                }
+            if let Some(Ok(output)) = &node.custom_function_output {
+                // Determine output kind based on configuration (built-in vs external)
+                let kind = if let Some(builtin) = &config.metadata.apply_function {
+                    builtin.output_kind()
+                } else if let Some(ext) = &config.metadata.external_function {
+                    ext.kind
+                } else {
+                    FunctionOutputKind::Text
+                };
+
+                aggregator.aggregate_function_output(output, kind, &config.metadata.apply_function);
             }
         }
 
@@ -78,52 +90,69 @@ impl MetadataAggregator {
     }
 
     /// Parses and aggregates output from apply functions.
-    fn aggregate_function_output(&mut self, output: &str, function: &Option<BuiltInFunction>) {
-        match function {
-            Some(BuiltInFunction::CountFiles) => {
-                if let Ok(count) = output.parse::<usize>() {
-                    *self.file_count_from_function.get_or_insert(0) += count;
-                }
-            }
-            Some(BuiltInFunction::CountDirs) => {
-                if let Ok(count) = output.parse::<usize>() {
-                    *self.dir_count_from_function.get_or_insert(0) += count;
-                }
-            }
-            Some(BuiltInFunction::SizeTotal) => {
-                if let Ok(size) = output.parse::<u64>() {
-                    *self.size_from_function.get_or_insert(0) += size;
-                }
-            }
-            Some(BuiltInFunction::DirStats) => {
-                // Parse "Xf,Yd,ZB" format
-                let parts: Vec<&str> = output.split(',').collect();
-                if parts.len() == 3 {
-                    // Extract file count
-                    if let Some(file_part) = parts[0].strip_suffix('f') {
-                        if let Ok(count) = file_part.parse::<usize>() {
-                            *self.file_count_from_function.get_or_insert(0) += count;
-                        }
-                    }
-                    // Extract directory count
-                    if let Some(dir_part) = parts[1].strip_suffix('d') {
-                        if let Ok(count) = dir_part.parse::<usize>() {
-                            *self.dir_count_from_function.get_or_insert(0) += count;
-                        }
-                    }
-                    // Extract size
-                    if let Some(size_part) = parts[2].strip_suffix('B') {
-                        if let Ok(size) = size_part.parse::<u64>() {
-                            *self.size_from_function.get_or_insert(0) += size;
-                        }
+    fn aggregate_function_output(
+        &mut self,
+        output: &str,
+        kind: FunctionOutputKind,
+        builtin: &Option<BuiltInFunction>,
+    ) {
+        // Aggregate generically only when the result originates from an external
+        // function (i.e. no built-in function specified).
+        if builtin.is_none() {
+            match kind {
+                FunctionOutputKind::Number => {
+                    if let Ok(num) = output.parse::<u64>() {
+                        *self.custom_number_total.get_or_insert(0) += num;
                     }
                 }
-            }
-            _ => {
-                // For other functions, try to parse as a number
-                if let Ok(_num) = output.parse::<usize>() {
-                    // Store in a generic counter (could be extended in the future)
+                FunctionOutputKind::Bytes => {
+                    if let Ok(bytes) = output.parse::<u64>() {
+                        *self.custom_bytes_total.get_or_insert(0) += bytes;
+                    }
                 }
+                FunctionOutputKind::Text => {}
+            }
+        }
+
+        // Still keep legacy built-in aggregation for specific directory functions
+        if let Some(function) = builtin {
+            match function {
+                BuiltInFunction::CountFiles => {
+                    if let Ok(count) = output.parse::<usize>() {
+                        *self.file_count_from_function.get_or_insert(0) += count;
+                    }
+                }
+                BuiltInFunction::CountDirs => {
+                    if let Ok(count) = output.parse::<usize>() {
+                        *self.dir_count_from_function.get_or_insert(0) += count;
+                    }
+                }
+                BuiltInFunction::SizeTotal => {
+                    if let Ok(size) = output.parse::<u64>() {
+                        *self.size_from_function.get_or_insert(0) += size;
+                    }
+                }
+                BuiltInFunction::DirStats => {
+                    let parts: Vec<&str> = output.split(',').collect();
+                    if parts.len() == 3 {
+                        if let Some(file_part) = parts[0].strip_suffix('f') {
+                            if let Ok(count) = file_part.parse::<usize>() {
+                                *self.file_count_from_function.get_or_insert(0) += count;
+                            }
+                        }
+                        if let Some(dir_part) = parts[1].strip_suffix('d') {
+                            if let Ok(count) = dir_part.parse::<usize>() {
+                                *self.dir_count_from_function.get_or_insert(0) += count;
+                            }
+                        }
+                        if let Some(size_part) = parts[2].strip_suffix('B') {
+                            if let Ok(size) = size_part.parse::<u64>() {
+                                *self.size_from_function.get_or_insert(0) += size;
+                            }
+                        }
+                    }
+                }
+                _ => {}
             }
         }
     }
@@ -144,12 +173,25 @@ impl MetadataAggregator {
             parts.push(format!("{} total", format_size(size)));
         }
 
-        // If we have function-based totals, include them separately
+        // Function-based totals (built-in directory functions & external)
         if let Some(size) = self.size_from_function {
             if self.size_total.is_none() {
-                // Only show if not already showing size_total
                 parts.push(format!("{} total (from function)", format_size(size)));
             }
+        }
+
+        if let Some(bytes) = self.custom_bytes_total.filter(|b| *b > 0) {
+            // Avoid duplicate display if already counted
+            if self.size_total.is_none() && self.size_from_function.is_none() {
+                parts.push(format!("{} total (custom)", format_size(bytes)));
+            }
+        }
+
+        if let Some(num) = self.custom_number_total.filter(|n| *n > 0) {
+            parts.push(format!(
+                "{} total (custom)",
+                Self::format_number(num as usize)
+            ));
         }
 
         if parts.is_empty() {

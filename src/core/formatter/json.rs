@@ -24,7 +24,7 @@ impl TreeFormatter for JsonFormatter {
     fn format(
         &self,
         nodes: &[NodeInfo],
-        _config: &RustreeLibConfig,
+        config: &RustreeLibConfig,
     ) -> Result<String, RustreeError> {
         // Build temporary tree to restore hierarchy
         let mut roots = builder::build_tree(nodes.to_vec())
@@ -34,8 +34,19 @@ impl TreeFormatter for JsonFormatter {
         let mut files = 0usize;
         let mut json_roots = Vec::new();
 
+        // Determine apply command string once.
+        let apply_cmd_opt: Option<String> = if let Some(builtin) = &config.metadata.apply_function {
+            Some(format!("{builtin:?}"))
+        } else {
+            config
+                .metadata
+                .external_function
+                .as_ref()
+                .map(|ext| ext.cmd_template.clone())
+        };
+
         for root in &mut roots {
-            json_roots.push(convert_node(root, &mut dirs, &mut files));
+            json_roots.push(convert_node(root, &apply_cmd_opt, &mut dirs, &mut files));
         }
 
         // Wrap under synthetic root directory ("." by default)
@@ -44,6 +55,8 @@ impl TreeFormatter for JsonFormatter {
         let wrapped_root = JsonValue::Directory {
             name: root_name,
             contents: Some(json_roots),
+            apply_command: apply_cmd_opt.clone(),
+            apply_command_output: None,
         };
 
         let output_vec = vec![
@@ -68,9 +81,19 @@ enum JsonValue {
         name: String,
         #[serde(skip_serializing_if = "Option::is_none")]
         contents: Option<Vec<JsonValue>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        apply_command: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        apply_command_output: Option<String>,
     },
     #[serde(rename = "file")]
-    File { name: String },
+    File {
+        name: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        apply_command: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        apply_command_output: Option<String>,
+    },
     #[serde(rename = "report")]
     Report(JsonReport),
 }
@@ -83,6 +106,7 @@ struct JsonReport {
 
 fn convert_node(
     node: &mut builder::TempNode,
+    apply_cmd: &Option<String>,
     dir_ctr: &mut usize,
     file_ctr: &mut usize,
 ) -> JsonValue {
@@ -91,7 +115,7 @@ fn convert_node(
             *dir_ctr += 1;
             let mut child_vals = Vec::new();
             for child in &mut node.children {
-                child_vals.push(convert_node(child, dir_ctr, file_ctr));
+                child_vals.push(convert_node(child, apply_cmd, dir_ctr, file_ctr));
             }
             JsonValue::Directory {
                 name: node.node_info.name.clone(),
@@ -100,12 +124,26 @@ fn convert_node(
                 } else {
                     Some(child_vals)
                 },
+                apply_command: apply_cmd.clone(),
+                apply_command_output: node
+                    .node_info
+                    .custom_function_output
+                    .as_ref()
+                    .and_then(|r| r.as_ref().ok())
+                    .cloned(),
             }
         }
         _ => {
             *file_ctr += 1;
             JsonValue::File {
                 name: node.node_info.name.clone(),
+                apply_command: apply_cmd.clone(),
+                apply_command_output: node
+                    .node_info
+                    .custom_function_output
+                    .as_ref()
+                    .and_then(|r| r.as_ref().ok())
+                    .cloned(),
             }
         }
     }

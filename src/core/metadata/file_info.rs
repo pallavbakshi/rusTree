@@ -4,9 +4,12 @@
 //! information and metadata, including content analysis and metadata formatting.
 
 use crate::config::RustreeLibConfig;
+use crate::config::metadata::ExternalFunction;
 use crate::config::metadata::{ApplyFnError, BuiltInFunction};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fs;
+use std::io::Read;
+use std::process::{Command, Stdio};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Represents different styles for formatting metadata display.
@@ -115,11 +118,18 @@ pub fn format_node_metadata(
         }
     }
 
-    // Apply function metadata: show only when function is applicable and has output
-    if config.metadata.apply_function.is_some() {
-        // Don't display cat content in metadata since it's shown separately
-        if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
-            // Skip displaying cat content in metadata
+    // Apply function metadata: handle both built-in and external functions
+    if config.metadata.apply_function.is_some() || config.metadata.external_function.is_some() {
+        // For built-in Cat, skip display of content in metadata
+        let external_text = config
+            .metadata
+            .external_function
+            .as_ref()
+            .map(|f| matches!(f.kind, crate::config::metadata::FunctionOutputKind::Text))
+            .unwrap_or(false);
+
+        if config.metadata.apply_function.as_ref() == Some(&BuiltInFunction::Cat) || external_text {
+            // content printed elsewhere (formatter body)
         } else {
             match &node.custom_function_output {
                 Some(Ok(val)) => match style {
@@ -135,11 +145,16 @@ pub fn format_node_metadata(
                     }
                 },
                 None => {
-                    // Only show [F: N/A] if the function should apply to this node type
-                    if style == MetadataStyle::Text
-                        && should_show_function_na_for_node(node, config)
-                    {
-                        metadata_parts.push("[F: N/A]".to_string());
+                    if style == MetadataStyle::Text {
+                        if config.metadata.apply_function.is_some() {
+                            if should_show_function_na_for_node(node, config) {
+                                metadata_parts.push("[F: N/A]".to_string());
+                            }
+                        } else if config.metadata.external_function.is_some()
+                            && node.node_type == NodeType::File
+                        {
+                            metadata_parts.push("[F: N/A]".to_string());
+                        }
                     }
                 }
             }
@@ -320,6 +335,74 @@ pub fn apply_builtin_function(
         | BuiltInFunction::DirStats => Err(ApplyFnError::CalculationFailed(
             "Directory functions require tree context".to_string(),
         )),
+    }
+}
+
+use std::path::Path;
+
+/// Applies an external command to the file and returns its stdout as string.
+/// The command template may contain the placeholder `{}` which will be replaced
+/// with the file path.  The implementation is best-effort and synchronous; the
+/// timeout is enforced by killing the child process if it exceeds the given
+/// duration.
+pub fn apply_external_to_file(
+    file_path: &Path,
+    ext_func: &ExternalFunction,
+) -> Result<String, ApplyFnError> {
+    // Basic shell-escape: wrap in single quotes and escape inner single quotes.
+    let path_str = file_path.to_string_lossy();
+    let escaped = path_str.replace("'", "'\\''");
+    let quoted_path = format!("'{}'", escaped);
+    let cmd_str = ext_func.cmd_template.replace("{}", &quoted_path);
+
+    // Spawn via shell so that redirections like "wc -l < {}" work.
+    let mut child = Command::new("sh")
+        .arg("-c")
+        .arg(&cmd_str)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| ApplyFnError::Execution(format!("spawn failed: {e}")))?;
+
+    // Immediately spawn thread that drains stdout to avoid pipe buffer deadlock
+    use std::io::BufReader;
+    use std::sync::mpsc;
+
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| ApplyFnError::Execution("failed to capture stdout".into()))?;
+
+    let (tx, rx) = mpsc::channel();
+    std::thread::spawn(move || {
+        let mut reader = BufReader::new(stdout);
+        let mut buf = String::new();
+        let _ = reader.read_to_string(&mut buf);
+        let _ = tx.send(buf);
+    });
+
+    let timeout = std::time::Duration::from_secs(ext_func.timeout_secs);
+    let start = std::time::Instant::now();
+
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                let output = rx.recv().unwrap_or_default();
+
+                if !status.success() {
+                    return Err(ApplyFnError::Execution(format!("exit status: {}", status)));
+                }
+                return Ok(output.trim().to_string());
+            }
+            Ok(None) => {
+                if start.elapsed() > timeout {
+                    let _ = child.kill();
+                    return Err(ApplyFnError::Timeout);
+                }
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
+            Err(e) => return Err(ApplyFnError::Execution(format!("wait failed: {e}"))),
+        }
     }
 }
 
