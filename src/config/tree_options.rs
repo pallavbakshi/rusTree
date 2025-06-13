@@ -1,6 +1,7 @@
 // src/config/tree_options.rs
 
 use crate::config::filtering::FilteringOptions;
+use crate::config::html::HtmlOptions;
 use crate::config::input_source::InputSourceOptions;
 use crate::config::listing::ListingOptions;
 use crate::config::metadata::MetadataOptions;
@@ -76,4 +77,7 @@ pub struct RustreeLibConfig {
 
     /// Miscellaneous configuration options
     pub misc: MiscOptions,
+
+    /// HTML output specific options (only used when `output-format`=html)
+    pub html: HtmlOptions,
 }

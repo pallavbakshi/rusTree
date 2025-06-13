@@ -16,7 +16,7 @@ RusTree is a command-line tool and Rust library designed to display directory st
 - **Analyze Content:** Get insights like file sizes, modification dates, line counts, and word counts.
 - **Apply Custom Logic:** Use built-in functions (or extend with your own) to process file contents and report results.
 - **Sort Entries:** Organize the tree output by name, size, modification time, or other criteria.
-- **Flexible Output:** Choose between plain text tree format or Markdown.
+- **Flexible Output:** Choose between plain text tree format, Markdown, JSON, or a self-contained HTML page.
 - **Cross-Platform:** Built with Rust, aiming for compatibility across different operating systems.
 
 ## Who is this for?

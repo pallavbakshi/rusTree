@@ -272,6 +272,7 @@ pub fn format_nodes(
         LibOutputFormat::Text => Box::new(TextTreeFormatter),
         LibOutputFormat::Markdown => Box::new(MarkdownFormatter),
         LibOutputFormat::Json => Box::new(core::formatter::JsonFormatter),
+        LibOutputFormat::Html => Box::new(core::formatter::HtmlFormatter),
     };
     let tree_output = formatter_instance.format(nodes, config)?;
 

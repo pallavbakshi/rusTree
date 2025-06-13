@@ -138,12 +138,12 @@ fn display_tree(nodes: &[NodeInfo], format: LibOutputFormat, config: &RustreeLib
 }
 ```
 
-This function takes the nodes, a `LibOutputFormat` enum (`Text` or `Markdown`, from `src/config/output_format.rs` and re-exported), and the `RustreeLibConfig` (as some config options affect formatting).
+This function takes the nodes, a `LibOutputFormat` enum (`Text`, `Markdown`, `Json`, or `Html`, from `src/config/output_format.rs` and re-exported), and the `RustreeLibConfig` (as some config options affect formatting).
 
 ### Key Enums
 
 - **`SortKey`**: `Name`, `Version`, `Size`, `MTime`, `ChangeTime`, `CreateTime`, `Words`, `Lines`, `Custom`, `None`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig.sorting.sort_by`.
-- **`LibOutputFormat`**: `Text`, `Markdown`. Defined in `src/config/output_format.rs` (as `OutputFormat`). Used with `format_nodes()`.
+- **`LibOutputFormat`**: `Text`, `Markdown`, `Json`, `Html`. Defined in `src/config/output_format.rs` (as `OutputFormat`). Used with `format_nodes()`.
 - **`BuiltInFunction`**: 
   - File functions: `CountPluses` (counts '+' characters), `Cat` (returns full file content)
   - Directory functions: `CountFiles`, `CountDirectories`, `SizeTotal`, `DirStats`

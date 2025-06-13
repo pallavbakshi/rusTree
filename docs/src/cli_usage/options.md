@@ -180,8 +180,48 @@ These flags can be combined to specify a size range, e.g. `--min-file-size 10K -
 
 - `--output-format <FORMAT>`
   - Description: Specifies the output format.
-  - Possible values: `text` (default), `markdown`, `json`.
+  - Possible values: `text` (default), `markdown`, `json`, `html`.
   - Example: `rustree --output-format json | jq '.'`
+
+### HTML-specific flags (when `--output-format html` is selected)
+
+| Flag | Explanation | GNU tree analogue |
+|------|-------------|-------------------|
+| `--html-base-href <URL>` | Prepend `<URL>/` to every generated hyperlink.  If the URL already ends with a `/`, it is not duplicated. | `-H <URL>` |
+| `--html-strip-first-component` | Strip the first path component of every link *after* the base-href. Useful when you scan a sub-directory but want links rooted at the parent. | `-H -<URL>` |
+| `--html-no-links` | Disable generation of `<a href>` tags – the tree is plain text inside the `<pre>` block. | `--nolinks` |
+| `--html-intro-file <FILE>` | Use the contents of `FILE` instead of the built-in HTML header (everything before the `<pre>`).  Specify `/dev/null` or an empty file to suppress the header entirely. | `--hintro=<file>` |
+| `--html-outro-file <FILE>` | Use the contents of `FILE` instead of the default footer (everything after `</pre>`).  Pass `/dev/null` to omit. | `--houtro=<file>` |
+
+#### Quick examples
+
+• Embed a browseable tree of your `src/` folder on a website:
+
+```bash
+rustree src/ \
+        --output-format html \
+        --html-base-href https://www.example.com/src \
+        > src_index.html
+```
+
+• Same as above, but you ran the command in the repo-root and want to drop the leading `src/` component:
+
+```bash
+rustree --output-format html \
+        --html-base-href https://www.example.com \
+        --html-strip-first-component \
+        src/ > index.html
+```
+
+• Plain HTML (no links), custom header/footer:
+
+```bash
+rustree --output-format html \
+        --html-no-links \
+        --html-intro-file ./templates/intro.html \
+        --html-outro-file ./templates/outro.html \
+        > tree.html
+```
   - When combined with LLM flags (`--llm-ask`, `--llm-export`, or `--dry-run`) the program emits a single JSON object that bundles both the tree and the LLM section.  This makes it trivial to post-process or archive the entire interaction.  Example:
 
     ```bash
