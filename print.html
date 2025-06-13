@@ -185,7 +185,7 @@
 <li><strong>Analyze Content:</strong> Get insights like file sizes, modification dates, line counts, and word counts.</li>
 <li><strong>Apply Custom Logic:</strong> Use built-in functions (or extend with your own) to process file contents and report results.</li>
 <li><strong>Sort Entries:</strong> Organize the tree output by name, size, modification time, or other criteria.</li>
-<li><strong>Flexible Output:</strong> Choose between plain text tree format or Markdown.</li>
+<li><strong>Flexible Output:</strong> Choose between plain text tree format, Markdown, JSON, or a self-contained HTML page.</li>
 <li><strong>Cross-Platform:</strong> Built with Rust, aiming for compatibility across different operating systems.</li>
 </ul>
 <h2 id="who-is-this-for"><a class="header" href="#who-is-this-for">Who is this for?</a></h2>
@@ -631,18 +631,44 @@ rustree --sort-by size --reverse-sort
 </ul>
 <h2 id="output-formatting"><a class="header" href="#output-formatting">Output Formatting</a></h2>
 <ul>
-<li>
-<p><code>--output-format &lt;FORMAT&gt;</code></p>
+<li><code>--output-format &lt;FORMAT&gt;</code>
 <ul>
-<li>
-<p>Description: Specifies the output format.</p>
+<li>Description: Specifies the output format.</li>
+<li>Possible values: <code>text</code> (default), <code>markdown</code>, <code>json</code>, <code>html</code>.</li>
+<li>Example: <code>rustree --output-format json | jq '.'</code></li>
+</ul>
 </li>
-<li>
-<p>Possible values: <code>text</code> (default), <code>markdown</code>, <code>json</code>.</p>
-</li>
-<li>
-<p>Example: <code>rustree --output-format json | jq '.'</code></p>
-</li>
+</ul>
+<h3 id="html-specific-flags-when---output-format-html-is-selected"><a class="header" href="#html-specific-flags-when---output-format-html-is-selected">HTML-specific flags (when <code>--output-format html</code> is selected)</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Flag</th><th>Explanation</th><th>GNU tree analogue</th></tr></thead><tbody>
+<tr><td><code>--html-base-href &lt;URL&gt;</code></td><td>Prepend <code>&lt;URL&gt;/</code> to every generated hyperlink.  If the URL already ends with a <code>/</code>, it is not duplicated.</td><td><code>-H &lt;URL&gt;</code></td></tr>
+<tr><td><code>--html-strip-first-component</code></td><td>Strip the first path component of every link <em>after</em> the base-href. Useful when you scan a sub-directory but want links rooted at the parent.</td><td><code>-H -&lt;URL&gt;</code></td></tr>
+<tr><td><code>--html-no-links</code></td><td>Disable generation of <code>&lt;a href&gt;</code> tags – the tree is plain text inside the <code>&lt;pre&gt;</code> block.</td><td><code>--nolinks</code></td></tr>
+<tr><td><code>--html-intro-file &lt;FILE&gt;</code></td><td>Use the contents of <code>FILE</code> instead of the built-in HTML header (everything before the <code>&lt;pre&gt;</code>).  Specify <code>/dev/null</code> or an empty file to suppress the header entirely.</td><td><code>--hintro=&lt;file&gt;</code></td></tr>
+<tr><td><code>--html-outro-file &lt;FILE&gt;</code></td><td>Use the contents of <code>FILE</code> instead of the default footer (everything after <code>&lt;/pre&gt;</code>).  Pass <code>/dev/null</code> to omit.</td><td><code>--houtro=&lt;file&gt;</code></td></tr>
+</tbody></table>
+</div>
+<h4 id="quick-examples"><a class="header" href="#quick-examples">Quick examples</a></h4>
+<p>• Embed a browseable tree of your <code>src/</code> folder on a website:</p>
+<pre><code class="language-bash">rustree src/ \
+        --output-format html \
+        --html-base-href https://www.example.com/src \
+        &gt; src_index.html
+</code></pre>
+<p>• Same as above, but you ran the command in the repo-root and want to drop the leading <code>src/</code> component:</p>
+<pre><code class="language-bash">rustree --output-format html \
+        --html-base-href https://www.example.com \
+        --html-strip-first-component \
+        src/ &gt; index.html
+</code></pre>
+<p>• Plain HTML (no links), custom header/footer:</p>
+<pre><code class="language-bash">rustree --output-format html \
+        --html-no-links \
+        --html-intro-file ./templates/intro.html \
+        --html-outro-file ./templates/outro.html \
+        &gt; tree.html
+</code></pre>
+<ul>
 <li>
 <p>When combined with LLM flags (<code>--llm-ask</code>, <code>--llm-export</code>, or <code>--dry-run</code>) the program emits a single JSON object that bundles both the tree and the LLM section.  This makes it trivial to post-process or archive the entire interaction.  Example:</p>
 <pre><code class="language-bash">rustree -L 1 \
@@ -659,8 +685,6 @@ rustree --sort-by size --reverse-sort
   }
 }
 </code></pre>
-</li>
-</ul>
 </li>
 <li>
 <p><code>--no-summary-report</code></p>
@@ -1575,11 +1599,11 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
     format_nodes(nodes, format, config)
 }
 <span class="boring">}</span></code></pre></pre>
-<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code> or <code>Markdown</code>, from <code>src/config/output_format.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
+<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code>, <code>Markdown</code>, <code>Json</code>, or <code>Html</code>, from <code>src/config/output_format.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
 <h3 id="key-enums"><a class="header" href="#key-enums">Key Enums</a></h3>
 <ul>
 <li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
-<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
+<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>, <code>Json</code>, <code>Html</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
 <li><strong><code>BuiltInFunction</code></strong>:
 <ul>
 <li>File functions: <code>CountPluses</code> (counts '+' characters), <code>Cat</code> (returns full file content)</li>

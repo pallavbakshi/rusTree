@@ -315,11 +315,11 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
     format_nodes(nodes, format, config)
 }
 <span class="boring">}</span></code></pre></pre>
-<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code> or <code>Markdown</code>, from <code>src/config/output_format.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
+<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code>, <code>Markdown</code>, <code>Json</code>, or <code>Html</code>, from <code>src/config/output_format.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
 <h3 id="key-enums"><a class="header" href="#key-enums">Key Enums</a></h3>
 <ul>
 <li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
-<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
+<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>, <code>Json</code>, <code>Html</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
 <li><strong><code>BuiltInFunction</code></strong>:
 <ul>
 <li>File functions: <code>CountPluses</code> (counts '+' characters), <code>Cat</code> (returns full file content)</li>
