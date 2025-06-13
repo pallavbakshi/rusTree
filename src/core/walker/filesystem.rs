@@ -218,33 +218,37 @@ pub fn walk_directory(
         }
 
         if node.node_type == NodeType::File {
-            // Analysis only for effective files
+            // === 1. Optional in-memory content processing (lines/words, built-ins that need content)
             if config.metadata.calculate_line_count
                 || config.metadata.calculate_word_count
                 || config.metadata.apply_function.is_some()
             {
-                match fs::read_to_string(&node.path) {
-                    // Reads target for symlinks
-                    Ok(content) => {
-                        if config.metadata.calculate_line_count {
-                            node.line_count =
-                                Some(size_calculator::count_lines_from_string(&content));
-                        }
-                        if config.metadata.calculate_word_count {
-                            node.word_count =
-                                Some(size_calculator::count_words_from_string(&content));
-                        }
-                        if let Some(func_type) = &config.metadata.apply_function {
-                            // Check if this is a file function and if it should be applied based on filtering
-                            if is_file_function(func_type)
-                                && should_apply_function_to_file(&node, config)
-                            {
-                                node.custom_function_output =
-                                    Some(file_info::apply_builtin_to_file(&node.path, func_type));
-                            }
+                if let Ok(content) = fs::read_to_string(&node.path) {
+                    if config.metadata.calculate_line_count {
+                        node.line_count = Some(size_calculator::count_lines_from_string(&content));
+                    }
+                    if config.metadata.calculate_word_count {
+                        node.word_count = Some(size_calculator::count_words_from_string(&content));
+                    }
+
+                    if let Some(func_type) = &config.metadata.apply_function {
+                        if is_file_function(func_type)
+                            && should_apply_function_to_file(&node, config)
+                        {
+                            node.custom_function_output =
+                                Some(file_info::apply_builtin_to_file(&node.path, func_type));
                         }
                     }
-                    Err(_e) => { /* Log error or store in NodeInfo */ }
+                }
+            }
+
+            // === 2. External command processing (does not require file content)
+            if node.custom_function_output.is_none() {
+                if let Some(ext_fn) = &config.metadata.external_function {
+                    if should_apply_function_to_file(&node, config) {
+                        node.custom_function_output =
+                            Some(file_info::apply_external_to_file(&node.path, ext_fn));
+                    }
                 }
             }
         }

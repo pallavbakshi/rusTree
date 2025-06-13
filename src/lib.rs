@@ -275,8 +275,19 @@ pub fn format_nodes(
     };
     let tree_output = formatter_instance.format(nodes, config)?;
 
-    // Check if cat function is applied - if so, append file contents after the tree
-    if let Some(BuiltInFunction::Cat) = &config.metadata.apply_function {
+    let mut is_cat_like = false;
+    if config.metadata.apply_function == Some(BuiltInFunction::Cat) {
+        is_cat_like = true;
+    } else if let Some(ext_fn) = &config.metadata.external_function {
+        if matches!(
+            ext_fn.kind,
+            crate::config::metadata::FunctionOutputKind::Text
+        ) {
+            is_cat_like = true;
+        }
+    }
+
+    if is_cat_like && !matches!(format, LibOutputFormat::Json) {
         let mut result = tree_output;
 
         // Only show file contents section if there are files with content
@@ -290,7 +301,19 @@ pub fn format_nodes(
             .collect();
 
         if !file_nodes_with_content.is_empty() {
-            result.push_str("\n\n--- File Contents ---\n");
+            // Determine section header text
+            let header = if config.metadata.apply_function == Some(BuiltInFunction::Cat) {
+                "File Contents".to_string()
+            } else if let Some(ext_fn) = &config.metadata.external_function {
+                format!(
+                    "Results of applying '{}' to relevant files",
+                    ext_fn.cmd_template
+                )
+            } else {
+                "Results".to_string()
+            };
+
+            result.push_str(&format!("\n\n--- {} ---\n", header));
 
             for node in file_nodes_with_content {
                 if let Some(Ok(content)) = &node.custom_function_output {

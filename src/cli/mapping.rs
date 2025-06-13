@@ -18,6 +18,9 @@ use crate::config::MiscOptions;
 use crate::config::RustreeLibConfig;
 use crate::config::SortKey as LibSortKey;
 use crate::config::SortingOptions;
+use crate::config::metadata::{
+    ExternalFunction as LibExternalFunction, FunctionOutputKind as LibFunctionOutputKind,
+};
 use crate::config::output_format::OutputFormat as LibOutputFormat;
 use crate::config::sorting::DirectoryFileOrder;
 
@@ -142,6 +145,36 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
                     CliBuiltInFunction::SizeTotal => LibBuiltInFunction::SizeTotal,
                     CliBuiltInFunction::DirStats => LibBuiltInFunction::DirStats,
                 }),
+            external_function: {
+                if let Some(cmd) = &cli_args.file_stats.apply_function_cmd {
+                    // Prevent simultaneous built-in and external function usage.
+                    if cli_args.file_stats.apply_function.is_some() {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::InvalidInput,
+                            "Cannot specify both --apply-function and --apply-function-cmd",
+                        ));
+                    }
+
+                    let kind = match cli_args
+                        .file_stats
+                        .apply_function_cmd_kind
+                        .to_ascii_lowercase()
+                        .as_str()
+                    {
+                        "number" | "num" | "count" => LibFunctionOutputKind::Number,
+                        "bytes" | "byte" | "size" => LibFunctionOutputKind::Bytes,
+                        _ => LibFunctionOutputKind::Text,
+                    };
+
+                    Some(LibExternalFunction {
+                        cmd_template: cmd.clone(),
+                        timeout_secs: cli_args.file_stats.apply_function_timeout,
+                        kind,
+                    })
+                } else {
+                    None
+                }
+            },
             human_readable_size: cli_args.llm.human_friendly,
         },
         misc: MiscOptions {
