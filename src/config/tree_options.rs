@@ -80,4 +80,7 @@ pub struct RustreeLibConfig {
 
     /// HTML output specific options (only used when `output-format`=html)
     pub html: HtmlOptions,
+
+    /// LLM options parsed from configuration files (not set via CLI here)
+    pub llm: crate::config::llm::LlmOptions,
 }

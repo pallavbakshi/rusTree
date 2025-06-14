@@ -7,6 +7,7 @@
 - [Command-Line Interface (CLI)](cli_usage.md)
   - [Options and Flags](cli_usage/options.md)
   - [Examples](cli_usage/examples.md)
+- [Configuration Files](configuration_files.md)
 - [Library Usage (API)](library_usage.md)
   - [Core Concepts](library_usage/concepts.md)
   - [Examples](library_usage/examples.md)

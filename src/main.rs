@@ -34,6 +34,12 @@ async fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
+    // Handle config template generation and exit
+    if cli_args.generate_config {
+        print_default_config_template();
+        return ExitCode::SUCCESS;
+    }
+
     // 1. Map CLI args to Library config
     let lib_config = match map_cli_to_lib_config(&cli_args) {
         Ok(config) => config,
@@ -44,6 +50,10 @@ async fn main() -> ExitCode {
     };
 
     let lib_output_format = map_cli_to_lib_output_format(cli_args.format.output_format.clone());
+
+    if cli_args.verbose {
+        print_config_summary(&lib_config);
+    }
 
     // 2. Call the library to get processed nodes
     let nodes = match rustree::get_tree_nodes(&cli_args.path, &lib_config) {
@@ -195,27 +205,200 @@ fn generate_shell_completions(shell: Shell) {
     generate(shell, &mut cmd, "rustree", &mut std::io::stdout());
 }
 
+/// Nicely formatted summary of the merged tree configuration (safe for logging).
+fn print_config_summary(cfg: &rustree::config::RustreeLibConfig) {
+    println!("\n🔧  Effective tree configuration\n────────────────────────────────────────");
+
+    println!("Listing:");
+    println!("  max_depth             : {:?}", cfg.listing.max_depth);
+    println!("  show_hidden           : {}", cfg.listing.show_hidden);
+    println!(
+        "  list_directories_only : {}",
+        cfg.listing.list_directories_only
+    );
+    println!("  show_full_path        : {}", cfg.listing.show_full_path);
+
+    println!("\nFiltering:");
+    println!(
+        "  match_patterns        : {:?}",
+        cfg.filtering.match_patterns
+    );
+    println!(
+        "  ignore_patterns       : {:?}",
+        cfg.filtering.ignore_patterns
+    );
+    println!(
+        "  use_gitignore_rules   : {}",
+        cfg.filtering.use_gitignore_rules
+    );
+    println!(
+        "  prune_empty_directories: {}",
+        cfg.filtering.prune_empty_directories
+    );
+
+    println!("\nSorting:");
+    println!("  sort_by               : {:?}", cfg.sorting.sort_by);
+    println!("  reverse_sort          : {}", cfg.sorting.reverse_sort);
+    println!(
+        "  directory_file_order  : {:?}",
+        cfg.sorting.directory_file_order
+    );
+
+    println!("\nMetadata:");
+    println!("  show_size_bytes       : {}", cfg.metadata.show_size_bytes);
+    println!(
+        "  show_last_modified    : {}",
+        cfg.metadata.show_last_modified
+    );
+    println!(
+        "  calculate_line_count  : {}",
+        cfg.metadata.calculate_line_count
+    );
+    println!(
+        "  calculate_word_count  : {}",
+        cfg.metadata.calculate_word_count
+    );
+
+    println!("\nOutput:");
+    // we only have text vs markdown etc from runtime flag; derive from cfg.html etc if needed.
+}
+
+/// Prints LLM configuration without leaking secrets.
+fn print_llm_summary(llm: &LlmConfig) {
+    println!("\n🤖  Effective LLM configuration\n────────────────────────────────────────");
+    println!("  provider     : {}", llm.provider.name());
+    println!("  model        : {}", llm.model);
+    if let Some(ep) = &llm.endpoint {
+        println!("  endpoint     : {}", ep);
+    }
+    println!("  temperature  : {}", llm.temperature);
+    println!("  max_tokens   : {}", llm.max_tokens);
+    println!("  api_key      : <redacted> (set via env var)");
+}
+
+/// Print a commented sample TOML configuration to stdout.
+fn print_default_config_template() {
+    const TEMPLATE: &str = r#"# RusTree configuration template (save as .rustree/config.toml)
+
+[listing]
+# show_hidden = true
+# max_depth = 3
+
+[filtering]
+# match_patterns  = ["*.rs", "*.md"]
+# ignore_patterns = ["target/*", "node_modules/*"]
+
+[sorting]
+# sort_by = "size"        # name | size | mtime | ctime | version | none
+# reverse = true
+
+[metadata]
+# show_size_bytes      = true
+# show_last_modified   = true
+# calculate_line_count = true
+
+[output]
+# format     = "html"     # text | markdown | json | html
+# no_summary = false
+
+[llm]
+# provider    = "openai"   # openai | anthropic | cohere | ollama
+# model       = "gpt-4o"
+# api_key_env = "OPENAI_API_KEY"
+# temperature = 0.5
+"#;
+
+    println!("{}", TEMPLATE);
+}
+
 async fn handle_llm_query(
     cli_args: &CliArgs,
     question: &str,
     tree_output: &str,
     json_mode: bool,
 ) -> Result<String, LlmError> {
-    // 1. Create LLM config from CLI args
-    let llm_config = LlmConfig::from_cli_args(&cli_args.llm)?;
+    // 1. Merge TOML-based LLM defaults into CLI args
+    let merged_llm_args = {
+        // Load the same config chain used earlier (explicit + project/global)
+        let (partial, cfg_sources) =
+            match rustree::config::load_merged_config(&cli_args.config_file, !cli_args.no_config) {
+                Ok(t) => t,
+                Err(e) => {
+                    if cli_args.verbose {
+                        eprintln!("Config load error: {e}");
+                    }
+                    // propagate to caller
+                    return Err(LlmError::Config(e.to_string()));
+                }
+            };
 
-    // 2. Map CLI args to library config for prompt formatting
+        if cli_args.verbose {
+            if !cfg_sources.is_empty() {
+                println!(
+                    "\n🔗  Config files used: {}",
+                    cfg_sources
+                        .iter()
+                        .map(|p| p.display().to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                );
+            } else {
+                println!("\n🔗  Config files used: (none)");
+            }
+        }
+
+        let mut args = cli_args.llm.clone();
+        if let Some(llm_p) = partial.llm {
+            if args.llm_provider == "openai" {
+                if let Some(p) = llm_p.provider {
+                    args.llm_provider = p;
+                }
+            }
+            if args.llm_model.is_none() {
+                args.llm_model = llm_p.model;
+            }
+            if args.llm_api_key.is_none() {
+                if let Some(env_var) = llm_p.api_key_env {
+                    if let Ok(val) = std::env::var(&env_var) {
+                        args.llm_api_key = Some(val);
+                    }
+                }
+                if args.llm_api_key.is_none() {
+                    args.llm_api_key = llm_p.api_key;
+                }
+            }
+            if args.llm_endpoint.is_none() {
+                args.llm_endpoint = llm_p.endpoint;
+            }
+            if args.llm_temperature.is_none() {
+                args.llm_temperature = llm_p.temperature;
+            }
+            if args.llm_max_tokens.is_none() {
+                args.llm_max_tokens = llm_p.max_tokens;
+            }
+        }
+        args
+    };
+
+    // 2. Create LLM config from merged args
+    let llm_config = LlmConfig::from_cli_args(&merged_llm_args)?;
+
+    if cli_args.verbose && cli_args.llm.llm_ask.is_some() {
+        print_llm_summary(&llm_config);
+    }
+
+    // 3. Map CLI args to library config for prompt formatting
     let lib_config = match rustree::cli::map_cli_to_lib_config(cli_args) {
         Ok(config) => config,
         Err(e) => return Err(LlmError::Config(e.to_string())),
     };
 
-    // 3. Format prompt with tree output and question
+    // 4. Format prompt with tree output and question
     let prompt = TreePromptFormatter::format_prompt(tree_output, question, &lib_config);
 
     use serde_json::json;
 
-    // 4. Handle dry-run: build preview and skip network
+    // 5. Handle dry-run: build preview and skip network
     if cli_args.llm.dry_run {
         let preview = rustree::core::llm::RequestPreview::from_config(&llm_config, &prompt);
 
@@ -244,7 +427,7 @@ async fn handle_llm_query(
         return Ok(String::new());
     }
 
-    // 5. Send to LLM and get response
+    // 6. Send to LLM and get response
     let response = LlmClientFactory::create_and_query(&llm_config, &prompt).await?;
 
     if json_mode {

@@ -1,4 +1,5 @@
 // src/config/mod.rs
+pub mod file;
 pub mod filtering;
 pub mod html;
 pub mod input_source;
@@ -7,6 +8,11 @@ pub mod llm;
 pub mod metadata;
 pub mod misc;
 pub mod output_format;
+pub mod partial;
+
+// Re-export key types for convenience
+pub use file::load_merged as load_merged_config;
+pub use partial::{MergeInto, PartialConfig};
 pub mod sorting;
 pub mod tree_options;
 

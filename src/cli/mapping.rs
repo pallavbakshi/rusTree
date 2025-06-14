@@ -16,7 +16,6 @@ use crate::config::InputSourceOptions;
 use crate::config::ListingOptions;
 use crate::config::MetadataOptions;
 use crate::config::MiscOptions;
-use crate::config::RustreeLibConfig;
 use crate::config::SortKey as LibSortKey;
 use crate::config::SortingOptions;
 use crate::config::metadata::{
@@ -24,6 +23,7 @@ use crate::config::metadata::{
 };
 use crate::config::output_format::OutputFormat as LibOutputFormat;
 use crate::config::sorting::DirectoryFileOrder;
+use crate::config::{RustreeLibConfig, load_merged_config};
 
 /// Maps command-line arguments (`CliArgs`) to the library's configuration structure (`RustreeLibConfig`).
 ///
@@ -37,6 +37,10 @@ use crate::config::sorting::DirectoryFileOrder;
 ///
 /// A `RustreeLibConfig` instance populated from the `cli_args`, or an error if pattern files cannot be read.
 pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std::io::Error> {
+    // ------------------------------------------------------------------
+    //  A. Build config based solely on CLI flags (legacy behaviour)
+    // ------------------------------------------------------------------
+
     let root_display_name = if cli_args.path.to_string_lossy() == "." {
         ".".to_string()
     } else {
@@ -60,7 +64,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
         .map(|meta| meta.is_dir())
         .unwrap_or(false); // Default to false if metadata fails or it's not a dir
 
-    Ok(RustreeLibConfig {
+    let mut cfg = RustreeLibConfig {
         input_source: InputSourceOptions {
             root_display_name,
             root_node_size,
@@ -189,7 +193,23 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
             custom_outro: cli_args.html_output.html_outro_file.clone(),
             include_links: !cli_args.html_output.html_no_links,
         },
-    })
+        llm: Default::default(),
+    };
+
+    // ------------------------------------------------------------------
+    //  B. Load TOML configuration files and merge (Phase-3 feature)
+    // ------------------------------------------------------------------
+
+    match load_merged_config(&cli_args.config_file, !cli_args.no_config) {
+        Ok((partial, _)) => {
+            partial.merge_into(&mut cfg);
+        }
+        Err(e) => {
+            return Err(std::io::Error::other(e.to_string()));
+        }
+    }
+
+    Ok(cfg)
 }
 
 /// Converts a human-readable size string (e.g. "12K", "3M", "1G") into bytes.
