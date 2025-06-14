@@ -2,6 +2,7 @@
 use crate::cli::filtering::{
     apply_function, exclude, gitignore_rules, include, pruning, size_filter,
 };
+use crate::cli::input;
 use crate::cli::listing::{depth, directory_only, full_path, hidden};
 use crate::cli::llm;
 use crate::cli::metadata::{date, size, stats};
@@ -72,6 +73,10 @@ pub struct CliArgs {
         default_value_t = false
     )]
     pub no_config: bool,
+
+    // Input Options
+    #[command(flatten, next_help_heading = "\x1b[1;36mInput Options\x1b[0m")]
+    pub input: input::InputArgs,
 
     // Listing Options
     #[command(flatten, next_help_heading = "\x1b[1;36mListing Options\x1b[0m")]

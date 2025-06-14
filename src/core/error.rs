@@ -22,6 +22,9 @@ pub enum RustreeError {
     /// An error during the construction of the internal tree representation.
     #[error("Tree building error: {0}")]
     TreeBuildError(String),
+    /// An error during parsing of input files.
+    #[error("Parse error: {0}")]
+    ParseError(String),
     // Add other specific error types as needed
     /// An unspecified or unknown error.
     #[error("Unknown error")]
