@@ -38,6 +38,41 @@ pub struct CliArgs {
     )]
     pub generate_completions: Option<Shell>,
 
+    /// Print a commented template configuration file (.rustree/config.toml) and exit.
+    #[arg(
+        long = "generate-config",
+        help_heading = "Utility Options",
+        conflicts_with = "generate_completions",
+        default_value_t = false
+    )]
+    pub generate_config: bool,
+
+    /// Print the fully merged configuration before executing.
+    #[arg(
+        long,
+        global = true,
+        help_heading = "Utility Options",
+        default_value_t = false
+    )]
+    pub verbose: bool,
+
+    /// Load an additional TOML configuration file (can be repeated; last one wins).
+    #[arg(
+        long = "config-file",
+        value_name = "FILE",
+        num_args = 1..,
+        help_heading = "Utility Options"
+    )]
+    pub config_file: Vec<PathBuf>,
+
+    /// Disable automatic discovery of project/global config files.
+    #[arg(
+        long = "no-config",
+        help_heading = "Utility Options",
+        default_value_t = false
+    )]
+    pub no_config: bool,
+
     // Listing Options
     #[command(flatten, next_help_heading = "\x1b[1;36mListing Options\x1b[0m")]
     pub depth: depth::DepthArgs,

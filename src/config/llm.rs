@@ -4,7 +4,7 @@
 ///
 /// This module contains configuration structures specific to LLM functionality.
 /// The main LLM configuration logic is in the core::llm::providers module.
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct LlmOptions {
     pub enabled: bool,
     pub export_mode: bool,

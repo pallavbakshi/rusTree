@@ -131,6 +131,19 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
 
 These flags can be combined to specify a size range, e.g. `--min-file-size 10K --max-file-size 1M`.
 
+## Utility & Configuration
+
+- `--config-file <FILE>` – Merge a specific TOML file into the active
+  configuration. May be used multiple times; later files override earlier ones.
+
+- `--no-config` – Skip automatic discovery of project/global config files.
+
+- `--generate-config` – Print a fully-commented config template and exit.
+
+- `--verbose` – Print the fully merged configuration (and LLM config, if
+  applicable) before running so you can see exactly what options RusTree will
+  use.
+
 ## Sorting
 
 - `-U, --unsorted`
