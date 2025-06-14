@@ -52,6 +52,18 @@ If `PATH` is omitted, it defaults to the current directory (`.`).
   - This option is affected by `--case-insensitive-filter`.
   - Example: `rustree -I "*.log"`, `rustree --filter-exclude "target/" --filter-exclude "*.tmp"`
 
+- `--filter-include-from <FILE>`
+  - Description: Read include patterns from a file. Each line in the file should contain one pattern. Lines starting with `#` and empty lines are ignored. This option can be used multiple times to read patterns from multiple files.
+  - Uses the same wildcard pattern syntax as `-P, --filter-include`.
+  - This option is affected by `--case-insensitive-filter`.
+  - Example: `rustree --filter-include-from ./include-patterns.txt`
+
+- `--filter-exclude-from <FILE>`
+  - Description: Read exclude patterns from a file. Each line in the file should contain one pattern. Lines starting with `#` and empty lines are ignored. This option can be used multiple times to read patterns from multiple files.
+  - Uses the same wildcard pattern syntax as `-I, --filter-exclude`.
+  - This option is affected by `--case-insensitive-filter`.
+  - Example: `rustree --filter-exclude-from ./exclude-patterns.txt`
+
 - `--use-gitignore-rules`, `--gitignore` (deprecated alias)
   - Description: Respects gitignore rules for filtering files and directories. This includes checking `.gitignore` files in the scanned directories and their parents, the global gitignore file (e.g., `~/.config/git/ignore`), and repository-specific exclude files (e.g., `$GIT_DIR/info/exclude`). The `--gitignore` flag is deprecated; use `--use-gitignore-rules` instead.
   - This option is affected by `--case-insensitive-filter`.

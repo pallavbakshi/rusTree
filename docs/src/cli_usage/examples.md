@@ -592,7 +592,145 @@ Here are some practical examples of how to use `rustree` from the command line.
     rustree --apply-function cat --apply-exclude "*secret*" --apply-exclude "*key*" ./scripts
     ```
 
-49. **Directory analysis for large projects:**
+## File-based Pattern Filtering Examples
+
+The `--filter-include-from` and `--filter-exclude-from` options allow you to maintain pattern lists in separate files, which is especially useful for complex projects or when sharing filter configurations across teams.
+
+56. **Use file-based include patterns:**
+
+    Create a file `include-patterns.txt`:
+    ```
+    # Include only source code files
+    *.rs
+    *.go
+    *.js
+    *.ts
+    
+    # Include configuration files
+    *.toml
+    *.yml
+    *.yaml
+    
+    # Include documentation
+    *.md
+    README*
+    ```
+
+    Then use:
+    ```bash
+    rustree --filter-include-from ./include-patterns.txt ./project
+    ```
+
+57. **Use file-based exclude patterns:**
+
+    Create a file `exclude-patterns.txt`:
+    ```
+    # Build artifacts
+    target/
+    build/
+    dist/
+    
+    # Dependencies
+    node_modules/
+    vendor/
+    
+    # Temporary files
+    *.tmp
+    *.log
+    *.swp
+    .DS_Store
+    ```
+
+    Then use:
+    ```bash
+    rustree --filter-exclude-from ./exclude-patterns.txt ./project
+    ```
+
+58. **Combine file-based and command-line patterns:**
+
+    ```bash
+    # Use patterns from file and add additional CLI patterns
+    rustree --filter-include-from ./src-patterns.txt \
+            --filter-include "*.md" \
+            --filter-exclude "*.test.js" ./project
+    ```
+
+59. **Multiple pattern files:**
+
+    ```bash
+    # Load patterns from multiple files
+    rustree --filter-include-from ./core-patterns.txt \
+            --filter-include-from ./docs-patterns.txt \
+            --filter-exclude-from ./ignore-patterns.txt ./workspace
+    ```
+
+60. **Project-specific filtering setup:**
+
+    Create a `.rustree` directory in your project with pattern files:
+    ```bash
+    mkdir .rustree
+    echo "*.rs" > .rustree/rust-files.txt
+    echo "*.md" > .rustree/docs.txt
+    echo "target/" > .rustree/ignore.txt
+    ```
+
+    Then use consistently across the team:
+    ```bash
+    # Show only Rust files
+    rustree --filter-include-from .rustree/rust-files.txt ./
+    
+    # Show documentation structure
+    rustree --filter-include-from .rustree/docs.txt --dirs-first ./
+    
+    # Full tree excluding build artifacts
+    rustree --filter-exclude-from .rustree/ignore.txt ./
+    ```
+
+61. **Combine with gitignore patterns:**
+
+    ```bash
+    # Use gitignore AND custom exclude patterns
+    rustree --use-gitignore-rules \
+            --filter-exclude-from ./additional-ignores.txt ./project
+    
+    # Override gitignore with specific includes
+    rustree --use-gitignore-rules \
+            --filter-include-from ./force-include.txt ./project
+    ```
+
+62. **Pattern file with comments for documentation:**
+
+    Create a well-documented `analysis-patterns.txt`:
+    ```
+    # Code Analysis Patterns
+    # =====================
+    
+    # Core source files
+    src/**/*.rs
+    lib/**/*.rs
+    
+    # Test files (for separate analysis)
+    tests/**/*.rs
+    benches/**/*.rs
+    
+    # Configuration that affects behavior
+    Cargo.toml
+    .cargo/config.toml
+    rust-toolchain.toml
+    
+    # Exclude examples and docs from analysis
+    # (uncomment if needed)
+    # !examples/
+    # !docs/
+    ```
+
+    Use for consistent code analysis:
+    ```bash
+    rustree --filter-include-from ./analysis-patterns.txt \
+            --calculate-lines --sort-by size -r ./
+    ```
+
+56. **Directory analysis for large projects:**
 
     ```bash
     # Get overview of all subdirectories with statistics

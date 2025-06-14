@@ -90,8 +90,10 @@ rustree --llm-ask "Brief analysis" --llm-temperature 0.3 --llm-max-tokens 500
 - `--size`: Show file sizes
 - `--file-stats`: Show file statistics
 - `--dirs-only`: Show directories only
-- `--include <pattern>`: Include files matching pattern
-- `--exclude <pattern>`: Exclude files matching pattern
+- `--filter-include <pattern>`: Include files matching pattern
+- `--filter-exclude <pattern>`: Exclude files matching pattern
+- `--filter-include-from <file>`: Read include patterns from file
+- `--filter-exclude-from <file>`: Read exclude patterns from file
 
 ### LLM Options
 - `--llm-ask <question>`: Ask LLM directly
@@ -115,7 +117,7 @@ rustree --llm-ask "What architectural patterns do you see in this codebase?" \
 ### Security Review
 ```bash
 rustree --llm-ask "Are there any potential security concerns?" \
-  --include "*.rs" --exclude "**/target/**" --llm-provider anthropic
+  --filter-include "*.rs" --filter-exclude "**/target/**" --llm-provider anthropic
 ```
 
 ### Performance Analysis  
@@ -147,6 +149,27 @@ rustree --llm-ask "Complex analysis question" --llm-max-tokens 2000 --dry-run
 # Save for later analysis
 rustree --llm-export "Technical debt assessment" > analysis-prompt.txt
 ```
+
+### File-based Pattern Filtering
+```bash
+# Create pattern files for reusable filtering
+echo "*.rs" > include-rust.txt
+echo "*.md" > include-docs.txt
+echo "target/" > exclude-build.txt
+echo "*.log" >> exclude-build.txt
+
+# Use pattern files
+rustree --filter-include-from include-rust.txt ./src
+
+# Combine multiple pattern files
+rustree --filter-include-from include-rust.txt \
+        --filter-include-from include-docs.txt \
+        --filter-exclude-from exclude-build.txt ./
+
+# Mix file patterns with command-line patterns
+rustree --filter-include-from include-rust.txt \
+        --filter-include "*.toml" \
+        --filter-exclude "*.test.rs" ./
 ```
 
 ## For Developers
