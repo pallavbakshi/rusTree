@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["PartialConfig","PartialFilteringOptions","PartialHtmlOptions","PartialInputSourceOptions","PartialListingOptions","PartialLlmOptions","PartialMetadataOptions","PartialMiscOptions","PartialSortingOptions"],"trait":["MergeInto"]};

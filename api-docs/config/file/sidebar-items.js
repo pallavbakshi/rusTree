@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["global_file","load_merged","load_toml","project_file"]};

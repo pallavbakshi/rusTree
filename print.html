@@ -556,6 +556,24 @@ rustree --sort-by size --reverse-sort
 </li>
 </ul>
 <p>These flags can be combined to specify a size range, e.g. <code>--min-file-size 10K --max-file-size 1M</code>.</p>
+<h2 id="utility--configuration"><a class="header" href="#utility--configuration">Utility &amp; Configuration</a></h2>
+<ul>
+<li>
+<p><code>--config-file &lt;FILE&gt;</code> – Merge a specific TOML file into the active
+configuration. May be used multiple times; later files override earlier ones.</p>
+</li>
+<li>
+<p><code>--no-config</code> – Skip automatic discovery of project/global config files.</p>
+</li>
+<li>
+<p><code>--generate-config</code> – Print a fully-commented config template and exit.</p>
+</li>
+<li>
+<p><code>--verbose</code> – Print the fully merged configuration (and LLM config, if
+applicable) before running so you can see exactly what options RusTree will
+use.</p>
+</li>
+</ul>
 <h2 id="sorting"><a class="header" href="#sorting">Sorting</a></h2>
 <ul>
 <li>
@@ -1428,6 +1446,62 @@ __2 directories, 25 files, 2,800 total lines total__
 </ol>
 <p>Note: The enhanced summary report automatically detects which metadata types are being displayed and includes appropriate totals. No additional flags are needed - the aggregation happens automatically when metadata options like <code>--calculate-lines</code>, <code>--calculate-words</code>, or <code>--show-size-bytes</code> are used.</p>
 <p>These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="persistent-configuration-files"><a class="header" href="#persistent-configuration-files">Persistent Configuration Files</a></h1>
+<p>RusTree can read default options from <strong>TOML</strong> files, so you don’t have to
+repeat long command-lines every time.</p>
+<h2 id="search-order"><a class="header" href="#search-order">Search order</a></h2>
+<ol>
+<li>Paths supplied via <code>--config-file &lt;FILE&gt;</code> (can be given multiple times; <em>last
+one wins</em>).</li>
+<li>Per-project file <code>./.rustree/config.toml</code> (looked-up from the working dir).</li>
+<li>Global file <code>$XDG_CONFIG_HOME/rustree/config.toml</code> (or <code>~/.config/rustree/…</code>
+on macOS / Linux).</li>
+<li>Built-in defaults.</li>
+</ol>
+<p>Disable project/global discovery with <code>--no-config</code>.</p>
+<h2 id="file-format"><a class="header" href="#file-format">File format</a></h2>
+<p>TOML sections map 1-to-1 to option groups:</p>
+<pre><code class="language-toml">[listing]
+show_hidden = true
+max_depth   = 2
+
+[filtering]
+match_patterns  = ["*.rs", "Cargo.*"]
+ignore_patterns = ["target/*"]
+
+[sorting]
+sort_by = "size"
+reverse = true      # largest files first
+
+[metadata]
+show_size_bytes    = true
+calculate_line_count = true
+
+[output]
+format = "markdown"
+
+[llm]
+provider    = "openai"
+model       = "gpt-4o"
+api_key_env = "OPENAI_API_KEY"  # recommended – keeps secrets out of the file
+# api_key_file = "./.secrets/openai.key"   # ← if used, rustree checks file perms
+</code></pre>
+<p>Unknown keys are ignored but a warning is printed, so your config keeps working
+after version upgrades.</p>
+<h2 id="creating-a-template"><a class="header" href="#creating-a-template">Creating a template</a></h2>
+<p>Run:</p>
+<pre><code class="language-bash">rustree --generate-config &gt; .rustree/config.toml
+</code></pre>
+<p>Then open the file and uncomment / edit the options you want.</p>
+<h2 id="security-notes"><a class="header" href="#security-notes">Security notes</a></h2>
+<p>If you use <code>api_key_file</code>, make sure the file is <strong>not</strong> world-readable. RusTree
+prints a warning when it detects permissive modes (<code>chmod 600 &lt;file&gt;</code> is a good
+baseline).</p>
+<h2 id="precedence-vs-cli"><a class="header" href="#precedence-vs-cli">Precedence vs CLI</a></h2>
+<p>Values from configuration files are applied <em>before</em> parsing the CLI, therefore
+<strong>command-line flags always override</strong> TOML settings.</p>
+<hr />
+<p>See the full option list in the next chapter or by running <code>rustree --help</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="library-usage-api"><a class="header" href="#library-usage-api">Library Usage (API)</a></h1>
 <p>Beyond the command-line tool, <code>rustree</code> can be used as a library in your own Rust projects. This allows you to programmatically generate and process directory tree information.</p>
 <h2 id="adding-rustree-as-a-dependency"><a class="header" href="#adding-rustree-as-a-dependency">Adding RusTree as a Dependency</a></h2>
