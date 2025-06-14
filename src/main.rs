@@ -56,11 +56,36 @@ async fn main() -> ExitCode {
     }
 
     // 2. Call the library to get processed nodes
-    let nodes = match rustree::get_tree_nodes(&cli_args.path, &lib_config) {
-        Ok(n) => n,
-        Err(e) => {
-            eprintln!("Error processing directory: {}", e);
-            return ExitCode::FAILURE;
+    let (nodes, _actual_path) = if cli_args.input.is_from_file() {
+        // Read from tree file
+        let input_file = match cli_args.input.get_tree_file() {
+            Some(file) => file,
+            None => {
+                eprintln!("Error: Input file path not available");
+                return ExitCode::FAILURE;
+            }
+        };
+        let input_format = Some(cli_args.input.get_input_format());
+        match rustree::get_tree_nodes_from_source(
+            &cli_args.path,
+            &lib_config,
+            Some(input_file),
+            input_format,
+        ) {
+            Ok(n) => (n, input_file.to_path_buf()),
+            Err(e) => {
+                eprintln!("Error parsing tree file: {}", e);
+                return ExitCode::FAILURE;
+            }
+        }
+    } else {
+        // Scan filesystem
+        match rustree::get_tree_nodes_from_source(&cli_args.path, &lib_config, None, None) {
+            Ok(n) => (n, cli_args.path.clone()),
+            Err(e) => {
+                eprintln!("Error processing directory: {}", e);
+                return ExitCode::FAILURE;
+            }
         }
     };
 

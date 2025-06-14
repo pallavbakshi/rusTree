@@ -107,6 +107,7 @@ pub use crate::config::output_format::OutputFormat as LibOutputFormat;
 
 // Core types for working with nodes
 pub use crate::core::error::RustreeError;
+pub use crate::core::input::InputFormat;
 pub use crate::core::tree::node::{NodeInfo, NodeType};
 
 // Formatter types (for advanced usage)
@@ -118,6 +119,46 @@ pub use crate::core::formatter::{
 // Internal imports
 use crate::core::{metadata::file_info, sorter, tree::builder::TempNode, walker};
 use std::path::Path;
+
+/// Gets tree nodes from either filesystem scanning or input file parsing.
+///
+/// This is the main entry point for gathering tree information. It can either:
+/// 1. Walk a directory structure (if `input_file` is `None`)
+/// 2. Parse a previously generated tree file (if `input_file` is `Some`)
+///
+/// # Arguments
+///
+/// * `root_path` - The starting path for directory traversal (ignored when reading from file).
+/// * `config` - Configuration options that control traversal, analysis, and sorting.
+/// * `input_file` - Optional path to a tree file to parse instead of scanning filesystem.
+/// * `input_format` - Format of the input file (ignored when scanning filesystem).
+///
+/// # Returns
+///
+/// A `Result` containing a `Vec<NodeInfo>` on success, representing the processed
+/// entries, or a `RustreeError` on failure.
+pub fn get_tree_nodes_from_source(
+    root_path: &Path,
+    config: &RustreeLibConfig,
+    input_file: Option<&Path>,
+    input_format: Option<crate::core::input::InputFormat>,
+) -> Result<Vec<NodeInfo>, RustreeError> {
+    match input_file {
+        Some(file_path) => {
+            // Parse from input file
+            let format = input_format.unwrap_or(crate::core::input::InputFormat::Auto);
+            let mut nodes = crate::core::input::TreeFileParser::parse_file(file_path, format)?;
+
+            // Apply any post-processing that would normally be done by get_tree_nodes
+            apply_post_processing(&mut nodes, config)?;
+            Ok(nodes)
+        }
+        None => {
+            // Use existing filesystem scanning
+            get_tree_nodes(root_path, config)
+        }
+    }
+}
 
 /// Walks the directory, analyzes files, and sorts them based on the provided configuration.
 ///
@@ -151,7 +192,17 @@ pub fn get_tree_nodes(
     // 1. Walk and analyze (analyzer is called within walker)
     let mut nodes = walker::walk_directory(root_path, config)?;
 
-    // 1b. Apply size-based file filtering prior to any tree manipulations
+    // 2. Apply shared post-processing
+    apply_post_processing(&mut nodes, config)?;
+    Ok(nodes)
+}
+
+/// Applies post-processing steps to nodes (shared between filesystem and file input).
+fn apply_post_processing(
+    nodes: &mut Vec<NodeInfo>,
+    config: &RustreeLibConfig,
+) -> Result<(), RustreeError> {
+    // 1. Apply size-based file filtering prior to any tree manipulations
     if config.filtering.min_file_size.is_some() || config.filtering.max_file_size.is_some() {
         let min_opt = config.filtering.min_file_size;
         let max_opt = config.filtering.max_file_size;
@@ -195,7 +246,7 @@ pub fn get_tree_nodes(
         && !nodes.is_empty()
     {
         // Build the tree structure from the flat list of nodes
-        let mut temp_roots = core::tree::builder::build_tree(std::mem::take(&mut nodes))
+        let mut temp_roots = core::tree::builder::build_tree(std::mem::take(nodes))
             .map_err(RustreeError::TreeBuildError)?;
 
         // Apply directory functions if configured
@@ -219,7 +270,7 @@ pub fn get_tree_nodes(
 
         // Flatten the modified tree back into a flat list of NodeInfo
         // `nodes` is empty at this point due to `std::mem::take`.
-        core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, &mut nodes);
+        core::tree::builder::flatten_tree_to_dfs_consuming(temp_roots, nodes);
     }
 
     // 3. Apply list_directories_only filter if enabled
@@ -231,14 +282,15 @@ pub fn get_tree_nodes(
     // 4. Sort if requested in config
     if config.sorting.sort_by.is_some() {
         // sort_nodes_with_options internally handles building tree from `nodes` for sorting
-        if let Err(e) = sorter::strategies::sort_nodes_with_options(&mut nodes, &config.sorting) {
+        if let Err(e) = sorter::strategies::sort_nodes_with_options(nodes, &config.sorting) {
             return Err(RustreeError::TreeBuildError(format!(
                 "Sorting failed: {}",
                 e
             )));
         }
     }
-    Ok(nodes)
+
+    Ok(())
 }
 
 /// Formats a slice of `NodeInfo` objects into a string using the specified format.
