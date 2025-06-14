@@ -77,8 +77,8 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
             show_full_path: cli_args.full_path.show_full_path,
         },
         filtering: FilteringOptions {
-            match_patterns: cli_args.include.match_patterns.clone(),
-            ignore_patterns: cli_args.exclude.ignore_patterns.clone(),
+            match_patterns: cli_args.include.get_all_match_patterns()?,
+            ignore_patterns: cli_args.exclude.get_all_ignore_patterns()?,
             use_gitignore_rules: cli_args.gitignore.use_gitignore_rules,
             gitignore_file: cli_args.gitignore.gitignore_file.clone(),
             case_insensitive_filter: cli_args.gitignore.case_insensitive_filter,
