@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["format_nodes","get_tree_nodes"],"mod":["config","core"]};
+window.SIDEBAR_ITEMS = {"fn":["format_nodes","get_tree_nodes","get_tree_nodes_from_source"],"mod":["config","core"]};

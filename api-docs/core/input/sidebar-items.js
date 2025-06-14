@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["InputFormat"],"mod":["auto_detect","html","json","markdown","text"],"struct":["TreeFileParser"],"trait":["TreeParser"]};

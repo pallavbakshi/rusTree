@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["error","filter","formatter","llm","metadata","sorter","tree","util","walker"]};
+window.SIDEBAR_ITEMS = {"mod":["error","filter","formatter","input","llm","metadata","sorter","tree","util","walker"]};
