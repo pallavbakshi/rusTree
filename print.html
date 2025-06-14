@@ -421,6 +421,24 @@ rustree --sort-by size --reverse-sort
 </ul>
 </li>
 <li>
+<p><code>--filter-include-from &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: Read include patterns from a file. Each line in the file should contain one pattern. Lines starting with <code>#</code> and empty lines are ignored. This option can be used multiple times to read patterns from multiple files.</li>
+<li>Uses the same wildcard pattern syntax as <code>-P, --filter-include</code>.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
+<li>Example: <code>rustree --filter-include-from ./include-patterns.txt</code></li>
+</ul>
+</li>
+<li>
+<p><code>--filter-exclude-from &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: Read exclude patterns from a file. Each line in the file should contain one pattern. Lines starting with <code>#</code> and empty lines are ignored. This option can be used multiple times to read patterns from multiple files.</li>
+<li>Uses the same wildcard pattern syntax as <code>-I, --filter-exclude</code>.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
+<li>Example: <code>rustree --filter-exclude-from ./exclude-patterns.txt</code></li>
+</ul>
+</li>
+<li>
 <p><code>--use-gitignore-rules</code>, <code>--gitignore</code> (deprecated alias)</p>
 <ul>
 <li>Description: Respects gitignore rules for filtering files and directories. This includes checking <code>.gitignore</code> files in the scanned directories and their parents, the global gitignore file (e.g., <code>~/.config/git/ignore</code>), and repository-specific exclude files (e.g., <code>$GIT_DIR/info/exclude</code>). The <code>--gitignore</code> flag is deprecated; use <code>--use-gitignore-rules</code> instead.</li>
@@ -1332,6 +1350,129 @@ rustree --apply-function cat --apply-include "*.toml" --apply-include "*.yml" ./
 
 # Show contents excluding sensitive files
 rustree --apply-function cat --apply-exclude "*secret*" --apply-exclude "*key*" ./scripts
+</code></pre>
+</li>
+</ol>
+<h2 id="file-based-pattern-filtering-examples"><a class="header" href="#file-based-pattern-filtering-examples">File-based Pattern Filtering Examples</a></h2>
+<p>The <code>--filter-include-from</code> and <code>--filter-exclude-from</code> options allow you to maintain pattern lists in separate files, which is especially useful for complex projects or when sharing filter configurations across teams.</p>
+<ol start="56">
+<li>
+<p><strong>Use file-based include patterns:</strong></p>
+<p>Create a file <code>include-patterns.txt</code>:</p>
+<pre><code># Include only source code files
+*.rs
+*.go
+*.js
+*.ts
+
+# Include configuration files
+*.toml
+*.yml
+*.yaml
+
+# Include documentation
+*.md
+README*
+</code></pre>
+<p>Then use:</p>
+<pre><code class="language-bash">rustree --filter-include-from ./include-patterns.txt ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Use file-based exclude patterns:</strong></p>
+<p>Create a file <code>exclude-patterns.txt</code>:</p>
+<pre><code># Build artifacts
+target/
+build/
+dist/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+.DS_Store
+</code></pre>
+<p>Then use:</p>
+<pre><code class="language-bash">rustree --filter-exclude-from ./exclude-patterns.txt ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Combine file-based and command-line patterns:</strong></p>
+<pre><code class="language-bash"># Use patterns from file and add additional CLI patterns
+rustree --filter-include-from ./src-patterns.txt \
+        --filter-include "*.md" \
+        --filter-exclude "*.test.js" ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Multiple pattern files:</strong></p>
+<pre><code class="language-bash"># Load patterns from multiple files
+rustree --filter-include-from ./core-patterns.txt \
+        --filter-include-from ./docs-patterns.txt \
+        --filter-exclude-from ./ignore-patterns.txt ./workspace
+</code></pre>
+</li>
+<li>
+<p><strong>Project-specific filtering setup:</strong></p>
+<p>Create a <code>.rustree</code> directory in your project with pattern files:</p>
+<pre><code class="language-bash">mkdir .rustree
+echo "*.rs" &gt; .rustree/rust-files.txt
+echo "*.md" &gt; .rustree/docs.txt
+echo "target/" &gt; .rustree/ignore.txt
+</code></pre>
+<p>Then use consistently across the team:</p>
+<pre><code class="language-bash"># Show only Rust files
+rustree --filter-include-from .rustree/rust-files.txt ./
+
+# Show documentation structure
+rustree --filter-include-from .rustree/docs.txt --dirs-first ./
+
+# Full tree excluding build artifacts
+rustree --filter-exclude-from .rustree/ignore.txt ./
+</code></pre>
+</li>
+<li>
+<p><strong>Combine with gitignore patterns:</strong></p>
+<pre><code class="language-bash"># Use gitignore AND custom exclude patterns
+rustree --use-gitignore-rules \
+        --filter-exclude-from ./additional-ignores.txt ./project
+
+# Override gitignore with specific includes
+rustree --use-gitignore-rules \
+        --filter-include-from ./force-include.txt ./project
+</code></pre>
+</li>
+<li>
+<p><strong>Pattern file with comments for documentation:</strong></p>
+<p>Create a well-documented <code>analysis-patterns.txt</code>:</p>
+<pre><code># Code Analysis Patterns
+# =====================
+
+# Core source files
+src/**/*.rs
+lib/**/*.rs
+
+# Test files (for separate analysis)
+tests/**/*.rs
+benches/**/*.rs
+
+# Configuration that affects behavior
+Cargo.toml
+.cargo/config.toml
+rust-toolchain.toml
+
+# Exclude examples and docs from analysis
+# (uncomment if needed)
+# !examples/
+# !docs/
+</code></pre>
+<p>Use for consistent code analysis:</p>
+<pre><code class="language-bash">rustree --filter-include-from ./analysis-patterns.txt \
+        --calculate-lines --sort-by size -r ./
 </code></pre>
 </li>
 <li>

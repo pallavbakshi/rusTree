@@ -242,6 +242,24 @@
 </ul>
 </li>
 <li>
+<p><code>--filter-include-from &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: Read include patterns from a file. Each line in the file should contain one pattern. Lines starting with <code>#</code> and empty lines are ignored. This option can be used multiple times to read patterns from multiple files.</li>
+<li>Uses the same wildcard pattern syntax as <code>-P, --filter-include</code>.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
+<li>Example: <code>rustree --filter-include-from ./include-patterns.txt</code></li>
+</ul>
+</li>
+<li>
+<p><code>--filter-exclude-from &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: Read exclude patterns from a file. Each line in the file should contain one pattern. Lines starting with <code>#</code> and empty lines are ignored. This option can be used multiple times to read patterns from multiple files.</li>
+<li>Uses the same wildcard pattern syntax as <code>-I, --filter-exclude</code>.</li>
+<li>This option is affected by <code>--case-insensitive-filter</code>.</li>
+<li>Example: <code>rustree --filter-exclude-from ./exclude-patterns.txt</code></li>
+</ul>
+</li>
+<li>
 <p><code>--use-gitignore-rules</code>, <code>--gitignore</code> (deprecated alias)</p>
 <ul>
 <li>Description: Respects gitignore rules for filtering files and directories. This includes checking <code>.gitignore</code> files in the scanned directories and their parents, the global gitignore file (e.g., <code>~/.config/git/ignore</code>), and repository-specific exclude files (e.g., <code>$GIT_DIR/info/exclude</code>). The <code>--gitignore</code> flag is deprecated; use <code>--use-gitignore-rules</code> instead.</li>
