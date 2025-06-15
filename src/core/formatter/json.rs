@@ -9,8 +9,8 @@
 //! summary line.
 
 use crate::core::error::RustreeError;
-use crate::core::formatter::base::TreeFormatter;
-use crate::core::options::RustreeLibConfig;
+use crate::core::formatter::base::{TreeFormatter, TreeFormatterCompat};
+use crate::core::options::contexts::FormattingContext;
 use crate::core::tree::{
     builder,
     node::{NodeInfo, NodeType},
@@ -24,7 +24,7 @@ impl TreeFormatter for JsonFormatter {
     fn format(
         &self,
         nodes: &[NodeInfo],
-        config: &RustreeLibConfig,
+        formatting_ctx: &FormattingContext,
     ) -> Result<String, RustreeError> {
         // Build temporary tree to restore hierarchy
         let mut roots = builder::build_tree(nodes.to_vec())
@@ -36,7 +36,7 @@ impl TreeFormatter for JsonFormatter {
 
         // Determine apply command string once.
         let apply_cmd_opt: Option<String> =
-            config
+            formatting_ctx
                 .metadata
                 .apply_function
                 .as_ref()
@@ -149,6 +149,9 @@ fn convert_node(
     }
 }
 
+/// Implement backward compatibility trait
+impl TreeFormatterCompat for JsonFormatter {}
+
 // --------------------------------------------------
 // Tests
 // --------------------------------------------------
@@ -193,7 +196,7 @@ mod tests {
         ];
 
         let json_str = JsonFormatter
-            .format(&nodes, &RustreeLibConfig::default())
+            .format_compat(&nodes, &crate::core::options::RustreeLibConfig::default())
             .unwrap();
 
         let v: serde_json::Value = serde_json::from_str(&json_str).unwrap();

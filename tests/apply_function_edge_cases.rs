@@ -235,8 +235,11 @@ fn test_directory_functions_with_symlinks() {
     fs::write(&real_subfile, "subcontent").expect("Failed to write subfile.txt");
 
     // Create symlinks (ignore errors on platforms that don't support them)
-    let _ = std::os::unix::fs::symlink(&real_file, &symlink_file);
-    let _ = std::os::unix::fs::symlink(&real_dir, &symlink_dir);
+    #[cfg(unix)]
+    {
+        let _ = std::os::unix::fs::symlink(&real_file, &symlink_file);
+        let _ = std::os::unix::fs::symlink(&real_dir, &symlink_dir);
+    }
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {

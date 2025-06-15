@@ -441,8 +441,10 @@ fn test_formatter_with_empty_directory() -> Result<()> {
     let nodes = get_tree_nodes(root_path, &config)?; // Will be empty
     let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
 
+    // With the new changes, empty directories output "0 directories, 0 files" first
     let expected_output = format!(
         r#"{}/
+0 directories, 0 files
 
 1 directory, 0 files"#, // Expect a blank line before summary
         root_name

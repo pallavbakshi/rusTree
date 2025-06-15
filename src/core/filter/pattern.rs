@@ -8,7 +8,7 @@ use glob::MatchOptions;
 use std::path::Path;
 
 /// Helper struct to hold compiled glob patterns and their properties.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CompiledGlobPattern {
     pub pattern: glob::Pattern,
     pub options: MatchOptions, // Stores case sensitivity and other glob matching options

@@ -7,10 +7,11 @@
 // sections, etc.) can build on top of this foundation without affecting the
 // public interface of `TreeFormatter`.
 
-use super::base::TreeFormatter;
+use super::base::{TreeFormatter, TreeFormatterCompat};
 use super::text_tree::TextTreeFormatter;
 
 use crate::core::error::RustreeError;
+use crate::core::options::contexts::FormattingContext;
 use crate::core::options::{HtmlOptions, RustreeLibConfig};
 use crate::core::tree::node::NodeInfo;
 
@@ -23,15 +24,15 @@ impl TreeFormatter for HtmlFormatter {
     fn format(
         &self,
         nodes: &[NodeInfo],
-        config: &RustreeLibConfig,
+        formatting_ctx: &FormattingContext,
     ) -> Result<String, RustreeError> {
-        let html_opts: &HtmlOptions = &config.html;
+        let html_opts: &HtmlOptions = formatting_ctx.html;
 
         // 1. Obtain the lines produced by the text formatter so we can reuse
         //    its indentation logic.  We will post-process each line to turn
         //    the file name portion into a hyperlink (unless links are
         //    disabled).
-        let plain_output = TextTreeFormatter.format(nodes, config)?;
+        let plain_output = TextTreeFormatter.format(nodes, formatting_ctx)?;
         let mut lines: Vec<String> = plain_output.lines().map(|s| s.to_string()).collect();
 
         // Build a path representing the scan root (same technique as text formatter)
@@ -87,7 +88,7 @@ impl TreeFormatter for HtmlFormatter {
                 };
 
                 // Determine visible label (same logic as text formatter)
-                let mut label = if config.listing.show_full_path {
+                let mut label = if formatting_ctx.listing.show_full_path {
                     rel_path.to_string_lossy().to_string()
                 } else {
                     node.name.clone()
@@ -148,9 +149,19 @@ impl TreeFormatter for HtmlFormatter {
         let escaped_body = lines.join("\n");
 
         // Build intro/outro — propagate I/O errors so users notice bad paths.
+        // Create temporary config for backward compatibility
+        let temp_config = RustreeLibConfig {
+            input_source: formatting_ctx.input_source.clone(),
+            listing: formatting_ctx.listing.clone(),
+            metadata: formatting_ctx.metadata.clone(),
+            misc: formatting_ctx.misc.clone(),
+            html: formatting_ctx.html.clone(),
+            ..Default::default()
+        };
+
         let intro = match &html_opts.custom_intro {
             Some(path) => std::fs::read_to_string(path)?,
-            None => default_intro(config),
+            None => default_intro(&temp_config),
         };
 
         let outro = match &html_opts.custom_outro {
@@ -162,6 +173,9 @@ impl TreeFormatter for HtmlFormatter {
         Ok(html_page)
     }
 }
+
+/// Implement backward compatibility trait
+impl TreeFormatterCompat for HtmlFormatter {}
 
 fn html_escape(raw: &str) -> String {
     let mut out = String::with_capacity(raw.len());
@@ -224,7 +238,7 @@ mod tests {
         }];
 
         let cfg = RustreeLibConfig::default();
-        let html = HtmlFormatter.format(&nodes, &cfg).unwrap();
+        let html = HtmlFormatter.format_compat(&nodes, &cfg).unwrap();
 
         // Basic sanity checks
         assert!(html.starts_with("<!DOCTYPE html>"));
@@ -250,7 +264,7 @@ mod tests {
         }];
 
         let cfg = RustreeLibConfig::default();
-        let html = HtmlFormatter.format(&nodes, &cfg).unwrap();
+        let html = HtmlFormatter.format_compat(&nodes, &cfg).unwrap();
 
         // The raw characters should be escaped inside the pre block.
         assert!(html.contains("&lt;1&gt;&amp;"));
@@ -285,7 +299,7 @@ mod tests {
             ..Default::default()
         };
 
-        let html = HtmlFormatter.format(&nodes, &cfg).unwrap();
+        let html = HtmlFormatter.format_compat(&nodes, &cfg).unwrap();
         assert!(html.contains("https://example.com/root/sub/file.txt"));
     }
 
@@ -316,7 +330,7 @@ mod tests {
             ..Default::default()
         };
 
-        let html = HtmlFormatter.format(&nodes, &cfg).unwrap();
+        let html = HtmlFormatter.format_compat(&nodes, &cfg).unwrap();
         assert!(!html.contains("<a href="));
         assert!(html.contains("alpha.txt"));
     }
