@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ChangeType"],"struct":["Change","DiffMetadata","DiffOptions","DiffResult","DiffSummary"]};

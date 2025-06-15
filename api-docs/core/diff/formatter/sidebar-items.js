@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["change_type_color","change_type_symbol","format_diff","format_size_change"],"mod":["html","json","markdown","text"],"trait":["DiffFormatter"]};

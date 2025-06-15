@@ -911,6 +911,305 @@ __2 directories, 25 files, 2,800 total lines total__
 </li>
 </ol>
 <p>Note: The enhanced summary report automatically detects which metadata types are being displayed and includes appropriate totals. No additional flags are needed - the aggregation happens automatically when metadata options like <code>--calculate-lines</code>, <code>--calculate-words</code>, or <code>--show-size-bytes</code> are used.</p>
+<h2 id="tree-diff-examples"><a class="header" href="#tree-diff-examples">Tree Diff Examples</a></h2>
+<p>RusTree includes powerful directory comparison capabilities to track changes over time. These examples show how to use the diff feature for various workflows.</p>
+<h3 id="basic-diff-operations"><a class="header" href="#basic-diff-operations">Basic Diff Operations</a></h3>
+<ol start="57">
+<li>
+<p><strong>Create a baseline snapshot and compare current state:</strong></p>
+<pre><code class="language-bash"># Save current state as baseline
+rustree --output-format json &gt; baseline.json
+
+# Later, after making changes, compare with baseline
+rustree --diff baseline.json
+</code></pre>
+</li>
+<li>
+<p><strong>Compare two specific snapshots:</strong></p>
+<pre><code class="language-bash"># Compare two saved snapshots
+rustree --diff new_snapshot.json --from-tree-file old_snapshot.json
+</code></pre>
+</li>
+<li>
+<p><strong>Diff with output formatting:</strong></p>
+<pre><code class="language-bash"># Text output (default) - shows tree structure with change markers
+rustree --diff baseline.json
+
+# Markdown format for documentation
+rustree --diff baseline.json --output-format markdown &gt; changes.md
+
+# JSON format for programmatic processing
+rustree --diff baseline.json --output-format json &gt; diff_report.json
+
+# HTML format for interactive viewing
+rustree --diff baseline.json --output-format html &gt; diff_report.html
+</code></pre>
+</li>
+</ol>
+<h3 id="development-workflow-monitoring"><a class="header" href="#development-workflow-monitoring">Development Workflow Monitoring</a></h3>
+<ol start="60">
+<li>
+<p><strong>Track changes during feature development:</strong></p>
+<pre><code class="language-bash"># Save snapshot before starting feature
+rustree --output-format json &gt; feature-start.json
+
+# After development, see what changed
+rustree --diff feature-start.json --filter-include "src/**" "tests/**"
+
+# Focus on specific file types
+rustree --diff feature-start.json --filter-include "*.rs" --show-size-bytes
+</code></pre>
+</li>
+<li>
+<p><strong>Monitor build artifact generation:</strong></p>
+<pre><code class="language-bash"># Snapshot before build
+rustree --output-format json &gt; pre-build.json
+
+# Compare after build to see what was generated
+rustree --diff pre-build.json --filter-include "target/**" --show-size-bytes --human-friendly
+</code></pre>
+</li>
+<li>
+<p><strong>Track refactoring changes:</strong></p>
+<pre><code class="language-bash"># Before refactoring
+rustree --filter-include "src/**" --output-format json &gt; before-refactor.json
+
+# After refactoring - understand structural changes
+rustree --diff before-refactor.json src/ --show-moves-only --move-threshold 0.9
+</code></pre>
+</li>
+</ol>
+<h3 id="code-review-and-analysis"><a class="header" href="#code-review-and-analysis">Code Review and Analysis</a></h3>
+<ol start="63">
+<li>
+<p><strong>Diff with LLM analysis for code review:</strong></p>
+<pre><code class="language-bash"># Analyze structural changes with AI
+rustree --diff feature-branch.json \
+  --llm-ask "Summarize the structural changes and their impact" \
+  --llm-provider anthropic
+
+# Focus on specific concerns
+rustree --diff baseline.json \
+  --filter-include "*.rs" \
+  --llm-ask "Are there any potential security or performance concerns in these changes?"
+</code></pre>
+</li>
+<li>
+<p><strong>Generate change reports for team review:</strong></p>
+<pre><code class="language-bash"># Comprehensive markdown report
+rustree --diff sprint-start.json \
+  --output-format markdown \
+  --show-size-bytes \
+  --show-last-modified &gt; sprint-changes.md
+
+# Export for external analysis tools
+rustree --diff baseline.json \
+  --llm-export "Analyze code quality impact of these changes" &gt; review-prompt.txt
+</code></pre>
+</li>
+</ol>
+<h3 id="move-detection-and-rename-tracking"><a class="header" href="#move-detection-and-rename-tracking">Move Detection and Rename Tracking</a></h3>
+<ol start="65">
+<li>
+<p><strong>Track file moves and renames:</strong></p>
+<pre><code class="language-bash"># Default move detection (80% similarity threshold)
+rustree --diff old-structure.json
+
+# Strict move detection - only very similar files
+rustree --diff old-structure.json --move-threshold 0.95
+
+# Loose move detection - catch more potential moves
+rustree --diff old-structure.json --move-threshold 0.5
+
+# Disable move detection - treat moves as separate add/remove
+rustree --diff old-structure.json --ignore-moves
+</code></pre>
+</li>
+<li>
+<p><strong>Focus on move analysis:</strong></p>
+<pre><code class="language-bash"># Show only moved/renamed files
+rustree --diff restructure-before.json --show-only moved
+
+# Show moves with detailed similarity scores
+rustree --diff restructure-before.json --output-format json | jq '.changes[] | select(.change_type == "moved")'
+</code></pre>
+</li>
+</ol>
+<h3 id="system-administration-and-monitoring"><a class="header" href="#system-administration-and-monitoring">System Administration and Monitoring</a></h3>
+<ol start="67">
+<li>
+<p><strong>Monitor configuration directories:</strong></p>
+<pre><code class="language-bash"># Daily configuration monitoring
+rustree --output-format json /etc &gt; daily-etc-$(date +%Y%m%d).json
+
+# Compare with previous day
+rustree --diff daily-etc-$(date -d yesterday +%Y%m%d).json /etc \
+  --show-last-modified \
+  --sort-by mtime
+</code></pre>
+</li>
+<li>
+<p><strong>Track system changes over time:</strong></p>
+<pre><code class="language-bash"># Monitor important system directories
+rustree --diff system-baseline.json /etc /opt /usr/local \
+  --filter-exclude "*.log" "*.tmp" \
+  --show-size-bytes
+
+# Focus on recently changed files
+rustree --diff yesterday.json \
+  --sort-by mtime \
+  --show-last-modified \
+  --dirs-first
+</code></pre>
+</li>
+</ol>
+<h3 id="advanced-diff-filtering"><a class="header" href="#advanced-diff-filtering">Advanced Diff Filtering</a></h3>
+<ol start="69">
+<li>
+<p><strong>Diff with complex filtering:</strong></p>
+<pre><code class="language-bash"># Compare only source code changes
+rustree --diff baseline.json \
+  --filter-include "*.rs" "*.toml" "*.md" \
+  --filter-exclude "**/target/**" \
+  --depth 5
+
+# Use pattern files for consistent filtering
+echo "*.rs" &gt; src-patterns.txt
+echo "*.md" &gt;&gt; src-patterns.txt
+echo "target/" &gt; ignore-patterns.txt
+
+rustree --diff baseline.json \
+  --filter-include-from src-patterns.txt \
+  --filter-exclude-from ignore-patterns.txt
+</code></pre>
+</li>
+<li>
+<p><strong>Size-based change analysis:</strong></p>
+<pre><code class="language-bash"># Focus on size changes
+rustree --diff baseline.json \
+  --show-size-bytes \
+  --human-friendly \
+  --sort-by size \
+  --reverse-sort
+
+# Track large file additions
+rustree --diff baseline.json \
+  --show-only added \
+  --show-size-bytes \
+  --sort-by size \
+  --reverse-sort
+</code></pre>
+</li>
+</ol>
+<h3 id="diff-output-customization"><a class="header" href="#diff-output-customization">Diff Output Customization</a></h3>
+<ol start="71">
+<li>
+<p><strong>Customize diff display:</strong></p>
+<pre><code class="language-bash"># Show unchanged files for complete picture
+rustree --diff baseline.json --show-unchanged
+
+# Statistics only - no detailed tree
+rustree --diff baseline.json --stats-only
+
+# Specific change types only
+rustree --diff baseline.json --show-only added,removed
+rustree --diff baseline.json --show-only modified,type_changed
+</code></pre>
+</li>
+<li>
+<p><strong>Combine diff with existing features:</strong></p>
+<pre><code class="language-bash"># Diff with line count analysis
+rustree --diff baseline.json \
+  --calculate-lines \
+  --filter-include "*.rs" \
+  --sort-by lines \
+  --reverse-sort
+
+# Diff with full metadata
+rustree --diff baseline.json \
+  --show-size-bytes \
+  --show-last-modified \
+  --calculate-lines \
+  --human-friendly \
+  --full-path
+</code></pre>
+</li>
+</ol>
+<h3 id="automation-and-scripting"><a class="header" href="#automation-and-scripting">Automation and Scripting</a></h3>
+<ol start="73">
+<li>
+<p><strong>Automated change detection scripts:</strong></p>
+<pre><code class="language-bash">#!/bin/bash
+# Daily change monitoring script
+
+DATE=$(date +%Y%m%d)
+YESTERDAY=$(date -d yesterday +%Y%m%d)
+PROJECT_DIR="/path/to/project"
+
+# Generate today's snapshot
+rustree --output-format json "$PROJECT_DIR" &gt; "snapshot-$DATE.json"
+
+# Compare with yesterday if exists
+if [ -f "snapshot-$YESTERDAY.json" ]; then
+    echo "Changes since yesterday:"
+    rustree --diff "snapshot-$YESTERDAY.json" "$PROJECT_DIR" \
+      --filter-exclude "*.log" "*.tmp" \
+      --show-size-bytes
+fi
+</code></pre>
+</li>
+<li>
+<p><strong>CI/CD integration example:</strong></p>
+<pre><code class="language-bash"># In CI pipeline - detect structural changes
+rustree --output-format json &gt; "build-$BUILD_NUMBER.json"
+
+if [ -f "baseline.json" ]; then
+    # Generate change report
+    rustree --diff baseline.json \
+      --output-format markdown \
+      --filter-include "src/**" "tests/**" &gt; changes.md
+    
+    # Check for significant changes
+    CHANGES=$(rustree --diff baseline.json --stats-only | grep "files added\|files removed" | wc -l)
+    if [ "$CHANGES" -gt 0 ]; then
+        echo "Structural changes detected - review required"
+    fi
+fi
+</code></pre>
+</li>
+</ol>
+<h3 id="troubleshooting-and-edge-cases"><a class="header" href="#troubleshooting-and-edge-cases">Troubleshooting and Edge Cases</a></h3>
+<ol start="75">
+<li>
+<p><strong>Handle large directories efficiently:</strong></p>
+<pre><code class="language-bash"># Use depth limits for large projects
+rustree --diff baseline.json --depth 3
+
+# Focus on specific subdirectories
+rustree --diff baseline.json src/ tests/
+
+# Use filtering to reduce scope
+rustree --diff baseline.json \
+  --filter-include "*.rs" \
+  --filter-exclude "**/target/**" \
+  --prune-empty-directories
+</code></pre>
+</li>
+<li>
+<p><strong>Debug diff issues:</strong></p>
+<pre><code class="language-bash"># Verify snapshot contents
+rustree --output-format json . | jq '.nodes | length'
+
+# Check path normalization
+rustree --diff baseline.json --full-path
+
+# Test move detection settings
+rustree --diff baseline.json --move-threshold 0.1  # Very loose
+rustree --diff baseline.json --ignore-moves        # Disable completely
+</code></pre>
+</li>
+</ol>
+<p>These examples demonstrate the flexibility and power of RusTree's diff functionality for various use cases from development monitoring to system administration. The diff feature integrates seamlessly with all existing RusTree options for filtering, formatting, and analysis.</p>
 <p>These examples cover common use cases. Combine options as needed to achieve your desired output! Remember to use <code>rustree --help</code> for a full list of options.</p>
 
                     </main>
