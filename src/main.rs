@@ -8,15 +8,25 @@
 //! invokes the library's core logic, and prints the results to standard output.
 
 // The CLI module is part of this crate (rustree library crate), but not exposed publicly
-use rustree::cli::{CliArgs, map_cli_to_lib_config, map_cli_to_lib_output_format};
+use rustree::cli::{
+    CliArgs, map_cli_to_diff_options, map_cli_to_lib_config, map_cli_to_lib_output_format,
+};
 use rustree::core::llm::{
     LlmClientFactory, LlmConfig, LlmError, LlmResponseProcessor, TreePromptFormatter,
 };
+use rustree::{DiffEngine, DiffMetadata, format_diff};
 
 use clap::{CommandFactory, Parser};
 use clap_complete::{Shell, generate};
 use serde_json::{self, json};
 use std::process::ExitCode;
+
+/// Context information for diff operations to support enhanced LLM analysis
+#[derive(Debug, Clone)]
+struct DiffContext {
+    pub old_tree_output: String,
+    pub new_tree_output: String,
+}
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -89,13 +99,38 @@ async fn main() -> ExitCode {
         }
     };
 
-    // 3. Call the library to format the nodes
-    let output_string = match rustree::format_nodes(&nodes, lib_output_format, &lib_config) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("Error formatting output: {}", e);
-            return ExitCode::FAILURE;
+    // 2.5. Handle diff mode if requested
+    let (output_string, diff_context) = if cli_args.diff.is_diff_mode() {
+        if cli_args.input.is_from_file() {
+            // Case: --diff <new.json> --from-tree-file <old.json>
+            // Compare two snapshots: old.json (previous) vs new.json (current)
+            match handle_snapshot_to_snapshot_diff(
+                &cli_args,
+                &lib_config,
+                lib_output_format,
+                &nodes,
+            ) {
+                Ok((output, context)) => (output, Some(context)),
+                Err(exit_code) => return exit_code,
+            }
+        } else {
+            // Case: --diff <old.json> (traditional behavior)
+            // Compare old.json (previous) vs current filesystem (current)
+            match handle_diff_mode(&cli_args, &lib_config, lib_output_format, &nodes) {
+                Ok((output, context)) => (output, Some(context)),
+                Err(exit_code) => return exit_code,
+            }
         }
+    } else {
+        // 3. Call the library to format the nodes
+        let output = match rustree::format_nodes(&nodes, lib_output_format, &lib_config) {
+            Ok(s) => s,
+            Err(e) => {
+                eprintln!("Error formatting output: {}", e);
+                return ExitCode::FAILURE;
+            }
+        };
+        (output, None)
     };
 
     // 4. Handle LLM env generation first
@@ -140,7 +175,15 @@ async fn main() -> ExitCode {
             Some(rustree::cli::output::CliOutputFormat::Json)
         );
 
-        match handle_llm_query(&cli_args, question, &output_string, want_json).await {
+        match handle_llm_query(
+            &cli_args,
+            question,
+            &output_string,
+            want_json,
+            diff_context.as_ref(),
+        )
+        .await
+        {
             Ok(output_json_or_text) => {
                 if !output_json_or_text.is_empty() {
                     println!("{}", output_json_or_text);
@@ -341,6 +384,7 @@ async fn handle_llm_query(
     question: &str,
     tree_output: &str,
     json_mode: bool,
+    diff_context: Option<&DiffContext>,
 ) -> Result<String, LlmError> {
     // 1. Merge TOML-based LLM defaults into CLI args
     let merged_llm_args = {
@@ -419,7 +463,17 @@ async fn handle_llm_query(
     };
 
     // 4. Format prompt with tree output and question
-    let prompt = TreePromptFormatter::format_prompt(tree_output, question, &lib_config);
+    let prompt = if let Some(context) = diff_context {
+        TreePromptFormatter::format_diff_prompt(
+            tree_output,
+            &context.old_tree_output,
+            &context.new_tree_output,
+            question,
+            &lib_config,
+        )
+    } else {
+        TreePromptFormatter::format_prompt(tree_output, question, &lib_config)
+    };
 
     use serde_json::json;
 
@@ -472,5 +526,173 @@ async fn handle_llm_query(
     } else {
         // 6. Format response for display
         Ok(LlmResponseProcessor::format_response(&response, question))
+    }
+}
+
+/// Handles diff mode by comparing current nodes with a snapshot file.
+fn handle_diff_mode(
+    cli_args: &CliArgs,
+    lib_config: &rustree::config::RustreeLibConfig,
+    output_format: rustree::LibOutputFormat,
+    current_nodes: &[rustree::NodeInfo],
+) -> Result<(String, DiffContext), std::process::ExitCode> {
+    // Get the snapshot file path
+    let snapshot_file = cli_args.diff.get_diff_file().unwrap();
+
+    // Load the snapshot nodes
+    let snapshot_nodes = match rustree::get_tree_nodes_from_source(
+        &cli_args.path,
+        lib_config,
+        Some(snapshot_file),
+        Some(rustree::InputFormat::Json), // Assume JSON for now
+    ) {
+        Ok(nodes) => nodes,
+        Err(e) => {
+            eprintln!("Error loading snapshot file: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
+
+    // Create diff options
+    let diff_options = map_cli_to_diff_options(cli_args, lib_config);
+
+    // Create diff metadata
+    let diff_metadata = DiffMetadata {
+        generated_at: chrono::Utc::now().to_rfc3339(),
+        snapshot_file: snapshot_file.clone(),
+        snapshot_date: None, // TODO: Extract from snapshot file if available
+        comparison_root: cli_args.path.clone(),
+        filters_applied: vec![], // TODO: Extract applied filters
+        options: diff_options.clone(),
+    };
+
+    // Run the diff engine
+    let diff_engine = DiffEngine::new(diff_options);
+    let diff_result = match diff_engine.compare(&snapshot_nodes, current_nodes, diff_metadata) {
+        Ok(result) => result,
+        Err(e) => {
+            eprintln!("Error running diff: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
+
+    // Generate tree outputs for LLM context
+    let old_tree_output =
+        match rustree::format_nodes(&snapshot_nodes, rustree::LibOutputFormat::Text, lib_config) {
+            Ok(output) => output,
+            Err(e) => {
+                eprintln!("Error formatting old tree output: {}", e);
+                return Err(std::process::ExitCode::FAILURE);
+            }
+        };
+
+    let new_tree_output =
+        match rustree::format_nodes(current_nodes, rustree::LibOutputFormat::Text, lib_config) {
+            Ok(output) => output,
+            Err(e) => {
+                eprintln!("Error formatting new tree output: {}", e);
+                return Err(std::process::ExitCode::FAILURE);
+            }
+        };
+
+    let diff_context = DiffContext {
+        old_tree_output,
+        new_tree_output,
+    };
+
+    // Format the diff result
+    match format_diff(&diff_result, output_format, lib_config) {
+        Ok(output) => Ok((output, diff_context)),
+        Err(e) => {
+            eprintln!("Error formatting diff: {}", e);
+            Err(std::process::ExitCode::FAILURE)
+        }
+    }
+}
+
+/// Handle snapshot-to-snapshot diff mode: --diff <new.json> --from-tree-file <old.json>
+fn handle_snapshot_to_snapshot_diff(
+    cli_args: &CliArgs,
+    lib_config: &rustree::config::RustreeLibConfig,
+    output_format: rustree::LibOutputFormat,
+    current_nodes: &[rustree::NodeInfo], // These are from --from-tree-file (will be "previous")
+) -> Result<(String, DiffContext), std::process::ExitCode> {
+    // Get the second snapshot file path from --diff
+    let new_snapshot_file = cli_args.diff.get_diff_file().unwrap();
+
+    // Load the "new" snapshot nodes from --diff argument
+    let new_snapshot_nodes = match rustree::get_tree_nodes_from_source(
+        &cli_args.path,
+        lib_config,
+        Some(new_snapshot_file),
+        Some(rustree::InputFormat::Json), // Assume JSON for now
+    ) {
+        Ok(nodes) => nodes,
+        Err(e) => {
+            eprintln!("Error loading new snapshot file: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
+
+    // Create diff options
+    let diff_options = map_cli_to_diff_options(cli_args, lib_config);
+
+    // Note: old snapshot file is from --from-tree-file (already loaded in current_nodes)
+    let _old_snapshot_file = cli_args.input.get_tree_file().unwrap();
+
+    // Create diff metadata
+    let diff_metadata = DiffMetadata {
+        generated_at: chrono::Utc::now().to_rfc3339(),
+        snapshot_file: new_snapshot_file.clone(),
+        snapshot_date: None, // TODO: Extract from new snapshot file if available
+        comparison_root: cli_args.path.clone(),
+        filters_applied: vec![], // TODO: Extract applied filters
+        options: diff_options.clone(),
+    };
+
+    // Run the diff engine: compare old (previous) vs new (current)
+    let diff_engine = DiffEngine::new(diff_options);
+    let diff_result = match diff_engine.compare(current_nodes, &new_snapshot_nodes, diff_metadata) {
+        Ok(result) => result,
+        Err(e) => {
+            eprintln!("Error running snapshot-to-snapshot diff: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
+
+    // Generate tree outputs for LLM context
+    let old_tree_output =
+        match rustree::format_nodes(current_nodes, rustree::LibOutputFormat::Text, lib_config) {
+            Ok(output) => output,
+            Err(e) => {
+                eprintln!("Error formatting old tree output: {}", e);
+                return Err(std::process::ExitCode::FAILURE);
+            }
+        };
+
+    let new_tree_output = match rustree::format_nodes(
+        &new_snapshot_nodes,
+        rustree::LibOutputFormat::Text,
+        lib_config,
+    ) {
+        Ok(output) => output,
+        Err(e) => {
+            eprintln!("Error formatting new tree output: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
+
+    let diff_context = DiffContext {
+        old_tree_output,
+        new_tree_output,
+    };
+
+    // Format the diff result
+    match format_diff(&diff_result, output_format, lib_config) {
+        Ok(output) => Ok((output, diff_context)),
+        Err(e) => {
+            eprintln!("Error formatting snapshot-to-snapshot diff: {}", e);
+            Err(std::process::ExitCode::FAILURE)
+        }
     }
 }

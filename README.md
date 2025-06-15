@@ -172,6 +172,179 @@ rustree --filter-include-from include-rust.txt \
         --filter-exclude "*.test.rs" ./
 ```
 
+## 🔄 Tree Diff Feature
+
+Compare directory snapshots to track changes over time. Perfect for development monitoring, backup verification, and change analysis.
+
+### Quick Start
+
+```bash
+# Save current state as baseline
+rustree --output-format json > baseline.json
+
+# Later, compare current state with baseline
+rustree --diff baseline.json
+
+# Compare two snapshots
+rustree --diff new_snapshot.json --from-tree-file old_snapshot.json
+```
+
+### Core Diff Features
+
+**Change Types Detected:**
+- `[+]` **Added**: New files and directories
+- `[-]` **Removed**: Deleted files and directories  
+- `[M]` **Modified**: Directories with changed contents
+- `[~]` **Moved**: Files/directories relocated or renamed
+- `[T]` **Type Changed**: File ↔ Directory conversions
+- `[=]` **Unchanged**: Files with no changes (when `--show-unchanged`)
+
+**Smart Move Detection:**
+- Automatic detection of moved/renamed files
+- Similarity scoring based on name, size, and modification time
+- Configurable similarity threshold (`--move-threshold`)
+- Option to disable move detection (`--ignore-moves`)
+
+### Diff Examples
+
+#### Development Workflow Monitoring
+```bash
+# Track changes since last release
+rustree --diff release-v1.0.json --filter-include "src/**" "docs/**"
+
+# Monitor build artifact generation
+rustree --diff pre-build.json --filter-include "target/**" --show-size-bytes
+
+# Track dependency updates  
+rustree --diff before-update.json node_modules/ --show-size-bytes --human-friendly
+```
+
+#### System Administration
+```bash
+# Monitor configuration changes
+rustree --diff system-baseline.json /etc/ --show-last-modified
+
+# Track daily changes (ignore logs)
+rustree --diff daily-snapshot.json --filter-exclude "*.log" "*.tmp"
+
+# Audit with detailed output
+rustree --diff security-baseline.json --sort-by mod_time --dirs-first
+```
+
+#### Code Review Support
+```bash
+# Understand structural changes
+rustree --diff feature-start.json --llm-ask "Summarize the structural changes"
+
+# Track refactoring progress
+rustree --diff before-refactor.json src/ --output-format markdown
+
+# Analyze large-scale moves
+rustree --diff old-structure.json --show-only moved --move-threshold 0.9
+```
+
+### Advanced Diff Options
+
+```bash
+# Diff-specific options
+--diff <file>                    # Compare with snapshot file
+--show-only <types>             # Show only: added,removed,modified,moved,type_changed
+--ignore-moves                  # Don't detect moves, treat as add+remove  
+--move-threshold <0.0-1.0>      # Similarity threshold (default: 0.8)
+--show-unchanged               # Include unchanged files in output
+--stats-only                   # Show only summary statistics
+
+# Size and time thresholds
+--size-threshold <bytes>        # Minimum size change to report
+--time-threshold <seconds>      # Minimum time change to report
+```
+
+### Diff Output Formats
+
+#### Text Format (Default)
+```bash
+rustree --diff old.json
+# ./
+# ├── [+] new_feature/
+# │   ├── [+] mod.rs (2.1 KB)
+# │   └── [+] tests.rs (1.5 KB)
+# ├── [-] deprecated/
+# ├── [~] renamed.rs ← original.rs
+# └── [M] src/
+#     ├── [+] new_module.rs
+#     └── [-] old_module.rs
+# 
+# Changes Summary:
+#   3 files added (+)
+#   2 files removed (-)
+#   1 files moved/renamed (~)
+```
+
+#### Markdown Format
+```bash
+rustree --diff old.json --output-format markdown
+# # Directory Changes
+# 
+# ## Added Files (+)
+# - `new_feature/mod.rs` (2.1 KB)
+# - `new_feature/tests.rs` (1.5 KB)
+# 
+# ## Removed Files (-)
+# - `deprecated/` (entire directory)
+# 
+# ## Moved/Renamed (~)
+# - `renamed.rs` ← was `original.rs`
+```
+
+#### JSON Format
+```bash
+rustree --diff old.json --output-format json
+# {
+#   "diff_summary": {
+#     "added": 3,
+#     "removed": 2,
+#     "moved": 1,
+#     "compared_at": "2024-01-15T10:30:00Z"
+#   },
+#   "changes": [...]
+# }
+```
+
+### Reuse All Existing Features
+
+The diff feature works seamlessly with all existing options:
+
+```bash
+# Filtering
+rustree --diff old.json --filter-include "*.rs" --use-gitignore-rules
+
+# Depth control
+rustree --diff old.json --depth 3
+
+# Path scope  
+rustree --diff old.json src/
+
+# Metadata
+rustree --diff old.json --show-size-bytes --show-last-modified --full-path
+
+# Sorting
+rustree --diff old.json --sort-by size --dirs-first
+
+# LLM integration
+rustree --diff old.json --llm-ask "What are the most significant changes?"
+rustree --diff old.json --llm-export "code-review" > review.md
+
+# Combined complex example
+rustree --diff yesterday.json \
+  --filter-include "src/**" "docs/**" \
+  --filter-exclude "*.tmp" \
+  --show-size-bytes \
+  --sort-by mod_time \
+  --human-friendly \
+  --output-format markdown \
+  --llm-ask "Analyze the impact of these changes"
+```
+
 ## For Developers
 
 ### Code formatter and linter

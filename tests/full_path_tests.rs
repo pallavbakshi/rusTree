@@ -310,6 +310,9 @@ fn test_full_path_no_summary_report() -> Result<()> {
         },
         misc: MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };

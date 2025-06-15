@@ -968,6 +968,9 @@ fn test_formatter_no_summary_report_text() -> Result<()> {
         },
         misc: MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };
@@ -1011,6 +1014,9 @@ fn test_formatter_no_summary_report_with_hidden_files() -> Result<()> {
         },
         misc: MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };
@@ -1054,6 +1060,9 @@ fn test_formatter_no_summary_report_directories_only() -> Result<()> {
         },
         misc: MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };

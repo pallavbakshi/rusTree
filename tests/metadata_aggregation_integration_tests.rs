@@ -326,6 +326,9 @@ fn test_integration_no_summary_report_disables_aggregation() -> Result<()> {
         },
         misc: rustree::config::MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };

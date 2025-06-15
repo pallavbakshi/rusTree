@@ -110,6 +110,10 @@ pub use crate::core::error::RustreeError;
 pub use crate::core::input::InputFormat;
 pub use crate::core::tree::node::{NodeInfo, NodeType};
 
+// Diff functionality
+pub use crate::core::diff::changes::{DiffMetadata, DiffOptions};
+pub use crate::core::diff::{Change, ChangeType, DiffEngine, DiffResult, DiffSummary};
+
 // Formatter types (for advanced usage)
 pub use crate::core::formatter::{
     base::TreeFormatter, json::JsonFormatter, markdown::MarkdownFormatter,
@@ -380,6 +384,46 @@ pub fn format_nodes(
     } else {
         Ok(tree_output)
     }
+}
+
+/// Formats a diff result into a string representation.
+///
+/// This function takes a `DiffResult` containing change information and formats it
+/// according to the specified output format. Unlike the regular `format_nodes` function,
+/// this is specialized for displaying directory change comparisons.
+///
+/// # Arguments
+///
+/// * `diff_result` - The diff result containing changes, summary, and metadata.
+/// * `format` - The output format to use (Text, Markdown, Json, Html).
+/// * `config` - Configuration options that affect formatting.
+///
+/// # Returns
+///
+/// A formatted string representation of the diff, or an error if formatting fails.
+///
+/// # Examples
+///
+/// ```no_run
+/// use rustree::{DiffResult, LibOutputFormat, RustreeLibConfig, format_diff};
+///
+/// fn example_format_diff(diff_result: DiffResult, config: RustreeLibConfig) -> Result<String, rustree::RustreeError> {
+///     format_diff(&diff_result, LibOutputFormat::Text, &config)
+/// }
+/// ```
+pub fn format_diff(
+    diff_result: &DiffResult,
+    format: LibOutputFormat,
+    config: &RustreeLibConfig,
+) -> Result<String, RustreeError> {
+    use crate::config::OutputFormat;
+    let output_format = match format {
+        LibOutputFormat::Text => OutputFormat::Text,
+        LibOutputFormat::Markdown => OutputFormat::Markdown,
+        LibOutputFormat::Json => OutputFormat::Json,
+        LibOutputFormat::Html => OutputFormat::Html,
+    };
+    crate::core::diff::formatter::format_diff(diff_result, output_format, config)
 }
 
 /// Checks if the current configuration needs directory function processing.
