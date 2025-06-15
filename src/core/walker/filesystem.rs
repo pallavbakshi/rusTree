@@ -3,10 +3,10 @@
 //! This module contains the main directory walking logic, including WalkBuilder
 //! setup, entry processing, and metadata collection.
 
-use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
 use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_glob_patterns};
 use crate::core::metadata::{file_info, size_calculator};
+use crate::core::options::RustreeLibConfig;
 use crate::core::tree::node::{NodeInfo, NodeType};
 use ignore::WalkBuilder;
 use std::fs;
@@ -219,9 +219,16 @@ pub fn walk_directory(
 
         if node.node_type == NodeType::File {
             // === 1. Optional in-memory content processing (lines/words, built-ins that need content)
+            let needs_builtin_content = config
+                .metadata
+                .apply_function
+                .as_ref()
+                .map(|apply_fn| matches!(apply_fn, crate::core::options::ApplyFunction::BuiltIn(_)))
+                .unwrap_or(false);
+
             if config.metadata.calculate_line_count
                 || config.metadata.calculate_word_count
-                || config.metadata.apply_function.is_some()
+                || needs_builtin_content
             {
                 if let Ok(content) = fs::read_to_string(&node.path) {
                     if config.metadata.calculate_line_count {
@@ -231,7 +238,9 @@ pub fn walk_directory(
                         node.word_count = Some(size_calculator::count_words_from_string(&content));
                     }
 
-                    if let Some(func_type) = &config.metadata.apply_function {
+                    if let Some(crate::core::options::ApplyFunction::BuiltIn(func_type)) =
+                        &config.metadata.apply_function
+                    {
                         if is_file_function(func_type)
                             && should_apply_function_to_file(&node, config)
                         {
@@ -244,7 +253,9 @@ pub fn walk_directory(
 
             // === 2. External command processing (does not require file content)
             if node.custom_function_output.is_none() {
-                if let Some(ext_fn) = &config.metadata.external_function {
+                if let Some(crate::core::options::ApplyFunction::External(ext_fn)) =
+                    &config.metadata.apply_function
+                {
                     if should_apply_function_to_file(&node, config) {
                         node.custom_function_output =
                             Some(file_info::apply_external_to_file(&node.path, ext_fn));
@@ -258,11 +269,11 @@ pub fn walk_directory(
 }
 
 /// Checks if a function is a file-specific function.
-fn is_file_function(func: &crate::config::metadata::BuiltInFunction) -> bool {
+fn is_file_function(func: &crate::core::options::BuiltInFunction) -> bool {
     matches!(
         func,
-        crate::config::metadata::BuiltInFunction::CountPluses
-            | crate::config::metadata::BuiltInFunction::Cat
+        crate::core::options::BuiltInFunction::CountPluses
+            | crate::core::options::BuiltInFunction::Cat
     )
 }
 

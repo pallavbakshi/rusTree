@@ -3,7 +3,7 @@
 //! This module contains high-level sorting strategies that coordinate the use of
 //! tree building, comparison functions, and flattening to sort node collections.
 
-use crate::config::sorting::{SortKey, SortingOptions};
+use crate::core::options::{SortKey, SortingOptions};
 use crate::core::sorter::comparators::{compare_siblings, compare_siblings_with_options};
 use crate::core::tree::builder::{build_tree, flatten_tree_to_dfs_consuming};
 use crate::core::tree::node::NodeInfo;

@@ -4,6 +4,7 @@ mod common;
 use common::common_test_utils;
 
 use anyhow::Result;
+use rustree::config::metadata::ApplyFunction;
 use rustree::{
     BuiltInFunction, InputSourceOptions, LibOutputFormat, ListingOptions, MetadataOptions,
     NodeType, RustreeLibConfig, SortKey, SortingOptions, format_nodes, get_tree_nodes,
@@ -493,7 +494,7 @@ fn test_d_ignores_file_specific_stats_options() -> Result<()> {
         metadata: MetadataOptions {
             calculate_line_count: true,
             calculate_word_count: true,
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             show_size_bytes: true, // Keep one dir-compatible flag
             ..Default::default()
         },

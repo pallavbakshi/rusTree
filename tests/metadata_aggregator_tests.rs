@@ -1,4 +1,7 @@
-use rustree::config::{RustreeLibConfig, metadata::BuiltInFunction};
+use rustree::config::{
+    RustreeLibConfig,
+    metadata::{ApplyFunction, BuiltInFunction},
+};
 use rustree::core::metadata::MetadataAggregator;
 use rustree::core::tree::node::{NodeInfo, NodeType};
 use std::path::PathBuf;
@@ -202,7 +205,7 @@ fn test_aggregate_multiple_metadata() {
 #[test]
 fn test_aggregate_dir_stats_function() {
     let mut config = RustreeLibConfig::default();
-    config.metadata.apply_function = Some(BuiltInFunction::DirStats);
+    config.metadata.apply_function = Some(ApplyFunction::BuiltIn(BuiltInFunction::DirStats));
 
     let nodes = vec![
         {
@@ -226,7 +229,7 @@ fn test_aggregate_dir_stats_function() {
 #[test]
 fn test_aggregate_count_files_function() {
     let mut config = RustreeLibConfig::default();
-    config.metadata.apply_function = Some(BuiltInFunction::CountFiles);
+    config.metadata.apply_function = Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles));
 
     let nodes = vec![
         {
@@ -341,7 +344,7 @@ fn test_ignore_directories_for_file_metadata() {
 #[test]
 fn test_malformed_dir_stats_output() {
     let mut config = RustreeLibConfig::default();
-    config.metadata.apply_function = Some(BuiltInFunction::DirStats);
+    config.metadata.apply_function = Some(ApplyFunction::BuiltIn(BuiltInFunction::DirStats));
 
     let nodes = vec![
         {
@@ -371,7 +374,7 @@ fn test_malformed_dir_stats_output() {
 #[test]
 fn test_function_errors_ignored() {
     let mut config = RustreeLibConfig::default();
-    config.metadata.apply_function = Some(BuiltInFunction::CountFiles);
+    config.metadata.apply_function = Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles));
 
     let nodes = vec![
         {
@@ -396,7 +399,7 @@ fn test_function_errors_ignored() {
 #[test]
 fn test_non_numeric_function_output() {
     let mut config = RustreeLibConfig::default();
-    config.metadata.apply_function = Some(BuiltInFunction::CountFiles);
+    config.metadata.apply_function = Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles));
 
     let nodes = vec![
         {
@@ -515,7 +518,7 @@ fn test_mixed_node_types_aggregation() {
     let mut config = RustreeLibConfig::default();
     config.metadata.calculate_line_count = true;
     config.metadata.show_size_bytes = true;
-    config.metadata.apply_function = Some(BuiltInFunction::DirStats);
+    config.metadata.apply_function = Some(ApplyFunction::BuiltIn(BuiltInFunction::DirStats));
 
     let nodes = vec![
         {

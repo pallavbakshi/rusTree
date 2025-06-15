@@ -2,10 +2,10 @@
 
 //! Formatters for rendering diff results in various output formats.
 
-use crate::config::RustreeLibConfig;
 use crate::core::diff::{ChangeType, DiffResult};
 use crate::core::error::RustreeError;
 use crate::core::formatter::OutputFormat;
+use crate::core::options::RustreeLibConfig;
 
 pub mod html;
 pub mod json;

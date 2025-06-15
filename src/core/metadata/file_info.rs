@@ -3,9 +3,9 @@
 //! This module provides utilities for extracting and processing file-specific
 //! information and metadata, including content analysis and metadata formatting.
 
-use crate::config::RustreeLibConfig;
-use crate::config::metadata::ExternalFunction;
-use crate::config::metadata::{ApplyFnError, BuiltInFunction};
+use crate::core::options::RustreeLibConfig;
+use crate::core::options::{ApplyFnError, BuiltInFunction};
+use crate::core::options::{ApplyFunction, ExternalFunction};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fs;
 use std::io::Read;
@@ -119,16 +119,12 @@ pub fn format_node_metadata(
     }
 
     // Apply function metadata: handle both built-in and external functions
-    if config.metadata.apply_function.is_some() || config.metadata.external_function.is_some() {
+    if let Some(apply_fn) = &config.metadata.apply_function {
         // For built-in Cat, skip display of content in metadata
-        let external_text = config
-            .metadata
-            .external_function
-            .as_ref()
-            .map(|f| matches!(f.kind, crate::config::metadata::FunctionOutputKind::Text))
-            .unwrap_or(false);
+        let is_cat = matches!(apply_fn, ApplyFunction::BuiltIn(BuiltInFunction::Cat));
+        let is_external_text = matches!(apply_fn, ApplyFunction::External(f) if matches!(f.kind, crate::core::options::FunctionOutputKind::Text));
 
-        if config.metadata.apply_function.as_ref() == Some(&BuiltInFunction::Cat) || external_text {
+        if is_cat || is_external_text {
             // content printed elsewhere (formatter body)
         } else {
             match &node.custom_function_output {
@@ -146,14 +142,16 @@ pub fn format_node_metadata(
                 },
                 None => {
                     if style == MetadataStyle::Text {
-                        if config.metadata.apply_function.is_some() {
-                            if should_show_function_na_for_node(node, config) {
+                        match apply_fn {
+                            ApplyFunction::BuiltIn(_) => {
+                                if should_show_function_na_for_node(node, config) {
+                                    metadata_parts.push("[F: N/A]".to_string());
+                                }
+                            }
+                            ApplyFunction::External(_) if node.node_type == NodeType::File => {
                                 metadata_parts.push("[F: N/A]".to_string());
                             }
-                        } else if config.metadata.external_function.is_some()
-                            && node.node_type == NodeType::File
-                        {
-                            metadata_parts.push("[F: N/A]".to_string());
+                            _ => {}
                         }
                     }
                 }
@@ -185,7 +183,7 @@ pub fn format_node_metadata(
 #[cfg(test)]
 mod human_size_tests {
     use super::*;
-    use crate::config::{MetadataOptions, RustreeLibConfig};
+    use crate::core::options::{MetadataOptions, RustreeLibConfig};
 
     #[test]
     fn test_format_node_metadata_human_size() {
@@ -409,15 +407,25 @@ pub fn apply_external_to_file(
 /// Determines if we should show [F: N/A] for a node when function output is None.
 /// Only show it if the function type matches the node type.
 fn should_show_function_na_for_node(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
-    if let Some(func) = &config.metadata.apply_function {
-        match func {
-            // File functions should only show N/A for files
-            BuiltInFunction::CountPluses | BuiltInFunction::Cat => node.node_type == NodeType::File,
-            // Directory functions should only show N/A for directories
-            BuiltInFunction::CountFiles
-            | BuiltInFunction::CountDirs
-            | BuiltInFunction::SizeTotal
-            | BuiltInFunction::DirStats => node.node_type == NodeType::Directory,
+    if let Some(apply_fn) = &config.metadata.apply_function {
+        match apply_fn {
+            ApplyFunction::BuiltIn(func) => {
+                match func {
+                    // File functions should only show N/A for files
+                    BuiltInFunction::CountPluses | BuiltInFunction::Cat => {
+                        node.node_type == NodeType::File
+                    }
+                    // Directory functions should only show N/A for directories
+                    BuiltInFunction::CountFiles
+                    | BuiltInFunction::CountDirs
+                    | BuiltInFunction::SizeTotal
+                    | BuiltInFunction::DirStats => node.node_type == NodeType::Directory,
+                }
+            }
+            ApplyFunction::External(_) => {
+                // External functions typically work on files
+                node.node_type == NodeType::File
+            }
         }
     } else {
         false
@@ -488,8 +496,8 @@ pub fn apply_builtin_to_directory(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::MetadataOptions;
-    use crate::config::metadata::BuiltInFunction;
+    use crate::core::options::BuiltInFunction;
+    use crate::core::options::MetadataOptions;
     use std::path::PathBuf;
     use std::time::{Duration, UNIX_EPOCH};
 
@@ -551,7 +559,7 @@ mod tests {
                 calculate_line_count: true,
                 calculate_word_count: true,
                 show_last_modified: true,
-                apply_function: Some(BuiltInFunction::CountPluses),
+                apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
                 ..Default::default()
             },
             ..Default::default()
@@ -649,7 +657,7 @@ mod tests {
 
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
-                apply_function: Some(BuiltInFunction::Cat),
+                apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)),
                 show_size_bytes: true,
                 ..Default::default()
             },
@@ -671,7 +679,7 @@ mod tests {
 
         let config = RustreeLibConfig {
             metadata: MetadataOptions {
-                apply_function: Some(BuiltInFunction::CountPluses),
+                apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
                 show_size_bytes: true,
                 ..Default::default()
             },

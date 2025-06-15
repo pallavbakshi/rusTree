@@ -8,7 +8,7 @@
 //!
 //! This module is part of the core layer and contains only business logic.
 //! All configuration, validation, and external dependencies are handled by
-//! the config layer in `crate::config::llm`.
+//! the higher-level configuration layer.
 //!
 //! ## Examples
 //!

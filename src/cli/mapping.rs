@@ -179,28 +179,26 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, Cli
             report_creation_time: false, // Currently no CLI flag for reporting creation time, but can be added later
             calculate_line_count: cli_args.file_stats.calculate_lines,
             calculate_word_count: cli_args.file_stats.calculate_words,
-            apply_function: cli_args
-                .file_stats
-                .apply_function
-                .as_ref()
-                .map(|f| match f {
-                    CliBuiltInFunction::CountPluses => LibBuiltInFunction::CountPluses,
-                    CliBuiltInFunction::Cat => LibBuiltInFunction::Cat,
-                    CliBuiltInFunction::CountFiles => LibBuiltInFunction::CountFiles,
-                    CliBuiltInFunction::CountDirs => LibBuiltInFunction::CountDirs,
-                    CliBuiltInFunction::SizeTotal => LibBuiltInFunction::SizeTotal,
-                    CliBuiltInFunction::DirStats => LibBuiltInFunction::DirStats,
-                }),
-            external_function: {
-                if let Some(cmd) = &cli_args.file_stats.apply_function_cmd {
-                    // Prevent simultaneous built-in and external function usage.
-                    if cli_args.file_stats.apply_function.is_some() {
+            apply_function: {
+                // Handle built-in functions
+                if let Some(f) = &cli_args.file_stats.apply_function {
+                    if cli_args.file_stats.apply_function_cmd.is_some() {
                         return Err(CliMappingError::Io(std::io::Error::new(
                             std::io::ErrorKind::InvalidInput,
                             "Cannot specify both --apply-function and --apply-function-cmd",
                         )));
                     }
-
+                    let builtin = match f {
+                        CliBuiltInFunction::CountPluses => LibBuiltInFunction::CountPluses,
+                        CliBuiltInFunction::Cat => LibBuiltInFunction::Cat,
+                        CliBuiltInFunction::CountFiles => LibBuiltInFunction::CountFiles,
+                        CliBuiltInFunction::CountDirs => LibBuiltInFunction::CountDirs,
+                        CliBuiltInFunction::SizeTotal => LibBuiltInFunction::SizeTotal,
+                        CliBuiltInFunction::DirStats => LibBuiltInFunction::DirStats,
+                    };
+                    Some(crate::core::options::ApplyFunction::BuiltIn(builtin))
+                } else if let Some(cmd) = &cli_args.file_stats.apply_function_cmd {
+                    // Handle external command functions
                     let kind = match cli_args
                         .file_stats
                         .apply_function_cmd_kind
@@ -212,11 +210,13 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, Cli
                         _ => LibFunctionOutputKind::Text,
                     };
 
-                    Some(LibExternalFunction {
-                        cmd_template: cmd.clone(),
-                        timeout_secs: cli_args.file_stats.apply_function_timeout,
-                        kind,
-                    })
+                    Some(crate::core::options::ApplyFunction::External(
+                        LibExternalFunction {
+                            cmd_template: cmd.clone(),
+                            timeout_secs: cli_args.file_stats.apply_function_timeout,
+                            kind,
+                        },
+                    ))
                 } else {
                     None
                 }

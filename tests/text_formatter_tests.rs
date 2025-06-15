@@ -3,6 +3,7 @@
 #![allow(clippy::needless_update)]
 
 use anyhow::Result; // For returning errors from test functions
+use rustree::config::metadata::ApplyFunction;
 use rustree::{
     BuiltInFunction,
     InputSourceOptions, // Add new configuration structs
@@ -215,7 +216,7 @@ fn test_formatter_no_file_specific_metadata_prefixes_in_dirs_only_mode() -> Resu
             show_last_modified: true,
             calculate_line_count: true,
             calculate_word_count: true,
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         sorting: SortingOptions {
@@ -668,7 +669,7 @@ fn test_formatter_with_apply_function() -> Result<()> {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         sorting: SortingOptions {
@@ -719,7 +720,7 @@ fn test_formatter_with_multiple_metadata() -> Result<()> {
             show_last_modified: true,
             calculate_line_count: true,
             calculate_word_count: true,
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         sorting: SortingOptions {

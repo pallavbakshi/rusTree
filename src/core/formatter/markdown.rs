@@ -1,9 +1,9 @@
 // src/core/formatter/markdown.rs
 use super::base::TreeFormatter;
-use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
 use crate::core::metadata::MetadataAggregator;
 use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
+use crate::core::options::RustreeLibConfig;
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fmt::Write;
 

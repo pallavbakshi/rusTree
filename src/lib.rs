@@ -121,6 +121,7 @@ pub use crate::core::formatter::{
 };
 
 // Internal imports
+use crate::core::options::ApplyFunction;
 use crate::core::{metadata::file_info, sorter, tree::builder::TempNode, walker};
 use std::path::Path;
 
@@ -254,7 +255,7 @@ fn apply_post_processing(
             .map_err(RustreeError::TreeBuildError)?;
 
         // Apply directory functions if configured
-        if let Some(apply_func) = &config.metadata.apply_function {
+        if let Some(ApplyFunction::BuiltIn(apply_func)) = &config.metadata.apply_function {
             if is_directory_function(apply_func) {
                 apply_directory_functions_to_tree(&mut temp_roots, apply_func, config);
             }
@@ -333,14 +334,17 @@ pub fn format_nodes(
     let tree_output = formatter_instance.format(nodes, config)?;
 
     let mut is_cat_like = false;
-    if config.metadata.apply_function == Some(BuiltInFunction::Cat) {
-        is_cat_like = true;
-    } else if let Some(ext_fn) = &config.metadata.external_function {
-        if matches!(
-            ext_fn.kind,
-            crate::config::metadata::FunctionOutputKind::Text
-        ) {
-            is_cat_like = true;
+    if let Some(apply_fn) = &config.metadata.apply_function {
+        match apply_fn {
+            ApplyFunction::BuiltIn(BuiltInFunction::Cat) => {
+                is_cat_like = true;
+            }
+            ApplyFunction::External(ext_fn) => {
+                if matches!(ext_fn.kind, crate::core::options::FunctionOutputKind::Text) {
+                    is_cat_like = true;
+                }
+            }
+            _ => {}
         }
     }
 
@@ -359,15 +363,15 @@ pub fn format_nodes(
 
         if !file_nodes_with_content.is_empty() {
             // Determine section header text
-            let header = if config.metadata.apply_function == Some(BuiltInFunction::Cat) {
-                "File Contents".to_string()
-            } else if let Some(ext_fn) = &config.metadata.external_function {
-                format!(
-                    "Results of applying '{}' to relevant files",
-                    ext_fn.cmd_template
-                )
-            } else {
-                "Results".to_string()
+            let header = match &config.metadata.apply_function {
+                Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)) => "File Contents".to_string(),
+                Some(ApplyFunction::External(ext_fn)) => {
+                    format!(
+                        "Results of applying '{}' to relevant files",
+                        ext_fn.cmd_template
+                    )
+                }
+                _ => "Results".to_string(),
             };
 
             result.push_str(&format!("\n\n--- {} ---\n", header));
@@ -428,7 +432,7 @@ pub fn format_diff(
 
 /// Checks if the current configuration needs directory function processing.
 fn needs_directory_function_processing(config: &RustreeLibConfig) -> bool {
-    if let Some(func) = &config.metadata.apply_function {
+    if let Some(ApplyFunction::BuiltIn(func)) = &config.metadata.apply_function {
         is_directory_function(func)
     } else {
         false

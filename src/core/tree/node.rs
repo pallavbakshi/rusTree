@@ -1,4 +1,4 @@
-use crate::config::metadata::ApplyFnError;
+use crate::core::options::ApplyFnError;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
