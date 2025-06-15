@@ -19,12 +19,52 @@ use crate::config::MetadataOptions;
 use crate::config::MiscOptions;
 use crate::config::SortKey as LibSortKey;
 use crate::config::SortingOptions;
+use crate::config::llm::LlmConfigError;
 use crate::config::metadata::{
     ExternalFunction as LibExternalFunction, FunctionOutputKind as LibFunctionOutputKind,
 };
 use crate::config::output_format::OutputFormat as LibOutputFormat;
 use crate::config::sorting::DirectoryFileOrder;
 use crate::config::{RustreeLibConfig, load_merged_config};
+
+/// Error type for CLI mapping operations
+#[derive(Debug)]
+pub enum CliMappingError {
+    /// IO error when reading pattern files
+    Io(std::io::Error),
+    /// LLM configuration error
+    LlmConfig(LlmConfigError),
+}
+
+impl std::fmt::Display for CliMappingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CliMappingError::Io(err) => write!(f, "Error reading pattern files: {}", err),
+            CliMappingError::LlmConfig(err) => write!(f, "LLM configuration error: {}", err),
+        }
+    }
+}
+
+impl std::error::Error for CliMappingError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            CliMappingError::Io(err) => Some(err),
+            CliMappingError::LlmConfig(err) => Some(err),
+        }
+    }
+}
+
+impl From<std::io::Error> for CliMappingError {
+    fn from(err: std::io::Error) -> Self {
+        CliMappingError::Io(err)
+    }
+}
+
+impl From<LlmConfigError> for CliMappingError {
+    fn from(err: LlmConfigError) -> Self {
+        CliMappingError::LlmConfig(err)
+    }
+}
 
 /// Maps command-line arguments (`CliArgs`) to the library's configuration structure (`RustreeLibConfig`).
 ///
@@ -37,7 +77,7 @@ use crate::config::{RustreeLibConfig, load_merged_config};
 /// # Returns
 ///
 /// A `RustreeLibConfig` instance populated from the `cli_args`, or an error if pattern files cannot be read.
-pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std::io::Error> {
+pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, CliMappingError> {
     // ------------------------------------------------------------------
     //  A. Build config based solely on CLI flags (legacy behaviour)
     // ------------------------------------------------------------------
@@ -155,10 +195,10 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
                 if let Some(cmd) = &cli_args.file_stats.apply_function_cmd {
                     // Prevent simultaneous built-in and external function usage.
                     if cli_args.file_stats.apply_function.is_some() {
-                        return Err(std::io::Error::new(
+                        return Err(CliMappingError::Io(std::io::Error::new(
                             std::io::ErrorKind::InvalidInput,
                             "Cannot specify both --apply-function and --apply-function-cmd",
-                        ));
+                        )));
                     }
 
                     let kind = match cli_args
@@ -197,7 +237,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
             custom_outro: cli_args.html_output.html_outro_file.clone(),
             include_links: !cli_args.html_output.html_no_links,
         },
-        llm: Default::default(),
+        llm: crate::config::LlmOptions::from_cli_args(&cli_args.llm)?,
     };
 
     // ------------------------------------------------------------------
@@ -209,7 +249,7 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
             partial.merge_into(&mut cfg);
         }
         Err(e) => {
-            return Err(std::io::Error::other(e.to_string()));
+            return Err(CliMappingError::Io(std::io::Error::other(e.to_string())));
         }
     }
 

@@ -54,7 +54,7 @@ async fn main() -> ExitCode {
     let lib_config = match map_cli_to_lib_config(&cli_args) {
         Ok(config) => config,
         Err(e) => {
-            eprintln!("Error reading pattern files: {}", e);
+            eprintln!("{}", e);
             return ExitCode::FAILURE;
         }
     };
@@ -137,7 +137,7 @@ async fn main() -> ExitCode {
     if cli_args.llm.llm_generate_env {
         println!(
             "{}",
-            rustree::core::llm::LlmConfig::generate_sample_env_file()
+            rustree::config::LlmOptions::generate_sample_env_file()
         );
         eprintln!("💡 Save this content to a .env file in your project root or current directory");
         return ExitCode::SUCCESS;
@@ -449,8 +449,15 @@ async fn handle_llm_query(
         args
     };
 
-    // 2. Create LLM config from merged args
-    let llm_config = LlmConfig::from_cli_args(&merged_llm_args)?;
+    // 2. Create LLM config using proper CLI → Config → Core flow
+    let llm_options = rustree::config::LlmOptions::from_cli_args(&merged_llm_args)
+        .map_err(|e| LlmError::Config(e.to_string()))?;
+
+    let core_llm_config = llm_options
+        .to_core_config()
+        .map_err(|e| LlmError::Config(e.to_string()))?;
+
+    let llm_config = LlmConfig::new(core_llm_config);
 
     if cli_args.verbose && cli_args.llm.llm_ask.is_some() {
         print_llm_summary(&llm_config);

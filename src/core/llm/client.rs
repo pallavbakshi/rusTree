@@ -1,6 +1,6 @@
 // src/core/llm/client.rs
 
-use crate::core::llm::{LlmConfig, LlmError, LlmProvider};
+use crate::core::llm::{CoreLlmProvider, LlmConfig, LlmError};
 use rig::completion::Prompt;
 use serde_json::json;
 
@@ -9,10 +9,10 @@ pub struct LlmClientFactory;
 impl LlmClientFactory {
     pub async fn create_and_query(config: &LlmConfig, prompt: &str) -> Result<String, LlmError> {
         match config.provider {
-            LlmProvider::OpenAi => Self::query_openai(config, prompt).await,
-            LlmProvider::Anthropic => Self::query_anthropic(config, prompt).await,
-            LlmProvider::Cohere => Self::query_cohere(config, prompt).await,
-            LlmProvider::OpenRouter => Self::query_openrouter(config, prompt).await,
+            CoreLlmProvider::OpenAi => Self::query_openai(config, prompt).await,
+            CoreLlmProvider::Anthropic => Self::query_anthropic(config, prompt).await,
+            CoreLlmProvider::Cohere => Self::query_cohere(config, prompt).await,
+            CoreLlmProvider::OpenRouter => Self::query_openrouter(config, prompt).await,
         }
     }
 

@@ -25,7 +25,7 @@ pub use filtering::FilteringOptions;
 pub use html::HtmlOptions;
 pub use input_source::InputSourceOptions;
 pub use listing::ListingOptions;
-pub use llm::LlmOptions;
+pub use llm::{LlmConfigError, LlmOptions, LlmProvider};
 pub use metadata::{ApplyFnError, BuiltInFunction, MetadataOptions}; // Re-export BuiltInFunction, ApplyFnError
 pub use misc::MiscOptions;
 pub use sorting::{SortKey, SortingOptions}; // Re-export SortKey directly as it's a common enum
