@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["LlmOptions"]};
+window.SIDEBAR_ITEMS = {"enum":["LlmConfigError","LlmProvider"],"struct":["LlmOptions"]};
