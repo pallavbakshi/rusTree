@@ -1,5 +1,6 @@
 // tests/apply_function_edge_cases.rs
 
+use rustree::config::metadata::ApplyFunction;
 use rustree::{BuiltInFunction, FilteringOptions, MetadataOptions};
 use rustree::{LibOutputFormat, RustreeLibConfig, format_nodes, get_tree_nodes};
 use std::fs;
@@ -36,7 +37,7 @@ fn test_size_total_function() {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::SizeTotal),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::SizeTotal)),
             show_size_bytes: true, // Enable size collection for SizeTotal to work
             ..Default::default()
         },
@@ -90,7 +91,7 @@ fn test_apply_function_with_mixed_patterns() {
     // Test combined include and exclude patterns
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         filtering: FilteringOptions {
@@ -174,7 +175,7 @@ fn test_empty_pattern_files() {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         filtering: FilteringOptions {
@@ -239,7 +240,7 @@ fn test_directory_functions_with_symlinks() {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountFiles),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles)),
             ..Default::default()
         },
         ..Default::default()

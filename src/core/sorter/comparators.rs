@@ -3,7 +3,7 @@
 //! This module contains the core comparison logic for sorting nodes based on
 //! various attributes like name, size, modification time, etc.
 
-use crate::config::sorting::{DirectoryFileOrder, SortKey, SortingOptions};
+use crate::core::options::{DirectoryFileOrder, SortKey, SortingOptions};
 use crate::core::tree::builder::TempNode;
 use crate::core::tree::node::NodeType;
 use std::cmp::Ordering;

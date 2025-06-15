@@ -10,9 +10,8 @@
 use super::base::TreeFormatter;
 use super::text_tree::TextTreeFormatter;
 
-use crate::config::RustreeLibConfig;
-use crate::config::html::HtmlOptions;
 use crate::core::error::RustreeError;
+use crate::core::options::{HtmlOptions, RustreeLibConfig};
 use crate::core::tree::node::NodeInfo;
 
 /// Formatter producing an HTML page that contains the directory tree wrapped
@@ -259,7 +258,7 @@ mod tests {
 
     #[test]
     fn base_href_and_links_work() {
-        use crate::config::html::HtmlOptions;
+        use crate::core::options::HtmlOptions;
         use std::path::PathBuf;
 
         let nodes = vec![NodeInfo {

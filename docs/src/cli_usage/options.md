@@ -339,3 +339,65 @@ rustree --output-format html \
   - Example: `rustree --llm-ask "Analyze this project" --dry-run --human-friendly`
 
   **Additional effect:** When combined with `--size` / `-s`, tree listings will display file sizes in a readable form (e.g. `1.2 MB` instead of `1234567B`).
+
+## Diff Functionality
+
+- `--diff <FILE>`
+  - Description: Compare the current directory tree with a previously saved snapshot file (JSON format). This feature detects additions, removals, modifications, moves/renames, and type changes.
+  - Example: `rustree --diff baseline.json`
+
+- `--from-tree-file <FILE>`
+  - Description: When using `--diff`, use this file as the source tree instead of scanning the current directory. Enables comparison between two snapshots.
+  - Example: `rustree --diff new.json --from-tree-file old.json`
+
+- `--show-only <TYPES>`
+  - Description: Filter diff output to show only specific types of changes. Comma-separated list.
+  - Available types: `added`, `removed`, `modified`, `moved`, `type_changed`
+  - Example: `rustree --diff old.json --show-only added,removed`
+
+- `--ignore-moves`
+  - Description: Disable move detection in diff output. Moved files will be shown as separate add and remove operations.
+  - Example: `rustree --diff old.json --ignore-moves`
+
+- `--move-threshold <FLOAT>`
+  - Description: Set the similarity threshold for move detection. Range: 0.0 to 1.0.
+  - Default: `0.8`
+  - Example: `rustree --diff old.json --move-threshold 0.9`
+
+- `--show-unchanged`
+  - Description: Include unchanged files in the diff output (marked with `[=]`).
+  - Example: `rustree --diff old.json --show-unchanged`
+
+- `--stats-only`
+  - Description: Show only the summary statistics without the detailed tree output.
+  - Example: `rustree --diff old.json --stats-only`
+
+- `--size-threshold <BYTES>`
+  - Description: Only report file changes where the size difference exceeds this threshold. Accepts suffixes K, M, G.
+  - Example: `rustree --diff old.json --size-threshold 1M`
+
+- `--time-threshold <SECONDS>`
+  - Description: Only report file changes where the modification time difference exceeds this threshold.
+  - Example: `rustree --diff old.json --time-threshold 3600`
+
+### Diff Examples
+
+```bash
+# Basic comparison with current directory
+rustree --diff baseline.json
+
+# Compare two snapshots
+rustree --diff new.json --from-tree-file old.json
+
+# Track source code changes only
+rustree --diff release.json --filter-include "src/**" --show-only added,removed,modified
+
+# Monitor with size information
+rustree --diff yesterday.json --show-size-bytes --human-friendly
+
+# Generate markdown report
+rustree --diff old.json --output-format markdown > changes.md
+
+# Combine with LLM analysis
+rustree --diff baseline.json --llm-ask "What are the most significant changes?"
+```

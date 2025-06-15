@@ -2,12 +2,12 @@
 
 //! Text formatter for diff results, producing tree-style output with change markers.
 
-use crate::config::RustreeLibConfig;
 use crate::core::diff::formatter::{
     DiffFormatter, change_type_color, change_type_symbol, format_size_change,
 };
 use crate::core::diff::{Change, ChangeType, DiffResult};
 use crate::core::error::RustreeError;
+use crate::core::options::RustreeLibConfig;
 use crate::core::tree::node::NodeType;
 use is_terminal::IsTerminal;
 use std::fmt::Write;
@@ -311,8 +311,8 @@ fn format_human_size(size: u64) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{MiscOptions, RustreeLibConfig};
     use crate::core::diff::changes::{ChangeType, DiffMetadata, DiffOptions, DiffSummary};
+    use crate::core::options::{MiscOptions, RustreeLibConfig};
     use crate::core::tree::node::{NodeInfo, NodeType};
     use std::path::PathBuf;
     use std::time::SystemTime;

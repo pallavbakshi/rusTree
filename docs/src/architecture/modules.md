@@ -2,44 +2,67 @@
 
 The `rustree` library is organized into several modules, each with a specific responsibility. The `src/core/` directory, in particular, has been significantly refactored into sub-modules for better organization and clarity.
 
-### `src/config/` - Configuration Module
+### `src/config/` - Configuration Bridge Module
 
-This top-level module centralizes all configuration-related definitions for the library. It groups related options into sub-modules and specific structs.
+This module now serves as a bridge layer that re-exports configuration types from the core layer and provides helper functions for CLI integration. After the refactoring (commit 333f1c7), all configuration structs have been moved to `src/core/options/` for better modularity.
+
+- **All configuration files now simply re-export from core**:
+  - `filtering.rs`: Re-exports `FilteringOptions` from `core::options::filtering`
+  - `html.rs`: Re-exports `HtmlOptions` from `core::options::html`
+  - `input_source.rs`: Re-exports `InputSourceOptions` from `core::options::input_source`
+  - `listing.rs`: Re-exports `ListingOptions` from `core::options::listing`
+  - `metadata.rs`: Re-exports all metadata types from `core::options::metadata`
+  - `misc.rs`: Re-exports `MiscOptions` from `core::options::misc`
+  - `output_format.rs`: Re-exports `OutputFormat` from `core::options::output_format`
+  - `sorting.rs`: Re-exports all sorting types from `core::options::sorting`
+  - `tree_options.rs`: Re-exports `RustreeLibConfig` from `core::options::tree_options`
+
+- **`llm.rs`** (special case):
+  - Still contains CLI-specific helper functions (`from_cli_args`, `to_core_config`, `generate_sample_env_file`)
+  - Re-exports core LLM types: `LlmConfigError`, `LlmOptions`, `LlmProvider`
+  - Provides the bridge between CLI arguments and core LLM configuration
+
+### `src/core/options/` - Core Configuration Module
+
+This new module (added in the refactoring) contains all the actual configuration struct definitions that were previously in `src/config/`. This change improves modularity by making the core layer self-contained.
 
 - **`tree_options.rs`**:
-  - Defines `RustreeLibConfig`, the main configuration struct. It is composed of several sub-structs:
-    - `InputSourceOptions` (from `input_source.rs`): Options related to the root input, like display name and initial metadata.
-    - `ListingOptions` (from `listing.rs`): Options controlling directory traversal, such as `max_depth`, `show_hidden`, and `list_directories_only`.
-    - `FilteringOptions` (from `filtering.rs`): Options for including/excluding files/directories, such as `match_patterns`, `ignore_patterns`, `use_gitignore_rules`, `gitignore_file`, and `case_insensitive_filter`.
-    - `SortingOptions` (from `sorting.rs`): Options for sorting, including `sort_by` (using `SortKey`), `reverse_sort`, and `files_before_directories`.
-    - `MetadataOptions` (from `metadata.rs`): Options for collecting and reporting metadata, like `show_size_bytes`, `show_last_modified`, `calculate_line_count`, `calculate_word_count`, and `apply_function` (using `BuiltInFunction`).
-    - `MiscOptions` (from `misc.rs`): For miscellaneous options.
+  - Defines `RustreeLibConfig`, the main configuration struct
+  - Composed of all the sub-configuration structs listed below
 
 - **`input_source.rs`**:
-  - Defines `InputSourceOptions` struct for root path display and initial metadata.
+  - Defines `InputSourceOptions` struct for root path display and initial metadata
 
 - **`listing.rs`**:
-  - Defines `ListingOptions` struct for directory traversal settings.
-  - Includes `show_full_path` option to control whether formatters display full relative paths or just filenames.
+  - Defines `ListingOptions` struct for directory traversal settings
+  - Includes `show_full_path` option to control whether formatters display full relative paths or just filenames
 
 - **`filtering.rs`**:
-  - Defines `FilteringOptions` struct for inclusion/exclusion patterns, gitignore settings, and the `prune_empty_directories` flag.
+  - Defines `FilteringOptions` struct for inclusion/exclusion patterns, gitignore settings, and the `prune_empty_directories` flag
 
 - **`sorting.rs`**:
-  - Defines the `SortKey` enum (e.g., `Name`, `Size`, `MTime`, `Version`, `ChangeTime`, `CreateTime`, `None`).
-  - Defines `DirectoryFileOrder` enum to control directory vs. file ordering (`Default`, `DirsFirst`, `FilesFirst`).
-  - Defines `SortingOptions` struct, used in `RustreeLibConfig` to specify sorting criteria, order, directory/file ordering preference, and backward compatibility options.
+  - Defines the `SortKey` enum (e.g., `Name`, `Size`, `MTime`, `Version`, `ChangeTime`, `CreateTime`, `None`)
+  - Defines `DirectoryFileOrder` enum to control directory vs. file ordering (`Default`, `DirsFirst`, `FilesFirst`)
+  - Defines `SortingOptions` struct for sorting criteria and preferences
 
 - **`metadata.rs`**:
-  - Defines `MetadataOptions` struct for metadata collection and content analysis flags (e.g., `show_size_bytes`, `show_last_modified`, `report_change_time`, `report_creation_time`).
-  - Defines `BuiltInFunction` enum for functions applicable to file content, including `CountPluses` (counts '+' characters) and `Cat` (returns full file content).
-  - Defines `ApplyFnError` for errors during custom function application.
+  - Defines `MetadataOptions` struct for metadata collection and content analysis flags
+  - Defines `BuiltInFunction` enum for functions applicable to file content
+  - Defines `ApplyFnError` for errors during custom function application
+  - Defines `FunctionOutputKind` and `ExternalFunction` for external command support
 
-- **`output_format.rs`** (formerly `output.rs`):
-  - Defines the `OutputFormat` enum (re-exported as `LibOutputFormat`), used to specify the desired output format (e.g., Text, Markdown).
+- **`output_format.rs`**:
+  - Defines the `OutputFormat` enum used to specify output format (Text, Markdown, Json, Html)
 
 - **`misc.rs`**:
-  - Defines `MiscOptions` struct for any other configuration options.
+  - Defines `MiscOptions` struct for miscellaneous configuration options
+
+- **`html.rs`**:
+  - Defines `HtmlOptions` struct for HTML-specific output configuration
+
+- **`llm.rs`**:
+  - Defines core LLM types: `LlmProvider`, `LlmOptions`, `LlmConfigError`
+  - Contains provider-specific logic and validation
 
 
 ### `src/core/` - Core Logic Modules
@@ -91,10 +114,12 @@ The `src/core/` directory houses the main operational logic of `rustree`.
 
 ### Top-Level Library File (`src/lib.rs`)
 
-- Re-exports key public types from the `config` and `core` modules to form the library's public API. This includes:
-  - `RustreeLibConfig` and its constituent option structs: `InputSourceOptions`, `ListingOptions`, `FilteringOptions`, `SortingOptions` (including `directory_file_order` and legacy `files_before_directories`), `MetadataOptions`, `MiscOptions`.
-  - Enums and related types: `SortKey`, `DirectoryFileOrder`, `BuiltInFunction`, `ApplyFnError`.
-  - `LibOutputFormat` (an alias for `OutputFormat`).
+- Re-exports key public types to form the library's public API:
+  - From `config` module (which now re-exports from `core::options`):
+    - `RustreeLibConfig` and its constituent option structs: `InputSourceOptions`, `ListingOptions`, `FilteringOptions`, `SortingOptions`, `MetadataOptions`, `MiscOptions`, `HtmlOptions`
+    - Enums and related types: `SortKey`, `DirectoryFileOrder`, `BuiltInFunction`, `ApplyFnError`, `FunctionOutputKind`, `ExternalFunction`
+    - `LibOutputFormat` (an alias for `OutputFormat`)
+    - LLM types: `LlmProvider`, `LlmOptions`, `LlmConfigError`
 
 - Core types: `NodeInfo` (from `core::tree::node`), `NodeType`, and `RustreeError`.
 - The `cli` module, while part of the crate, is marked `#[doc(hidden)]` and is not part of the stable public API.
@@ -107,3 +132,15 @@ The `src/core/` directory houses the main operational logic of `rustree`.
   - `format_nodes()`: Takes the processed nodes and applies the chosen formatter. For the `Cat` function, it first generates the normal tree output, then appends a "--- File Contents ---" section with the content of each file.
 
 This modular structure aims to make the codebase maintainable and extensible.
+
+## Known Architectural Issues
+
+### Incomplete Core Module Independence
+
+While the recent refactoring (commit 333f1c7) moved configuration structs from `src/config/` to `src/core/options/` to improve modularity, the core module is not yet fully independent. There are still some dependencies that need to be addressed:
+
+- The core module has dependencies on the config layer through re-exports
+- Some types and functions still reference higher-level modules
+- Complete independence would require further refactoring of the module boundaries
+
+This is a known limitation that may be addressed in future versions. For now, the library functions correctly despite these architectural imperfections.

@@ -4,38 +4,41 @@ Understanding these core components will help you effectively use the `rustree` 
 
 ### `RustreeLibConfig`
 
-This struct (defined in `src/config/tree_options.rs`) is central to controlling how `rustree` behaves. It has been refactored into a hierarchical structure, grouping related options into sub-structs for better organization. You create an instance of `RustreeLibConfig` and set fields within these sub-structs:
+This struct is central to controlling how `rustree` behaves. Following the recent refactoring (commit 333f1c7), all configuration types are now defined in `src/core/options/` but remain accessible through the `rustree` crate's public API. You create an instance of `RustreeLibConfig` and set fields within these sub-structs:
 
-- **`input_source: InputSourceOptions`** (from `src/config/input_source.rs`):
+- **`input_source: InputSourceOptions`**:
   - `root_display_name`: How the root directory is named in the output.
   - `root_node_size`: Optional size of the root node itself, used by formatters if `metadata.show_size_bytes` is true.
   - `root_is_directory`: Indicates if the root path itself is a directory, used by formatters.
-- **`listing: ListingOptions`** (from `src/config/listing.rs`):
+- **`listing: ListingOptions`**:
   - `max_depth`: The maximum depth of traversal.
   - `show_hidden`: Whether to include hidden files/directories.
   - `list_directories_only`: If `true`, only directories (including symlinks to directories) are included in the results.
   - `show_full_path`: If `true`, formatters display the full relative path for each entry instead of just the filename. Equivalent to the CLI `-f`/`--full-path` flag.
-- **`filtering: FilteringOptions`** (from `src/config/filtering.rs`):
+- **`filtering: FilteringOptions`**:
   - `match_patterns`: `Option<Vec<String>>` containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI `-P`/`--filter-include` options.
   - `ignore_patterns`: `Option<Vec<String>>` containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI `-I`/`--filter-exclude` options.
   - `use_gitignore_rules`: If `true`, standard gitignore files (`.gitignore`, global gitignore, etc.) will be used for filtering.
   - `gitignore_file`: `Option<Vec<PathBuf>>` specifying paths to custom files to be used as additional gitignore files.
   - `case_insensitive_filter`: If `true`, all pattern matching (`match_patterns`, `ignore_patterns`, and gitignore processing) will be case-insensitive.
   - `prune_empty_directories`: If `true`, empty directories are removed from the results after initial walking and filtering, but before sorting. An empty directory is one that contains no files and no non-empty subdirectories after other filters have been applied.
-- **`sorting: SortingOptions`** (from `src/config/sorting.rs`):
-  - `sort_by`: An optional `SortKey` (from `src/config/sorting.rs`) to sort sibling entries.
+- **`sorting: SortingOptions`**:
+  - `sort_by`: An optional `SortKey` to sort sibling entries.
   - `reverse_sort`: Whether to reverse the sort order.
   - `files_before_directories`: A `bool` (default `true`) that, when sorting by size, determines if files and symlinks are grouped before directories. If `false`, types are intermingled based purely on size.
-- **`metadata: MetadataOptions`** (from `src/config/metadata.rs`):
+- **`metadata: MetadataOptions`**:
   - `show_size_bytes`: Whether to collect and report file sizes in bytes. Applies to directories as well.
   - `show_last_modified`: Whether to collect and report last modification times (mtime).
   - `report_change_time`: Whether to collect and report last status change times (ctime).
   - `report_creation_time`: Whether to collect and report creation times (btime/crtime).
   - `calculate_line_count`, `calculate_word_count`: Whether to perform these analyses on files.
-  - `apply_function`: An optional `BuiltInFunction` (from `src/config/metadata.rs`) to apply to file contents.
+  - `apply_function`: An optional `BuiltInFunction` to apply to file contents.
   - `report_permissions`: (Currently not exposed via CLI, defaults to false).
-- **`misc: MiscOptions`** (from `src/config/misc.rs`):
-  - Currently no fields, reserved for future use.
+- **`misc: MiscOptions`**:
+  - `no_summary_report`: Whether to omit the summary report at the end.
+  - `human_friendly`: Whether to display sizes in human-readable format.
+  - `no_color`: Whether to disable colored output.
+  - `verbose`: Whether to show verbose output.
 
 **Example:**
 
@@ -100,7 +103,7 @@ Each file or directory encountered during the scan is represented by a `NodeInfo
 - `change_time`: `Option<SystemTime>` for last status change time (ctime).
 - `create_time`: `Option<SystemTime>` for creation time (btime/crtime).
 - `line_count`, `word_count`: `Option<usize>` for analysis results (applicable to files only).
-- `custom_function_output`: `Option<Result<String, ApplyFnError>>` (where `ApplyFnError` is from `src/config/metadata.rs`) for results of `metadata.apply_function`.
+- `custom_function_output`: `Option<Result<String, ApplyFnError>>` for results of `metadata.apply_function`.
 
 You typically receive a `Vec<NodeInfo>` from `get_tree_nodes()`.
 
@@ -138,18 +141,23 @@ fn display_tree(nodes: &[NodeInfo], format: LibOutputFormat, config: &RustreeLib
 }
 ```
 
-This function takes the nodes, a `LibOutputFormat` enum (`Text`, `Markdown`, `Json`, or `Html`, from `src/config/output_format.rs` and re-exported), and the `RustreeLibConfig` (as some config options affect formatting).
+This function takes the nodes, a `LibOutputFormat` enum (`Text`, `Markdown`, `Json`, or `Html`), and the `RustreeLibConfig` (as some config options affect formatting).
 
 ### Key Enums
 
-- **`SortKey`**: `Name`, `Version`, `Size`, `MTime`, `ChangeTime`, `CreateTime`, `Words`, `Lines`, `Custom`, `None`. Defined in `src/config/sorting.rs`. Used in `RustreeLibConfig.sorting.sort_by`.
-- **`LibOutputFormat`**: `Text`, `Markdown`, `Json`, `Html`. Defined in `src/config/output_format.rs` (as `OutputFormat`). Used with `format_nodes()`.
+- **`SortKey`**: `Name`, `Version`, `Size`, `MTime`, `ChangeTime`, `CreateTime`, `Words`, `Lines`, `Custom`, `None`. Used in `RustreeLibConfig.sorting.sort_by`.
+- **`DirectoryFileOrder`**: `Default`, `DirsFirst`, `FilesFirst`. Controls directory vs file ordering.
+- **`LibOutputFormat`**: `Text`, `Markdown`, `Json`, `Html`. Used with `format_nodes()`.
 - **`BuiltInFunction`**: 
   - File functions: `CountPluses` (counts '+' characters), `Cat` (returns full file content)
-  - Directory functions: `CountFiles`, `CountDirectories`, `SizeTotal`, `DirStats`
-  - Defined in `src/config/metadata.rs`. Used in `RustreeLibConfig.metadata.apply_function`. When using `Cat`, the `format_nodes()` function automatically displays file contents after the tree structure.
-- **`ApplyFnError`**: Error type for `BuiltInFunction` application. Defined in `src/config/metadata.rs`.
-- **`NodeType`**: `File`, `Directory`, `Symlink`. Defined in `src/core/tree/node.rs`. Found in `NodeInfo`.
-- **`RustreeError`**: The error type returned by library functions. Defined in `src/core/error.rs`. Includes variants like `Io`, `GlobPattern`, `IgnoreError`, and `TreeBuildError` (for errors during internal tree construction or sorting).
+  - Directory functions: `CountFiles`, `CountDirs`, `SizeTotal`, `DirStats`
+  - Used in `RustreeLibConfig.metadata.apply_function`. When using `Cat`, the `format_nodes()` function automatically displays file contents after the tree structure.
+- **`ApplyFnError`**: Error type for `BuiltInFunction` application.
+- **`FunctionOutputKind`**: `Text`, `Number`, `Bytes`. Describes the type of output from apply functions.
+- **`ExternalFunction`**: Configuration for external command-based functions.
+- **`NodeType`**: `File`, `Directory`, `Symlink`. Found in `NodeInfo`.
+- **`RustreeError`**: The error type returned by library functions. Includes variants like `Io`, `GlobPattern`, `IgnoreError`, and `TreeBuildError`.
+
+All these types are available through the `rustree` crate's public API, even though they are now defined in `src/core/options/`.
 
 Refer to the API documentation (generated by `cargo doc`) for the full details of these types and their variants/fields.

@@ -31,7 +31,7 @@ pub mod markdown;
 pub mod text_tree;
 
 // Re-export the OutputFormat from config for convenience
-pub use crate::config::output_format::OutputFormat;
+pub use crate::core::options::OutputFormat;
 
 // Re-export the core types for external use
 pub use base::TreeFormatter;
