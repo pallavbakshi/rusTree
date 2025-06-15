@@ -33,7 +33,7 @@ fn test_llm_options_from_export_args() {
         llm_ask: None,
         llm_provider: "openai".to_string(),
         llm_model: None,
-        llm_api_key: None,
+        llm_api_key: Some("sk-test-key".to_string()),
         llm_endpoint: None,
         llm_temperature: None,
         llm_max_tokens: None,
@@ -42,7 +42,7 @@ fn test_llm_options_from_export_args() {
         human_friendly: false,
     };
 
-    let options = LlmOptions::from_cli_args(&args);
+    let options = LlmOptions::from_cli_args(&args).expect("Should create options from export args");
 
     assert!(options.enabled);
     assert!(options.export_mode);
@@ -56,7 +56,7 @@ fn test_llm_options_from_ask_args() {
         llm_ask: Some("Test ask question".to_string()),
         llm_provider: "anthropic".to_string(),
         llm_model: Some("claude-3-sonnet".to_string()),
-        llm_api_key: None,
+        llm_api_key: Some("sk-test-key".to_string()),
         llm_endpoint: None,
         llm_temperature: Some(0.5),
         llm_max_tokens: Some(1500),
@@ -65,7 +65,7 @@ fn test_llm_options_from_ask_args() {
         human_friendly: false,
     };
 
-    let options = LlmOptions::from_cli_args(&args);
+    let options = LlmOptions::from_cli_args(&args).expect("Should create options from ask args");
 
     assert!(options.enabled);
     assert!(!options.export_mode);
@@ -79,7 +79,7 @@ fn test_llm_options_from_both_args() {
         llm_ask: Some("Ask question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: None,
-        llm_api_key: None,
+        llm_api_key: Some("sk-test-key".to_string()),
         llm_endpoint: None,
         llm_temperature: None,
         llm_max_tokens: None,
@@ -88,7 +88,7 @@ fn test_llm_options_from_both_args() {
         human_friendly: false,
     };
 
-    let options = LlmOptions::from_cli_args(&args);
+    let options = LlmOptions::from_cli_args(&args).expect("Should create options from both args");
 
     // When both are present, both should be true
     assert!(options.enabled);
@@ -112,7 +112,7 @@ fn test_llm_options_from_empty_args() {
         human_friendly: false,
     };
 
-    let options = LlmOptions::from_cli_args(&args);
+    let options = LlmOptions::from_cli_args(&args).expect("Should create options from empty args");
 
     assert!(!options.enabled);
     assert!(!options.export_mode);
@@ -147,7 +147,8 @@ fn test_generate_env_flag() {
     assert!(args.llm_generate_env);
 
     // The generate env flag doesn't affect LLM options enabled state
-    let options = LlmOptions::from_cli_args(&args);
+    let options =
+        LlmOptions::from_cli_args(&args).expect("Should create options from generate env args");
     assert!(!options.enabled); // Because no actual LLM query is requested
 }
 
@@ -182,7 +183,8 @@ fn test_complex_args_configuration() {
     assert_eq!(args.llm_temperature.unwrap(), 0.2);
     assert_eq!(args.llm_max_tokens.unwrap(), 2000);
 
-    let options = LlmOptions::from_cli_args(&args);
+    let options =
+        LlmOptions::from_cli_args(&args).expect("Should create options from complex args");
     assert!(options.enabled);
     assert!(options.direct_query_mode);
     assert!(!options.export_mode);
@@ -195,7 +197,7 @@ fn test_edge_case_empty_strings() {
         llm_ask: None,
         llm_provider: "openai".to_string(),
         llm_model: Some("".to_string()), // Empty string
-        llm_api_key: None,
+        llm_api_key: Some("sk-test-key".to_string()),
         llm_endpoint: None,
         llm_temperature: None,
         llm_max_tokens: None,
@@ -204,7 +206,8 @@ fn test_edge_case_empty_strings() {
         human_friendly: false,
     };
 
-    let options = LlmOptions::from_cli_args(&args);
+    let options =
+        LlmOptions::from_cli_args(&args).expect("Should create options from edge case args");
 
     // Empty string should still count as "some"
     assert!(options.enabled);
@@ -299,7 +302,7 @@ fn test_provider_case_handling() {
             llm_ask: Some("test".to_string()),
             llm_provider: provider.to_string(),
             llm_model: None,
-            llm_api_key: None,
+            llm_api_key: Some("sk-test-key".to_string()),
             llm_endpoint: None,
             llm_temperature: None,
             llm_max_tokens: None,
@@ -309,7 +312,8 @@ fn test_provider_case_handling() {
         };
 
         // Should not panic when creating LlmOptions
-        let options = LlmOptions::from_cli_args(&args);
+        let options =
+            LlmOptions::from_cli_args(&args).expect("Should create options for all provider cases");
         assert!(options.enabled);
     }
 }

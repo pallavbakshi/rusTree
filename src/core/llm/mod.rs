@@ -14,18 +14,22 @@
 //! ## Quick Start
 //!
 //! ```rust,no_run
-//! use rustree::core::llm::{LlmConfig, LlmClientFactory, TreePromptFormatter};
-//! use rustree::cli::llm::LlmArgs;
+//! use rustree::core::llm::{CoreLlmConfig, CoreLlmProvider, LlmConfig, LlmClientFactory};
+//! use std::time::Duration;
 //!
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-//! // Create LLM configuration from CLI args
-//! let args = LlmArgs {
-//!     llm_ask: Some("Analyze this project".to_string()),
-//!     llm_provider: "openai".to_string(),
-//!     ..Default::default()
+//! // Create pure core LLM configuration
+//! let core_config = CoreLlmConfig {
+//!     provider: CoreLlmProvider::OpenAi,
+//!     model: "gpt-4".to_string(),
+//!     api_key: "sk-your-api-key".to_string(),
+//!     endpoint: None,
+//!     temperature: 0.7,
+//!     max_tokens: 1000,
+//!     timeout: Duration::from_secs(60),
 //! };
 //!
-//! let config = LlmConfig::from_cli_args(&args)?;
+//! let config = LlmConfig::new(core_config);
 //!
 //! // Query the LLM
 //! let response = LlmClientFactory::create_and_query(&config, "What is this project about?").await?;
@@ -44,6 +48,7 @@
 //! - [`LlmError`]: Comprehensive error types for LLM operations
 
 pub mod client;
+pub mod config;
 pub mod error;
 pub mod preview;
 pub mod prompt;
@@ -51,6 +56,7 @@ pub mod providers;
 pub mod response;
 
 pub use client::LlmClientFactory;
+pub use config::{CoreLlmConfig, CoreLlmProvider};
 pub use error::LlmError;
 pub use preview::RequestPreview;
 pub use prompt::TreePromptFormatter;

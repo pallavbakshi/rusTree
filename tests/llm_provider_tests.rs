@@ -1,7 +1,8 @@
 //! Integration tests for LLM provider functionality
 
 use rustree::cli::llm::LlmArgs;
-use rustree::core::llm::{LlmConfig, LlmError, LlmProvider};
+use rustree::config::{LlmOptions, LlmProvider};
+use rustree::core::llm::LlmConfig;
 use std::env;
 use std::str::FromStr;
 use std::sync::{Mutex, OnceLock};
@@ -44,7 +45,7 @@ fn test_provider_from_str() {
     // Test invalid provider
     assert!(LlmProvider::from_str("invalid").is_err());
     let error = LlmProvider::from_str("invalid").unwrap_err();
-    assert!(matches!(error, LlmError::InvalidProvider { .. }));
+    // The error is now a String, not LlmConfigError
     assert!(error.to_string().contains("invalid"));
 }
 
@@ -80,7 +81,7 @@ fn test_config_with_custom_model() {
 
     let args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: Some("gpt-3.5-turbo".to_string()),
         llm_api_key: None,
@@ -92,7 +93,11 @@ fn test_config_with_custom_model() {
         human_friendly: false,
     };
 
-    let config = LlmConfig::from_cli_args(&args).expect("Should create config");
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(config.model, "gpt-3.5-turbo");
 
     unsafe {
@@ -110,7 +115,7 @@ fn test_config_validation_temperature() {
     // Valid temperature
     let args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: None,
         llm_api_key: None,
@@ -122,7 +127,11 @@ fn test_config_validation_temperature() {
         human_friendly: false,
     };
 
-    let config = LlmConfig::from_cli_args(&args).expect("Should create config");
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(config.temperature, 1.5);
 
     // Invalid temperature - too low
@@ -131,11 +140,11 @@ fn test_config_validation_temperature() {
         ..args.clone()
     };
 
-    let result = LlmConfig::from_cli_args(&args_low);
+    let result = LlmOptions::from_cli_args(&args_low);
     assert!(result.is_err());
     assert!(matches!(
         result.unwrap_err(),
-        LlmError::InvalidTemperature { .. }
+        rustree::config::LlmConfigError::InvalidTemperature { .. }
     ));
 
     // Invalid temperature - too high
@@ -144,11 +153,11 @@ fn test_config_validation_temperature() {
         ..args
     };
 
-    let result = LlmConfig::from_cli_args(&args_high);
+    let result = LlmOptions::from_cli_args(&args_high);
     assert!(result.is_err());
     assert!(matches!(
         result.unwrap_err(),
-        LlmError::InvalidTemperature { .. }
+        rustree::config::LlmConfigError::InvalidTemperature { .. }
     ));
 
     unsafe {
@@ -166,7 +175,7 @@ fn test_config_validation_max_tokens() {
     // Valid max tokens
     let args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: None,
         llm_api_key: None,
@@ -178,7 +187,11 @@ fn test_config_validation_max_tokens() {
         human_friendly: false,
     };
 
-    let config = LlmConfig::from_cli_args(&args).expect("Should create config");
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(config.max_tokens, 500);
 
     // Invalid max tokens - too low
@@ -187,11 +200,11 @@ fn test_config_validation_max_tokens() {
         ..args.clone()
     };
 
-    let result = LlmConfig::from_cli_args(&args_low);
+    let result = LlmOptions::from_cli_args(&args_low);
     assert!(result.is_err());
     assert!(matches!(
         result.unwrap_err(),
-        LlmError::InvalidMaxTokens { .. }
+        rustree::config::LlmConfigError::InvalidMaxTokens { .. }
     ));
 
     // Invalid max tokens - too high
@@ -200,11 +213,11 @@ fn test_config_validation_max_tokens() {
         ..args
     };
 
-    let result = LlmConfig::from_cli_args(&args_high);
+    let result = LlmOptions::from_cli_args(&args_high);
     assert!(result.is_err());
     assert!(matches!(
         result.unwrap_err(),
-        LlmError::InvalidMaxTokens { .. }
+        rustree::config::LlmConfigError::InvalidMaxTokens { .. }
     ));
 
     unsafe {
@@ -221,7 +234,7 @@ fn test_config_defaults() {
 
     let args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "anthropic".to_string(),
         llm_model: None,
         llm_api_key: None,
@@ -233,10 +246,17 @@ fn test_config_defaults() {
         human_friendly: false,
     };
 
-    let config = LlmConfig::from_cli_args(&args).expect("Should create config");
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
 
     // Check defaults
-    assert_eq!(config.provider, LlmProvider::Anthropic);
+    assert_eq!(
+        config.provider,
+        rustree::core::llm::CoreLlmProvider::Anthropic
+    );
     assert_eq!(config.model, "claude-3-sonnet-20240229"); // Default for Anthropic
     assert_eq!(config.temperature, 0.7); // Default temperature
     assert_eq!(config.max_tokens, 1000); // Default max tokens
@@ -268,7 +288,7 @@ impl LlmArgsBuilder {
         Self {
             args: LlmArgs {
                 llm_export: None,
-                llm_ask: None,
+                llm_ask: Some("test question".to_string()),
                 llm_provider: "openai".to_string(),
                 llm_model: None,
                 llm_api_key: None,
@@ -315,8 +335,12 @@ fn test_builder_pattern_usage() {
         .max_tokens(2000)
         .build();
 
-    let config = LlmConfig::from_cli_args(&args).expect("Should create config");
-    assert_eq!(config.provider, LlmProvider::Cohere);
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
+    assert_eq!(config.provider, rustree::core::llm::CoreLlmProvider::Cohere);
     assert_eq!(config.temperature, 0.5);
     assert_eq!(config.max_tokens, 2000);
 
@@ -333,12 +357,18 @@ fn test_config_with_custom_endpoint() {
     }
 
     let args = LlmArgs {
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_endpoint: Some("https://custom.openai.example.com".to_string()),
+        llm_api_key: Some("sk-test-key".to_string()),
         ..Default::default()
     };
 
-    let config = LlmConfig::from_cli_args(&args).unwrap();
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(
         config.endpoint,
         Some("https://custom.openai.example.com".to_string())
@@ -357,12 +387,18 @@ fn test_openrouter_default_endpoint() {
     }
 
     let args = LlmArgs {
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openrouter".to_string(),
         llm_endpoint: None, // Should use default OpenRouter endpoint
+        llm_api_key: Some("sk-test-key".to_string()),
         ..Default::default()
     };
 
-    let config = LlmConfig::from_cli_args(&args).unwrap();
+    let llm_options = LlmOptions::from_cli_args(&args).expect("Should create options");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(config.endpoint, None); // Config stores None, client provides default
 
     unsafe {

@@ -32,19 +32,19 @@ impl RequestPreview {
 
         // Determine endpoint based on provider / cfg.endpoint
         let endpoint = match cfg.provider {
-            super::providers::LlmProvider::OpenAi => cfg
+            super::config::CoreLlmProvider::OpenAi => cfg
                 .endpoint
                 .clone()
                 .unwrap_or_else(|| "https://api.openai.com/v1".to_string()),
-            super::providers::LlmProvider::Anthropic => cfg
+            super::config::CoreLlmProvider::Anthropic => cfg
                 .endpoint
                 .clone()
                 .unwrap_or_else(|| "https://api.anthropic.com/v1".to_string()),
-            super::providers::LlmProvider::Cohere => cfg
+            super::config::CoreLlmProvider::Cohere => cfg
                 .endpoint
                 .clone()
                 .unwrap_or_else(|| "https://api.cohere.ai/v1".to_string()),
-            super::providers::LlmProvider::OpenRouter => cfg
+            super::config::CoreLlmProvider::OpenRouter => cfg
                 .endpoint
                 .clone()
                 .unwrap_or_else(|| "https://openrouter.ai/api/v1".to_string()),
@@ -52,7 +52,7 @@ impl RequestPreview {
 
         // Build provider-specific request body to match actual wire format
         let body = match cfg.provider {
-            super::providers::LlmProvider::OpenAi | super::providers::LlmProvider::OpenRouter => {
+            super::config::CoreLlmProvider::OpenAi | super::config::CoreLlmProvider::OpenRouter => {
                 json!({
                     "model": cfg.model,
                     "messages": [ { "role": "user", "content": prompt } ],
@@ -60,7 +60,7 @@ impl RequestPreview {
                     "max_tokens": cfg.max_tokens
                 })
             }
-            super::providers::LlmProvider::Anthropic => {
+            super::config::CoreLlmProvider::Anthropic => {
                 json!({
                     "model": cfg.model,
                     "max_tokens": cfg.max_tokens,
@@ -68,7 +68,7 @@ impl RequestPreview {
                     "temperature": cfg.temperature
                 })
             }
-            super::providers::LlmProvider::Cohere => {
+            super::config::CoreLlmProvider::Cohere => {
                 json!({
                     "model": cfg.model,
                     "message": prompt,
@@ -82,7 +82,7 @@ impl RequestPreview {
 
         // Build provider-specific headers
         let headers = match cfg.provider {
-            super::providers::LlmProvider::OpenAi | super::providers::LlmProvider::OpenRouter => {
+            super::config::CoreLlmProvider::OpenAi | super::config::CoreLlmProvider::OpenRouter => {
                 vec![
                     (
                         "Authorization".to_string(),
@@ -91,14 +91,14 @@ impl RequestPreview {
                     ("Content-Type".to_string(), "application/json".to_string()),
                 ]
             }
-            super::providers::LlmProvider::Anthropic => {
+            super::config::CoreLlmProvider::Anthropic => {
                 vec![
                     ("x-api-key".to_string(), masked_key),
                     ("Content-Type".to_string(), "application/json".to_string()),
                     ("anthropic-version".to_string(), "2023-06-01".to_string()),
                 ]
             }
-            super::providers::LlmProvider::Cohere => {
+            super::config::CoreLlmProvider::Cohere => {
                 vec![
                     (
                         "Authorization".to_string(),
@@ -259,13 +259,13 @@ impl RequestPreview {
 #[cfg(test)]
 mod tests_serialization {
     use super::*;
-    use crate::core::llm::providers::{LlmConfig, LlmProvider};
+    use crate::core::llm::{CoreLlmProvider, LlmConfig};
     use std::time::Duration;
 
     #[test]
     fn preview_serializes_to_json_short() {
         let cfg = LlmConfig {
-            provider: LlmProvider::OpenAi,
+            provider: CoreLlmProvider::OpenAi,
             model: "gpt-4".to_string(),
             api_key: "sk-abc".to_string(),
             endpoint: None,
@@ -294,12 +294,12 @@ fn mask_key(key: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::llm::providers::{LlmConfig, LlmProvider};
+    use crate::core::llm::{CoreLlmProvider, LlmConfig};
     use std::time::Duration;
 
     fn dummy_cfg() -> LlmConfig {
         LlmConfig {
-            provider: LlmProvider::OpenAi,
+            provider: CoreLlmProvider::OpenAi,
             model: "gpt-4".to_string(),
             api_key: "sk-test123456".to_string(),
             endpoint: None,

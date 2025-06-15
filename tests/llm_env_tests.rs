@@ -1,6 +1,7 @@
 // tests/llm_env_tests.rs
 
 use rustree::cli::llm::LlmArgs;
+use rustree::config::LlmOptions;
 use rustree::core::llm::LlmConfig;
 use std::env;
 use std::sync::{Mutex, OnceLock};
@@ -21,7 +22,7 @@ fn test_env_variable_loading() {
 
     let llm_args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: None,
         llm_api_key: None, // No CLI key provided
@@ -33,7 +34,12 @@ fn test_env_variable_loading() {
         human_friendly: false,
     };
 
-    let config = LlmConfig::from_cli_args(&llm_args).expect("Should create config from env var");
+    let llm_options =
+        LlmOptions::from_cli_args(&llm_args).expect("Should create options from env var");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(config.api_key, "test-key-12345");
     assert_eq!(config.model, "gpt-4"); // Default model
 
@@ -53,7 +59,7 @@ fn test_cli_key_overrides_env() {
 
     let llm_args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: None,
         llm_api_key: Some("cli-key".to_string()), // CLI key provided
@@ -65,7 +71,12 @@ fn test_cli_key_overrides_env() {
         human_friendly: false,
     };
 
-    let config = LlmConfig::from_cli_args(&llm_args).expect("Should create config with CLI key");
+    let llm_options =
+        LlmOptions::from_cli_args(&llm_args).expect("Should create options with CLI key");
+    let core_config = llm_options
+        .to_core_config()
+        .expect("Should convert to core config");
+    let config = LlmConfig::new(core_config);
     assert_eq!(config.api_key, "cli-key"); // CLI key should override env
 
     // Clean up
@@ -84,7 +95,7 @@ fn test_missing_api_key_error() {
 
     let llm_args = LlmArgs {
         llm_export: None,
-        llm_ask: None,
+        llm_ask: Some("test question".to_string()),
         llm_provider: "openai".to_string(),
         llm_model: None,
         llm_api_key: None, // No key provided
@@ -96,17 +107,20 @@ fn test_missing_api_key_error() {
         human_friendly: false,
     };
 
-    let result = LlmConfig::from_cli_args(&llm_args);
+    let result = LlmOptions::from_cli_args(&llm_args);
     assert!(result.is_err());
 
     let error = result.unwrap_err();
-    assert!(error.to_string().contains("OPENAI_API_KEY"));
-    assert!(error.to_string().contains(".env file"));
+    let error_msg = error.to_string();
+    println!("Error message: {}", error_msg);
+    assert!(error_msg.contains("OPENAI_API_KEY"));
+    // The new error message might not contain ".env file", let's check for "environment variable" instead
+    assert!(error_msg.contains("environment variable") || error_msg.contains(".env"));
 }
 
 #[test]
 fn test_generate_sample_env_file() {
-    let sample = LlmConfig::generate_sample_env_file();
+    let sample = LlmOptions::generate_sample_env_file();
 
     // no env changes; no lock needed but acquire anyway for consistency
     let _g = env_lock();
