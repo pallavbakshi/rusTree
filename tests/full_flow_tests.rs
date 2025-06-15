@@ -414,6 +414,9 @@ fn test_formatting_markdown_no_summary_report() -> Result<()> {
         },
         misc: rustree::MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };
@@ -463,6 +466,9 @@ fn test_formatting_markdown_no_summary_with_directories_only() -> Result<()> {
         },
         misc: rustree::MiscOptions {
             no_summary_report: true,
+            human_friendly: false,
+            no_color: false,
+            verbose: false,
         },
         ..Default::default()
     };

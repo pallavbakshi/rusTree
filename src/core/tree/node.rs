@@ -41,7 +41,7 @@ pub struct NodeInfo {
 }
 
 /// Enumerates the types of file system entries that `rustree` can represent.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum NodeType {
     /// Represents a regular file.
     File,

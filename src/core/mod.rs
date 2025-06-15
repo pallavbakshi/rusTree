@@ -1,4 +1,5 @@
 // src/core/mod.rs
+pub mod diff;
 pub mod error;
 pub mod filter;
 pub mod formatter;

@@ -7,6 +7,7 @@ use crate::cli::args::CliArgs;
 use crate::cli::metadata::CliBuiltInFunction;
 use crate::cli::output::CliOutputFormat;
 use crate::cli::sorting::CliSortKey;
+use crate::core::diff::changes::DiffOptions;
 
 // Corrected imports using explicit paths from crate::config
 use crate::config::BuiltInFunction as LibBuiltInFunction;
@@ -184,6 +185,9 @@ pub fn map_cli_to_lib_config(cli_args: &CliArgs) -> Result<RustreeLibConfig, std
         },
         misc: MiscOptions {
             no_summary_report: cli_args.format.no_summary_report,
+            human_friendly: cli_args.llm.human_friendly,
+            no_color: false, // TODO: Add CLI flag for this if needed
+            verbose: cli_args.verbose,
         },
 
         html: HtmlOptions {
@@ -276,6 +280,19 @@ pub fn map_cli_to_lib_output_format(cli_output_format: Option<CliOutputFormat>) 
         Some(CliOutputFormat::Json) => LibOutputFormat::Json,
         Some(CliOutputFormat::Html) => LibOutputFormat::Html,
         Some(CliOutputFormat::Text) | None => LibOutputFormat::Text, // Default to Text
+    }
+}
+
+/// Maps CLI diff arguments to DiffOptions.
+pub fn map_cli_to_diff_options(cli_args: &CliArgs, config: &RustreeLibConfig) -> DiffOptions {
+    DiffOptions {
+        max_depth: config.listing.max_depth,
+        show_size: config.metadata.show_size_bytes,
+        sort_by: config.sorting.sort_by.as_ref().map(|s| format!("{:?}", s)),
+        detect_moves: !cli_args.diff.ignore_moves,
+        move_threshold: cli_args.diff.move_threshold,
+        show_unchanged: cli_args.diff.show_unchanged,
+        ignore_moves: cli_args.diff.ignore_moves,
     }
 }
 

@@ -1,4 +1,5 @@
 // src/cli/args.rs
+use crate::cli::diff;
 use crate::cli::filtering::{
     apply_function, exclude, gitignore_rules, include, pruning, size_filter,
 };
@@ -132,6 +133,10 @@ pub struct CliArgs {
     // LLM Options
     #[command(flatten, next_help_heading = "\x1b[1;31mLLM Options\x1b[0m")]
     pub llm: llm::LlmArgs,
+
+    // Diff Options
+    #[command(flatten, next_help_heading = "\x1b[1;36mDiff Options\x1b[0m")]
+    pub diff: diff::DiffArgs,
 
     #[command(flatten, next_help_heading = "\x1b[1;33mFiltering Options\x1b[0m")]
     pub pruning: pruning::PruningArgs,
