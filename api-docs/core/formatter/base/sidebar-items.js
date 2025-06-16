@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["TreeFormatter"]};
+window.SIDEBAR_ITEMS = {"trait":["TreeFormatter","TreeFormatterCompat"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["walk_directory"]};
+window.SIDEBAR_ITEMS = {"fn":["walk_directory","walk_directory_owned","walk_directory_with_context","walk_directory_with_options"]};

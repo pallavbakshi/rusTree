@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["sort_nodes","sort_nodes_with_options"]};
+window.SIDEBAR_ITEMS = {"fn":["sort_nodes","sort_nodes_with_context","sort_nodes_with_options"]};
