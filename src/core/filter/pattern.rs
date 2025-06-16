@@ -176,3 +176,65 @@ pub fn entry_matches_path_with_patterns(
     }
     false
 }
+
+/// Checks if a path matches any of the compiled glob patterns, correctly handling relative patterns.
+/// This function matches the logic from entry_matches_glob_patterns for consistent behavior.
+///
+/// # Arguments
+/// * `path` - The path to check
+/// * `compiled_patterns` - The compiled glob patterns to match against
+/// * `walk_root` - The root directory of the walk, used for relative pattern matching
+pub fn entry_matches_path_with_patterns_relative(
+    path: &Path,
+    compiled_patterns: &Vec<CompiledGlobPattern>,
+    walk_root: &Path,
+) -> bool {
+    // Validate that we have patterns to match against
+    if compiled_patterns.is_empty() {
+        return false; // No patterns means no matches
+    }
+
+    let file_name_lossy = path
+        .file_name()
+        .map(|name| name.to_string_lossy())
+        .unwrap_or_else(|| std::borrow::Cow::Borrowed(""));
+    let is_dir = path.is_dir();
+
+    for p_info in compiled_patterns {
+        let matches = if p_info.is_dir_only_match {
+            // Pattern like "dir/" - matches directory name
+            is_dir
+                && p_info
+                    .pattern
+                    .matches_with(&file_name_lossy, p_info.options)
+        } else if p_info.is_path_pattern {
+            // Pattern like "src/*.rs" or "**/*.tmp" or "/abs/path/*.txt"
+            let pattern_str = p_info.pattern.as_str();
+            if Path::new(pattern_str).is_absolute() {
+                // For absolute path patterns, match against the full path.
+                p_info.pattern.matches_path_with(path, p_info.options)
+            } else {
+                // For relative path patterns (including "**" patterns), match against path relative to walk root.
+                match path.strip_prefix(walk_root).ok() {
+                    Some(relative_path) => p_info
+                        .pattern
+                        .matches_path_with(relative_path, p_info.options),
+                    None => {
+                        // If strip prefix fails, the path is outside the walk root.
+                        // This shouldn't normally happen, but fall back to full path matching.
+                        p_info.pattern.matches_path_with(path, p_info.options)
+                    }
+                }
+            }
+        } else {
+            // Basename match, e.g., "*.log"
+            p_info
+                .pattern
+                .matches_with(&file_name_lossy, p_info.options)
+        };
+        if matches {
+            return true;
+        }
+    }
+    false
+}
