@@ -2,10 +2,10 @@
 
 //! JSON formatter for diff results, producing structured output for programmatic consumption.
 
-use crate::config::RustreeLibConfig;
 use crate::core::diff::formatter::DiffFormatter;
 use crate::core::diff::{Change, ChangeType, DiffResult};
 use crate::core::error::RustreeError;
+use crate::core::options::RustreeLibConfig;
 use serde_json::{Value, json};
 
 pub struct JsonDiffFormatter;

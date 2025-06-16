@@ -2,10 +2,10 @@
 
 //! Markdown formatter for diff results, producing clean markdown output.
 
-use crate::config::RustreeLibConfig;
 use crate::core::diff::formatter::{DiffFormatter, format_size_change};
 use crate::core::diff::{Change, ChangeType, DiffResult};
 use crate::core::error::RustreeError;
+use crate::core::options::RustreeLibConfig;
 use crate::core::tree::node::NodeType;
 use std::fmt::Write;
 

@@ -1,5 +1,5 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use rustree::config::metadata::BuiltInFunction;
+use rustree::config::metadata::{ApplyFunction, BuiltInFunction};
 use rustree::{
     ListingOptions, MetadataOptions, RustreeLibConfig, SortKey, SortingOptions, get_tree_nodes,
 };
@@ -151,7 +151,7 @@ fn benchmark_metadata_aggregation(c: &mut Criterion) {
             calculate_line_count: true,
             calculate_word_count: true,
             show_size_bytes: true,
-            apply_function: Some(BuiltInFunction::DirStats),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::DirStats)),
             ..Default::default()
         },
         ..Default::default()

@@ -4,7 +4,7 @@
 //! to create complex sorting behaviors. This is useful for implementing hierarchical
 //! sorting where files might be sorted by type first, then by name, then by size, etc.
 
-use crate::config::sorting::SortKey;
+use crate::core::options::SortKey;
 use crate::core::sorter::comparators::compare_siblings;
 use crate::core::tree::builder::TempNode;
 use std::cmp::Ordering;

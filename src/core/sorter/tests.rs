@@ -4,7 +4,7 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::config::sorting::SortKey;
+    use crate::core::options::SortKey;
     use crate::core::sorter::strategies::sort_nodes;
     use crate::core::tree::node::{NodeInfo, NodeType};
     use std::path::PathBuf;

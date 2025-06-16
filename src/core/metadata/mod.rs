@@ -11,8 +11,8 @@ pub mod size_calculator;
 pub mod extended_attrs;
 pub mod time_formatter;
 
-use crate::config::metadata::FunctionOutputKind;
-use crate::config::{RustreeLibConfig, metadata::BuiltInFunction};
+use crate::core::options::{ApplyFunction, FunctionOutputKind};
+use crate::core::options::{BuiltInFunction, RustreeLibConfig};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use crate::core::util::format_size;
 
@@ -74,15 +74,17 @@ impl MetadataAggregator {
             // Aggregate apply function outputs
             if let Some(Ok(output)) = &node.custom_function_output {
                 // Determine output kind based on configuration (built-in vs external)
-                let kind = if let Some(builtin) = &config.metadata.apply_function {
-                    builtin.output_kind()
-                } else if let Some(ext) = &config.metadata.external_function {
-                    ext.kind
+                let kind = if let Some(apply_fn) = &config.metadata.apply_function {
+                    apply_fn.output_kind()
                 } else {
                     FunctionOutputKind::Text
                 };
 
-                aggregator.aggregate_function_output(output, kind, &config.metadata.apply_function);
+                let builtin_func = match &config.metadata.apply_function {
+                    Some(ApplyFunction::BuiltIn(func)) => Some(func.clone()),
+                    _ => None,
+                };
+                aggregator.aggregate_function_output(output, kind, &builtin_func);
             }
         }
 

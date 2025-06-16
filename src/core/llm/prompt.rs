@@ -1,6 +1,6 @@
 // src/core/llm/prompt.rs
 
-use crate::config::RustreeLibConfig;
+use crate::core::options::RustreeLibConfig;
 
 pub struct TreePromptFormatter;
 
@@ -211,7 +211,7 @@ impl TreePromptFormatter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::RustreeLibConfig;
+    use crate::core::options::RustreeLibConfig;
 
     fn create_test_config() -> RustreeLibConfig {
         RustreeLibConfig::default()

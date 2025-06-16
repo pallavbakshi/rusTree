@@ -1,6 +1,6 @@
 //! Tests covering the UI behaviour of external command apply-functions.
 
-use rustree::config::metadata::{ExternalFunction, FunctionOutputKind};
+use rustree::config::metadata::{ApplyFunction, ExternalFunction, FunctionOutputKind};
 use rustree::config::{ListingOptions, MetadataOptions, RustreeLibConfig};
 use rustree::core::tree::node::NodeType;
 use rustree::{LibOutputFormat, format_nodes, get_tree_nodes};
@@ -11,7 +11,7 @@ use std::io::Write;
 fn make_config(ext_fn: ExternalFunction) -> RustreeLibConfig {
     RustreeLibConfig {
         metadata: MetadataOptions {
-            external_function: Some(ext_fn),
+            apply_function: Some(ApplyFunction::External(ext_fn)),
             ..Default::default()
         },
         listing: ListingOptions {

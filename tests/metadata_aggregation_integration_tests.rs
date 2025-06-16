@@ -1,6 +1,7 @@
 use anyhow::Result;
 use rustree::config::{
-    ListingOptions, MetadataOptions, RustreeLibConfig, metadata::BuiltInFunction,
+    ListingOptions, MetadataOptions, RustreeLibConfig,
+    metadata::{ApplyFunction, BuiltInFunction},
 };
 use rustree::{LibOutputFormat, format_nodes, get_tree_nodes};
 use std::fs;
@@ -166,7 +167,7 @@ fn test_integration_dir_stats_function_aggregation() -> Result<()> {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::DirStats),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::DirStats)),
             ..Default::default()
         },
         listing: ListingOptions {

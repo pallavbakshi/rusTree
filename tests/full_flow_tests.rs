@@ -4,10 +4,11 @@
 // Use your library as if you were an external user
 use anyhow::Result;
 use clap::Parser;
+use rustree::config::metadata::ApplyFunction; // For test functions returning Result
 use rustree::{
     BuiltInFunction, InputSourceOptions, LibOutputFormat, ListingOptions, MetadataOptions,
     NodeType, RustreeLibConfig, SortKey, SortingOptions, format_nodes, get_tree_nodes,
-}; // For test functions returning Result
+};
 use std::fs; // Added import for fs module // Added import for Parser trait
 
 // Use the common module
@@ -632,7 +633,7 @@ fn test_apply_function_count_pluses_corrected_and_zero_case() -> Result<()> {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         listing: ListingOptions {
@@ -710,7 +711,7 @@ fn test_apply_function_for_directory_is_none() -> Result<()> {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses), // Enabled
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)), // Enabled
             ..Default::default()
         },
         listing: ListingOptions {
@@ -773,7 +774,7 @@ fn test_stats_are_conditional_and_graceful_on_read_error() -> Result<()> {
         metadata: MetadataOptions {
             calculate_line_count: true,
             calculate_word_count: true,
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         listing: ListingOptions {

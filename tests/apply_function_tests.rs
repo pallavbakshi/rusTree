@@ -1,5 +1,6 @@
 // tests/apply_function_tests.rs
 
+use rustree::config::metadata::ApplyFunction;
 use rustree::{BuiltInFunction, MetadataOptions};
 use rustree::{LibOutputFormat, RustreeLibConfig, format_nodes, get_tree_nodes};
 use std::fs;
@@ -25,7 +26,7 @@ fn test_cat_function_integration() {
     // Configure to use cat function
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::Cat),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)),
             ..Default::default()
         },
         ..Default::default()
@@ -79,7 +80,7 @@ fn test_cat_function_with_empty_files() {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::Cat),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)),
             ..Default::default()
         },
         ..Default::default()
@@ -107,7 +108,7 @@ fn test_count_pluses_function_integration() {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         ..Default::default()
@@ -133,7 +134,7 @@ fn test_cat_function_markdown_format() {
 
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::Cat),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)),
             ..Default::default()
         },
         ..Default::default()
@@ -168,7 +169,7 @@ fn test_cat_function_directories_only_mode() {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::Cat),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)),
             ..Default::default()
         },
         ..Default::default()
@@ -205,7 +206,7 @@ fn test_cat_function_with_depth_limit() {
             ..Default::default()
         },
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::Cat),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)),
             ..Default::default()
         },
         ..Default::default()
@@ -257,7 +258,7 @@ fn test_count_files_function() {
     // Configure to use count-files function
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountFiles),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles)),
             ..Default::default()
         },
         ..Default::default()
@@ -319,7 +320,7 @@ fn test_count_dirs_function() {
     // Configure to use count-dirs function
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountDirs),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountDirs)),
             ..Default::default()
         },
         ..Default::default()
@@ -381,7 +382,7 @@ fn test_dir_stats_function() {
     // Configure to use dir-stats function
     let config = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::DirStats),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::DirStats)),
             ..Default::default()
         },
         ..Default::default()
@@ -443,7 +444,7 @@ fn test_apply_function_filtering() {
     // Test 1: Apply count-pluses to only files matching "include*" pattern
     let config_include = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         filtering: FilteringOptions {
@@ -470,7 +471,7 @@ fn test_apply_function_filtering() {
     // Test 2: Apply count-files to directories but exclude "special*" pattern
     let config_exclude = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountFiles),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles)),
             ..Default::default()
         },
         filtering: FilteringOptions {
@@ -554,7 +555,7 @@ fn test_apply_function_filtering_from_files() {
     // Test 1: Apply count-pluses using include patterns from file
     let config_include = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountPluses),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountPluses)),
             ..Default::default()
         },
         filtering: FilteringOptions {
@@ -590,7 +591,7 @@ fn test_apply_function_filtering_from_files() {
     // Test 2: Apply count-files using exclude patterns from file
     let config_exclude = RustreeLibConfig {
         metadata: MetadataOptions {
-            apply_function: Some(BuiltInFunction::CountFiles),
+            apply_function: Some(ApplyFunction::BuiltIn(BuiltInFunction::CountFiles)),
             ..Default::default()
         },
         filtering: FilteringOptions {

@@ -131,8 +131,7 @@ pub struct PartialMetadataOptions {
     pub report_creation_time: Option<bool>,
     pub calculate_line_count: Option<bool>,
     pub calculate_word_count: Option<bool>,
-    pub apply_function: Option<Option<super::metadata::BuiltInFunction>>,
-    // external_function omitted for now.
+    pub apply_function: Option<Option<super::metadata::ApplyFunction>>,
 }
 
 impl MergeInto<MetadataOptions> for PartialMetadataOptions {

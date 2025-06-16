@@ -8,9 +8,9 @@
 //! total directory / file counts so downstream tools can replicate `tree`'s
 //! summary line.
 
-use crate::config::RustreeLibConfig;
 use crate::core::error::RustreeError;
 use crate::core::formatter::base::TreeFormatter;
+use crate::core::options::RustreeLibConfig;
 use crate::core::tree::{
     builder,
     node::{NodeInfo, NodeType},
@@ -35,15 +35,15 @@ impl TreeFormatter for JsonFormatter {
         let mut json_roots = Vec::new();
 
         // Determine apply command string once.
-        let apply_cmd_opt: Option<String> = if let Some(builtin) = &config.metadata.apply_function {
-            Some(format!("{builtin:?}"))
-        } else {
+        let apply_cmd_opt: Option<String> =
             config
                 .metadata
-                .external_function
+                .apply_function
                 .as_ref()
-                .map(|ext| ext.cmd_template.clone())
-        };
+                .map(|apply_fn| match apply_fn {
+                    crate::core::options::ApplyFunction::BuiltIn(builtin) => format!("{builtin:?}"),
+                    crate::core::options::ApplyFunction::External(ext) => ext.cmd_template.clone(),
+                });
 
         for root in &mut roots {
             json_roots.push(convert_node(root, &apply_cmd_opt, &mut dirs, &mut files));

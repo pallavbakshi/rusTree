@@ -3,7 +3,7 @@
 //! This module contains functionality for building temporary tree structures
 //! from flat lists of nodes, primarily used for sorting operations.
 
-use crate::config::sorting::{SortKey, SortingOptions};
+use crate::core::options::{SortKey, SortingOptions};
 use crate::core::tree::node::NodeInfo;
 
 /// Temporary tree node used for building and sorting tree structures.
