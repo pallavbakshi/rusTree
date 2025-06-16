@@ -25,6 +25,9 @@ pub enum RustreeError {
     /// An error during parsing of input files.
     #[error("Parse error: {0}")]
     ParseError(String),
+    /// An error in configuration or context validation.
+    #[error("Configuration error: {0}")]
+    ConfigError(String),
     // Add other specific error types as needed
     /// An unspecified or unknown error.
     #[error("Unknown error")]

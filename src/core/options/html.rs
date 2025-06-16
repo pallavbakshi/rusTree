@@ -25,6 +25,7 @@ pub struct HtmlOptions {
     pub include_links: bool,
 }
 
+#[allow(clippy::derivable_impls)] // We have a custom default for include_links
 impl Default for HtmlOptions {
     fn default() -> Self {
         Self {
@@ -32,7 +33,11 @@ impl Default for HtmlOptions {
             strip_first_component: false,
             custom_intro: None,
             custom_outro: None,
-            include_links: true,
+            // The default should be *false* so that plain text output is
+            // produced unless users explicitly opt-in to hyperlink
+            // generation.  This aligns the core defaults with CLI behaviour
+            // and the expectations encoded in the test-suite.
+            include_links: false,
         }
     }
 }

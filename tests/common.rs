@@ -135,6 +135,221 @@ pub mod common_test_utils {
     }
 }
 
+// Context testing utilities
+pub mod context_utils {
+    use rustree::core::options::DirectoryFileOrder;
+    use rustree::core::options::contexts::*;
+    use rustree::*;
+
+    #[allow(dead_code)]
+    pub fn create_test_walking_context() -> OwnedWalkingContext {
+        OwnedWalkingContext::new(
+            ListingOptions {
+                max_depth: Some(2),
+                show_hidden: false,
+                list_directories_only: false,
+                show_full_path: false,
+            },
+            FilteringOptions {
+                ignore_patterns: Some(vec!["*.tmp".to_string()]),
+                match_patterns: Some(vec!["*.rs".to_string()]),
+                case_insensitive_filter: false,
+                ..Default::default()
+            },
+            MetadataOptions {
+                show_size_bytes: true,
+                calculate_line_count: true,
+                calculate_word_count: false,
+                ..Default::default()
+            },
+        )
+    }
+
+    #[allow(dead_code)]
+    pub fn create_test_formatting_context() -> OwnedFormattingContext {
+        OwnedFormattingContext {
+            input_source: InputSourceOptions {
+                root_display_name: "test".to_string(),
+                root_is_directory: true,
+                root_node_size: None,
+            },
+            listing: ListingOptions {
+                max_depth: Some(2),
+                show_hidden: false,
+                list_directories_only: false,
+                show_full_path: false,
+            },
+            metadata: MetadataOptions {
+                show_size_bytes: true,
+                show_last_modified: false,
+                calculate_line_count: true,
+                calculate_word_count: false,
+                apply_function: None,
+                human_readable_size: false,
+                report_permissions: false,
+                report_change_time: false,
+                report_creation_time: false,
+            },
+            misc: MiscOptions {
+                no_summary_report: false,
+                human_friendly: false,
+                no_color: false,
+                verbose: false,
+            },
+            html: HtmlOptions {
+                include_links: false,
+                base_href: None,
+                strip_first_component: false,
+                custom_intro: None,
+                custom_outro: None,
+            },
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn create_test_sorting_context() -> OwnedSortingContext {
+        OwnedSortingContext {
+            sorting: SortingOptions {
+                sort_by: Some(SortKey::Name),
+                reverse_sort: false,
+                files_before_directories: false,
+                directory_file_order: DirectoryFileOrder::DirsFirst,
+            },
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn create_test_processing_context() -> OwnedProcessingContext {
+        OwnedProcessingContext {
+            walking: create_test_walking_context(),
+            sorting: Some(create_test_sorting_context()),
+            formatting: create_test_formatting_context(),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn create_minimal_walking_context() -> OwnedWalkingContext {
+        OwnedWalkingContext::new(
+            ListingOptions {
+                max_depth: Some(1),
+                show_hidden: false,
+                list_directories_only: false,
+                show_full_path: false,
+            },
+            FilteringOptions::default(),
+            MetadataOptions::default(),
+        )
+    }
+
+    #[allow(dead_code)]
+    pub fn create_deep_walking_context() -> OwnedWalkingContext {
+        OwnedWalkingContext::new(
+            ListingOptions {
+                max_depth: Some(5),
+                show_hidden: true,
+                list_directories_only: false,
+                show_full_path: true,
+            },
+            FilteringOptions {
+                ignore_patterns: Some(vec!["*.tmp".to_string(), "*.bak".to_string()]),
+                match_patterns: None,
+                case_insensitive_filter: true,
+                ..Default::default()
+            },
+            MetadataOptions {
+                show_size_bytes: true,
+                show_last_modified: true,
+                calculate_line_count: true,
+                calculate_word_count: true,
+                ..Default::default()
+            },
+        )
+    }
+
+    #[allow(dead_code)]
+    pub fn create_minimal_formatting_context() -> OwnedFormattingContext {
+        OwnedFormattingContext {
+            input_source: InputSourceOptions {
+                root_display_name: "minimal".to_string(),
+                root_is_directory: true,
+                root_node_size: None,
+            },
+            listing: ListingOptions::default(),
+            metadata: MetadataOptions::default(),
+            misc: MiscOptions {
+                no_summary_report: true,
+                ..Default::default()
+            },
+            html: HtmlOptions::default(),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn create_html_formatting_context() -> OwnedFormattingContext {
+        OwnedFormattingContext {
+            input_source: InputSourceOptions {
+                root_display_name: "html_test".to_string(),
+                root_is_directory: true,
+                root_node_size: None,
+            },
+            listing: ListingOptions::default(),
+            metadata: MetadataOptions {
+                show_size_bytes: true,
+                ..Default::default()
+            },
+            misc: MiscOptions::default(),
+            html: HtmlOptions {
+                include_links: true,
+                base_href: Some("https://example.com".to_string()),
+                strip_first_component: false,
+                custom_intro: None,
+                custom_outro: None,
+            },
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn assert_contexts_equivalent(
+        config: &RustreeLibConfig,
+        walking_ctx: &WalkingContext,
+        formatting_ctx: &FormattingContext,
+        sorting_ctx: Option<&SortingContext>,
+    ) {
+        // Verify walking context equivalence
+        assert_eq!(walking_ctx.listing.max_depth, config.listing.max_depth);
+        assert_eq!(walking_ctx.listing.show_hidden, config.listing.show_hidden);
+        assert_eq!(
+            walking_ctx.filtering.ignore_patterns,
+            config.filtering.ignore_patterns
+        );
+        assert_eq!(
+            walking_ctx.metadata.show_size_bytes,
+            config.metadata.show_size_bytes
+        );
+
+        // Verify formatting context equivalence
+        assert_eq!(
+            formatting_ctx.input_source.root_display_name,
+            config.input_source.root_display_name
+        );
+        assert_eq!(
+            formatting_ctx.misc.no_summary_report,
+            config.misc.no_summary_report
+        );
+        assert_eq!(formatting_ctx.html.include_links, config.html.include_links);
+
+        // Verify sorting context equivalence
+        match (sorting_ctx, &config.sorting.sort_by) {
+            (Some(ctx), Some(_)) => {
+                assert_eq!(ctx.sorting.sort_by, config.sorting.sort_by);
+                assert_eq!(ctx.sorting.reverse_sort, config.sorting.reverse_sort);
+            }
+            (None, None) => {} // Both None is valid
+            _ => panic!("Sorting context mismatch"),
+        }
+    }
+}
+
 #[allow(dead_code)] // Used by CLI integration tests
 pub fn get_binary_path() -> String {
     // Use the path to the built binary in target/debug/

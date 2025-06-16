@@ -65,7 +65,7 @@ async fn main() -> ExitCode {
         print_config_summary(&lib_config);
     }
 
-    // 2. Call the library to get processed nodes
+    // 2. Call the library to get processed nodes using context-based APIs
     let (nodes, _actual_path) = if cli_args.input.is_from_file() {
         // Read from tree file
         let input_file = match cli_args.input.get_tree_file() {
@@ -89,8 +89,9 @@ async fn main() -> ExitCode {
             }
         }
     } else {
-        // Scan filesystem
-        match rustree::get_tree_nodes_from_source(&cli_args.path, &lib_config, None, None) {
+        // Scan filesystem using optimized context-based API
+        let processing_ctx = lib_config.processing_context();
+        match rustree::get_tree_nodes_with_context(&cli_args.path, &processing_ctx) {
             Ok(n) => (n, cli_args.path.clone()),
             Err(e) => {
                 eprintln!("Error processing directory: {}", e);
@@ -122,14 +123,16 @@ async fn main() -> ExitCode {
             }
         }
     } else {
-        // 3. Call the library to format the nodes
-        let output = match rustree::format_nodes(&nodes, lib_output_format, &lib_config) {
-            Ok(s) => s,
-            Err(e) => {
-                eprintln!("Error formatting output: {}", e);
-                return ExitCode::FAILURE;
-            }
-        };
+        // 3. Call the library to format the nodes using context-based API
+        let formatting_ctx = lib_config.formatting_context();
+        let output =
+            match rustree::format_nodes_with_context(&nodes, lib_output_format, &formatting_ctx) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("Error formatting output: {}", e);
+                    return ExitCode::FAILURE;
+                }
+            };
         (output, None)
     };
 
@@ -583,24 +586,31 @@ fn handle_diff_mode(
         }
     };
 
-    // Generate tree outputs for LLM context
-    let old_tree_output =
-        match rustree::format_nodes(&snapshot_nodes, rustree::LibOutputFormat::Text, lib_config) {
-            Ok(output) => output,
-            Err(e) => {
-                eprintln!("Error formatting old tree output: {}", e);
-                return Err(std::process::ExitCode::FAILURE);
-            }
-        };
+    // Generate tree outputs for LLM context using context-based API
+    let formatting_ctx = lib_config.formatting_context();
+    let old_tree_output = match rustree::format_nodes_with_context(
+        &snapshot_nodes,
+        rustree::LibOutputFormat::Text,
+        &formatting_ctx,
+    ) {
+        Ok(output) => output,
+        Err(e) => {
+            eprintln!("Error formatting old tree output: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
 
-    let new_tree_output =
-        match rustree::format_nodes(current_nodes, rustree::LibOutputFormat::Text, lib_config) {
-            Ok(output) => output,
-            Err(e) => {
-                eprintln!("Error formatting new tree output: {}", e);
-                return Err(std::process::ExitCode::FAILURE);
-            }
-        };
+    let new_tree_output = match rustree::format_nodes_with_context(
+        current_nodes,
+        rustree::LibOutputFormat::Text,
+        &formatting_ctx,
+    ) {
+        Ok(output) => output,
+        Err(e) => {
+            eprintln!("Error formatting new tree output: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
 
     let diff_context = DiffContext {
         old_tree_output,
@@ -667,20 +677,24 @@ fn handle_snapshot_to_snapshot_diff(
         }
     };
 
-    // Generate tree outputs for LLM context
-    let old_tree_output =
-        match rustree::format_nodes(current_nodes, rustree::LibOutputFormat::Text, lib_config) {
-            Ok(output) => output,
-            Err(e) => {
-                eprintln!("Error formatting old tree output: {}", e);
-                return Err(std::process::ExitCode::FAILURE);
-            }
-        };
+    // Generate tree outputs for LLM context using context-based API
+    let formatting_ctx = lib_config.formatting_context();
+    let old_tree_output = match rustree::format_nodes_with_context(
+        current_nodes,
+        rustree::LibOutputFormat::Text,
+        &formatting_ctx,
+    ) {
+        Ok(output) => output,
+        Err(e) => {
+            eprintln!("Error formatting old tree output: {}", e);
+            return Err(std::process::ExitCode::FAILURE);
+        }
+    };
 
-    let new_tree_output = match rustree::format_nodes(
+    let new_tree_output = match rustree::format_nodes_with_context(
         &new_snapshot_nodes,
         rustree::LibOutputFormat::Text,
-        lib_config,
+        &formatting_ctx,
     ) {
         Ok(output) => output,
         Err(e) => {

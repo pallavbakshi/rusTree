@@ -1,9 +1,10 @@
 // src/core/formatter/markdown.rs
-use super::base::TreeFormatter;
+use super::base::{TreeFormatter, TreeFormatterCompat};
 use crate::core::error::RustreeError;
 use crate::core::metadata::MetadataAggregator;
 use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
 use crate::core::options::RustreeLibConfig;
+use crate::core::options::contexts::FormattingContext;
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fmt::Write;
 
@@ -18,12 +19,25 @@ impl TreeFormatter for MarkdownFormatter {
     fn format(
         &self,
         nodes: &[NodeInfo],
-        config: &RustreeLibConfig,
+        formatting_ctx: &FormattingContext,
     ) -> Result<String, RustreeError> {
+        // Create temporary config for backward compatibility
+        let temp_config = RustreeLibConfig {
+            input_source: formatting_ctx.input_source.clone(),
+            listing: formatting_ctx.listing.clone(),
+            metadata: formatting_ctx.metadata.clone(),
+            misc: formatting_ctx.misc.clone(),
+            html: formatting_ctx.html.clone(),
+            ..Default::default()
+        };
         let mut output = String::new();
 
         // Add the root header
-        writeln!(output, "# {}", config.input_source.root_display_name)?;
+        writeln!(
+            output,
+            "# {}",
+            formatting_ctx.input_source.root_display_name
+        )?;
         writeln!(output)?;
 
         // Determine the effective root path from the nodes themselves
@@ -38,7 +52,7 @@ impl TreeFormatter for MarkdownFormatter {
             let indent = "  ".repeat(node.depth.saturating_sub(1));
 
             // Get the display name (full path or just name)
-            let display_name = if config.listing.show_full_path {
+            let display_name = if formatting_ctx.listing.show_full_path {
                 // For full path, we need to make it relative to the current directory
                 if let Some(scan_root) = &scan_root_path_opt {
                     // Make path relative to scan root
@@ -63,17 +77,17 @@ impl TreeFormatter for MarkdownFormatter {
             };
 
             // Add metadata if configured using centralized formatting
-            let metadata_str = format_node_metadata(node, config, MetadataStyle::Markdown);
+            let metadata_str = format_node_metadata(node, &temp_config, MetadataStyle::Markdown);
 
             // Write the markdown list item
             writeln!(output, "{}* {}{}", indent, name_with_suffix, metadata_str)?;
         }
 
         // Add summary
-        if !config.misc.no_summary_report {
-            let (dir_count, file_count) = if config.listing.list_directories_only {
+        if !formatting_ctx.misc.no_summary_report {
+            let (dir_count, file_count) = if formatting_ctx.listing.list_directories_only {
                 let child_dir_count = nodes.len();
-                let root_dir_increment = if config.input_source.root_is_directory {
+                let root_dir_increment = if formatting_ctx.input_source.root_is_directory {
                     1
                 } else {
                     0
@@ -90,7 +104,7 @@ impl TreeFormatter for MarkdownFormatter {
                     }
                 }
                 // Include root directory in count if it's a directory
-                let root_dir_increment = if config.input_source.root_is_directory {
+                let root_dir_increment = if formatting_ctx.input_source.root_is_directory {
                     1
                 } else {
                     0
@@ -109,7 +123,7 @@ impl TreeFormatter for MarkdownFormatter {
             )?;
 
             // Aggregate metadata and add to summary
-            let aggregator = MetadataAggregator::aggregate_from_nodes(nodes, config);
+            let aggregator = MetadataAggregator::aggregate_from_nodes(nodes, &temp_config);
             let summary_additions = aggregator.format_summary_additions();
             if !summary_additions.is_empty() {
                 write!(output, "{}", summary_additions)?;
@@ -121,3 +135,6 @@ impl TreeFormatter for MarkdownFormatter {
         Ok(output)
     }
 }
+
+/// Implement backward compatibility trait
+impl TreeFormatterCompat for MarkdownFormatter {}

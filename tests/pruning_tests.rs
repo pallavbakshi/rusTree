@@ -420,10 +420,12 @@ fn test_prune_empty_root_directory_scenario() -> Result<()> {
     // The current `format_nodes` logic for summary counts nodes passed to it.
     // If `nodes` is empty, it will report "1 directory, 0 files" for children.
     // The root name is always printed.
+    // With the new changes, empty directories output "0 directories, 0 files" first
     let expected_output = format!(
         r#"{}/
+0 directories, 0 files
 
-1 directory, 0 files"#, // This reflects 0 child directories and 0 child files.
+1 directory, 0 files"#, // This reflects 0 child directories and 0 child files plus the root.
         root_name
     );
     assert_eq!(

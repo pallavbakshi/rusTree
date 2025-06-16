@@ -6,15 +6,61 @@
 use crate::core::error::RustreeError;
 use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_glob_patterns};
 use crate::core::metadata::{file_info, size_calculator};
-use crate::core::options::RustreeLibConfig;
+use crate::core::options::contexts::{OwnedWalkingContext, WalkingContext};
+use crate::core::options::{FilteringOptions, ListingOptions, MetadataOptions, RustreeLibConfig};
 use crate::core::tree::node::{NodeInfo, NodeType};
 use ignore::WalkBuilder;
 use std::fs;
 use std::path::Path;
 
-pub fn walk_directory(
+/// Walk directory using WalkingContext (Phase 3 - Context Objects)
+///
+/// This function uses a context structure for cleaner API and better modularity.
+pub fn walk_directory_with_context(
     root_path: &Path,
-    config: &RustreeLibConfig,
+    walking_ctx: &WalkingContext,
+) -> Result<Vec<NodeInfo>, RustreeError> {
+    walk_directory_with_options(
+        root_path,
+        walking_ctx.listing,
+        walking_ctx.filtering,
+        walking_ctx.metadata,
+    )
+}
+
+/// Walk directory using owned context (GUI-friendly with pattern caching)
+///
+/// This function is optimized for scenarios where contexts are owned and modified,
+/// such as GUI applications. It caches compiled patterns for better performance.
+pub fn walk_directory_owned(
+    root_path: &Path,
+    walking_ctx: &mut OwnedWalkingContext,
+) -> Result<Vec<NodeInfo>, RustreeError> {
+    // Validate the context first
+    walking_ctx.validate().map_err(RustreeError::ConfigError)?;
+
+    // Use the caching functionality for better performance
+    let _ignore_patterns = walking_ctx.ignore_patterns()?;
+    let _match_patterns = walking_ctx.match_patterns()?;
+
+    // Call the underlying implementation with the owned context's options
+    walk_directory_with_options(
+        root_path,
+        &walking_ctx.listing,
+        &walking_ctx.filtering,
+        &walking_ctx.metadata,
+    )
+}
+
+/// Walk directory using specific option structs (Phase 1 - Parameter Objects)
+///
+/// This function takes only the specific options needed for directory walking,
+/// reducing coupling to the full configuration structure.
+pub fn walk_directory_with_options(
+    root_path: &Path,
+    listing_opts: &ListingOptions,
+    filtering_opts: &FilteringOptions,
+    metadata_opts: &MetadataOptions,
 ) -> Result<Vec<NodeInfo>, RustreeError> {
     let mut intermediate_nodes = Vec::new();
 
@@ -36,31 +82,31 @@ pub fn walk_directory(
     };
 
     let final_compiled_ignore_patterns = compile_glob_patterns(
-        &config.filtering.ignore_patterns,
-        config.filtering.case_insensitive_filter,
-        config.listing.show_hidden,
+        &filtering_opts.ignore_patterns,
+        filtering_opts.case_insensitive_filter,
+        listing_opts.show_hidden,
     )?;
     let compiled_match_patterns = compile_glob_patterns(
-        &config.filtering.match_patterns,
-        config.filtering.case_insensitive_filter,
-        config.listing.show_hidden,
+        &filtering_opts.match_patterns,
+        filtering_opts.case_insensitive_filter,
+        listing_opts.show_hidden,
     )?;
 
     let mut walker_builder = WalkBuilder::new(&canonical_root_path); // Use canonicalized path
-    walker_builder.hidden(!config.listing.show_hidden);
+    walker_builder.hidden(!listing_opts.show_hidden);
     walker_builder.parents(true);
     walker_builder.ignore(false);
-    walker_builder.git_global(config.filtering.use_gitignore_rules);
-    walker_builder.git_ignore(config.filtering.use_gitignore_rules);
-    walker_builder.git_exclude(config.filtering.use_gitignore_rules);
+    walker_builder.git_global(filtering_opts.use_gitignore_rules);
+    walker_builder.git_ignore(filtering_opts.use_gitignore_rules);
+    walker_builder.git_exclude(filtering_opts.use_gitignore_rules);
     walker_builder.require_git(false); // Process gitignore files even if not in a git repo (for tests)
-    walker_builder.ignore_case_insensitive(config.filtering.case_insensitive_filter);
+    walker_builder.ignore_case_insensitive(filtering_opts.case_insensitive_filter);
 
-    if let Some(max_d) = config.listing.max_depth {
+    if let Some(max_d) = listing_opts.max_depth {
         walker_builder.max_depth(Some(max_d));
     }
 
-    if let Some(custom_ignore_files) = &config.filtering.gitignore_file {
+    if let Some(custom_ignore_files) = &filtering_opts.gitignore_file {
         for file_path in custom_ignore_files {
             walker_builder.add_custom_ignore_filename(file_path);
         }
@@ -172,16 +218,16 @@ pub fn walk_directory(
         };
 
         if let Some(meta) = resolved_metadata_for_node {
-            if config.metadata.show_size_bytes
-                || config.filtering.min_file_size.is_some()
-                || config.filtering.max_file_size.is_some()
+            if metadata_opts.show_size_bytes
+                || filtering_opts.min_file_size.is_some()
+                || filtering_opts.max_file_size.is_some()
             {
                 node.size = Some(meta.len());
             }
-            if config.metadata.show_last_modified {
+            if metadata_opts.show_last_modified {
                 node.mtime = meta.modified().ok();
             }
-            if config.metadata.report_change_time {
+            if metadata_opts.report_change_time {
                 // Note: ctime is Unix-specific and represents the time when file metadata was last changed.
                 // It is not directly available via std::fs::Metadata on all platforms.
                 // A cross-platform solution would require platform-specific APIs.
@@ -210,7 +256,7 @@ pub fn walk_directory(
                     node.change_time = None; // Placeholder for other OS where ctime isn't easily accessible
                 }
             }
-            if config.metadata.report_creation_time {
+            if metadata_opts.report_creation_time {
                 // Note: creation_time is not universally available (e.g., Linux filesystems often don't store it).
                 // `std::fs::Metadata::created()` is the portable way but can return an error.
                 node.create_time = meta.created().ok();
@@ -219,30 +265,33 @@ pub fn walk_directory(
 
         if node.node_type == NodeType::File {
             // === 1. Optional in-memory content processing (lines/words, built-ins that need content)
-            let needs_builtin_content = config
-                .metadata
+            let needs_builtin_content = metadata_opts
                 .apply_function
                 .as_ref()
                 .map(|apply_fn| matches!(apply_fn, crate::core::options::ApplyFunction::BuiltIn(_)))
                 .unwrap_or(false);
 
-            if config.metadata.calculate_line_count
-                || config.metadata.calculate_word_count
+            if metadata_opts.calculate_line_count
+                || metadata_opts.calculate_word_count
                 || needs_builtin_content
             {
                 if let Ok(content) = fs::read_to_string(&node.path) {
-                    if config.metadata.calculate_line_count {
+                    if metadata_opts.calculate_line_count {
                         node.line_count = Some(size_calculator::count_lines_from_string(&content));
                     }
-                    if config.metadata.calculate_word_count {
+                    if metadata_opts.calculate_word_count {
                         node.word_count = Some(size_calculator::count_words_from_string(&content));
                     }
 
                     if let Some(crate::core::options::ApplyFunction::BuiltIn(func_type)) =
-                        &config.metadata.apply_function
+                        &metadata_opts.apply_function
                     {
                         if is_file_function(func_type)
-                            && should_apply_function_to_file(&node, config)
+                            && should_apply_function_to_file_with_options(
+                                &node,
+                                listing_opts,
+                                filtering_opts,
+                            )
                         {
                             node.custom_function_output =
                                 Some(file_info::apply_builtin_to_file(&node.path, func_type));
@@ -254,9 +303,13 @@ pub fn walk_directory(
             // === 2. External command processing (does not require file content)
             if node.custom_function_output.is_none() {
                 if let Some(crate::core::options::ApplyFunction::External(ext_fn)) =
-                    &config.metadata.apply_function
+                    &metadata_opts.apply_function
                 {
-                    if should_apply_function_to_file(&node, config) {
+                    if should_apply_function_to_file_with_options(
+                        &node,
+                        listing_opts,
+                        filtering_opts,
+                    ) {
                         node.custom_function_output =
                             Some(file_info::apply_external_to_file(&node.path, ext_fn));
                     }
@@ -277,17 +330,21 @@ fn is_file_function(func: &crate::core::options::BuiltInFunction) -> bool {
     )
 }
 
-/// Checks if a function should be applied to a specific file based on filtering patterns.
-fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
+/// Checks if a function should be applied to a specific file based on filtering patterns (parameter objects version).
+fn should_apply_function_to_file_with_options(
+    node: &NodeInfo,
+    listing_opts: &ListingOptions,
+    filtering_opts: &FilteringOptions,
+) -> bool {
     use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_path_with_patterns};
 
     // Check apply_exclude_patterns first - if it matches, skip
-    if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
+    if let Some(exclude_patterns) = &filtering_opts.apply_exclude_patterns {
         if !exclude_patterns.is_empty() {
             if let Ok(Some(patterns)) = compile_glob_patterns(
                 &Some(exclude_patterns.clone()),
-                config.filtering.case_insensitive_filter,
-                config.listing.show_hidden,
+                filtering_opts.case_insensitive_filter,
+                listing_opts.show_hidden,
             ) {
                 if entry_matches_path_with_patterns(&node.path, &patterns) {
                     return false; // Skip this node
@@ -297,12 +354,12 @@ fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> 
     }
 
     // Check apply_include_patterns - if specified, node must match
-    if let Some(include_patterns) = &config.filtering.apply_include_patterns {
+    if let Some(include_patterns) = &filtering_opts.apply_include_patterns {
         if !include_patterns.is_empty() {
             if let Ok(Some(patterns)) = compile_glob_patterns(
                 &Some(include_patterns.clone()),
-                config.filtering.case_insensitive_filter,
-                config.listing.show_hidden,
+                filtering_opts.case_insensitive_filter,
+                listing_opts.show_hidden,
             ) {
                 return entry_matches_path_with_patterns(&node.path, &patterns);
             }
@@ -313,4 +370,26 @@ fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> 
 
     // If no include patterns specified, or node passed all checks, apply the function
     true
+}
+
+/// Checks if a function should be applied to a specific file based on filtering patterns (backward compatibility).
+#[allow(dead_code)]
+fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
+    should_apply_function_to_file_with_options(node, &config.listing, &config.filtering)
+}
+
+/// Walk directory using full config (backward compatibility)
+///
+/// This function maintains the original API while internally using the new
+/// parameter-based function.
+pub fn walk_directory(
+    root_path: &Path,
+    config: &RustreeLibConfig,
+) -> Result<Vec<NodeInfo>, RustreeError> {
+    walk_directory_with_options(
+        root_path,
+        &config.listing,
+        &config.filtering,
+        &config.metadata,
+    )
 }

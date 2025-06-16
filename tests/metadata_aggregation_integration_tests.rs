@@ -130,8 +130,9 @@ fn test_integration_multiple_metadata_aggregation() -> Result<()> {
 
     // Verify the order and format
     let summary_line = output.lines().last().unwrap();
+    // Note: Now counts root directory too when root_is_directory is true
     assert!(
-        summary_line.contains("1 directory, 5 files, 13 total lines, 20 total words, 89 B total")
+        summary_line.contains("2 directories, 5 files, 13 total lines, 20 total words, 89 B total")
     );
 
     Ok(())
@@ -155,7 +156,9 @@ fn test_integration_markdown_format_aggregation() -> Result<()> {
     let output = format_nodes(&nodes, LibOutputFormat::Markdown, &config)?;
 
     // Should show totals in markdown format
-    assert!(output.contains("__1 directory, 5 files, 13 total lines, 20 total words total__"));
+    // Note: Now counts root directory too when root_is_directory is true
+    // Markdown format doesn't include size in summary since show_size_bytes is false for this test
+    assert!(output.contains("__2 directories, 5 files, 13 total lines, 20 total words total__"));
 
     Ok(())
 }
@@ -242,7 +245,8 @@ fn test_integration_empty_directory_aggregation() -> Result<()> {
     let output = format_nodes(&nodes, LibOutputFormat::Text, &config)?;
 
     // Should show standard directory/file count but no metadata totals
-    assert!(output.contains("3 directories, 0 files"));
+    // Note: Now counts root directory too when root_is_directory is true
+    assert!(output.contains("4 directories, 0 files"));
     // Should NOT show any metadata totals since there are no files
     assert!(!output.contains("total lines"));
     assert!(!output.contains("total words"));

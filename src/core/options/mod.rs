@@ -7,7 +7,9 @@
 
 // Re-export everything for ergonomic access (e.g. `crate::core::options::ListingOptions`).
 
+pub mod contexts;
 pub mod filtering;
+pub mod formatter_options;
 pub mod html;
 pub mod input_source;
 pub mod listing;
@@ -18,7 +20,13 @@ pub mod output_format;
 pub mod sorting;
 pub mod tree_options;
 
+pub use contexts::{
+    FormattingContext, OwnedFormattingContext, OwnedProcessingContext, OwnedSortingContext,
+    OwnedWalkingContext, ProcessingContext, ProcessingContextBuilder, SortingContext,
+    WalkingContext,
+};
 pub use filtering::FilteringOptions;
+pub use formatter_options::FormatterOptions;
 pub use html::HtmlOptions;
 pub use input_source::InputSourceOptions;
 pub use listing::ListingOptions;

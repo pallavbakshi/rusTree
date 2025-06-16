@@ -8,5 +8,7 @@ pub mod filesystem;
 pub mod input_source;
 pub mod symlinks;
 
-// Re-export the main walk_directory function for backward compatibility
-pub use filesystem::walk_directory;
+// Re-export old, parameter-based, and context-based walker functions
+pub use filesystem::{
+    walk_directory, walk_directory_owned, walk_directory_with_context, walk_directory_with_options,
+};

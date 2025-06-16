@@ -15,11 +15,19 @@
 //! ```rust
 //! # use rustree::core::formatter::{TextTreeFormatter, TreeFormatter};
 //! # use rustree::{RustreeLibConfig, NodeInfo};
+//! # use rustree::core::options::contexts::FormattingContext;
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! let formatter = TextTreeFormatter;
 //! let config = RustreeLibConfig::default();
 //! let nodes: Vec<NodeInfo> = vec![];
-//! let output = formatter.format(&nodes, &config)?;
+//! let formatting_ctx = FormattingContext {
+//!     input_source: &config.input_source,
+//!     listing: &config.listing,
+//!     metadata: &config.metadata,
+//!     misc: &config.misc,
+//!     html: &config.html,
+//! };
+//! let output = formatter.format(&nodes, &formatting_ctx)?;
 //! # Ok(())
 //! # }
 //! ```
