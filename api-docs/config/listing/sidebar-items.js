@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ListingOptions"]};
+window.SIDEBAR_ITEMS = {};

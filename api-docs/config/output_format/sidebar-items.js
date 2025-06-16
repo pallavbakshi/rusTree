@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["OutputFormat"]};
+window.SIDEBAR_ITEMS = {};

@@ -5,7 +5,7 @@ configuration types.</p>
 <h3 id="architecture"><a class="doc-anchor" href="#architecture">§</a>Architecture</h3>
 <p>This module is part of the core layer and contains only business logic.
 All configuration, validation, and external dependencies are handled by
-the config layer in <code>crate::config::llm</code>.</p>
+the higher-level configuration layer.</p>
 <h3 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h3>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rustree::core::llm::{CoreLlmConfig, CoreLlmProvider, LlmConfig};
 <span class="kw">use </span>std::time::Duration;

@@ -169,16 +169,16 @@
                         <h2 id="core-library-concepts"><a class="header" href="#core-library-concepts">Core Library Concepts</a></h2>
 <p>Understanding these core components will help you effectively use the <code>rustree</code> library.</p>
 <h3 id="rustreelibconfig"><a class="header" href="#rustreelibconfig"><code>RustreeLibConfig</code></a></h3>
-<p>This struct (defined in <code>src/config/tree_options.rs</code>) is central to controlling how <code>rustree</code> behaves. It has been refactored into a hierarchical structure, grouping related options into sub-structs for better organization. You create an instance of <code>RustreeLibConfig</code> and set fields within these sub-structs:</p>
+<p>This struct is central to controlling how <code>rustree</code> behaves. Following the recent refactoring (commit 333f1c7), all configuration types are now defined in <code>src/core/options/</code> but remain accessible through the <code>rustree</code> crate's public API. You create an instance of <code>RustreeLibConfig</code> and set fields within these sub-structs:</p>
 <ul>
-<li><strong><code>input_source: InputSourceOptions</code></strong> (from <code>src/config/input_source.rs</code>):
+<li><strong><code>input_source: InputSourceOptions</code></strong>:
 <ul>
 <li><code>root_display_name</code>: How the root directory is named in the output.</li>
 <li><code>root_node_size</code>: Optional size of the root node itself, used by formatters if <code>metadata.show_size_bytes</code> is true.</li>
 <li><code>root_is_directory</code>: Indicates if the root path itself is a directory, used by formatters.</li>
 </ul>
 </li>
-<li><strong><code>listing: ListingOptions</code></strong> (from <code>src/config/listing.rs</code>):
+<li><strong><code>listing: ListingOptions</code></strong>:
 <ul>
 <li><code>max_depth</code>: The maximum depth of traversal.</li>
 <li><code>show_hidden</code>: Whether to include hidden files/directories.</li>
@@ -186,7 +186,7 @@
 <li><code>show_full_path</code>: If <code>true</code>, formatters display the full relative path for each entry instead of just the filename. Equivalent to the CLI <code>-f</code>/<code>--full-path</code> flag.</li>
 </ul>
 </li>
-<li><strong><code>filtering: FilteringOptions</code></strong> (from <code>src/config/filtering.rs</code>):
+<li><strong><code>filtering: FilteringOptions</code></strong>:
 <ul>
 <li><code>match_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to filter entries. Only entries matching any pattern will be included. Corresponds to the CLI <code>-P</code>/<code>--filter-include</code> options.</li>
 <li><code>ignore_patterns</code>: <code>Option&lt;Vec&lt;String&gt;&gt;</code> containing patterns to ignore entries. Entries matching any pattern will be excluded. Corresponds to the CLI <code>-I</code>/<code>--filter-exclude</code> options.</li>
@@ -196,27 +196,30 @@
 <li><code>prune_empty_directories</code>: If <code>true</code>, empty directories are removed from the results after initial walking and filtering, but before sorting. An empty directory is one that contains no files and no non-empty subdirectories after other filters have been applied.</li>
 </ul>
 </li>
-<li><strong><code>sorting: SortingOptions</code></strong> (from <code>src/config/sorting.rs</code>):
+<li><strong><code>sorting: SortingOptions</code></strong>:
 <ul>
-<li><code>sort_by</code>: An optional <code>SortKey</code> (from <code>src/config/sorting.rs</code>) to sort sibling entries.</li>
+<li><code>sort_by</code>: An optional <code>SortKey</code> to sort sibling entries.</li>
 <li><code>reverse_sort</code>: Whether to reverse the sort order.</li>
 <li><code>files_before_directories</code>: A <code>bool</code> (default <code>true</code>) that, when sorting by size, determines if files and symlinks are grouped before directories. If <code>false</code>, types are intermingled based purely on size.</li>
 </ul>
 </li>
-<li><strong><code>metadata: MetadataOptions</code></strong> (from <code>src/config/metadata.rs</code>):
+<li><strong><code>metadata: MetadataOptions</code></strong>:
 <ul>
 <li><code>show_size_bytes</code>: Whether to collect and report file sizes in bytes. Applies to directories as well.</li>
 <li><code>show_last_modified</code>: Whether to collect and report last modification times (mtime).</li>
 <li><code>report_change_time</code>: Whether to collect and report last status change times (ctime).</li>
 <li><code>report_creation_time</code>: Whether to collect and report creation times (btime/crtime).</li>
 <li><code>calculate_line_count</code>, <code>calculate_word_count</code>: Whether to perform these analyses on files.</li>
-<li><code>apply_function</code>: An optional <code>BuiltInFunction</code> (from <code>src/config/metadata.rs</code>) to apply to file contents.</li>
+<li><code>apply_function</code>: An optional <code>BuiltInFunction</code> to apply to file contents.</li>
 <li><code>report_permissions</code>: (Currently not exposed via CLI, defaults to false).</li>
 </ul>
 </li>
-<li><strong><code>misc: MiscOptions</code></strong> (from <code>src/config/misc.rs</code>):
+<li><strong><code>misc: MiscOptions</code></strong>:
 <ul>
-<li>Currently no fields, reserved for future use.</li>
+<li><code>no_summary_report</code>: Whether to omit the summary report at the end.</li>
+<li><code>human_friendly</code>: Whether to display sizes in human-readable format.</li>
+<li><code>no_color</code>: Whether to disable colored output.</li>
+<li><code>verbose</code>: Whether to show verbose output.</li>
 </ul>
 </li>
 </ul>
@@ -281,7 +284,7 @@ let config = RustreeLibConfig {
 <li><code>change_time</code>: <code>Option&lt;SystemTime&gt;</code> for last status change time (ctime).</li>
 <li><code>create_time</code>: <code>Option&lt;SystemTime&gt;</code> for creation time (btime/crtime).</li>
 <li><code>line_count</code>, <code>word_count</code>: <code>Option&lt;usize&gt;</code> for analysis results (applicable to files only).</li>
-<li><code>custom_function_output</code>: <code>Option&lt;Result&lt;String, ApplyFnError&gt;&gt;</code> (where <code>ApplyFnError</code> is from <code>src/config/metadata.rs</code>) for results of <code>metadata.apply_function</code>.</li>
+<li><code>custom_function_output</code>: <code>Option&lt;Result&lt;String, ApplyFnError&gt;&gt;</code> for results of <code>metadata.apply_function</code>.</li>
 </ul>
 <p>You typically receive a <code>Vec&lt;NodeInfo&gt;</code> from <code>get_tree_nodes()</code>.</p>
 <h3 id="get_tree_nodes"><a class="header" href="#get_tree_nodes"><code>get_tree_nodes()</code></a></h3>
@@ -315,22 +318,26 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
     format_nodes(nodes, format, config)
 }
 <span class="boring">}</span></code></pre></pre>
-<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code>, <code>Markdown</code>, <code>Json</code>, or <code>Html</code>, from <code>src/config/output_format.rs</code> and re-exported), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
+<p>This function takes the nodes, a <code>LibOutputFormat</code> enum (<code>Text</code>, <code>Markdown</code>, <code>Json</code>, or <code>Html</code>), and the <code>RustreeLibConfig</code> (as some config options affect formatting).</p>
 <h3 id="key-enums"><a class="header" href="#key-enums">Key Enums</a></h3>
 <ul>
-<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Defined in <code>src/config/sorting.rs</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
-<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>, <code>Json</code>, <code>Html</code>. Defined in <code>src/config/output_format.rs</code> (as <code>OutputFormat</code>). Used with <code>format_nodes()</code>.</li>
+<li><strong><code>SortKey</code></strong>: <code>Name</code>, <code>Version</code>, <code>Size</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>Words</code>, <code>Lines</code>, <code>Custom</code>, <code>None</code>. Used in <code>RustreeLibConfig.sorting.sort_by</code>.</li>
+<li><strong><code>DirectoryFileOrder</code></strong>: <code>Default</code>, <code>DirsFirst</code>, <code>FilesFirst</code>. Controls directory vs file ordering.</li>
+<li><strong><code>LibOutputFormat</code></strong>: <code>Text</code>, <code>Markdown</code>, <code>Json</code>, <code>Html</code>. Used with <code>format_nodes()</code>.</li>
 <li><strong><code>BuiltInFunction</code></strong>:
 <ul>
 <li>File functions: <code>CountPluses</code> (counts '+' characters), <code>Cat</code> (returns full file content)</li>
-<li>Directory functions: <code>CountFiles</code>, <code>CountDirectories</code>, <code>SizeTotal</code>, <code>DirStats</code></li>
-<li>Defined in <code>src/config/metadata.rs</code>. Used in <code>RustreeLibConfig.metadata.apply_function</code>. When using <code>Cat</code>, the <code>format_nodes()</code> function automatically displays file contents after the tree structure.</li>
+<li>Directory functions: <code>CountFiles</code>, <code>CountDirs</code>, <code>SizeTotal</code>, <code>DirStats</code></li>
+<li>Used in <code>RustreeLibConfig.metadata.apply_function</code>. When using <code>Cat</code>, the <code>format_nodes()</code> function automatically displays file contents after the tree structure.</li>
 </ul>
 </li>
-<li><strong><code>ApplyFnError</code></strong>: Error type for <code>BuiltInFunction</code> application. Defined in <code>src/config/metadata.rs</code>.</li>
-<li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Defined in <code>src/core/tree/node.rs</code>. Found in <code>NodeInfo</code>.</li>
-<li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Defined in <code>src/core/error.rs</code>. Includes variants like <code>Io</code>, <code>GlobPattern</code>, <code>IgnoreError</code>, and <code>TreeBuildError</code> (for errors during internal tree construction or sorting).</li>
+<li><strong><code>ApplyFnError</code></strong>: Error type for <code>BuiltInFunction</code> application.</li>
+<li><strong><code>FunctionOutputKind</code></strong>: <code>Text</code>, <code>Number</code>, <code>Bytes</code>. Describes the type of output from apply functions.</li>
+<li><strong><code>ExternalFunction</code></strong>: Configuration for external command-based functions.</li>
+<li><strong><code>NodeType</code></strong>: <code>File</code>, <code>Directory</code>, <code>Symlink</code>. Found in <code>NodeInfo</code>.</li>
+<li><strong><code>RustreeError</code></strong>: The error type returned by library functions. Includes variants like <code>Io</code>, <code>GlobPattern</code>, <code>IgnoreError</code>, and <code>TreeBuildError</code>.</li>
 </ul>
+<p>All these types are available through the <code>rustree</code> crate's public API, even though they are now defined in <code>src/core/options/</code>.</p>
 <p>Refer to the API documentation (generated by <code>cargo doc</code>) for the full details of these types and their variants/fields.</p>
 
                     </main>

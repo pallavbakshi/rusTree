@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["RustreeLibConfig"]};
+window.SIDEBAR_ITEMS = {};

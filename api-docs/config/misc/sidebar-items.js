@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["MiscOptions"]};
+window.SIDEBAR_ITEMS = {};

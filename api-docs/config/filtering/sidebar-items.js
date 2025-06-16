@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["FilteringOptions"]};
+window.SIDEBAR_ITEMS = {};

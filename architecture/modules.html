@@ -168,69 +168,101 @@
                     <main>
                         <h2 id="core-library-modules"><a class="header" href="#core-library-modules">Core Library Modules</a></h2>
 <p>The <code>rustree</code> library is organized into several modules, each with a specific responsibility. The <code>src/core/</code> directory, in particular, has been significantly refactored into sub-modules for better organization and clarity.</p>
-<h3 id="srcconfig---configuration-module"><a class="header" href="#srcconfig---configuration-module"><code>src/config/</code> - Configuration Module</a></h3>
-<p>This top-level module centralizes all configuration-related definitions for the library. It groups related options into sub-modules and specific structs.</p>
+<h3 id="srcconfig---configuration-bridge-module"><a class="header" href="#srcconfig---configuration-bridge-module"><code>src/config/</code> - Configuration Bridge Module</a></h3>
+<p>This module now serves as a bridge layer that re-exports configuration types from the core layer and provides helper functions for CLI integration. After the refactoring (commit 333f1c7), all configuration structs have been moved to <code>src/core/options/</code> for better modularity.</p>
+<ul>
+<li>
+<p><strong>All configuration files now simply re-export from core</strong>:</p>
+<ul>
+<li><code>filtering.rs</code>: Re-exports <code>FilteringOptions</code> from <code>core::options::filtering</code></li>
+<li><code>html.rs</code>: Re-exports <code>HtmlOptions</code> from <code>core::options::html</code></li>
+<li><code>input_source.rs</code>: Re-exports <code>InputSourceOptions</code> from <code>core::options::input_source</code></li>
+<li><code>listing.rs</code>: Re-exports <code>ListingOptions</code> from <code>core::options::listing</code></li>
+<li><code>metadata.rs</code>: Re-exports all metadata types from <code>core::options::metadata</code></li>
+<li><code>misc.rs</code>: Re-exports <code>MiscOptions</code> from <code>core::options::misc</code></li>
+<li><code>output_format.rs</code>: Re-exports <code>OutputFormat</code> from <code>core::options::output_format</code></li>
+<li><code>sorting.rs</code>: Re-exports all sorting types from <code>core::options::sorting</code></li>
+<li><code>tree_options.rs</code>: Re-exports <code>RustreeLibConfig</code> from <code>core::options::tree_options</code></li>
+</ul>
+</li>
+<li>
+<p><strong><code>llm.rs</code></strong> (special case):</p>
+<ul>
+<li>Still contains CLI-specific helper functions (<code>from_cli_args</code>, <code>to_core_config</code>, <code>generate_sample_env_file</code>)</li>
+<li>Re-exports core LLM types: <code>LlmConfigError</code>, <code>LlmOptions</code>, <code>LlmProvider</code></li>
+<li>Provides the bridge between CLI arguments and core LLM configuration</li>
+</ul>
+</li>
+</ul>
+<h3 id="srccoreoptions---core-configuration-module"><a class="header" href="#srccoreoptions---core-configuration-module"><code>src/core/options/</code> - Core Configuration Module</a></h3>
+<p>This new module (added in the refactoring) contains all the actual configuration struct definitions that were previously in <code>src/config/</code>. This change improves modularity by making the core layer self-contained.</p>
 <ul>
 <li>
 <p><strong><code>tree_options.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>RustreeLibConfig</code>, the main configuration struct. It is composed of several sub-structs:
-<ul>
-<li><code>InputSourceOptions</code> (from <code>input_source.rs</code>): Options related to the root input, like display name and initial metadata.</li>
-<li><code>ListingOptions</code> (from <code>listing.rs</code>): Options controlling directory traversal, such as <code>max_depth</code>, <code>show_hidden</code>, and <code>list_directories_only</code>.</li>
-<li><code>FilteringOptions</code> (from <code>filtering.rs</code>): Options for including/excluding files/directories, such as <code>match_patterns</code>, <code>ignore_patterns</code>, <code>use_gitignore_rules</code>, <code>gitignore_file</code>, and <code>case_insensitive_filter</code>.</li>
-<li><code>SortingOptions</code> (from <code>sorting.rs</code>): Options for sorting, including <code>sort_by</code> (using <code>SortKey</code>), <code>reverse_sort</code>, and <code>files_before_directories</code>.</li>
-<li><code>MetadataOptions</code> (from <code>metadata.rs</code>): Options for collecting and reporting metadata, like <code>show_size_bytes</code>, <code>show_last_modified</code>, <code>calculate_line_count</code>, <code>calculate_word_count</code>, and <code>apply_function</code> (using <code>BuiltInFunction</code>).</li>
-<li><code>MiscOptions</code> (from <code>misc.rs</code>): For miscellaneous options.</li>
-</ul>
-</li>
+<li>Defines <code>RustreeLibConfig</code>, the main configuration struct</li>
+<li>Composed of all the sub-configuration structs listed below</li>
 </ul>
 </li>
 <li>
 <p><strong><code>input_source.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>InputSourceOptions</code> struct for root path display and initial metadata.</li>
+<li>Defines <code>InputSourceOptions</code> struct for root path display and initial metadata</li>
 </ul>
 </li>
 <li>
 <p><strong><code>listing.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>ListingOptions</code> struct for directory traversal settings.</li>
-<li>Includes <code>show_full_path</code> option to control whether formatters display full relative paths or just filenames.</li>
+<li>Defines <code>ListingOptions</code> struct for directory traversal settings</li>
+<li>Includes <code>show_full_path</code> option to control whether formatters display full relative paths or just filenames</li>
 </ul>
 </li>
 <li>
 <p><strong><code>filtering.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>FilteringOptions</code> struct for inclusion/exclusion patterns, gitignore settings, and the <code>prune_empty_directories</code> flag.</li>
+<li>Defines <code>FilteringOptions</code> struct for inclusion/exclusion patterns, gitignore settings, and the <code>prune_empty_directories</code> flag</li>
 </ul>
 </li>
 <li>
 <p><strong><code>sorting.rs</code></strong>:</p>
 <ul>
-<li>Defines the <code>SortKey</code> enum (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>).</li>
-<li>Defines <code>DirectoryFileOrder</code> enum to control directory vs. file ordering (<code>Default</code>, <code>DirsFirst</code>, <code>FilesFirst</code>).</li>
-<li>Defines <code>SortingOptions</code> struct, used in <code>RustreeLibConfig</code> to specify sorting criteria, order, directory/file ordering preference, and backward compatibility options.</li>
+<li>Defines the <code>SortKey</code> enum (e.g., <code>Name</code>, <code>Size</code>, <code>MTime</code>, <code>Version</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>)</li>
+<li>Defines <code>DirectoryFileOrder</code> enum to control directory vs. file ordering (<code>Default</code>, <code>DirsFirst</code>, <code>FilesFirst</code>)</li>
+<li>Defines <code>SortingOptions</code> struct for sorting criteria and preferences</li>
 </ul>
 </li>
 <li>
 <p><strong><code>metadata.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags (e.g., <code>show_size_bytes</code>, <code>show_last_modified</code>, <code>report_change_time</code>, <code>report_creation_time</code>).</li>
-<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content, including <code>CountPluses</code> (counts '+' characters) and <code>Cat</code> (returns full file content).</li>
-<li>Defines <code>ApplyFnError</code> for errors during custom function application.</li>
+<li>Defines <code>MetadataOptions</code> struct for metadata collection and content analysis flags</li>
+<li>Defines <code>BuiltInFunction</code> enum for functions applicable to file content</li>
+<li>Defines <code>ApplyFnError</code> for errors during custom function application</li>
+<li>Defines <code>FunctionOutputKind</code> and <code>ExternalFunction</code> for external command support</li>
 </ul>
 </li>
 <li>
-<p><strong><code>output_format.rs</code></strong> (formerly <code>output.rs</code>):</p>
+<p><strong><code>output_format.rs</code></strong>:</p>
 <ul>
-<li>Defines the <code>OutputFormat</code> enum (re-exported as <code>LibOutputFormat</code>), used to specify the desired output format (e.g., Text, Markdown).</li>
+<li>Defines the <code>OutputFormat</code> enum used to specify output format (Text, Markdown, Json, Html)</li>
 </ul>
 </li>
 <li>
 <p><strong><code>misc.rs</code></strong>:</p>
 <ul>
-<li>Defines <code>MiscOptions</code> struct for any other configuration options.</li>
+<li>Defines <code>MiscOptions</code> struct for miscellaneous configuration options</li>
+</ul>
+</li>
+<li>
+<p><strong><code>html.rs</code></strong>:</p>
+<ul>
+<li>Defines <code>HtmlOptions</code> struct for HTML-specific output configuration</li>
+</ul>
+</li>
+<li>
+<p><strong><code>llm.rs</code></strong>:</p>
+<ul>
+<li>Defines core LLM types: <code>LlmProvider</code>, <code>LlmOptions</code>, <code>LlmConfigError</code></li>
+<li>Contains provider-specific logic and validation</li>
 </ul>
 </li>
 </ul>
@@ -309,11 +341,16 @@
 <h3 id="top-level-library-file-srclibrs"><a class="header" href="#top-level-library-file-srclibrs">Top-Level Library File (<code>src/lib.rs</code>)</a></h3>
 <ul>
 <li>
-<p>Re-exports key public types from the <code>config</code> and <code>core</code> modules to form the library's public API. This includes:</p>
+<p>Re-exports key public types to form the library's public API:</p>
 <ul>
-<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code> (including <code>directory_file_order</code> and legacy <code>files_before_directories</code>), <code>MetadataOptions</code>, <code>MiscOptions</code>.</li>
-<li>Enums and related types: <code>SortKey</code>, <code>DirectoryFileOrder</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>.</li>
-<li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code>).</li>
+<li>From <code>config</code> module (which now re-exports from <code>core::options</code>):
+<ul>
+<li><code>RustreeLibConfig</code> and its constituent option structs: <code>InputSourceOptions</code>, <code>ListingOptions</code>, <code>FilteringOptions</code>, <code>SortingOptions</code>, <code>MetadataOptions</code>, <code>MiscOptions</code>, <code>HtmlOptions</code></li>
+<li>Enums and related types: <code>SortKey</code>, <code>DirectoryFileOrder</code>, <code>BuiltInFunction</code>, <code>ApplyFnError</code>, <code>FunctionOutputKind</code>, <code>ExternalFunction</code></li>
+<li><code>LibOutputFormat</code> (an alias for <code>OutputFormat</code>)</li>
+<li>LLM types: <code>LlmProvider</code>, <code>LlmOptions</code>, <code>LlmConfigError</code></li>
+</ul>
+</li>
 </ul>
 </li>
 <li>
@@ -338,6 +375,15 @@
 </li>
 </ul>
 <p>This modular structure aims to make the codebase maintainable and extensible.</p>
+<h2 id="known-architectural-issues"><a class="header" href="#known-architectural-issues">Known Architectural Issues</a></h2>
+<h3 id="incomplete-core-module-independence"><a class="header" href="#incomplete-core-module-independence">Incomplete Core Module Independence</a></h3>
+<p>While the recent refactoring (commit 333f1c7) moved configuration structs from <code>src/config/</code> to <code>src/core/options/</code> to improve modularity, the core module is not yet fully independent. There are still some dependencies that need to be addressed:</p>
+<ul>
+<li>The core module has dependencies on the config layer through re-exports</li>
+<li>Some types and functions still reference higher-level modules</li>
+<li>Complete independence would require further refactoring of the module boundaries</li>
+</ul>
+<p>This is a known limitation that may be addressed in future versions. For now, the library functions correctly despite these architectural imperfections.</p>
 
                     </main>
 

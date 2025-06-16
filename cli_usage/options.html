@@ -662,6 +662,93 @@ use.</p>
 <p><strong>Additional effect:</strong> When combined with <code>--size</code> / <code>-s</code>, tree listings will display file sizes in a readable form (e.g. <code>1.2 MB</code> instead of <code>1234567B</code>).</p>
 </li>
 </ul>
+<h2 id="diff-functionality"><a class="header" href="#diff-functionality">Diff Functionality</a></h2>
+<ul>
+<li>
+<p><code>--diff &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: Compare the current directory tree with a previously saved snapshot file (JSON format). This feature detects additions, removals, modifications, moves/renames, and type changes.</li>
+<li>Example: <code>rustree --diff baseline.json</code></li>
+</ul>
+</li>
+<li>
+<p><code>--from-tree-file &lt;FILE&gt;</code></p>
+<ul>
+<li>Description: When using <code>--diff</code>, use this file as the source tree instead of scanning the current directory. Enables comparison between two snapshots.</li>
+<li>Example: <code>rustree --diff new.json --from-tree-file old.json</code></li>
+</ul>
+</li>
+<li>
+<p><code>--show-only &lt;TYPES&gt;</code></p>
+<ul>
+<li>Description: Filter diff output to show only specific types of changes. Comma-separated list.</li>
+<li>Available types: <code>added</code>, <code>removed</code>, <code>modified</code>, <code>moved</code>, <code>type_changed</code></li>
+<li>Example: <code>rustree --diff old.json --show-only added,removed</code></li>
+</ul>
+</li>
+<li>
+<p><code>--ignore-moves</code></p>
+<ul>
+<li>Description: Disable move detection in diff output. Moved files will be shown as separate add and remove operations.</li>
+<li>Example: <code>rustree --diff old.json --ignore-moves</code></li>
+</ul>
+</li>
+<li>
+<p><code>--move-threshold &lt;FLOAT&gt;</code></p>
+<ul>
+<li>Description: Set the similarity threshold for move detection. Range: 0.0 to 1.0.</li>
+<li>Default: <code>0.8</code></li>
+<li>Example: <code>rustree --diff old.json --move-threshold 0.9</code></li>
+</ul>
+</li>
+<li>
+<p><code>--show-unchanged</code></p>
+<ul>
+<li>Description: Include unchanged files in the diff output (marked with <code>[=]</code>).</li>
+<li>Example: <code>rustree --diff old.json --show-unchanged</code></li>
+</ul>
+</li>
+<li>
+<p><code>--stats-only</code></p>
+<ul>
+<li>Description: Show only the summary statistics without the detailed tree output.</li>
+<li>Example: <code>rustree --diff old.json --stats-only</code></li>
+</ul>
+</li>
+<li>
+<p><code>--size-threshold &lt;BYTES&gt;</code></p>
+<ul>
+<li>Description: Only report file changes where the size difference exceeds this threshold. Accepts suffixes K, M, G.</li>
+<li>Example: <code>rustree --diff old.json --size-threshold 1M</code></li>
+</ul>
+</li>
+<li>
+<p><code>--time-threshold &lt;SECONDS&gt;</code></p>
+<ul>
+<li>Description: Only report file changes where the modification time difference exceeds this threshold.</li>
+<li>Example: <code>rustree --diff old.json --time-threshold 3600</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="diff-examples"><a class="header" href="#diff-examples">Diff Examples</a></h3>
+<pre><code class="language-bash"># Basic comparison with current directory
+rustree --diff baseline.json
+
+# Compare two snapshots
+rustree --diff new.json --from-tree-file old.json
+
+# Track source code changes only
+rustree --diff release.json --filter-include "src/**" --show-only added,removed,modified
+
+# Monitor with size information
+rustree --diff yesterday.json --show-size-bytes --human-friendly
+
+# Generate markdown report
+rustree --diff old.json --output-format markdown &gt; changes.md
+
+# Combine with LLM analysis
+rustree --diff baseline.json --llm-ask "What are the most significant changes?"
+</code></pre>
 
                     </main>
 

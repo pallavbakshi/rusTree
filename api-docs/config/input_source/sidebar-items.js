@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["InputSourceOptions"]};
+window.SIDEBAR_ITEMS = {};

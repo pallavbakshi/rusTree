@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["HtmlOptions"]};
+window.SIDEBAR_ITEMS = {};
