@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["contexts","filtering","formatter_options","html","input_source","listing","llm","metadata","misc","output_format","sorting","tree_options"]};
+window.SIDEBAR_ITEMS = {"mod":["contexts","filtering","html","input_source","listing","llm","metadata","misc","output_format","sorting","tree_options"]};
