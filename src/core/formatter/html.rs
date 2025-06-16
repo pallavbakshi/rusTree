@@ -11,8 +11,8 @@ use super::base::{TreeFormatter, TreeFormatterCompat};
 use super::text_tree::TextTreeFormatter;
 
 use crate::core::error::RustreeError;
+use crate::core::options::HtmlOptions;
 use crate::core::options::contexts::FormattingContext;
-use crate::core::options::{HtmlOptions, RustreeLibConfig};
 use crate::core::tree::node::NodeInfo;
 
 /// Formatter producing an HTML page that contains the directory tree wrapped
@@ -149,19 +149,9 @@ impl TreeFormatter for HtmlFormatter {
         let escaped_body = lines.join("\n");
 
         // Build intro/outro — propagate I/O errors so users notice bad paths.
-        // Create temporary config for backward compatibility
-        let temp_config = RustreeLibConfig {
-            input_source: formatting_ctx.input_source.clone(),
-            listing: formatting_ctx.listing.clone(),
-            metadata: formatting_ctx.metadata.clone(),
-            misc: formatting_ctx.misc.clone(),
-            html: formatting_ctx.html.clone(),
-            ..Default::default()
-        };
-
         let intro = match &html_opts.custom_intro {
             Some(path) => std::fs::read_to_string(path)?,
-            None => default_intro(&temp_config),
+            None => default_intro(formatting_ctx),
         };
 
         let outro = match &html_opts.custom_outro {
@@ -191,9 +181,9 @@ fn html_escape(raw: &str) -> String {
     out
 }
 
-fn default_intro(config: &RustreeLibConfig) -> String {
-    let raw_title = if !config.input_source.root_display_name.is_empty() {
-        &config.input_source.root_display_name
+fn default_intro(formatting_ctx: &FormattingContext) -> String {
+    let raw_title = if !formatting_ctx.input_source.root_display_name.is_empty() {
+        &formatting_ctx.input_source.root_display_name
     } else {
         "Directory Tree"
     };

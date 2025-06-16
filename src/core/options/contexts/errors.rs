@@ -215,6 +215,12 @@ impl fmt::Display for ContextValidationError {
 
 impl std::error::Error for ContextValidationError {}
 
+impl From<ContextValidationError> for String {
+    fn from(err: ContextValidationError) -> String {
+        err.to_string()
+    }
+}
+
 /// A collection of validation errors for a context
 #[derive(Debug, Clone)]
 pub struct ContextValidationErrors {

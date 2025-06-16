@@ -1,3 +1,4 @@
+use super::errors::{ContextType, ContextValidationError};
 use crate::core::error::RustreeError;
 use crate::core::filter::pattern::CompiledGlobPattern;
 use crate::core::options::{FilteringOptions, ListingOptions, MetadataOptions};
@@ -127,11 +128,14 @@ impl OwnedWalkingContext {
     ///
     /// This method checks for invalid combinations of options and
     /// provides helpful error messages for fixing configuration issues.
-    pub fn validate(&self) -> Result<(), String> {
+    pub fn validate(&self) -> Result<(), ContextValidationError> {
         // Validate max_depth
         if let Some(max_depth) = self.listing.max_depth {
             if max_depth == 0 {
-                return Err("max_depth cannot be 0 (use None for unlimited depth)".to_string());
+                return Err(ContextValidationError::invalid_max_depth(
+                    0,
+                    ContextType::Walking,
+                ));
             }
         }
 
@@ -139,9 +143,10 @@ impl OwnedWalkingContext {
         if let (Some(min), Some(max)) = (self.filtering.min_file_size, self.filtering.max_file_size)
         {
             if min > max {
-                return Err(format!(
-                    "min_file_size ({}) cannot be greater than max_file_size ({})",
-                    min, max
+                return Err(ContextValidationError::invalid_file_size_range(
+                    min,
+                    max,
+                    ContextType::Walking,
                 ));
             }
         }
@@ -150,7 +155,10 @@ impl OwnedWalkingContext {
         if let Some(ref patterns) = self.filtering.ignore_patterns {
             for pattern in patterns {
                 if pattern.trim().is_empty() {
-                    return Err("ignore patterns cannot be empty strings".to_string());
+                    return Err(ContextValidationError::empty_pattern(
+                        "ignore_patterns",
+                        ContextType::Walking,
+                    ));
                 }
             }
         }
@@ -158,7 +166,10 @@ impl OwnedWalkingContext {
         if let Some(ref patterns) = self.filtering.match_patterns {
             for pattern in patterns {
                 if pattern.trim().is_empty() {
-                    return Err("match patterns cannot be empty strings".to_string());
+                    return Err(ContextValidationError::empty_pattern(
+                        "match_patterns",
+                        ContextType::Walking,
+                    ));
                 }
             }
         }
@@ -281,7 +292,12 @@ mod tests {
 
         let result = ctx.validate();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("max_depth cannot be 0"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("max_depth cannot be 0")
+        );
     }
 
     #[test]
@@ -298,8 +314,8 @@ mod tests {
         let result = ctx.validate();
         assert!(result.is_err());
         let error_msg = result.unwrap_err();
-        assert!(error_msg.contains("min_file_size"));
-        assert!(error_msg.contains("max_file_size"));
+        assert!(error_msg.to_string().contains("min_file_size"));
+        assert!(error_msg.to_string().contains("max_file_size"));
     }
 
     #[test]
@@ -314,7 +330,7 @@ mod tests {
 
         let result = ctx.validate();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("empty strings"));
+        assert!(result.unwrap_err().to_string().contains("empty strings"));
     }
 
     #[test]

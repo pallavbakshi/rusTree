@@ -4,6 +4,7 @@
 //! information and metadata, including content analysis and metadata formatting.
 
 use crate::core::options::RustreeLibConfig;
+use crate::core::options::contexts::FormattingContext;
 use crate::core::options::{ApplyFnError, BuiltInFunction};
 use crate::core::options::{ApplyFunction, ExternalFunction};
 use crate::core::tree::node::{NodeInfo, NodeType};
@@ -31,7 +32,7 @@ pub enum MetadataStyle {
 /// # Arguments
 ///
 /// * `node` - The node whose metadata should be formatted
-/// * `config` - Configuration specifying which metadata to include
+/// * `formatting_ctx` - Formatting context specifying which metadata to include
 /// * `style` - The formatting style to use
 ///
 /// # Returns
@@ -40,15 +41,15 @@ pub enum MetadataStyle {
 /// no metadata is configured to be displayed.
 pub fn format_node_metadata(
     node: &NodeInfo,
-    config: &RustreeLibConfig,
+    formatting_ctx: &FormattingContext,
     style: MetadataStyle,
 ) -> String {
     let mut metadata_parts = Vec::new();
 
-    // Size: applies to files and directories if config.show_size_bytes is true
-    if config.metadata.show_size_bytes {
+    // Size: applies to files and directories if formatting_ctx.metadata.show_size_bytes is true
+    if formatting_ctx.metadata.show_size_bytes {
         if let Some(size) = node.size {
-            if config.metadata.human_readable_size {
+            if formatting_ctx.metadata.human_readable_size {
                 // Use nicer units like KB, MB …
                 let size_str = crate::core::util::format_size(size);
                 match style {
@@ -71,19 +72,19 @@ pub fn format_node_metadata(
     }
 
     // Time metadata: applies to all node types if configured
-    if config.metadata.show_last_modified {
+    if formatting_ctx.metadata.show_last_modified {
         if let Some(formatted) = format_timestamp(node.mtime, "MTime", style) {
             metadata_parts.push(formatted);
         }
     }
 
-    if config.metadata.report_change_time {
+    if formatting_ctx.metadata.report_change_time {
         if let Some(formatted) = format_timestamp(node.change_time, "CTime", style) {
             metadata_parts.push(formatted);
         }
     }
 
-    if config.metadata.report_creation_time {
+    if formatting_ctx.metadata.report_creation_time {
         if let Some(formatted) = format_timestamp(node.create_time, "BTime", style) {
             metadata_parts.push(formatted);
         }
@@ -91,7 +92,7 @@ pub fn format_node_metadata(
 
     // File-specific metadata: only show if the node is a file
     if node.node_type == NodeType::File {
-        if config.metadata.calculate_line_count {
+        if formatting_ctx.metadata.calculate_line_count {
             if let Some(lc) = node.line_count {
                 match style {
                     MetadataStyle::Text => metadata_parts.push(format!("[L:{:>4}]", lc)),
@@ -104,7 +105,7 @@ pub fn format_node_metadata(
             }
         }
 
-        if config.metadata.calculate_word_count {
+        if formatting_ctx.metadata.calculate_word_count {
             if let Some(wc) = node.word_count {
                 match style {
                     MetadataStyle::Text => metadata_parts.push(format!("[W:{:>4}]", wc)),
@@ -119,7 +120,7 @@ pub fn format_node_metadata(
     }
 
     // Apply function metadata: handle both built-in and external functions
-    if let Some(apply_fn) = &config.metadata.apply_function {
+    if let Some(apply_fn) = &formatting_ctx.metadata.apply_function {
         // For built-in Cat, skip display of content in metadata
         let is_cat = matches!(apply_fn, ApplyFunction::BuiltIn(BuiltInFunction::Cat));
         let is_external_text = matches!(apply_fn, ApplyFunction::External(f) if matches!(f.kind, crate::core::options::FunctionOutputKind::Text));
@@ -144,7 +145,7 @@ pub fn format_node_metadata(
                     if style == MetadataStyle::Text {
                         match apply_fn {
                             ApplyFunction::BuiltIn(_) => {
-                                if should_show_function_na_for_node(node, config) {
+                                if should_show_function_na_for_node(node, formatting_ctx) {
                                     metadata_parts.push("[F: N/A]".to_string());
                                 }
                             }
@@ -211,7 +212,7 @@ mod human_size_tests {
             ..Default::default()
         };
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Text);
         assert!(result.contains("2.0 KB"));
     }
 }
@@ -406,8 +407,8 @@ pub fn apply_external_to_file(
 
 /// Determines if we should show [F: N/A] for a node when function output is None.
 /// Only show it if the function type matches the node type.
-fn should_show_function_na_for_node(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
-    if let Some(apply_fn) = &config.metadata.apply_function {
+fn should_show_function_na_for_node(node: &NodeInfo, formatting_ctx: &FormattingContext) -> bool {
+    if let Some(apply_fn) = &formatting_ctx.metadata.apply_function {
         match apply_fn {
             ApplyFunction::BuiltIn(func) => {
                 match func {
@@ -493,6 +494,25 @@ pub fn apply_builtin_to_directory(
     }
 }
 
+/// Backward compatibility function for existing code that uses RustreeLibConfig
+///
+/// This function creates a temporary FormattingContext and calls the new format_node_metadata.
+/// Eventually, callers should be updated to use the context-based version directly.
+pub fn format_node_metadata_compat(
+    node: &NodeInfo,
+    config: &RustreeLibConfig,
+    style: MetadataStyle,
+) -> String {
+    let formatting_ctx = FormattingContext::new(
+        &config.input_source,
+        &config.listing,
+        &config.metadata,
+        &config.misc,
+        &config.html,
+    );
+    format_node_metadata(node, &formatting_ctx, style)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -565,7 +585,7 @@ mod tests {
             ..Default::default()
         };
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Text);
 
         assert!(result.contains("[   1024B]")); // 3 spaces + 1024 = 7 chars total
         assert!(result.contains("[MTime: 1234567890s]"));
@@ -587,7 +607,7 @@ mod tests {
             ..Default::default()
         };
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Markdown);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Markdown);
 
         assert_eq!(result, " `1024B, 42L, 200W`");
     }
@@ -607,7 +627,7 @@ mod tests {
             ..Default::default()
         };
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Markdown);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Markdown);
 
         // Only size should be shown for directories
         assert_eq!(result, " `1024B`");
@@ -618,7 +638,7 @@ mod tests {
         let node = create_test_node();
         let config = RustreeLibConfig::default(); // No metadata enabled
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Text);
 
         assert_eq!(result, "");
     }
@@ -664,7 +684,7 @@ mod tests {
             ..Default::default()
         };
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Text);
 
         // Should show size but NOT show cat content in metadata (it's displayed separately)
         assert!(result.contains("[   1024B]"));
@@ -686,7 +706,7 @@ mod tests {
             ..Default::default()
         };
 
-        let result = format_node_metadata(&node, &config, MetadataStyle::Text);
+        let result = format_node_metadata_compat(&node, &config, MetadataStyle::Text);
 
         // Should show both size and function result for non-Cat functions
         assert!(result.contains("[   1024B]"));

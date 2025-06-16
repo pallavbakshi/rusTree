@@ -11,6 +11,7 @@ pub mod size_calculator;
 pub mod extended_attrs;
 pub mod time_formatter;
 
+use crate::core::options::contexts::FormattingContext;
 use crate::core::options::{ApplyFunction, FunctionOutputKind};
 use crate::core::options::{BuiltInFunction, RustreeLibConfig};
 use crate::core::tree::node::{NodeInfo, NodeType};
@@ -40,7 +41,64 @@ pub struct MetadataAggregator {
 }
 
 impl MetadataAggregator {
+    /// Aggregates metadata from a collection of nodes based on the formatting context.
+    pub fn aggregate_from_nodes_with_context(
+        nodes: &[NodeInfo],
+        formatting_ctx: &FormattingContext,
+    ) -> Self {
+        let mut aggregator = Self::default();
+
+        // Track whether we should aggregate each type
+        let should_aggregate_size = formatting_ctx.metadata.show_size_bytes;
+        let should_aggregate_lines = formatting_ctx.metadata.calculate_line_count;
+        let should_aggregate_words = formatting_ctx.metadata.calculate_word_count;
+
+        for node in nodes {
+            // Aggregate built-in metadata for files
+            if node.node_type == NodeType::File {
+                if should_aggregate_size {
+                    if let Some(size) = node.size {
+                        *aggregator.size_total.get_or_insert(0) += size;
+                    }
+                }
+
+                if should_aggregate_lines {
+                    if let Some(lines) = node.line_count {
+                        *aggregator.line_total.get_or_insert(0) += lines;
+                    }
+                }
+
+                if should_aggregate_words {
+                    if let Some(words) = node.word_count {
+                        *aggregator.word_total.get_or_insert(0) += words;
+                    }
+                }
+            }
+
+            // Aggregate apply function outputs
+            if let Some(Ok(output)) = &node.custom_function_output {
+                // Determine output kind based on configuration (built-in vs external)
+                let kind = if let Some(apply_fn) = &formatting_ctx.metadata.apply_function {
+                    apply_fn.output_kind()
+                } else {
+                    FunctionOutputKind::Text
+                };
+
+                let builtin_func = match &formatting_ctx.metadata.apply_function {
+                    Some(ApplyFunction::BuiltIn(func)) => Some(func.clone()),
+                    _ => None,
+                };
+                aggregator.aggregate_function_output(output, kind, &builtin_func);
+            }
+        }
+
+        aggregator
+    }
+
     /// Aggregates metadata from a collection of nodes based on the configuration.
+    ///
+    /// # Deprecated
+    /// This function is deprecated. Use `aggregate_from_nodes_with_context` instead.
     pub fn aggregate_from_nodes(nodes: &[NodeInfo], config: &RustreeLibConfig) -> Self {
         let mut aggregator = Self::default();
 
