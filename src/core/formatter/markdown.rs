@@ -3,7 +3,6 @@ use super::base::{TreeFormatter, TreeFormatterCompat};
 use crate::core::error::RustreeError;
 use crate::core::metadata::MetadataAggregator;
 use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
-use crate::core::options::RustreeLibConfig;
 use crate::core::options::contexts::FormattingContext;
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::fmt::Write;
@@ -21,15 +20,6 @@ impl TreeFormatter for MarkdownFormatter {
         nodes: &[NodeInfo],
         formatting_ctx: &FormattingContext,
     ) -> Result<String, RustreeError> {
-        // Create temporary config for backward compatibility
-        let temp_config = RustreeLibConfig {
-            input_source: formatting_ctx.input_source.clone(),
-            listing: formatting_ctx.listing.clone(),
-            metadata: formatting_ctx.metadata.clone(),
-            misc: formatting_ctx.misc.clone(),
-            html: formatting_ctx.html.clone(),
-            ..Default::default()
-        };
         let mut output = String::new();
 
         // Add the root header
@@ -77,7 +67,7 @@ impl TreeFormatter for MarkdownFormatter {
             };
 
             // Add metadata if configured using centralized formatting
-            let metadata_str = format_node_metadata(node, &temp_config, MetadataStyle::Markdown);
+            let metadata_str = format_node_metadata(node, formatting_ctx, MetadataStyle::Markdown);
 
             // Write the markdown list item
             writeln!(output, "{}* {}{}", indent, name_with_suffix, metadata_str)?;
@@ -123,7 +113,8 @@ impl TreeFormatter for MarkdownFormatter {
             )?;
 
             // Aggregate metadata and add to summary
-            let aggregator = MetadataAggregator::aggregate_from_nodes(nodes, &temp_config);
+            let aggregator =
+                MetadataAggregator::aggregate_from_nodes_with_context(nodes, formatting_ctx);
             let summary_additions = aggregator.format_summary_additions();
             if !summary_additions.is_empty() {
                 write!(output, "{}", summary_additions)?;

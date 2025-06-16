@@ -37,7 +37,9 @@ pub fn walk_directory_owned(
     walking_ctx: &mut OwnedWalkingContext,
 ) -> Result<Vec<NodeInfo>, RustreeError> {
     // Validate the context first
-    walking_ctx.validate().map_err(RustreeError::ConfigError)?;
+    walking_ctx
+        .validate()
+        .map_err(|e| RustreeError::ConfigError(e.to_string()))?;
 
     // Use the caching functionality for better performance
     let _ignore_patterns = walking_ctx.ignore_patterns()?;

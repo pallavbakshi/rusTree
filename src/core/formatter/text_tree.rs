@@ -2,7 +2,6 @@ use super::base::{TreeFormatter, TreeFormatterCompat};
 use crate::core::error::RustreeError;
 use crate::core::metadata::MetadataAggregator;
 use crate::core::metadata::file_info::{MetadataStyle, format_node_metadata};
-use crate::core::options::RustreeLibConfig;
 use crate::core::options::contexts::FormattingContext;
 use crate::core::tree::node::{NodeInfo, NodeType};
 use std::collections::HashMap;
@@ -74,17 +73,6 @@ impl TreeFormatter for TextTreeFormatter {
         formatting_ctx: &FormattingContext,
     ) -> Result<String, RustreeError> {
         let mut output = String::new();
-
-        // Temporarily create a config from formatting context for backward compatibility
-        // TODO: Remove this when all dependent functions are updated to use FormattingContext
-        let temp_config = RustreeLibConfig {
-            input_source: formatting_ctx.input_source.clone(),
-            listing: formatting_ctx.listing.clone(),
-            metadata: formatting_ctx.metadata.clone(),
-            misc: formatting_ctx.misc.clone(),
-            html: formatting_ctx.html.clone(),
-            ..Default::default()
-        };
 
         // Handle root display name with optional size prefix
         if formatting_ctx.metadata.show_size_bytes {
@@ -158,7 +146,7 @@ impl TreeFormatter for TextTreeFormatter {
 
             write!(output, "{}", line_prefix)?;
 
-            let metadata_string = format_node_metadata(node, &temp_config, MetadataStyle::Text);
+            let metadata_string = format_node_metadata(node, formatting_ctx, MetadataStyle::Text);
             write!(output, "{}", metadata_string)?;
 
             // Show full path or just name based on configuration
@@ -243,8 +231,8 @@ impl TreeFormatter for TextTreeFormatter {
             )?;
 
             // Aggregate metadata and add to summary
-            // TODO: Update MetadataAggregator to use FormatterOptions in Phase 2
-            let aggregator = MetadataAggregator::aggregate_from_nodes(nodes, &temp_config);
+            let aggregator =
+                MetadataAggregator::aggregate_from_nodes_with_context(nodes, formatting_ctx);
             let summary_additions = aggregator.format_summary_additions();
             if !summary_additions.is_empty() {
                 write!(output, "{}", summary_additions)?;

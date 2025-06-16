@@ -349,7 +349,12 @@ fn test_owned_walking_context_validation() -> Result<()> {
     );
     let result = invalid_max_depth.validate();
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("max_depth cannot be 0"));
+    assert!(
+        result
+            .unwrap_err()
+            .to_string()
+            .contains("max_depth cannot be 0")
+    );
 
     // Invalid file size range
     let invalid_file_size = OwnedWalkingContext::new(
@@ -364,8 +369,8 @@ fn test_owned_walking_context_validation() -> Result<()> {
     let result = invalid_file_size.validate();
     assert!(result.is_err());
     let error_msg = result.unwrap_err();
-    assert!(error_msg.contains("min_file_size"));
-    assert!(error_msg.contains("max_file_size"));
+    assert!(error_msg.to_string().contains("min_file_size"));
+    assert!(error_msg.to_string().contains("max_file_size"));
 
     // Empty patterns
     let empty_pattern = OwnedWalkingContext::new(
@@ -378,7 +383,7 @@ fn test_owned_walking_context_validation() -> Result<()> {
     );
     let result = empty_pattern.validate();
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("empty strings"));
+    assert!(result.unwrap_err().to_string().contains("empty strings"));
 
     Ok(())
 }

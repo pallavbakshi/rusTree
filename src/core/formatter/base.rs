@@ -1,7 +1,7 @@
 // src/core/formatter/base.rs
 use crate::core::error::RustreeError;
+use crate::core::options::RustreeLibConfig;
 use crate::core::options::contexts::FormattingContext;
-use crate::core::options::{FormatterOptions, RustreeLibConfig};
 use crate::core::tree::node::NodeInfo;
 
 /// A trait for formatting a list of `NodeInfo` objects into a string representation.
@@ -23,26 +23,6 @@ pub trait TreeFormatter {
         nodes: &[NodeInfo],
         formatting_ctx: &FormattingContext,
     ) -> Result<String, RustreeError>;
-
-    /// Formats the given nodes using FormatterOptions (transitional method).
-    ///
-    /// This provides backward compatibility during the transition to context-based APIs.
-    /// It converts FormatterOptions to FormattingContext internally.
-    fn format_with_options(
-        &self,
-        nodes: &[NodeInfo],
-        formatter_opts: &FormatterOptions,
-    ) -> Result<String, RustreeError> {
-        // Convert FormatterOptions to FormattingContext for compatibility
-        let formatting_ctx = FormattingContext {
-            input_source: formatter_opts.input_source,
-            listing: formatter_opts.listing,
-            metadata: formatter_opts.metadata,
-            misc: formatter_opts.misc,
-            html: formatter_opts.html,
-        };
-        self.format(nodes, &formatting_ctx)
-    }
 }
 
 /// Extension trait that provides backward compatibility with the old config-based API
@@ -53,7 +33,13 @@ pub trait TreeFormatterCompat: TreeFormatter {
         nodes: &[NodeInfo],
         config: &RustreeLibConfig,
     ) -> Result<String, RustreeError> {
-        let formatter_opts = FormatterOptions::from_config(config);
-        self.format_with_options(nodes, &formatter_opts)
+        let formatting_ctx = FormattingContext::new(
+            &config.input_source,
+            &config.listing,
+            &config.metadata,
+            &config.misc,
+            &config.html,
+        );
+        self.format(nodes, &formatting_ctx)
     }
 }

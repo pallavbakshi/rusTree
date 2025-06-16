@@ -326,15 +326,9 @@ impl AsyncProcessingContext {
     }
 }
 
-// Safety: All our contexts use Arc internally, making them Send + Sync
-unsafe impl Send for AsyncWalkingContext {}
-unsafe impl Sync for AsyncWalkingContext {}
-unsafe impl Send for AsyncFormattingContext {}
-unsafe impl Sync for AsyncFormattingContext {}
-unsafe impl Send for AsyncSortingContext {}
-unsafe impl Sync for AsyncSortingContext {}
-unsafe impl Send for AsyncProcessingContext {}
-unsafe impl Sync for AsyncProcessingContext {}
+// All our contexts use Arc internally and should automatically be Send + Sync
+// since Arc<T> implements Send + Sync when T: Send + Sync.
+// The standard option types (bool, Option<usize>, String, Vec<String>, etc.) are all Send + Sync.
 
 #[cfg(test)]
 mod tests {
