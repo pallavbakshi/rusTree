@@ -23,8 +23,8 @@ If you want to build from the latest source code (e.g., from a Git repository):
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/rustree.git # Replace with actual URL
-   cd rustree
+   git clone https://github.com/pallavbakshi/rusTree.git
+   cd rusTree
    ```
 
 1. Build and install the binary:
