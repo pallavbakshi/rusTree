@@ -293,6 +293,7 @@ pub fn walk_directory_with_options(
                                 &node,
                                 listing_opts,
                                 filtering_opts,
+                                &canonical_root_path,
                             )
                         {
                             node.custom_function_output =
@@ -311,6 +312,7 @@ pub fn walk_directory_with_options(
                         &node,
                         listing_opts,
                         filtering_opts,
+                        &canonical_root_path,
                     ) {
                         node.custom_function_output =
                             Some(file_info::apply_external_to_file(&node.path, ext_fn));
@@ -337,8 +339,11 @@ fn should_apply_function_to_file_with_options(
     node: &NodeInfo,
     listing_opts: &ListingOptions,
     filtering_opts: &FilteringOptions,
+    walk_root: &Path,
 ) -> bool {
-    use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_path_with_patterns};
+    use crate::core::filter::pattern::{
+        compile_glob_patterns, entry_matches_path_with_patterns_relative,
+    };
 
     // Check apply_exclude_patterns first - if it matches, skip
     if let Some(exclude_patterns) = &filtering_opts.apply_exclude_patterns {
@@ -348,7 +353,7 @@ fn should_apply_function_to_file_with_options(
                 filtering_opts.case_insensitive_filter,
                 listing_opts.show_hidden,
             ) {
-                if entry_matches_path_with_patterns(&node.path, &patterns) {
+                if entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root) {
                     return false; // Skip this node
                 }
             }
@@ -357,27 +362,47 @@ fn should_apply_function_to_file_with_options(
 
     // Check apply_include_patterns - if specified, node must match
     if let Some(include_patterns) = &filtering_opts.apply_include_patterns {
-        if !include_patterns.is_empty() {
-            if let Ok(Some(patterns)) = compile_glob_patterns(
-                &Some(include_patterns.clone()),
-                filtering_opts.case_insensitive_filter,
-                listing_opts.show_hidden,
-            ) {
-                return entry_matches_path_with_patterns(&node.path, &patterns);
-            }
-            // If we have include patterns but compilation failed, don't apply
+        // If include patterns are specified (even if empty), use them as a filter
+        if include_patterns.is_empty() {
+            // Empty include patterns means match nothing
             return false;
         }
+
+        if let Ok(Some(patterns)) = compile_glob_patterns(
+            &Some(include_patterns.clone()),
+            filtering_opts.case_insensitive_filter,
+            listing_opts.show_hidden,
+        ) {
+            return entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root);
+        }
+        // If we have include patterns but compilation failed, don't apply
+        return false;
     }
 
-    // If no include patterns specified, or node passed all checks, apply the function
+    // If no include patterns specified (None), apply the function to all
     true
 }
 
 /// Checks if a function should be applied to a specific file based on filtering patterns (backward compatibility).
+/// Note: This function uses the current working directory as the walk root, which may not be correct
+/// when scanning directories outside the CWD. For correct behavior, use should_apply_function_to_file_with_options.
 #[allow(dead_code)]
 fn should_apply_function_to_file(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
-    should_apply_function_to_file_with_options(node, &config.listing, &config.filtering)
+    // For backward compatibility, use the current working directory as walk root
+    // This is not ideal but maintains the existing API
+    match std::env::current_dir() {
+        Ok(cwd) => should_apply_function_to_file_with_options(
+            node,
+            &config.listing,
+            &config.filtering,
+            &cwd,
+        ),
+        Err(_) => {
+            // If we can't get the current directory, fall back to allowing all
+            // (same behavior as when pattern matching fails)
+            true
+        }
+    }
 }
 
 /// Walk directory using full config (backward compatibility)

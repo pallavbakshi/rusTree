@@ -10,6 +10,7 @@
 - [Configuration Files](configuration_files.md)
 - [Library Usage (API)](library_usage.md)
   - [Core Concepts](library_usage/concepts.md)
+  - [Apply Functions](library_usage/apply_functions.md)
   - [Examples](library_usage/examples.md)
 - [Architecture](architecture.md)
   - [Overview](architecture/overview.md)

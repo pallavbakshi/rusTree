@@ -256,7 +256,7 @@ pub fn get_tree_nodes_from_source(
             let mut nodes = crate::core::input::TreeFileParser::parse_file(file_path, format)?;
 
             // Apply any post-processing that would normally be done by get_tree_nodes
-            apply_post_processing(&mut nodes, config)?;
+            apply_post_processing(&mut nodes, config, root_path)?;
             Ok(nodes)
         }
         None => {
@@ -305,7 +305,7 @@ pub fn get_tree_nodes(
     )?;
 
     // 2. Apply shared post-processing
-    apply_post_processing(&mut nodes, config)?;
+    apply_post_processing(&mut nodes, config, root_path)?;
     Ok(nodes)
 }
 
@@ -313,6 +313,7 @@ pub fn get_tree_nodes(
 fn apply_post_processing(
     nodes: &mut Vec<NodeInfo>,
     config: &RustreeLibConfig,
+    walk_root: &Path,
 ) -> Result<(), RustreeError> {
     // 1. Apply size-based file filtering prior to any tree manipulations
     if config.filtering.min_file_size.is_some() || config.filtering.max_file_size.is_some() {
@@ -364,7 +365,7 @@ fn apply_post_processing(
         // Apply directory functions if configured
         if let Some(ApplyFunction::BuiltIn(apply_func)) = &config.metadata.apply_function {
             if is_directory_function(apply_func) {
-                apply_directory_functions_to_tree(&mut temp_roots, apply_func, config);
+                apply_directory_functions_to_tree(&mut temp_roots, apply_func, config, walk_root);
             }
         }
 
@@ -583,7 +584,7 @@ pub fn get_tree_nodes_with_context(
     let mut nodes = walker::walk_directory_with_context(root_path, &processing_ctx.walking)?;
 
     // Apply post-processing with contexts
-    apply_post_processing_with_contexts(&mut nodes, processing_ctx)?;
+    apply_post_processing_with_contexts(&mut nodes, processing_ctx, root_path)?;
 
     // Use sorting context if provided
     if let Some(sorting_ctx) = &processing_ctx.sorting {
@@ -688,7 +689,64 @@ pub fn format_nodes_with_context(
         LibOutputFormat::Json => Box::new(core::formatter::JsonFormatter),
         LibOutputFormat::Html => Box::new(core::formatter::HtmlFormatter),
     };
-    formatter_instance.format(nodes, formatting_ctx)
+    let tree_output = formatter_instance.format(nodes, formatting_ctx)?;
+
+    // Apply the same cat-like function logic as the legacy format_nodes function
+    let mut is_cat_like = false;
+    if let Some(apply_fn) = &formatting_ctx.metadata.apply_function {
+        match apply_fn {
+            ApplyFunction::BuiltIn(BuiltInFunction::Cat) => {
+                is_cat_like = true;
+            }
+            ApplyFunction::External(ext_fn) => {
+                if matches!(ext_fn.kind, crate::core::options::FunctionOutputKind::Text) {
+                    is_cat_like = true;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if is_cat_like && !matches!(format, LibOutputFormat::Json) {
+        let mut result = tree_output;
+
+        // Only show file contents section if there are files with content
+        let file_nodes_with_content: Vec<_> = nodes
+            .iter()
+            .filter(|node| {
+                node.node_type == NodeType::File
+                    && node.custom_function_output.is_some()
+                    && matches!(node.custom_function_output, Some(Ok(_)))
+            })
+            .collect();
+
+        if !file_nodes_with_content.is_empty() {
+            // Determine section header text
+            let header = match &formatting_ctx.metadata.apply_function {
+                Some(ApplyFunction::BuiltIn(BuiltInFunction::Cat)) => "File Contents".to_string(),
+                Some(ApplyFunction::External(ext_fn)) => {
+                    format!(
+                        "Results of applying '{}' to relevant files",
+                        ext_fn.cmd_template
+                    )
+                }
+                _ => "Results".to_string(),
+            };
+
+            result.push_str(&format!("\n\n--- {} ---\n", header));
+
+            for node in file_nodes_with_content {
+                if let Some(Ok(content)) = &node.custom_function_output {
+                    result.push_str(&format!("\n=== {} ===\n", node.path.display()));
+                    result.push_str(content);
+                    result.push('\n');
+                }
+            }
+        }
+        Ok(result)
+    } else {
+        Ok(tree_output)
+    }
 }
 
 /// Focused sorting API using SortingContext.
@@ -717,6 +775,7 @@ pub fn sort_nodes_with_context(
 fn apply_post_processing_with_contexts(
     nodes: &mut Vec<NodeInfo>,
     processing_ctx: &ProcessingContext,
+    walk_root: &Path,
 ) -> Result<(), RustreeError> {
     // 1. Apply size-based file filtering prior to any tree manipulations
     if processing_ctx.walking.filtering.min_file_size.is_some()
@@ -773,7 +832,12 @@ fn apply_post_processing_with_contexts(
             &processing_ctx.walking.metadata.apply_function
         {
             if is_directory_function(apply_func) {
-                apply_directory_functions_to_tree_ctx(&mut temp_roots, apply_func, processing_ctx);
+                apply_directory_functions_to_tree_ctx(
+                    &mut temp_roots,
+                    apply_func,
+                    processing_ctx,
+                    walk_root,
+                );
             }
         }
 
@@ -817,9 +881,10 @@ fn apply_directory_functions_to_tree_ctx(
     roots: &mut [TempNode],
     func: &BuiltInFunction,
     processing_ctx: &ProcessingContext,
+    walk_root: &Path,
 ) {
     for root in roots {
-        apply_directory_functions_to_node_ctx(root, func, processing_ctx);
+        apply_directory_functions_to_node_ctx(root, func, processing_ctx, walk_root);
     }
 }
 
@@ -828,15 +893,16 @@ fn apply_directory_functions_to_node_ctx(
     node: &mut TempNode,
     func: &BuiltInFunction,
     processing_ctx: &ProcessingContext,
+    walk_root: &Path,
 ) {
     // First, recursively process all children
     for child in &mut node.children {
-        apply_directory_functions_to_node_ctx(child, func, processing_ctx);
+        apply_directory_functions_to_node_ctx(child, func, processing_ctx, walk_root);
     }
 
     // Then process this node if it's a directory and should have the function applied
     if node.node_info.node_type == NodeType::Directory
-        && should_apply_function_to_node_ctx(&node.node_info, processing_ctx)
+        && should_apply_function_to_node_ctx(&node.node_info, processing_ctx, walk_root)
     {
         // Collect child NodeInfo objects for the function
         let child_infos: Vec<NodeInfo> = node
@@ -852,8 +918,14 @@ fn apply_directory_functions_to_node_ctx(
 }
 
 /// Context-aware version of should_apply_function_to_node.
-fn should_apply_function_to_node_ctx(node: &NodeInfo, processing_ctx: &ProcessingContext) -> bool {
-    use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_path_with_patterns};
+fn should_apply_function_to_node_ctx(
+    node: &NodeInfo,
+    processing_ctx: &ProcessingContext,
+    walk_root: &Path,
+) -> bool {
+    use crate::core::filter::pattern::{
+        compile_glob_patterns, entry_matches_path_with_patterns_relative,
+    };
 
     // Check apply_exclude_patterns first - if it matches, skip
     if let Some(exclude_patterns) = &processing_ctx.walking.filtering.apply_exclude_patterns {
@@ -863,7 +935,7 @@ fn should_apply_function_to_node_ctx(node: &NodeInfo, processing_ctx: &Processin
                 processing_ctx.walking.filtering.case_insensitive_filter,
                 processing_ctx.walking.listing.show_hidden,
             ) {
-                if entry_matches_path_with_patterns(&node.path, &patterns) {
+                if entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root) {
                     return false; // Skip this node
                 }
             }
@@ -872,20 +944,24 @@ fn should_apply_function_to_node_ctx(node: &NodeInfo, processing_ctx: &Processin
 
     // Check apply_include_patterns - if specified, node must match
     if let Some(include_patterns) = &processing_ctx.walking.filtering.apply_include_patterns {
-        if !include_patterns.is_empty() {
-            if let Ok(Some(patterns)) = compile_glob_patterns(
-                &Some(include_patterns.clone()),
-                processing_ctx.walking.filtering.case_insensitive_filter,
-                processing_ctx.walking.listing.show_hidden,
-            ) {
-                return entry_matches_path_with_patterns(&node.path, &patterns);
-            }
-            // If we have include patterns but compilation failed, don't apply
+        // If include patterns are specified (even if empty), use them as a filter
+        if include_patterns.is_empty() {
+            // Empty include patterns means match nothing
             return false;
         }
+
+        if let Ok(Some(patterns)) = compile_glob_patterns(
+            &Some(include_patterns.clone()),
+            processing_ctx.walking.filtering.case_insensitive_filter,
+            processing_ctx.walking.listing.show_hidden,
+        ) {
+            return entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root);
+        }
+        // If we have include patterns but compilation failed, don't apply
+        return false;
     }
 
-    // If no include patterns specified, or node passed all checks, apply the function
+    // If no include patterns specified (None), apply the function to all
     true
 }
 
@@ -914,9 +990,10 @@ fn apply_directory_functions_to_tree(
     roots: &mut [TempNode],
     func: &BuiltInFunction,
     config: &RustreeLibConfig,
+    walk_root: &Path,
 ) {
     for root in roots {
-        apply_directory_functions_to_node(root, func, config);
+        apply_directory_functions_to_node(root, func, config, walk_root);
     }
 }
 
@@ -925,15 +1002,16 @@ fn apply_directory_functions_to_node(
     node: &mut TempNode,
     func: &BuiltInFunction,
     config: &RustreeLibConfig,
+    walk_root: &Path,
 ) {
     // First, recursively process all children
     for child in &mut node.children {
-        apply_directory_functions_to_node(child, func, config);
+        apply_directory_functions_to_node(child, func, config, walk_root);
     }
 
     // Then process this node if it's a directory and should have the function applied
     if node.node_info.node_type == NodeType::Directory
-        && should_apply_function_to_node(&node.node_info, config)
+        && should_apply_function_to_node(&node.node_info, config, walk_root)
     {
         // Collect child NodeInfo objects for the function
         let child_infos: Vec<NodeInfo> = node
@@ -949,8 +1027,14 @@ fn apply_directory_functions_to_node(
 }
 
 /// Checks if a function should be applied to a specific node based on filtering patterns.
-fn should_apply_function_to_node(node: &NodeInfo, config: &RustreeLibConfig) -> bool {
-    use crate::core::filter::pattern::{compile_glob_patterns, entry_matches_path_with_patterns};
+fn should_apply_function_to_node(
+    node: &NodeInfo,
+    config: &RustreeLibConfig,
+    walk_root: &Path,
+) -> bool {
+    use crate::core::filter::pattern::{
+        compile_glob_patterns, entry_matches_path_with_patterns_relative,
+    };
 
     // Check apply_exclude_patterns first - if it matches, skip
     if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
@@ -960,7 +1044,7 @@ fn should_apply_function_to_node(node: &NodeInfo, config: &RustreeLibConfig) -> 
                 config.filtering.case_insensitive_filter,
                 config.listing.show_hidden,
             ) {
-                if entry_matches_path_with_patterns(&node.path, &patterns) {
+                if entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root) {
                     return false; // Skip this node
                 }
             }
@@ -969,20 +1053,24 @@ fn should_apply_function_to_node(node: &NodeInfo, config: &RustreeLibConfig) -> 
 
     // Check apply_include_patterns - if specified, node must match
     if let Some(include_patterns) = &config.filtering.apply_include_patterns {
-        if !include_patterns.is_empty() {
-            if let Ok(Some(patterns)) = compile_glob_patterns(
-                &Some(include_patterns.clone()),
-                config.filtering.case_insensitive_filter,
-                config.listing.show_hidden,
-            ) {
-                return entry_matches_path_with_patterns(&node.path, &patterns);
-            }
-            // If we have include patterns but compilation failed, don't apply
+        // If include patterns are specified (even if empty), use them as a filter
+        if include_patterns.is_empty() {
+            // Empty include patterns means match nothing
             return false;
         }
+
+        if let Ok(Some(patterns)) = compile_glob_patterns(
+            &Some(include_patterns.clone()),
+            config.filtering.case_insensitive_filter,
+            config.listing.show_hidden,
+        ) {
+            return entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root);
+        }
+        // If we have include patterns but compilation failed, don't apply
+        return false;
     }
 
-    // If no include patterns specified, or node passed all checks, apply the function
+    // If no include patterns specified (None), apply the function to all
     true
 }
 
@@ -1033,7 +1121,7 @@ pub fn get_tree_nodes_owned(
 
     // Apply post-processing with contexts
     let borrowed_ctx = processing_ctx.as_borrowed();
-    apply_post_processing_with_contexts(&mut nodes, &borrowed_ctx)?;
+    apply_post_processing_with_contexts(&mut nodes, &borrowed_ctx, root_path)?;
 
     // Use sorting context if provided
     if let Some(sorting_ctx) = &processing_ctx.sorting {
