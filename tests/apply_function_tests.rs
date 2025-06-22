@@ -46,18 +46,18 @@ fn test_cat_function_integration() {
     assert!(output.contains("file3.txt"));
 
     // Verify the cat content section
-    assert!(output.contains("--- File Contents ---"));
-    assert!(output.contains("=== "));
-    assert!(output.contains("file1.txt ==="));
+    assert!(output.contains("--- File Contents ("));
+    assert!(output.contains("<file path="));
+    assert!(output.contains("file1.txt\">"));
     assert!(output.contains("Content of file 1\nSecond line"));
-    assert!(output.contains("file2.txt ==="));
+    assert!(output.contains("file2.txt\">"));
     assert!(output.contains("File 2 content"));
-    assert!(output.contains("file3.txt ==="));
+    assert!(output.contains("file3.txt\">"));
     assert!(output.contains("Nested file content"));
 
     // Verify structure: tree comes before file contents
     let tree_end = output
-        .find("--- File Contents ---")
+        .find("--- File Contents (")
         .expect("File contents section not found");
     let file1_in_tree = output[..tree_end]
         .find("file1.txt")
@@ -92,9 +92,9 @@ fn test_cat_function_with_empty_files() {
 
     // Should still show the file in tree and content section, even if empty
     assert!(output.contains("empty.txt"));
-    assert!(output.contains("--- File Contents ---"));
-    assert!(output.contains("=== "));
-    assert!(output.contains("empty.txt ==="));
+    assert!(output.contains("--- File Contents ("));
+    assert!(output.contains("<file path="));
+    assert!(output.contains("empty.txt\">"));
 }
 
 #[test]
@@ -146,9 +146,9 @@ fn test_cat_function_markdown_format() {
 
     // Should work with markdown format too
     assert!(output.contains("test.txt")); // More flexible check
-    assert!(output.contains("--- File Contents ---"));
-    assert!(output.contains("=== "));
-    assert!(output.contains("test.txt ==="));
+    assert!(output.contains("--- File Contents ("));
+    assert!(output.contains("<file path="));
+    assert!(output.contains("test.txt\">"));
     assert!(output.contains("Test content for markdown"));
 }
 
@@ -182,7 +182,7 @@ fn test_cat_function_directories_only_mode() {
     // Should only show directories, no file content section
     assert!(output.contains("subdir/"));
     assert!(!output.contains("file.txt"));
-    assert!(!output.contains("--- File Contents ---"));
+    assert!(!output.contains("--- File Contents ("));
 }
 
 #[test]

@@ -80,12 +80,10 @@ fn test_external_text_cat_style_header_and_content() {
     // No inline F markers for text mode
     assert!(!out.contains("[F:"));
 
-    // The custom header should be present
-    let expected_header = format!(
-        "--- Results of applying '{}' to relevant files ---",
-        ext_cmd
-    );
-    assert!(out.contains(&expected_header));
+    // The custom header should be present (with file count)
+    let expected_header_pattern =
+        format!("--- Results of applying '{}' to relevant files (", ext_cmd);
+    assert!(out.contains(&expected_header_pattern));
 
     // And the content of the file should follow under === <path> ===
     assert!(out.contains("Hello external world!"));

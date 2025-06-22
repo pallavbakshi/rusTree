@@ -494,13 +494,42 @@ pub fn format_nodes(
                 _ => "Results".to_string(),
             };
 
-            result.push_str(&format!("\n\n--- {} ---\n", header));
+            result.push_str(&format!(
+                "\n\n--- {} ({} files processed) ---\n",
+                header,
+                file_nodes_with_content.len()
+            ));
+
+            // Determine the effective root path from the nodes themselves
+            // This is the parent of the first depth-1 node.
+            let scan_root_path_opt = nodes
+                .iter()
+                .find(|n| n.depth == 1)
+                .and_then(|n| n.path.parent().map(|p| p.to_path_buf()));
 
             for node in file_nodes_with_content {
                 if let Some(Ok(content)) = &node.custom_function_output {
-                    result.push_str(&format!("\n=== {} ===\n", node.path.display()));
+                    // Display path based on show_full_path flag
+                    let display_path = if config.listing.show_full_path {
+                        // For full path, show absolute path
+                        node.path.to_string_lossy().to_string()
+                    } else {
+                        // Default: show relative path to scan root (existing behavior)
+                        if let Some(scan_root) = &scan_root_path_opt {
+                            node.path
+                                .strip_prefix(scan_root)
+                                .unwrap_or(&node.path)
+                                .to_string_lossy()
+                                .to_string()
+                        } else {
+                            // Fallback to full path if no scan root
+                            node.path.to_string_lossy().to_string()
+                        }
+                    };
+
+                    result.push_str(&format!("\n<file path=\"{}\">\n", display_path));
                     result.push_str(content);
-                    result.push('\n');
+                    result.push_str(&format!("\n</file path=\"{}\">\n", display_path));
                 }
             }
         }
@@ -733,13 +762,42 @@ pub fn format_nodes_with_context(
                 _ => "Results".to_string(),
             };
 
-            result.push_str(&format!("\n\n--- {} ---\n", header));
+            result.push_str(&format!(
+                "\n\n--- {} ({} files processed) ---\n",
+                header,
+                file_nodes_with_content.len()
+            ));
+
+            // Determine the effective root path from the nodes themselves
+            // This is the parent of the first depth-1 node.
+            let scan_root_path_opt = nodes
+                .iter()
+                .find(|n| n.depth == 1)
+                .and_then(|n| n.path.parent().map(|p| p.to_path_buf()));
 
             for node in file_nodes_with_content {
                 if let Some(Ok(content)) = &node.custom_function_output {
-                    result.push_str(&format!("\n=== {} ===\n", node.path.display()));
+                    // Display path based on show_full_path flag
+                    let display_path = if formatting_ctx.listing.show_full_path {
+                        // For full path, show absolute path
+                        node.path.to_string_lossy().to_string()
+                    } else {
+                        // Default: show relative path to scan root (existing behavior)
+                        if let Some(scan_root) = &scan_root_path_opt {
+                            node.path
+                                .strip_prefix(scan_root)
+                                .unwrap_or(&node.path)
+                                .to_string_lossy()
+                                .to_string()
+                        } else {
+                            // Fallback to full path if no scan root
+                            node.path.to_string_lossy().to_string()
+                        }
+                    };
+
+                    result.push_str(&format!("\n<file path=\"{}\">\n", display_path));
                     result.push_str(content);
-                    result.push('\n');
+                    result.push_str(&format!("\n</file path=\"{}\">\n", display_path));
                 }
             }
         }
@@ -946,8 +1004,8 @@ fn should_apply_function_to_node_ctx(
     if let Some(include_patterns) = &processing_ctx.walking.filtering.apply_include_patterns {
         // If include patterns are specified (even if empty), use them as a filter
         if include_patterns.is_empty() {
-            // Empty include patterns means match nothing
-            return false;
+            // Empty include patterns means no restrictions (match everything)
+            return true;
         }
 
         if let Ok(Some(patterns)) = compile_glob_patterns(
@@ -1055,8 +1113,8 @@ fn should_apply_function_to_node(
     if let Some(include_patterns) = &config.filtering.apply_include_patterns {
         // If include patterns are specified (even if empty), use them as a filter
         if include_patterns.is_empty() {
-            // Empty include patterns means match nothing
-            return false;
+            // Empty include patterns means no restrictions (match everything)
+            return true;
         }
 
         if let Ok(Some(patterns)) = compile_glob_patterns(
