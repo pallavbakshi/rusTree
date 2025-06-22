@@ -194,14 +194,14 @@ fn test_apply_function_exclude_patterns() {
         format_nodes(&nodes, LibOutputFormat::Text, &config).expect("Failed to format nodes");
 
     // Should show content for main.rs and lib.rs, but not test.rs
-    assert!(output.contains("--- File Contents ---"));
-    assert!(output.contains("=== ") && output.contains("main.rs ==="));
+    assert!(output.contains("--- File Contents ("));
+    assert!(output.contains("<file path=") && output.contains("main.rs\">"));
     assert!(output.contains("fn main() {}"));
-    assert!(output.contains("=== ") && output.contains("lib.rs ==="));
+    assert!(output.contains("<file path=") && output.contains("lib.rs\">"));
     assert!(output.contains("// lib"));
 
     // Should NOT show content for test.rs
-    assert!(!output.contains("=== test.rs ===") && !output.contains("// test"));
+    assert!(!(output.contains("<file path=") && output.contains("test.rs\">")));
 }
 
 #[test]
@@ -236,15 +236,15 @@ fn test_apply_function_both_include_and_exclude_patterns() {
         format_nodes(&nodes, LibOutputFormat::Text, &config).expect("Failed to format nodes");
 
     // Should show content for main.rs and lib.rs only
-    assert!(output.contains("--- File Contents ---"));
-    assert!(output.contains("=== ") && output.contains("main.rs ==="));
+    assert!(output.contains("--- File Contents ("));
+    assert!(output.contains("<file path=") && output.contains("main.rs\">"));
     assert!(output.contains("fn main() {}"));
-    assert!(output.contains("=== ") && output.contains("lib.rs ==="));
+    assert!(output.contains("<file path=") && output.contains("lib.rs\">"));
     assert!(output.contains("// lib"));
 
     // Should NOT show content for test.rs (excluded) or readme.txt (not included)
-    assert!(!output.contains("=== test.rs ===") && !output.contains("// test"));
-    assert!(!output.contains("=== readme.txt ==="));
+    assert!(!(output.contains("<file path=") && output.contains("test.rs\">")));
+    assert!(!(output.contains("<file path=") && output.contains("readme.txt\">")));
 }
 
 #[test]
@@ -293,9 +293,9 @@ fn test_apply_function_case_sensitivity() {
         .expect("Failed to format nodes");
 
     // Should match only lowercase main.rs
-    assert!(output.contains("=== ") && output.contains("main.rs ==="));
+    assert!(output.contains("<file path=") && output.contains("main.rs\">"));
     assert!(output.contains("// main"));
-    assert!(!output.contains("=== Main.rs ===") && !output.contains("// Main"));
+    assert!(!(output.contains("<file path=") && output.contains("Main.rs\">")));
 
     // Test case-insensitive pattern
     let config_insensitive = RustreeLibConfig {
@@ -316,7 +316,7 @@ fn test_apply_function_case_sensitivity() {
         .expect("Failed to format nodes");
 
     // Should match both files due to case insensitivity
-    assert!(output.contains("=== ") && output.contains("main.rs ==="));
+    assert!(output.contains("<file path=") && output.contains("main.rs\">"));
     assert!(output.contains("// main"));
     // Note: This test might need adjustment based on how case insensitivity is implemented
 }
@@ -358,7 +358,7 @@ fn test_apply_function_patterns_with_different_working_directories() {
         format_nodes(&nodes, LibOutputFormat::Text, &config).expect("Failed to format nodes");
 
     // Should match the file
-    assert!(output.contains("=== ") && output.contains("file.txt ==="));
+    assert!(output.contains("<file path=") && output.contains("file.txt\">"));
     assert!(output.contains("nested content"));
 
     // Restore original working directory
@@ -393,7 +393,7 @@ fn test_pattern_match(
     if expected_count == 0 {
         // Should not have file contents section at all
         assert!(
-            !output.contains("--- File Contents ---"),
+            !output.contains("--- File Contents ("),
             "Pattern '{}' should not match any files, but found file contents section",
             pattern
         );
@@ -402,14 +402,14 @@ fn test_pattern_match(
 
     // Should have file contents section
     assert!(
-        output.contains("--- File Contents ---"),
+        output.contains("--- File Contents ("),
         "Pattern '{}' should match {} files but no file contents section found",
         pattern,
         expected_count
     );
 
     // Count the number of file headers in the content section
-    let content_headers = output.matches("=== ").count();
+    let content_headers = output.matches("<file path=").count();
     assert_eq!(
         content_headers, expected_count,
         "Pattern '{}' should match {} files but found {} file headers",
@@ -418,7 +418,7 @@ fn test_pattern_match(
 
     // Verify each expected file is present
     for expected_file in expected_files {
-        let header = format!("{} ===", expected_file);
+        let header = format!("<file path=\"{}\">", expected_file);
         assert!(
             output.contains(&header),
             "Pattern '{}' should match '{}' but file header '{}' not found in output",
@@ -523,6 +523,6 @@ fn test_empty_and_invalid_patterns() {
         format_nodes(&nodes, LibOutputFormat::Text, &config_pipe).expect("Failed to format nodes");
 
     // Should match test.txt despite empty parts in pattern
-    assert!(output.contains("=== ") && output.contains("test.txt ==="));
+    assert!(output.contains("<file path=") && output.contains("test.txt\">"));
     assert!(output.contains("test content"));
 }

@@ -9,6 +9,7 @@ edition = "2024"
 name = "rustree"
 path = "src/main.rs"
 
+
 [[bench]]
 name = "core_performance"
 harness = false

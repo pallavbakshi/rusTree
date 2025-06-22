@@ -364,8 +364,8 @@ fn should_apply_function_to_file_with_options(
     if let Some(include_patterns) = &filtering_opts.apply_include_patterns {
         // If include patterns are specified (even if empty), use them as a filter
         if include_patterns.is_empty() {
-            // Empty include patterns means match nothing
-            return false;
+            // Empty include patterns means no restrictions (match everything)
+            return true;
         }
 
         if let Ok(Some(patterns)) = compile_glob_patterns(
