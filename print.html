@@ -141,6 +141,9 @@
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
+                        <a href="https://github.com/pallavbakshi/rusTree" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
 
                     </div>
                 </div>
@@ -217,8 +220,8 @@
 <ol>
 <li>
 <p>Clone the repository:</p>
-<pre><code class="language-bash">git clone https://github.com/yourusername/rustree.git # Replace with actual URL
-cd rustree
+<pre><code class="language-bash">git clone https://github.com/pallavbakshi/rusTree.git
+cd rusTree
 </code></pre>
 </li>
 <li>
@@ -306,8 +309,8 @@ rustree --sort-by size --reverse-sort
 <p>This will display all available arguments and their descriptions.</p>
 <p>Explore the <a href="getting_started/../cli_usage.html">Command-Line Interface (CLI)</a> section for more detailed information on all options.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="command-line-interface-cli"><a class="header" href="#command-line-interface-cli">Command-Line Interface (CLI)</a></h1>
-<p>This section details the usage of the <code>rustree</code> command-line tool.</p>
-<p>The basic syntax is:</p>
+<p>This section provides comprehensive documentation for the <code>rustree</code> command-line tool, organized by functional areas for easy navigation.</p>
+<h2 id="basic-syntax"><a class="header" href="#basic-syntax">Basic Syntax</a></h2>
 <pre><code class="language-bash">rustree [OPTIONS] [PATH]
 </code></pre>
 <ul>
@@ -318,13 +321,45 @@ rustree --sort-by size --reverse-sort
 <ul>
 <li><strong>Tree visualization</strong> with customizable depth and formatting</li>
 <li><strong>Metadata display</strong> including sizes, timestamps, line/word counts</li>
-<li><strong>Enhanced summary report</strong> with automatic aggregation of metadata totals</li>
+<li><strong>Enhanced summary reports</strong> with automatic aggregation of metadata totals</li>
 <li><strong>Apply functions</strong> to analyze file contents and directory statistics</li>
 <li><strong>Flexible filtering</strong> with patterns, gitignore support, and function-specific filtering</li>
 <li><strong>Advanced sorting</strong> by various criteria including custom function output</li>
-<li><strong>Multiple output formats</strong> (text, markdown) for different use cases</li>
+<li><strong>Multiple output formats</strong> (text, markdown, JSON, HTML) for different use cases</li>
+<li><strong>LLM integration</strong> for AI-powered project analysis</li>
+<li><strong>Directory comparison</strong> and change tracking</li>
+<li><strong>Configuration file support</strong> for persistent settings</li>
 </ul>
-<h3 id="enhanced-summary-reports"><a class="header" href="#enhanced-summary-reports">Enhanced Summary Reports</a></h3>
+<h2 id="documentation-organization"><a class="header" href="#documentation-organization">Documentation Organization</a></h2>
+<p>The CLI documentation is organized into the following sections:</p>
+<h3 id="core-usage"><a class="header" href="#core-usage">Core Usage</a></h3>
+<ul>
+<li><strong><a href="./cli_usage/getting_started.html">Getting Started</a></strong> - Basic commands and essential options for new users</li>
+<li><strong><a href="./cli_usage/configuration.html">Configuration</a></strong> - Config files, shell completions, and persistent settings</li>
+</ul>
+<h3 id="tree-control"><a class="header" href="#tree-control">Tree Control</a></h3>
+<ul>
+<li><strong><a href="./cli_usage/listing_and_traversal.html">Listing and Traversal</a></strong> - Control tree depth, hidden files, and path display</li>
+<li><strong><a href="./cli_usage/filtering_and_patterns.html">Filtering and Patterns</a></strong> - Include/exclude patterns, gitignore integration, size filtering</li>
+</ul>
+<h3 id="analysis-and-display"><a class="header" href="#analysis-and-display">Analysis and Display</a></h3>
+<ul>
+<li><strong><a href="./cli_usage/metadata_and_analysis.html">Metadata and Analysis</a></strong> - File sizes, timestamps, line/word counts, and content analysis</li>
+<li><strong><a href="./cli_usage/apply_functions.html">Apply Functions</a></strong> - Built-in and external functions for file and directory analysis</li>
+<li><strong><a href="./cli_usage/sorting_and_ordering.html">Sorting and Ordering</a></strong> - Sort by various criteria and control output organization</li>
+</ul>
+<h3 id="output-and-integration"><a class="header" href="#output-and-integration">Output and Integration</a></h3>
+<ul>
+<li><strong><a href="./cli_usage/output_formats.html">Output Formats</a></strong> - Text, Markdown, JSON, HTML formats and customization</li>
+<li><strong><a href="./cli_usage/llm_integration.html">LLM Integration</a></strong> - AI-powered analysis with various LLM providers</li>
+<li><strong><a href="./cli_usage/diff_and_comparison.html">Diff and Comparison</a></strong> - Directory comparison and change tracking</li>
+</ul>
+<h3 id="reference"><a class="header" href="#reference">Reference</a></h3>
+<ul>
+<li><strong><a href="./cli_usage/options.html">Options and Flags</a></strong> - Comprehensive reference of all available command-line options</li>
+<li><strong><a href="./cli_usage/examples.html">Examples</a></strong> - Practical examples demonstrating various use cases</li>
+</ul>
+<h2 id="enhanced-summary-reports"><a class="header" href="#enhanced-summary-reports">Enhanced Summary Reports</a></h2>
 <p>When using metadata flags like <code>--calculate-lines</code>, <code>--calculate-words</code>, or <code>--show-size-bytes</code>, the summary line automatically includes aggregated totals:</p>
 <pre><code class="language-bash"># Instead of just: "3 directories, 15 files"
 # You now get: "3 directories, 15 files, 1,234 total lines, 5,678 total words, 2.1 MB total"
@@ -337,14 +372,2673 @@ rustree --sort-by size --reverse-sort
 <li>Apply function outputs (when numeric)</li>
 <li>Large numbers are formatted with thousand separators for readability</li>
 </ul>
-<h2 id="sub-sections"><a class="header" href="#sub-sections">Sub-sections:</a></h2>
-<ul>
-<li><a href="./cli_usage/options.html">Options and Flags</a>: A comprehensive list of all available command-line options.</li>
-<li><a href="./cli_usage/examples.html">Examples</a>: Practical examples demonstrating various use cases.</li>
-</ul>
-<p>To see all available options directly from your terminal, run:</p>
-<pre><code class="language-bash">rustree --help
+<h2 id="quick-help"><a class="header" href="#quick-help">Quick Help</a></h2>
+<p>To see all available options directly from your terminal:</p>
+<pre><code class="language-bash">rustree --help        # Full help with all options
+rustree -h            # Short help summary
+rustree --version     # Show version information
 </code></pre>
+<h2 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h2>
+<p>If you're new to RusTree, start with the <a href="./cli_usage/getting_started.html">Getting Started</a> guide for the most commonly used commands and options.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-with-rustree-cli"><a class="header" href="#getting-started-with-rustree-cli">Getting Started with RusTree CLI</a></h1>
+<p>This page covers the most basic and commonly used RusTree commands to get you started quickly.</p>
+<h2 id="basic-usage-1"><a class="header" href="#basic-usage-1">Basic Usage</a></h2>
+<p>The simplest way to use RusTree is just to run it without any arguments:</p>
+<pre><code class="language-bash">rustree
+</code></pre>
+<p>This displays a tree of the current directory with default settings.</p>
+<h2 id="essential-options"><a class="header" href="#essential-options">Essential Options</a></h2>
+<h3 id="specify-a-directory"><a class="header" href="#specify-a-directory">Specify a Directory</a></h3>
+<p>Point RusTree at any directory:</p>
+<pre><code class="language-bash">rustree /path/to/directory
+rustree ~/Documents
+rustree ./src
+</code></pre>
+<h3 id="control-tree-depth"><a class="header" href="#control-tree-depth">Control Tree Depth</a></h3>
+<p>Limit how deep into subdirectories RusTree scans:</p>
+<pre><code class="language-bash"># Show only the root and direct children (depth 1)
+rustree -L 1
+
+# Show up to 3 levels deep
+rustree --depth 3 ./my_project
+</code></pre>
+<h3 id="show-hidden-files"><a class="header" href="#show-hidden-files">Show Hidden Files</a></h3>
+<p>Include files and directories that start with a dot:</p>
+<pre><code class="language-bash"># Show hidden files
+rustree -a
+
+# Long form
+rustree --include-hidden
+</code></pre>
+<h3 id="display-file-sizes"><a class="header" href="#display-file-sizes">Display File Sizes</a></h3>
+<p>Show the size of each file:</p>
+<pre><code class="language-bash"># Show sizes in bytes
+rustree -s
+
+# Long form
+rustree --show-size-bytes
+</code></pre>
+<h3 id="show-modification-times"><a class="header" href="#show-modification-times">Show Modification Times</a></h3>
+<p>Display when files were last modified:</p>
+<pre><code class="language-bash"># Show modification times
+rustree -D
+
+# Long form  
+rustree --show-last-modified
+</code></pre>
+<h2 id="common-combinations"><a class="header" href="#common-combinations">Common Combinations</a></h2>
+<h3 id="explore-a-project-structure"><a class="header" href="#explore-a-project-structure">Explore a Project Structure</a></h3>
+<pre><code class="language-bash"># Get an overview of a project (2 levels deep, with sizes)
+rustree -L 2 -s ./my_project
+</code></pre>
+<h3 id="analyze-source-code"><a class="header" href="#analyze-source-code">Analyze Source Code</a></h3>
+<pre><code class="language-bash"># Look at source files with metadata
+rustree -a -s -D --depth 3 ./src
+</code></pre>
+<h3 id="quick-directory-overview"><a class="header" href="#quick-directory-overview">Quick Directory Overview</a></h3>
+<pre><code class="language-bash"># See directory structure only (no files)
+rustree -d -L 2 ./workspace
+</code></pre>
+<h2 id="simple-filtering"><a class="header" href="#simple-filtering">Simple Filtering</a></h2>
+<h3 id="show-only-specific-file-types"><a class="header" href="#show-only-specific-file-types">Show Only Specific File Types</a></h3>
+<pre><code class="language-bash"># Show only Rust files
+rustree -P "*.rs"
+
+# Show only documentation files
+rustree -P "*.md|*.txt"
+</code></pre>
+<h3 id="hide-specific-files-or-directories"><a class="header" href="#hide-specific-files-or-directories">Hide Specific Files or Directories</a></h3>
+<pre><code class="language-bash"># Hide log files
+rustree -I "*.log"
+
+# Hide build directories
+rustree -I "target/|build/"
+</code></pre>
+<h2 id="getting-help-1"><a class="header" href="#getting-help-1">Getting Help</a></h2>
+<ul>
+<li>Use <code>rustree --help</code> for a complete list of options</li>
+<li>Use <code>rustree -h</code> for a shorter summary</li>
+<li>Check <code>rustree --version</code> to see your version</li>
+</ul>
+<h2 id="next-steps"><a class="header" href="#next-steps">Next Steps</a></h2>
+<p>Once you're comfortable with these basics, explore more advanced features:</p>
+<ul>
+<li><strong><a href="cli_usage/./listing_and_traversal.html">Listing and Traversal</a></strong> - Advanced tree structure control</li>
+<li><strong><a href="cli_usage/./filtering_and_patterns.html">Filtering and Patterns</a></strong> - Powerful include/exclude capabilities</li>
+<li><strong><a href="cli_usage/./metadata_and_analysis.html">Metadata and Analysis</a></strong> - File analysis and information display</li>
+<li><strong><a href="cli_usage/./examples.html">Examples</a></strong> - Comprehensive examples for all features</li>
+</ul>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--depth &lt;N&gt;</code></td><td><code>-L &lt;N&gt;</code></td><td>Limit tree depth to N levels</td></tr>
+<tr><td><code>--include-hidden</code></td><td><code>-a</code></td><td>Show hidden files/directories</td></tr>
+<tr><td><code>--show-size-bytes</code></td><td><code>-s</code></td><td>Display file sizes</td></tr>
+<tr><td><code>--show-last-modified</code></td><td><code>-D</code></td><td>Show modification times</td></tr>
+<tr><td><code>--directory-only</code></td><td><code>-d</code></td><td>Show directories only</td></tr>
+<tr><td><code>--filter-include &lt;PATTERN&gt;</code></td><td><code>-P &lt;PATTERN&gt;</code></td><td>Include only matching files</td></tr>
+<tr><td><code>--filter-exclude &lt;PATTERN&gt;</code></td><td><code>-I &lt;PATTERN&gt;</code></td><td>Exclude matching files</td></tr>
+<tr><td><code>--help</code></td><td><code>-h</code></td><td>Show help information</td></tr>
+<tr><td><code>--version</code></td><td><code>-V</code></td><td>Show version information</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="listing-and-traversal"><a class="header" href="#listing-and-traversal">Listing and Traversal</a></h1>
+<p>This page covers options that control how RusTree traverses directories and what elements of the tree structure it displays.</p>
+<h2 id="tree-depth-control"><a class="header" href="#tree-depth-control">Tree Depth Control</a></h2>
+<h3 id="maximum-depth"><a class="header" href="#maximum-depth">Maximum Depth</a></h3>
+<p>Control how deep RusTree descends into subdirectories:</p>
+<pre><code class="language-bash"># Show only direct children (depth 1)
+rustree -L 1
+
+# Scan up to 3 levels deep
+rustree --depth 3 ./project
+
+# No depth limit (default behavior)
+rustree ./project
+</code></pre>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-bash"># Quick project overview
+rustree -L 2 ~/my_project
+
+# Detailed but limited scan
+rustree --depth 4 --show-size-bytes ./src
+</code></pre>
+<h2 id="hidden-files-and-directories"><a class="header" href="#hidden-files-and-directories">Hidden Files and Directories</a></h2>
+<h3 id="including-hidden-files"><a class="header" href="#including-hidden-files">Including Hidden Files</a></h3>
+<p>By default, RusTree ignores files and directories starting with a dot (<code>.</code>). Use <code>-a</code> to include them:</p>
+<pre><code class="language-bash"># Show hidden files and directories
+rustree -a
+
+# Long form
+rustree --include-hidden
+
+# Combine with other options
+rustree -a -L 2 -s
+</code></pre>
+<p><strong>Important:</strong> When using pattern matching (<code>-P</code>), you need <code>-a</code> for patterns like <code>*</code> to match hidden files. Patterns that explicitly start with <code>.</code> (like <code>.*</code>) will match hidden files regardless.</p>
+<pre><code class="language-bash"># This WON'T match .hidden_file
+rustree -P "*"
+
+# This WILL match .hidden_file  
+rustree -a -P "*"
+
+# This WILL match .hidden_file (explicit dot pattern)
+rustree -P ".*"
+</code></pre>
+<h2 id="directory-vs-file-display"><a class="header" href="#directory-vs-file-display">Directory vs File Display</a></h2>
+<h3 id="directory-only-mode"><a class="header" href="#directory-only-mode">Directory-Only Mode</a></h3>
+<p>Show only directories, excluding all files:</p>
+<pre><code class="language-bash"># Show directory structure only
+rustree -d
+
+# Long form
+rustree --directory-only
+
+# Combine with depth and metadata
+rustree -d -L 3 -s ./workspace
+</code></pre>
+<p>This is useful for understanding the overall organization of large projects without being overwhelmed by individual files.</p>
+<h3 id="full-path-display"><a class="header" href="#full-path-display">Full Path Display</a></h3>
+<p>Show the complete relative path for each entry:</p>
+<pre><code class="language-bash"># Display full paths
+rustree -f
+
+# Long form  
+rustree --full-path
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── README.md
+├── src/
+│   ├── src/main.rs        # Shows full path from root
+│   ├── src/lib.rs
+│   └── src/utils/
+│       └── src/utils/helper.rs
+└── tests/
+    └── tests/integration_test.rs
+</code></pre>
+<p>This is particularly useful when you need to know exact file locations, especially for documentation or when working with tools that need full paths.</p>
+<h2 id="path-arguments"><a class="header" href="#path-arguments">Path Arguments</a></h2>
+<h3 id="scanning-multiple-paths"><a class="header" href="#scanning-multiple-paths">Scanning Multiple Paths</a></h3>
+<p>RusTree can scan a specific directory by providing it as an argument:</p>
+<pre><code class="language-bash"># Scan a specific directory
+rustree ~/Documents
+
+# Scan relative path
+rustree ./src
+
+# Scan with options
+rustree -a -L 2 /etc/nginx
+</code></pre>
+<h3 id="current-directory"><a class="header" href="#current-directory">Current Directory</a></h3>
+<p>When no path is specified, RusTree scans the current directory:</p>
+<pre><code class="language-bash"># These are equivalent
+rustree
+rustree .
+rustree ./
+</code></pre>
+<h2 id="combining-traversal-options"><a class="header" href="#combining-traversal-options">Combining Traversal Options</a></h2>
+<h3 id="common-combinations-1"><a class="header" href="#common-combinations-1">Common Combinations</a></h3>
+<pre><code class="language-bash"># Project structure overview
+rustree -d -L 2 --full-path ./my_project
+
+# Hidden configuration files
+rustree -a -P ".*" /etc
+
+# Detailed source code structure  
+rustree -f --include-hidden --depth 4 ./src
+
+# Quick directory tree with sizes
+rustree -d -s -L 3 ~/workspace
+</code></pre>
+<h3 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h3>
+<p>For large directories, consider:</p>
+<ul>
+<li>Using <code>--depth</code> to limit traversal depth</li>
+<li>Using <code>--directory-only</code> to skip files when analyzing structure</li>
+<li>Combining with <a href="cli_usage/./filtering_and_patterns.html">filtering</a> to focus on relevant content</li>
+</ul>
+<h2 id="integration-with-other-features"><a class="header" href="#integration-with-other-features">Integration with Other Features</a></h2>
+<p>Traversal options work seamlessly with other RusTree features:</p>
+<ul>
+<li><strong><a href="cli_usage/./filtering_and_patterns.html">Filtering</a></strong>: Control which files are included based on patterns</li>
+<li><strong><a href="cli_usage/./metadata_and_analysis.html">Metadata</a></strong>: Add file information to the traversal output</li>
+<li><strong><a href="cli_usage/./sorting_and_ordering.html">Sorting</a></strong>: Control how entries are ordered in the tree</li>
+<li><strong><a href="cli_usage/./output_formats.html">Output Formats</a></strong>: Change how the traversal results are displayed</li>
+</ul>
+<h2 id="quick-reference-1"><a class="header" href="#quick-reference-1">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--depth &lt;N&gt;</code></td><td><code>-L &lt;N&gt;</code></td><td>Limit traversal to N levels deep</td></tr>
+<tr><td><code>--include-hidden</code></td><td><code>-a</code></td><td>Include hidden files/directories (starting with <code>.</code>)</td></tr>
+<tr><td><code>--directory-only</code></td><td><code>-d</code></td><td>Show directories only, exclude files</td></tr>
+<tr><td><code>--full-path</code></td><td><code>-f</code></td><td>Display complete relative paths for all entries</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed usage scenarios and combinations with other features.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="filtering-and-patterns"><a class="header" href="#filtering-and-patterns">Filtering and Patterns</a></h1>
+<p>RusTree provides powerful filtering capabilities to show only the files and directories you're interested in. This page covers include/exclude patterns, gitignore integration, and size-based filtering.</p>
+<h2 id="pattern-syntax"><a class="header" href="#pattern-syntax">Pattern Syntax</a></h2>
+<p>RusTree uses glob patterns for matching files and directories:</p>
+<ul>
+<li><code>*</code> - Matches any number of characters (except <code>/</code>)</li>
+<li><code>?</code> - Matches exactly one character</li>
+<li><code>[abc]</code> - Matches any character in brackets</li>
+<li><code>[a-z]</code> - Matches any character in range</li>
+<li><code>[!abc]</code> - Matches any character NOT in brackets</li>
+<li><code>**</code> - Matches any number of directories (recursive)</li>
+<li><code>|</code> - Separates alternative patterns within one argument</li>
+</ul>
+<h2 id="include-patterns"><a class="header" href="#include-patterns">Include Patterns</a></h2>
+<h3 id="basic-include-filtering"><a class="header" href="#basic-include-filtering">Basic Include Filtering</a></h3>
+<p>Show only files/directories that match specific patterns:</p>
+<pre><code class="language-bash"># Show only Rust files
+rustree -P "*.rs"
+
+# Show only documentation files
+rustree --filter-include "*.md"
+
+# Multiple file types using pipe separator
+rustree -P "*.rs|*.toml|*.md"
+</code></pre>
+<h3 id="multiple-include-patterns"><a class="header" href="#multiple-include-patterns">Multiple Include Patterns</a></h3>
+<p>You can specify multiple <code>-P</code> options:</p>
+<pre><code class="language-bash"># These are equivalent
+rustree -P "*.rs" -P "*.toml" -P "*.md"
+rustree -P "*.rs|*.toml|*.md"
+</code></pre>
+<h3 id="directory-specific-patterns"><a class="header" href="#directory-specific-patterns">Directory-Specific Patterns</a></h3>
+<p>Use a trailing <code>/</code> to match directories only:</p>
+<pre><code class="language-bash"># Match directories named "src" or "lib"
+rustree -P "src/|lib/"
+
+# Match any directory ending with "_test"  
+rustree -P "*_test/"
+</code></pre>
+<h3 id="path-based-patterns"><a class="header" href="#path-based-patterns">Path-Based Patterns</a></h3>
+<p>Use <code>/</code> or <code>**</code> for path-based matching:</p>
+<pre><code class="language-bash"># Files directly in src directory
+rustree -P "src/*.rs"
+
+# Rust files anywhere in the tree
+rustree -P "**/*.rs"
+
+# Files in any subdirectory of src
+rustree -P "src/**"
+
+# Specific nested path
+rustree -P "src/cli/*.rs"
+</code></pre>
+<h2 id="exclude-patterns"><a class="header" href="#exclude-patterns">Exclude Patterns</a></h2>
+<h3 id="basic-exclude-filtering"><a class="header" href="#basic-exclude-filtering">Basic Exclude Filtering</a></h3>
+<p>Hide files/directories that match patterns:</p>
+<pre><code class="language-bash"># Hide log files
+rustree -I "*.log"
+
+# Hide build directories
+rustree --filter-exclude "target/"
+
+# Hide multiple types
+rustree -I "*.tmp|*.log|*.bak"
+</code></pre>
+<h3 id="multiple-exclude-patterns"><a class="header" href="#multiple-exclude-patterns">Multiple Exclude Patterns</a></h3>
+<pre><code class="language-bash"># Multiple exclude options
+rustree -I "target/" -I "node_modules/" -I "*.log"
+
+# Pipe-separated in single option
+rustree -I "target/|node_modules/|*.log"
+</code></pre>
+<h3 id="complex-exclusions"><a class="header" href="#complex-exclusions">Complex Exclusions</a></h3>
+<pre><code class="language-bash"># Hide all hidden directories but keep hidden files
+rustree -I ".*/"
+
+# Hide test files but keep test directories  
+rustree -I "*test*.rs" --filter-include "*test*/"
+</code></pre>
+<h2 id="pattern-files"><a class="header" href="#pattern-files">Pattern Files</a></h2>
+<h3 id="include-patterns-from-file"><a class="header" href="#include-patterns-from-file">Include Patterns from File</a></h3>
+<p>Store patterns in files for reusability:</p>
+<p>Create <code>include-patterns.txt</code>:</p>
+<pre><code># Source code files
+*.rs
+*.go
+*.js
+*.ts
+
+# Configuration files  
+*.toml
+*.yml
+*.yaml
+
+# Documentation
+*.md
+README*
+</code></pre>
+<p>Use the file:</p>
+<pre><code class="language-bash">rustree --filter-include-from ./include-patterns.txt
+</code></pre>
+<h3 id="exclude-patterns-from-file"><a class="header" href="#exclude-patterns-from-file">Exclude Patterns from File</a></h3>
+<p>Create <code>exclude-patterns.txt</code>:</p>
+<pre><code># Build artifacts
+target/
+build/
+dist/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+.DS_Store
+</code></pre>
+<p>Use the file:</p>
+<pre><code class="language-bash">rustree --filter-exclude-from ./exclude-patterns.txt
+</code></pre>
+<h3 id="multiple-pattern-files"><a class="header" href="#multiple-pattern-files">Multiple Pattern Files</a></h3>
+<pre><code class="language-bash"># Load from multiple files
+rustree --filter-include-from ./src-patterns.txt \
+        --filter-include-from ./docs-patterns.txt \
+        --filter-exclude-from ./ignore-patterns.txt
+</code></pre>
+<h3 id="pattern-file-format"><a class="header" href="#pattern-file-format">Pattern File Format</a></h3>
+<ul>
+<li>One pattern per line</li>
+<li>Lines starting with <code>#</code> are comments</li>
+<li>Empty lines are ignored</li>
+<li>Same glob syntax as command-line patterns</li>
+</ul>
+<h2 id="gitignore-integration"><a class="header" href="#gitignore-integration">Gitignore Integration</a></h2>
+<h3 id="basic-gitignore-support"><a class="header" href="#basic-gitignore-support">Basic Gitignore Support</a></h3>
+<p>Respect <code>.gitignore</code> files automatically:</p>
+<pre><code class="language-bash"># Use .gitignore rules
+rustree --use-gitignore-rules
+
+# Old alias (deprecated but still works)
+rustree --gitignore
+</code></pre>
+<p>This respects:</p>
+<ul>
+<li><code>.gitignore</code> files in the scanned directories</li>
+<li>Global gitignore file (<code>~/.config/git/ignore</code>)</li>
+<li>Repository exclude files (<code>$GIT_DIR/info/exclude</code>)</li>
+</ul>
+<h3 id="custom-ignore-files"><a class="header" href="#custom-ignore-files">Custom Ignore Files</a></h3>
+<p>Use specific files as gitignore sources:</p>
+<pre><code class="language-bash"># Use custom ignore file
+rustree --gitignore-file ./.customignore
+
+# Multiple ignore files
+rustree --gitignore-file ./.customignore --gitignore-file ./project.ignores
+
+# Combine with standard gitignore
+rustree --use-gitignore-rules --gitignore-file ./.extraignores
+</code></pre>
+<h2 id="case-sensitivity"><a class="header" href="#case-sensitivity">Case Sensitivity</a></h2>
+<h3 id="case-insensitive-matching"><a class="header" href="#case-insensitive-matching">Case-Insensitive Matching</a></h3>
+<p>Make all pattern matching case-insensitive:</p>
+<pre><code class="language-bash"># Match *.TXT, *.txt, *.Txt, etc.
+rustree -P "*.txt" --case-insensitive-filter
+
+# Apply to all filter types
+rustree -P "*.RS" -I "TARGET/" --case-insensitive-filter --use-gitignore-rules
+</code></pre>
+<p>Affects:</p>
+<ul>
+<li>Include patterns (<code>-P</code>, <code>--filter-include</code>)</li>
+<li>Exclude patterns (<code>-I</code>, <code>--filter-exclude</code>)</li>
+<li>Pattern files (<code>--filter-include-from</code>, <code>--filter-exclude-from</code>)</li>
+<li>Gitignore patterns (<code>--use-gitignore-rules</code>, <code>--gitignore-file</code>)</li>
+</ul>
+<h2 id="size-based-filtering"><a class="header" href="#size-based-filtering">Size-Based Filtering</a></h2>
+<h3 id="minimum-file-size"><a class="header" href="#minimum-file-size">Minimum File Size</a></h3>
+<p>Include only files above a certain size:</p>
+<pre><code class="language-bash"># Files at least 100KB
+rustree --min-file-size 100K
+
+# Files at least 2MB
+rustree --min-file-size 2M
+
+# Files at least 1GB
+rustree --min-file-size 1G
+</code></pre>
+<h3 id="maximum-file-size"><a class="header" href="#maximum-file-size">Maximum File Size</a></h3>
+<p>Include only files below a certain size:</p>
+<pre><code class="language-bash"># Files no larger than 500KB  
+rustree --max-file-size 500K
+
+# Small files only (under 1MB)
+rustree --max-file-size 1M
+</code></pre>
+<h3 id="size-ranges"><a class="header" href="#size-ranges">Size Ranges</a></h3>
+<p>Combine min and max for size ranges:</p>
+<pre><code class="language-bash"># Files between 10KB and 1MB
+rustree --min-file-size 10K --max-file-size 1M
+
+# Medium-sized files (100KB to 10MB)
+rustree --min-file-size 100K --max-file-size 10M
+</code></pre>
+<h3 id="size-units"><a class="header" href="#size-units">Size Units</a></h3>
+<p>Supported size suffixes (base-1024):</p>
+<ul>
+<li><code>K</code> - Kibibytes (1024 bytes)</li>
+<li><code>M</code> - Mebibytes (1024² bytes)</li>
+<li><code>G</code> - Gibibytes (1024³ bytes)</li>
+</ul>
+<p><strong>Note:</strong> Size filtering only applies to files, not directories.</p>
+<h2 id="empty-directory-pruning"><a class="header" href="#empty-directory-pruning">Empty Directory Pruning</a></h2>
+<h3 id="remove-empty-directories"><a class="header" href="#remove-empty-directories">Remove Empty Directories</a></h3>
+<p>Hide directories that become empty after filtering:</p>
+<pre><code class="language-bash"># Remove empty directories
+rustree --prune-empty-directories
+
+# Short alias
+rustree --prune
+
+# Combine with filtering
+rustree -P "*.rs" --prune
+</code></pre>
+<p>This is applied after all other filtering, so a directory containing only filtered-out files will be considered empty and pruned.</p>
+<h2 id="hidden-files-and-patterns"><a class="header" href="#hidden-files-and-patterns">Hidden Files and Patterns</a></h2>
+<h3 id="pattern-matching-with-hidden-files"><a class="header" href="#pattern-matching-with-hidden-files">Pattern Matching with Hidden Files</a></h3>
+<p>By default, patterns like <code>*</code> don't match hidden files:</p>
+<pre><code class="language-bash"># This WON'T match .hidden_file
+rustree -P "*"
+
+# This WILL match .hidden_file
+rustree -a -P "*"
+
+# This WILL match .hidden_file (explicit dot)
+rustree -P ".*"
+</code></pre>
+<p>Use <code>-a</code> with general patterns to include hidden files in pattern matching.</p>
+<h2 id="combining-filters"><a class="header" href="#combining-filters">Combining Filters</a></h2>
+<h3 id="complex-filtering-examples"><a class="header" href="#complex-filtering-examples">Complex Filtering Examples</a></h3>
+<pre><code class="language-bash"># Source code only, no build artifacts
+rustree -P "*.rs|*.toml" -I "target/" --use-gitignore-rules
+
+# Large documentation files
+rustree -P "*.md" --min-file-size 10K --max-file-size 1M
+
+# Configuration files with custom ignore
+rustree -P "*.yml|*.yaml|*.toml|*.json" \
+        --filter-exclude-from ./temp-ignores.txt \
+        --case-insensitive-filter
+
+# Include from file, exclude specific patterns
+rustree --filter-include-from ./source-patterns.txt \
+        -I "*.test.*" -I "*_backup*" \
+        --prune-empty-directories
+</code></pre>
+<h2 id="integration-with-other-features-1"><a class="header" href="#integration-with-other-features-1">Integration with Other Features</a></h2>
+<p>Filtering works with all other RusTree features:</p>
+<ul>
+<li><strong><a href="cli_usage/./apply_functions.html">Apply Functions</a></strong>: Apply functions only to filtered files</li>
+<li><strong><a href="cli_usage/./metadata_and_analysis.html">Metadata Analysis</a></strong>: Show metadata for filtered files</li>
+<li><strong><a href="cli_usage/./sorting_and_ordering.html">Sorting</a></strong>: Sort filtered results</li>
+<li><strong><a href="cli_usage/./output_formats.html">Output Formats</a></strong>: Format filtered output</li>
+</ul>
+<h2 id="quick-reference-2"><a class="header" href="#quick-reference-2">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--filter-include &lt;PATTERN&gt;</code></td><td><code>-P</code></td><td>Include only files matching pattern</td></tr>
+<tr><td><code>--filter-exclude &lt;PATTERN&gt;</code></td><td><code>-I</code></td><td>Exclude files matching pattern</td></tr>
+<tr><td><code>--filter-include-from &lt;FILE&gt;</code></td><td></td><td>Read include patterns from file</td></tr>
+<tr><td><code>--filter-exclude-from &lt;FILE&gt;</code></td><td></td><td>Read exclude patterns from file</td></tr>
+<tr><td><code>--use-gitignore-rules</code></td><td></td><td>Respect .gitignore files</td></tr>
+<tr><td><code>--gitignore-file &lt;FILE&gt;</code></td><td></td><td>Use specific file as gitignore source</td></tr>
+<tr><td><code>--case-insensitive-filter</code></td><td></td><td>Make all pattern matching case-insensitive</td></tr>
+<tr><td><code>--min-file-size &lt;SIZE&gt;</code></td><td></td><td>Include only files at least this size</td></tr>
+<tr><td><code>--max-file-size &lt;SIZE&gt;</code></td><td></td><td>Include only files no larger than this size</td></tr>
+<tr><td><code>--prune-empty-directories</code></td><td></td><td>Remove directories that become empty after filtering</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples-1"><a class="header" href="#examples-1">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed filtering scenarios and real-world use cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="metadata-and-analysis"><a class="header" href="#metadata-and-analysis">Metadata and Analysis</a></h1>
+<p>RusTree can collect and display various types of metadata about files and directories, from basic size and timestamp information to detailed content analysis. This page covers all metadata and analysis options.</p>
+<h2 id="file-size-information"><a class="header" href="#file-size-information">File Size Information</a></h2>
+<h3 id="basic-size-display"><a class="header" href="#basic-size-display">Basic Size Display</a></h3>
+<p>Show file sizes alongside the tree structure:</p>
+<pre><code class="language-bash"># Show sizes in bytes
+rustree -s
+
+# Long form
+rustree --show-size-bytes
+</code></pre>
+<h3 id="human-readable-sizes"><a class="header" href="#human-readable-sizes">Human-Readable Sizes</a></h3>
+<p>Format sizes in a more readable format:</p>
+<pre><code class="language-bash"># Show sizes in human-readable format (1.2 MB instead of 1234567B)
+rustree -s --human-friendly
+
+# Combine with other metadata
+rustree -s --human-friendly -D --calculate-lines
+</code></pre>
+<p>The <code>--human-friendly</code> flag converts raw byte counts to readable formats like:</p>
+<ul>
+<li><code>1.2 KB</code> instead of <code>1234B</code></li>
+<li><code>3.4 MB</code> instead of <code>3456789B</code></li>
+<li><code>2.1 GB</code> instead of <code>2147483648B</code></li>
+</ul>
+<h2 id="timestamp-information"><a class="header" href="#timestamp-information">Timestamp Information</a></h2>
+<h3 id="modification-times"><a class="header" href="#modification-times">Modification Times</a></h3>
+<p>Display when files were last modified:</p>
+<pre><code class="language-bash"># Show modification times
+rustree -D
+
+# Long form
+rustree --show-last-modified
+</code></pre>
+<h3 id="change-times"><a class="header" href="#change-times">Change Times</a></h3>
+<p>When combined with change time sorting, <code>-D</code> shows change times instead:</p>
+<pre><code class="language-bash"># Sort by change time and show change times
+rustree -c -D
+
+# Or using long form
+rustree --sort-by change_time --show-last-modified
+</code></pre>
+<h3 id="creation-times"><a class="header" href="#creation-times">Creation Times</a></h3>
+<p>Show file creation times (where supported by the filesystem):</p>
+<pre><code class="language-bash"># Show creation times (may not be available on all systems)
+rustree --show-creation-time
+</code></pre>
+<p><strong>Note:</strong> Creation time support varies by operating system and filesystem. It's most reliable on Windows and macOS, less so on Linux.</p>
+<h2 id="content-analysis"><a class="header" href="#content-analysis">Content Analysis</a></h2>
+<h3 id="line-counting"><a class="header" href="#line-counting">Line Counting</a></h3>
+<p>Count the number of lines in text files:</p>
+<pre><code class="language-bash"># Calculate and display line counts
+rustree --calculate-lines
+
+# Combine with other analysis
+rustree --calculate-lines --show-size-bytes
+</code></pre>
+<h3 id="word-counting"><a class="header" href="#word-counting">Word Counting</a></h3>
+<p>Count words in text files:</p>
+<pre><code class="language-bash"># Calculate and display word counts  
+rustree --calculate-words
+
+# Combine with line counting
+rustree --calculate-lines --calculate-words
+</code></pre>
+<h3 id="content-analysis-with-filtering"><a class="header" href="#content-analysis-with-filtering">Content Analysis with Filtering</a></h3>
+<p>Content analysis works with any file RusTree can read as text:</p>
+<pre><code class="language-bash"># Analyze only source code files
+rustree --calculate-lines --calculate-words -P "*.rs|*.js|*.py"
+
+# Analyze documentation
+rustree --calculate-lines --calculate-words -P "*.md|*.txt"
+</code></pre>
+<h2 id="enhanced-summary-reports-1"><a class="header" href="#enhanced-summary-reports-1">Enhanced Summary Reports</a></h2>
+<p>When using metadata options, RusTree automatically aggregates totals in the summary line:</p>
+<pre><code class="language-bash"># This shows enhanced summary with totals
+rustree --calculate-lines --calculate-words --show-size-bytes
+</code></pre>
+<p>Example output:</p>
+<pre><code>my_project/
+├── [   1024B] [L:  50] [W: 250] README.md
+├── [   2048B] [L: 100] [W: 500] main.rs
+└── src/
+    ├── [   3072B] [L: 150] [W: 750] lib.rs
+    └── [   1536B] [L:  75] [W: 375] util.rs
+
+2 directories, 4 files, 375 total lines, 1,875 total words, 7.7 KB total
+</code></pre>
+<p>The summary automatically includes:</p>
+<ul>
+<li>Total line counts (when <code>--calculate-lines</code> is used)</li>
+<li>Total word counts (when <code>--calculate-words</code> is used)</li>
+<li>Total file sizes (when <code>--show-size-bytes</code> is used)</li>
+<li>Large numbers formatted with thousand separators</li>
+</ul>
+<h2 id="combining-metadata-options"><a class="header" href="#combining-metadata-options">Combining Metadata Options</a></h2>
+<h3 id="comprehensive-analysis"><a class="header" href="#comprehensive-analysis">Comprehensive Analysis</a></h3>
+<pre><code class="language-bash"># Full metadata analysis
+rustree --show-size-bytes --show-last-modified --calculate-lines --calculate-words --human-friendly
+
+# Focus on source code with full analysis
+rustree -P "*.rs" --show-size-bytes --calculate-lines --calculate-words --sort-by size -r
+</code></pre>
+<h3 id="performance-considerations-1"><a class="header" href="#performance-considerations-1">Performance Considerations</a></h3>
+<p>Content analysis (line/word counting) requires reading file contents, which can be slower for:</p>
+<ul>
+<li>Very large files</li>
+<li>Large numbers of files</li>
+<li>Network-mounted filesystems</li>
+</ul>
+<p>Consider using <a href="cli_usage/./filtering_and_patterns.html">filtering</a> to limit analysis to relevant files:</p>
+<pre><code class="language-bash"># Analyze only source files to improve performance
+rustree --calculate-lines -P "*.rs|*.js|*.py" --depth 3
+</code></pre>
+<h2 id="metadata-display-format"><a class="header" href="#metadata-display-format">Metadata Display Format</a></h2>
+<h3 id="size-formatting"><a class="header" href="#size-formatting">Size Formatting</a></h3>
+<p>Sizes are displayed in brackets before the filename:</p>
+<pre><code class="language-bash">rustree -s
+# Output: ├── [   1024B] config.toml
+</code></pre>
+<p>With <code>--human-friendly</code>:</p>
+<pre><code class="language-bash">rustree -s --human-friendly  
+# Output: ├── [  1.0 KB] config.toml
+</code></pre>
+<h3 id="line-and-word-count-display"><a class="header" href="#line-and-word-count-display">Line and Word Count Display</a></h3>
+<p>Line and word counts appear in brackets with prefixes:</p>
+<pre><code class="language-bash">rustree --calculate-lines --calculate-words
+# Output: ├── [L: 150] [W: 750] main.rs
+</code></pre>
+<h3 id="timestamp-display"><a class="header" href="#timestamp-display">Timestamp Display</a></h3>
+<p>Timestamps are shown in a readable format:</p>
+<pre><code class="language-bash">rustree -D
+# Output: ├── [2024-01-15 14:30:25] main.rs
+</code></pre>
+<h2 id="integration-with-other-features-2"><a class="header" href="#integration-with-other-features-2">Integration with Other Features</a></h2>
+<h3 id="sorting-by-metadata"><a class="header" href="#sorting-by-metadata">Sorting by Metadata</a></h3>
+<p>Use metadata for sorting (see <a href="cli_usage/./sorting_and_ordering.html">Sorting and Ordering</a>):</p>
+<pre><code class="language-bash"># Sort by file size (largest first)
+rustree -s --sort-by size -r
+
+# Sort by line count (most lines first)  
+rustree --calculate-lines --sort-by lines -r
+
+# Sort by modification time (newest first)
+rustree -D --sort-by mtime -r
+</code></pre>
+<h3 id="filtering-with-metadata"><a class="header" href="#filtering-with-metadata">Filtering with Metadata</a></h3>
+<p>Combine with <a href="cli_usage/./filtering_and_patterns.html#size-based-filtering">size-based filtering</a>:</p>
+<pre><code class="language-bash"># Show metadata for large files only
+rustree -s --min-file-size 1M --calculate-lines
+
+# Analyze medium-sized source files
+rustree --calculate-lines --calculate-words \
+        -P "*.rs" \
+        --min-file-size 1K --max-file-size 100K
+</code></pre>
+<h3 id="output-formatting"><a class="header" href="#output-formatting">Output Formatting</a></h3>
+<p>Metadata works with all <a href="cli_usage/./output_formats.html">output formats</a>:</p>
+<pre><code class="language-bash"># JSON output with metadata
+rustree --show-size-bytes --calculate-lines --output-format json
+
+# Markdown documentation with analysis
+rustree --calculate-lines -P "*.md" --output-format markdown
+</code></pre>
+<h2 id="project-analysis-examples"><a class="header" href="#project-analysis-examples">Project Analysis Examples</a></h2>
+<h3 id="code-complexity-analysis"><a class="header" href="#code-complexity-analysis">Code Complexity Analysis</a></h3>
+<pre><code class="language-bash"># Analyze source code complexity
+rustree --calculate-lines --calculate-words --show-size-bytes \
+        -P "*.rs|*.js|*.py" \
+        --sort-by lines -r \
+        --depth 3
+</code></pre>
+<h3 id="documentation-overview"><a class="header" href="#documentation-overview">Documentation Overview</a></h3>
+<pre><code class="language-bash"># Analyze documentation completeness
+rustree --calculate-words --show-size-bytes \
+        -P "*.md|*.txt|README*" \
+        --sort-by words -r
+</code></pre>
+<h3 id="large-file-detection"><a class="header" href="#large-file-detection">Large File Detection</a></h3>
+<pre><code class="language-bash"># Find large files with metadata
+rustree --show-size-bytes --human-friendly \
+        --min-file-size 1M \
+        --sort-by size -r \
+        --full-path
+</code></pre>
+<h3 id="module-size-comparison"><a class="header" href="#module-size-comparison">Module Size Comparison</a></h3>
+<pre><code class="language-bash"># Compare module sizes in a project
+rustree --show-size-bytes --calculate-lines \
+        --directory-only --depth 2 \
+        --sort-by size -r
+</code></pre>
+<h2 id="quick-reference-3"><a class="header" href="#quick-reference-3">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--show-size-bytes</code></td><td><code>-s</code></td><td>Display file sizes in bytes</td></tr>
+<tr><td><code>--show-last-modified</code></td><td><code>-D</code></td><td>Show modification times (or change times with <code>-c</code>)</td></tr>
+<tr><td><code>--calculate-lines</code></td><td></td><td>Count and display lines in text files</td></tr>
+<tr><td><code>--calculate-words</code></td><td></td><td>Count and display words in text files</td></tr>
+<tr><td><code>--human-friendly</code></td><td></td><td>Format sizes in readable units (KB, MB, GB)</td></tr>
+<tr><td><code>--show-creation-time</code></td><td></td><td>Show file creation times (where supported)</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples-2"><a class="header" href="#examples-2">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed metadata analysis scenarios and real-world use cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="apply-functions"><a class="header" href="#apply-functions">Apply Functions</a></h1>
+<p>Apply functions allow you to execute operations on files and directories during the tree traversal. RusTree includes powerful built-in functions for analysis and supports external commands for custom processing.</p>
+<h2 id="built-in-functions"><a class="header" href="#built-in-functions">Built-In Functions</a></h2>
+<h3 id="file-content-functions"><a class="header" href="#file-content-functions">File Content Functions</a></h3>
+<p>These functions operate on individual file contents:</p>
+<h4 id="cat-function"><a class="header" href="#cat-function">Cat Function</a></h4>
+<p>Display the complete contents of files after the tree structure:</p>
+<pre><code class="language-bash"># Show tree structure, then file contents
+rustree --apply-function cat
+
+# Show contents of specific file types only
+rustree --apply-function cat -P "*.md|*.txt"
+</code></pre>
+<p><strong>Output format:</strong></p>
+<pre><code>project/
+├── README.md
+├── config.toml
+└── src/
+    └── main.rs
+
+2 directories, 3 files
+
+--- File Contents ---
+
+=== README.md ===
+# My Project
+This is a sample project...
+
+=== config.toml ===
+[package]
+name = "my-project"
+version = "0.1.0"
+
+=== src/main.rs ===
+fn main() {
+    println!("Hello, world!");
+}
+</code></pre>
+<h4 id="count-pluses-function"><a class="header" href="#count-pluses-function">Count Pluses Function</a></h4>
+<p>Count occurrences of the '+' character in each file:</p>
+<pre><code class="language-bash"># Count '+' characters in files
+rustree --apply-function count-pluses
+
+# Focus on specific file types
+rustree --apply-function count-pluses -P "*.rs|*.js"
+</code></pre>
+<p><strong>Output format:</strong></p>
+<pre><code>project/
+├── [+: 5] README.md
+├── [+: 0] config.toml
+└── src/
+    └── [+: 12] main.rs
+</code></pre>
+<h3 id="directory-analysis-functions"><a class="header" href="#directory-analysis-functions">Directory Analysis Functions</a></h3>
+<p>These functions analyze directory contents:</p>
+<h4 id="directory-statistics"><a class="header" href="#directory-statistics">Directory Statistics</a></h4>
+<p>Get comprehensive statistics for each directory:</p>
+<pre><code class="language-bash"># Show files, subdirs, and total size for each directory
+rustree --apply-function dir-stats --show-size-bytes
+</code></pre>
+<p><strong>Output format:</strong></p>
+<pre><code>project/
+├── [F: "2f,1d,1024B"] src/
+│   └── main.rs
+└── [F: "1f,0d,512B"] docs/
+    └── README.md
+</code></pre>
+<p>Format: <code>[F: "XFiles,YDirs,ZBytes"]</code></p>
+<h4 id="count-files"><a class="header" href="#count-files">Count Files</a></h4>
+<p>Count the number of files in each directory:</p>
+<pre><code class="language-bash"># Count files in each directory
+rustree --apply-function count-files
+</code></pre>
+<p><strong>Output format:</strong></p>
+<pre><code>project/
+├── [F: "3"] src/
+└── [F: "1"] docs/
+</code></pre>
+<h4 id="count-directories"><a class="header" href="#count-directories">Count Directories</a></h4>
+<p>Count the number of subdirectories in each directory:</p>
+<pre><code class="language-bash"># Count subdirectories  
+rustree --apply-function count-dirs
+</code></pre>
+<h4 id="size-total"><a class="header" href="#size-total">Size Total</a></h4>
+<p>Calculate total size of all files in each directory:</p>
+<pre><code class="language-bash"># Calculate total size (requires --show-size-bytes)
+rustree --apply-function size-total --show-size-bytes
+</code></pre>
+<p><strong>Note:</strong> <code>--show-size-bytes</code> must be enabled for size calculations to work.</p>
+<h2 id="external-commands"><a class="header" href="#external-commands">External Commands</a></h2>
+<h3 id="custom-command-execution"><a class="header" href="#custom-command-execution">Custom Command Execution</a></h3>
+<p>Execute any external command on file contents:</p>
+<pre><code class="language-bash"># Run wc -l on each file (count lines)
+rustree --apply-function-cmd "wc -l"
+
+# Run grep to count pattern matches
+rustree --apply-function-cmd "grep -c 'TODO'"
+
+# Run custom analysis script
+rustree --apply-function-cmd "./analyze-file.sh"
+</code></pre>
+<h3 id="command-result-types"><a class="header" href="#command-result-types">Command Result Types</a></h3>
+<p>Specify how to interpret command output:</p>
+<pre><code class="language-bash"># Treat output as text (default)
+rustree --apply-function-cmd "file" --apply-function-cmd-kind text
+
+# Treat output as a number  
+rustree --apply-function-cmd "wc -l" --apply-function-cmd-kind number
+
+# Treat output as raw bytes
+rustree --apply-function-cmd "md5sum" --apply-function-cmd-kind bytes
+</code></pre>
+<h3 id="command-timeout"><a class="header" href="#command-timeout">Command Timeout</a></h3>
+<p>Set timeout for external commands:</p>
+<pre><code class="language-bash"># Set 10-second timeout
+rustree --apply-function-cmd "slow-analysis" --apply-timeout 10
+
+# Quick timeout for fast commands
+rustree --apply-function-cmd "grep -c pattern" --apply-timeout 2
+</code></pre>
+<p>Default timeout is 5 seconds.</p>
+<h2 id="function-specific-filtering"><a class="header" href="#function-specific-filtering">Function-Specific Filtering</a></h2>
+<h3 id="include-patterns-1"><a class="header" href="#include-patterns-1">Include Patterns</a></h3>
+<p>Apply functions only to files/directories matching patterns:</p>
+<pre><code class="language-bash"># Apply cat only to configuration files
+rustree --apply-function cat --apply-include "*.toml|*.yml|*.json"
+
+# Count pluses only in source code
+rustree --apply-function count-pluses --apply-include "*.rs|*.js|*.py"
+
+# Directory stats for source directories only  
+rustree --apply-function dir-stats --apply-include "src*|lib*"
+</code></pre>
+<h3 id="exclude-patterns-1"><a class="header" href="#exclude-patterns-1">Exclude Patterns</a></h3>
+<p>Skip applying functions to matching files/directories:</p>
+<pre><code class="language-bash"># Apply cat but exclude temporary files
+rustree --apply-function cat --apply-exclude "*.tmp|*.log"
+
+# Directory stats excluding build directories
+rustree --apply-function dir-stats --apply-exclude "target/*|build/*"
+</code></pre>
+<h3 id="pattern-files-1"><a class="header" href="#pattern-files-1">Pattern Files</a></h3>
+<p>Use files to specify include/exclude patterns:</p>
+<p>Create <code>apply-include.txt</code>:</p>
+<pre><code># Include source files
+*.rs
+*.js
+*.py
+
+# Include configs  
+*.toml
+*.yml
+</code></pre>
+<p>Create <code>apply-exclude.txt</code>:</p>
+<pre><code># Exclude tests
+*test*
+*Test*
+
+# Exclude temp files
+*.tmp
+*.bak
+</code></pre>
+<p>Use the files:</p>
+<pre><code class="language-bash">rustree --apply-function cat \
+        --apply-include-from ./apply-include.txt \
+        --apply-exclude-from ./apply-exclude.txt
+</code></pre>
+<h2 id="advanced-usage"><a class="header" href="#advanced-usage">Advanced Usage</a></h2>
+<h3 id="combining-with-other-features"><a class="header" href="#combining-with-other-features">Combining with Other Features</a></h3>
+<p>Apply functions work seamlessly with other RusTree features:</p>
+<pre><code class="language-bash"># Apply function with filtering and sorting
+rustree --apply-function count-pluses \
+        -P "*.rs" \
+        --sort-by custom -r \
+        --depth 3
+
+# External command with metadata
+rustree --apply-function-cmd "wc -l" \
+        --apply-function-cmd-kind number \
+        --show-size-bytes \
+        --sort-by custom
+
+# Directory analysis with full metadata
+rustree --apply-function dir-stats \
+        --show-size-bytes \
+        --show-last-modified \
+        --sort-by custom -r
+</code></pre>
+<h3 id="performance-optimization"><a class="header" href="#performance-optimization">Performance Optimization</a></h3>
+<p>For large projects, optimize apply function usage:</p>
+<pre><code class="language-bash"># Limit depth to improve performance
+rustree --apply-function cat --depth 2
+
+# Use specific filtering to reduce scope
+rustree --apply-function-cmd "analyze" \
+        --apply-include "*.rs" \
+        --apply-exclude "**/target/**"
+
+# Set shorter timeout for fast commands
+rustree --apply-function-cmd "grep -c pattern" \
+        --apply-timeout 1
+</code></pre>
+<h2 id="sorting-by-function-output"><a class="header" href="#sorting-by-function-output">Sorting by Function Output</a></h2>
+<p>Sort the tree by apply function results:</p>
+<pre><code class="language-bash"># Sort by count-pluses output (highest first)
+rustree --apply-function count-pluses --sort-by custom -r
+
+# Sort by directory statistics  
+rustree --apply-function dir-stats --sort-by custom
+
+# Sort by external command output
+rustree --apply-function-cmd "wc -l" --sort-by custom -r
+</code></pre>
+<p>See <a href="cli_usage/./sorting_and_ordering.html">Sorting and Ordering</a> for more details.</p>
+<h2 id="real-world-examples"><a class="header" href="#real-world-examples">Real-World Examples</a></h2>
+<h3 id="code-analysis"><a class="header" href="#code-analysis">Code Analysis</a></h3>
+<pre><code class="language-bash"># Find files with the most TODO comments
+rustree --apply-function-cmd "grep -c 'TODO'" \
+        --apply-function-cmd-kind number \
+        -P "*.rs|*.js|*.py" \
+        --sort-by custom -r
+
+# Analyze complexity by line count
+rustree --apply-function-cmd "wc -l" \
+        --apply-function-cmd-kind number \
+        --apply-include "*.rs" \
+        --sort-by custom -r
+</code></pre>
+<h3 id="configuration-management"><a class="header" href="#configuration-management">Configuration Management</a></h3>
+<pre><code class="language-bash"># Display all configuration files
+rustree --apply-function cat \
+        --apply-include "*.toml|*.yml|*.json|*.ini" \
+        --depth 2
+
+# Find large config files
+rustree --apply-function-cmd "wc -c" \
+        --apply-function-cmd-kind number \
+        --apply-include "*.config|*.conf" \
+        --sort-by custom -r
+</code></pre>
+<h3 id="project-statistics"><a class="header" href="#project-statistics">Project Statistics</a></h3>
+<pre><code class="language-bash"># Comprehensive directory analysis
+rustree --apply-function dir-stats \
+        --show-size-bytes \
+        --apply-exclude "**/target/**" \
+        --apply-exclude "**/node_modules/**" \
+        --sort-by custom -r
+
+# Find directories with most files
+rustree --apply-function count-files \
+        --directory-only \
+        --sort-by custom -r \
+        --depth 3
+</code></pre>
+<h3 id="documentation-review"><a class="header" href="#documentation-review">Documentation Review</a></h3>
+<pre><code class="language-bash"># Review all markdown documentation
+rustree --apply-function cat \
+        --apply-include "*.md|README*" \
+        --depth 3
+
+# Find largest documentation files
+rustree --apply-function-cmd "wc -w" \
+        --apply-function-cmd-kind number \
+        --apply-include "*.md" \
+        --sort-by custom -r
+</code></pre>
+<h2 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h2>
+<h3 id="command-failures"><a class="header" href="#command-failures">Command Failures</a></h3>
+<p>When external commands fail:</p>
+<ul>
+<li>Error output is captured and displayed</li>
+<li>Tree generation continues for other files</li>
+<li>Failed commands show error message in output</li>
+</ul>
+<h3 id="timeout-handling"><a class="header" href="#timeout-handling">Timeout Handling</a></h3>
+<p>When commands exceed timeout:</p>
+<ul>
+<li>Command is terminated</li>
+<li>Timeout message is displayed</li>
+<li>Processing continues with remaining files</li>
+</ul>
+<h3 id="file-access-issues"><a class="header" href="#file-access-issues">File Access Issues</a></h3>
+<p>When files can't be read:</p>
+<ul>
+<li>Built-in functions skip unreadable files</li>
+<li>External commands receive empty input</li>
+<li>Warning messages may be displayed</li>
+</ul>
+<h2 id="quick-reference-4"><a class="header" href="#quick-reference-4">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--apply-function &lt;FUNCTION&gt;</code></td><td>Apply built-in function (cat, count-pluses, dir-stats, etc.)</td></tr>
+<tr><td><code>--apply-function-cmd &lt;CMD&gt;</code></td><td>Apply external command to files</td></tr>
+<tr><td><code>--apply-function-cmd-kind &lt;KIND&gt;</code></td><td>Command output type (text, number, bytes)</td></tr>
+<tr><td><code>--apply-timeout &lt;SECONDS&gt;</code></td><td>Timeout for external commands (default: 5)</td></tr>
+<tr><td><code>--apply-include &lt;PATTERN&gt;</code></td><td>Apply function only to matching files/dirs</td></tr>
+<tr><td><code>--apply-exclude &lt;PATTERN&gt;</code></td><td>Skip function for matching files/dirs</td></tr>
+<tr><td><code>--apply-include-from &lt;FILE&gt;</code></td><td>Read include patterns from file</td></tr>
+<tr><td><code>--apply-exclude-from &lt;FILE&gt;</code></td><td>Read exclude patterns from file</td></tr>
+</tbody></table>
+</div>
+<h3 id="built-in-functions-1"><a class="header" href="#built-in-functions-1">Built-in Functions</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Function</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>cat</code></td><td>File</td><td>Display complete file contents</td></tr>
+<tr><td><code>count-pluses</code></td><td>File</td><td>Count '+' characters in files</td></tr>
+<tr><td><code>count-files</code></td><td>Directory</td><td>Count files in directories</td></tr>
+<tr><td><code>count-dirs</code></td><td>Directory</td><td>Count subdirectories</td></tr>
+<tr><td><code>size-total</code></td><td>Directory</td><td>Calculate total size (needs <code>--show-size-bytes</code>)</td></tr>
+<tr><td><code>dir-stats</code></td><td>Directory</td><td>Combined stats (files, dirs, size)</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples-3"><a class="header" href="#examples-3">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed apply function scenarios and real-world use cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sorting-and-ordering"><a class="header" href="#sorting-and-ordering">Sorting and Ordering</a></h1>
+<p>RusTree provides flexible sorting options to organize tree output by various criteria. You can sort by name, size, timestamps, content analysis results, or custom function output.</p>
+<h2 id="basic-sorting"><a class="header" href="#basic-sorting">Basic Sorting</a></h2>
+<h3 id="default-behavior"><a class="header" href="#default-behavior">Default Behavior</a></h3>
+<p>By default, RusTree sorts entries alphabetically by name:</p>
+<pre><code class="language-bash"># Default alphabetical sorting
+rustree
+</code></pre>
+<h3 id="disable-sorting"><a class="header" href="#disable-sorting">Disable Sorting</a></h3>
+<p>Display entries in directory order (as they appear on disk):</p>
+<pre><code class="language-bash"># No sorting - directory order
+rustree -U
+
+# Long form
+rustree --unsorted
+
+# Alternative form
+rustree --sort-by none
+</code></pre>
+<h2 id="sort-by-name"><a class="header" href="#sort-by-name">Sort by Name</a></h2>
+<h3 id="alphabetical-sorting"><a class="header" href="#alphabetical-sorting">Alphabetical Sorting</a></h3>
+<pre><code class="language-bash"># Explicit alphabetical sorting (default)
+rustree --sort-by name
+</code></pre>
+<h3 id="version-sorting"><a class="header" href="#version-sorting">Version Sorting</a></h3>
+<p>Sort by version numbers embedded in filenames:</p>
+<pre><code class="language-bash"># Version-aware sorting (file-1.0.0 before file-1.10.0)
+rustree -v
+
+# Long form
+rustree --sort-by version
+</code></pre>
+<p>This is useful for files with version numbers where you want proper numerical ordering instead of lexicographic ordering.</p>
+<h2 id="sort-by-size"><a class="header" href="#sort-by-size">Sort by Size</a></h2>
+<h3 id="file-size-sorting"><a class="header" href="#file-size-sorting">File Size Sorting</a></h3>
+<p>Sort by file size (requires size information):</p>
+<pre><code class="language-bash"># Sort by size (largest first)
+rustree --show-size-bytes --sort-by size
+
+# Sort by size (smallest first) 
+rustree -s --sort-by size --reverse-sort
+</code></pre>
+<p><strong>Note:</strong> You must enable <code>--show-size-bytes</code> for size sorting to work.</p>
+<h2 id="sort-by-time"><a class="header" href="#sort-by-time">Sort by Time</a></h2>
+<h3 id="modification-time"><a class="header" href="#modification-time">Modification Time</a></h3>
+<p>Sort by when files were last modified:</p>
+<pre><code class="language-bash"># Sort by modification time (oldest first)
+rustree -t
+
+# Long form
+rustree --sort-by mtime
+
+# Newest first
+rustree -t -r
+</code></pre>
+<h3 id="change-time"><a class="header" href="#change-time">Change Time</a></h3>
+<p>Sort by when file metadata was last changed:</p>
+<pre><code class="language-bash"># Sort by change time (oldest first)
+rustree -c
+
+# Long form  
+rustree --sort-by change_time
+
+# Show change times when using this sort
+rustree -c -D
+</code></pre>
+<h3 id="creation-time"><a class="header" href="#creation-time">Creation Time</a></h3>
+<p>Sort by file creation time (where supported):</p>
+<pre><code class="language-bash"># Sort by creation time
+rustree --sort-by create_time
+
+# Newest created files first
+rustree --sort-by create_time --reverse-sort
+</code></pre>
+<h2 id="sort-by-content-analysis"><a class="header" href="#sort-by-content-analysis">Sort by Content Analysis</a></h2>
+<h3 id="line-count-sorting"><a class="header" href="#line-count-sorting">Line Count Sorting</a></h3>
+<p>Sort by number of lines in files (requires line counting):</p>
+<pre><code class="language-bash"># Sort by line count (most lines first)
+rustree --calculate-lines --sort-by lines
+
+# Fewest lines first
+rustree --calculate-lines --sort-by lines --reverse-sort
+</code></pre>
+<h3 id="word-count-sorting"><a class="header" href="#word-count-sorting">Word Count Sorting</a></h3>
+<p>Sort by number of words in files (requires word counting):</p>
+<pre><code class="language-bash"># Sort by word count (most words first)
+rustree --calculate-words --sort-by words
+
+# Fewest words first
+rustree --calculate-words --sort-by words -r
+</code></pre>
+<h2 id="sort-by-custom-functions"><a class="header" href="#sort-by-custom-functions">Sort by Custom Functions</a></h2>
+<h3 id="apply-function-results"><a class="header" href="#apply-function-results">Apply Function Results</a></h3>
+<p>Sort by the output of apply functions:</p>
+<pre><code class="language-bash"># Sort by count-pluses output (most '+' characters first)
+rustree --apply-function count-pluses --sort-by custom -r
+
+# Sort by directory statistics
+rustree --apply-function dir-stats --sort-by custom
+
+# Sort by external command output
+rustree --apply-function-cmd "wc -l" --sort-by custom -r
+</code></pre>
+<h2 id="reverse-sorting"><a class="header" href="#reverse-sorting">Reverse Sorting</a></h2>
+<h3 id="reverse-any-sort-order"><a class="header" href="#reverse-any-sort-order">Reverse Any Sort Order</a></h3>
+<p>Add <code>-r</code> or <code>--reverse-sort</code> to reverse any sort:</p>
+<pre><code class="language-bash"># Reverse alphabetical (Z to A)
+rustree -r
+
+# Largest files first
+rustree -s --sort-by size -r
+
+# Newest modifications first  
+rustree -t -r
+
+# Most complex files first (by line count)
+rustree --calculate-lines --sort-by lines -r
+</code></pre>
+<h2 id="directory-vs-file-ordering"><a class="header" href="#directory-vs-file-ordering">Directory vs File Ordering</a></h2>
+<h3 id="directories-first"><a class="header" href="#directories-first">Directories First</a></h3>
+<p>Show all directories before files at each level:</p>
+<pre><code class="language-bash"># Directories before files
+rustree --dirs-first
+
+# Combine with other sorting
+rustree --dirs-first --sort-by size -r
+</code></pre>
+<h3 id="files-first"><a class="header" href="#files-first">Files First</a></h3>
+<p>Show all files before directories at each level:</p>
+<pre><code class="language-bash"># Files before directories
+rustree --files-first
+
+# Combine with sorting
+rustree --files-first --sort-by mtime -r
+</code></pre>
+<p><strong>Note:</strong> <code>--dirs-first</code> and <code>--files-first</code> are mutually exclusive.</p>
+<h2 id="sort-conflicts-and-precedence"><a class="header" href="#sort-conflicts-and-precedence">Sort Conflicts and Precedence</a></h2>
+<h3 id="single-letter-sort-options"><a class="header" href="#single-letter-sort-options">Single-Letter Sort Options</a></h3>
+<p>The single-letter sort options (<code>-t</code>, <code>-c</code>, <code>-v</code>, <code>-U</code>) conflict with each other and with <code>--sort-by</code>:</p>
+<pre><code class="language-bash"># These conflict - only the last one applies
+rustree -t -c -v    # Only -v (version) applies
+
+# Use --sort-by for explicit control
+rustree --sort-by mtime
+</code></pre>
+<h3 id="sort-order-precedence"><a class="header" href="#sort-order-precedence">Sort Order Precedence</a></h3>
+<ol>
+<li><code>--sort-by</code> takes precedence over single-letter options</li>
+<li><code>-U</code> (unsorted) disables all other sorting</li>
+<li><code>-r</code> applies to whatever sort is active</li>
+</ol>
+<h2 id="complex-sorting-examples"><a class="header" href="#complex-sorting-examples">Complex Sorting Examples</a></h2>
+<h3 id="multi-criteria-analysis"><a class="header" href="#multi-criteria-analysis">Multi-Criteria Analysis</a></h3>
+<pre><code class="language-bash"># Large source files with most lines first
+rustree --show-size-bytes --calculate-lines \
+        -P "*.rs|*.js|*.py" \
+        --sort-by lines -r \
+        --dirs-first
+
+# Recently modified large files
+rustree -s -D --sort-by mtime -r \
+        --min-file-size 1M \
+        --files-first
+
+# Complex directories by statistics
+rustree --apply-function dir-stats \
+        --directory-only \
+        --sort-by custom -r \
+        --depth 2
+</code></pre>
+<h3 id="combining-with-filtering"><a class="header" href="#combining-with-filtering">Combining with Filtering</a></h3>
+<pre><code class="language-bash"># Largest documentation files
+rustree -s -P "*.md|*.txt" \
+        --sort-by size -r \
+        --max-file-size 1M
+
+# Most recently changed configuration
+rustree -c -D --sort-by change_time -r \
+        -P "*.toml|*.yml|*.json"
+
+# Source files by complexity
+rustree --calculate-lines --calculate-words \
+        -P "*.rs" \
+        --sort-by lines -r \
+        --apply-exclude "**/target/**"
+</code></pre>
+<h2 id="performance-considerations-2"><a class="header" href="#performance-considerations-2">Performance Considerations</a></h2>
+<h3 id="expensive-sorts"><a class="header" href="#expensive-sorts">Expensive Sorts</a></h3>
+<p>Some sorts require additional processing:</p>
+<ul>
+<li><strong>Size sorting</strong>: Requires reading file metadata</li>
+<li><strong>Content analysis sorting</strong>: Requires reading and analyzing file contents</li>
+<li><strong>Custom function sorting</strong>: Depends on function complexity</li>
+</ul>
+<p>Consider using <a href="cli_usage/./filtering_and_patterns.html">filtering</a> to reduce the number of files processed:</p>
+<pre><code class="language-bash"># Efficient: filter first, then sort
+rustree --calculate-lines -P "*.rs" --sort-by lines -r
+
+# Less efficient: sort everything, then filter might happen later
+rustree --calculate-lines --sort-by lines -r
+</code></pre>
+<h3 id="large-directory-optimization"><a class="header" href="#large-directory-optimization">Large Directory Optimization</a></h3>
+<p>For large directories:</p>
+<pre><code class="language-bash"># Limit depth to improve performance
+rustree --sort-by size -r --depth 2
+
+# Use directory-only for structure analysis
+rustree --sort-by size -r --directory-only
+
+# Combine with pruning
+rustree --sort-by lines -r --prune-empty-directories
+</code></pre>
+<h2 id="integration-with-other-features-3"><a class="header" href="#integration-with-other-features-3">Integration with Other Features</a></h2>
+<h3 id="output-formats"><a class="header" href="#output-formats">Output Formats</a></h3>
+<p>Sorting works with all output formats:</p>
+<pre><code class="language-bash"># Sorted JSON output
+rustree --sort-by size -r --output-format json
+
+# Sorted Markdown
+rustree --sort-by mtime -r --output-format markdown
+</code></pre>
+<h3 id="metadata-display"><a class="header" href="#metadata-display">Metadata Display</a></h3>
+<p>Show relevant metadata for your sort criteria:</p>
+<pre><code class="language-bash"># Show sizes when sorting by size
+rustree -s --sort-by size -r
+
+# Show times when sorting by time
+rustree -D --sort-by mtime -r
+
+# Show line counts when sorting by lines
+rustree --calculate-lines --sort-by lines -r
+</code></pre>
+<h2 id="quick-reference-5"><a class="header" href="#quick-reference-5">Quick Reference</a></h2>
+<h3 id="sort-keys"><a class="header" href="#sort-keys">Sort Keys</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--sort-by name</code></td><td>(default)</td><td>Alphabetical sorting</td></tr>
+<tr><td><code>--sort-by version</code></td><td><code>-v</code></td><td>Version-aware sorting</td></tr>
+<tr><td><code>--sort-by size</code></td><td></td><td>Sort by file size (needs <code>--show-size-bytes</code>)</td></tr>
+<tr><td><code>--sort-by mtime</code></td><td><code>-t</code></td><td>Sort by modification time</td></tr>
+<tr><td><code>--sort-by change_time</code></td><td><code>-c</code></td><td>Sort by change time</td></tr>
+<tr><td><code>--sort-by create_time</code></td><td></td><td>Sort by creation time</td></tr>
+<tr><td><code>--sort-by lines</code></td><td></td><td>Sort by line count (needs <code>--calculate-lines</code>)</td></tr>
+<tr><td><code>--sort-by words</code></td><td></td><td>Sort by word count (needs <code>--calculate-words</code>)</td></tr>
+<tr><td><code>--sort-by custom</code></td><td></td><td>Sort by apply function output</td></tr>
+<tr><td><code>--sort-by none</code></td><td><code>-U</code></td><td>No sorting (directory order)</td></tr>
+</tbody></table>
+</div>
+<h3 id="sort-modifiers"><a class="header" href="#sort-modifiers">Sort Modifiers</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--reverse-sort</code></td><td><code>-r</code></td><td>Reverse the sort order</td></tr>
+<tr><td><code>--dirs-first</code></td><td></td><td>Show directories before files</td></tr>
+<tr><td><code>--files-first</code></td><td></td><td>Show files before directories</td></tr>
+</tbody></table>
+</div>
+<h3 id="sort-direction-defaults"><a class="header" href="#sort-direction-defaults">Sort Direction Defaults</a></h3>
+<ul>
+<li><strong>Name/Version</strong>: A to Z (use <code>-r</code> for Z to A)</li>
+<li><strong>Size</strong>: Largest first (use <code>-r</code> for smallest first)</li>
+<li><strong>Time</strong>: Oldest first (use <code>-r</code> for newest first)</li>
+<li><strong>Lines/Words</strong>: Most first (use <code>-r</code> for fewest first)</li>
+<li><strong>Custom</strong>: Depends on function output type</li>
+</ul>
+<h2 id="examples-4"><a class="header" href="#examples-4">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed sorting scenarios and real-world use cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="output-formats-1"><a class="header" href="#output-formats-1">Output Formats</a></h1>
+<p>RusTree supports multiple output formats to suit different use cases, from human-readable text to structured data formats and web-ready HTML. This page covers all output format options and customization.</p>
+<h2 id="available-formats"><a class="header" href="#available-formats">Available Formats</a></h2>
+<h3 id="text-format-default"><a class="header" href="#text-format-default">Text Format (Default)</a></h3>
+<p>The default tree-like text output:</p>
+<pre><code class="language-bash"># Default text format
+rustree
+
+# Explicit text format
+rustree --output-format text
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── README.md
+├── src/
+│   ├── main.rs
+│   └── lib.rs
+└── tests/
+    └── integration.rs
+
+2 directories, 4 files
+</code></pre>
+<h3 id="markdown-format"><a class="header" href="#markdown-format">Markdown Format</a></h3>
+<p>List-based Markdown output suitable for documentation:</p>
+<pre><code class="language-bash"># Markdown format
+rustree --output-format markdown
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code class="language-markdown"># my_project
+
+* README.md
+* src/
+  * main.rs
+  * lib.rs
+* tests/
+  * integration.rs
+
+__2 directories, 4 files total__
+</code></pre>
+<h3 id="json-format"><a class="header" href="#json-format">JSON Format</a></h3>
+<p>Structured JSON data for programmatic processing:</p>
+<pre><code class="language-bash"># JSON format
+rustree --output-format json
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code class="language-json">{
+  "nodes": [
+    {
+      "path": "./README.md",
+      "name": "README.md",
+      "type": "file",
+      "depth": 1,
+      "size": 1024
+    },
+    {
+      "path": "./src",
+      "name": "src",
+      "type": "directory", 
+      "depth": 1
+    }
+  ],
+  "summary": {
+    "directories": 2,
+    "files": 4,
+    "total_size": 5120
+  }
+}
+</code></pre>
+<h3 id="html-format"><a class="header" href="#html-format">HTML Format</a></h3>
+<p>Web-ready HTML with optional hyperlinks and customization:</p>
+<pre><code class="language-bash"># Basic HTML format
+rustree --output-format html
+
+# HTML with hyperlinks
+rustree --output-format html --html-base-href https://example.com/repo
+</code></pre>
+<h2 id="summary-report-control"><a class="header" href="#summary-report-control">Summary Report Control</a></h2>
+<h3 id="disable-summary"><a class="header" href="#disable-summary">Disable Summary</a></h3>
+<p>Remove the summary line from output:</p>
+<pre><code class="language-bash"># No summary report
+rustree --no-summary-report
+
+# Useful for clean Markdown documentation
+rustree --output-format markdown --no-summary-report &gt; structure.md
+</code></pre>
+<h3 id="enhanced-summary-with-metadata"><a class="header" href="#enhanced-summary-with-metadata">Enhanced Summary with Metadata</a></h3>
+<p>When using metadata options, the summary automatically includes totals:</p>
+<pre><code class="language-bash"># Enhanced summary with aggregated metadata
+rustree --calculate-lines --calculate-words --show-size-bytes
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code>my_project/
+├── [1024B] [L: 50] [W: 250] README.md
+└── src/
+    └── [2048B] [L: 100] [W: 500] main.rs
+
+1 directory, 2 files, 150 total lines, 750 total words, 3.1 KB total
+</code></pre>
+<h2 id="html-customization"><a class="header" href="#html-customization">HTML Customization</a></h2>
+<h3 id="base-url-for-links"><a class="header" href="#base-url-for-links">Base URL for Links</a></h3>
+<p>Create clickable links in HTML output:</p>
+<pre><code class="language-bash"># Add base URL to all links
+rustree --output-format html --html-base-href https://github.com/user/repo/blob/main
+
+# Local file links
+rustree --output-format html --html-base-href file:///path/to/project
+</code></pre>
+<h3 id="strip-path-components"><a class="header" href="#strip-path-components">Strip Path Components</a></h3>
+<p>Remove leading path components from links:</p>
+<pre><code class="language-bash"># Scan subdirectory but link to parent paths
+rustree src/ --output-format html \
+       --html-base-href https://example.com \
+       --html-strip-first-component
+</code></pre>
+<p>This is useful when scanning a subdirectory but wanting links to be relative to the parent.</p>
+<h3 id="disable-links"><a class="header" href="#disable-links">Disable Links</a></h3>
+<p>Generate HTML without hyperlinks:</p>
+<pre><code class="language-bash"># Plain HTML without &lt;a&gt; tags
+rustree --output-format html --html-no-links
+</code></pre>
+<h3 id="custom-html-templates"><a class="header" href="#custom-html-templates">Custom HTML Templates</a></h3>
+<h4 id="custom-header"><a class="header" href="#custom-header">Custom Header</a></h4>
+<p>Replace the default HTML header:</p>
+<pre><code class="language-bash"># Use custom intro HTML
+rustree --output-format html --html-intro-file ./templates/header.html
+
+# Suppress header entirely
+rustree --output-format html --html-intro-file /dev/null
+</code></pre>
+<h4 id="custom-footer"><a class="header" href="#custom-footer">Custom Footer</a></h4>
+<p>Replace the default HTML footer:</p>
+<pre><code class="language-bash"># Use custom outro HTML  
+rustree --output-format html --html-outro-file ./templates/footer.html
+
+# Suppress footer entirely
+rustree --output-format html --html-outro-file /dev/null
+</code></pre>
+<h2 id="format-specific-features"><a class="header" href="#format-specific-features">Format-Specific Features</a></h2>
+<h3 id="json-with-metadata"><a class="header" href="#json-with-metadata">JSON with Metadata</a></h3>
+<p>JSON format includes all collected metadata:</p>
+<pre><code class="language-bash"># Rich JSON with full metadata
+rustree --output-format json \
+        --show-size-bytes \
+        --calculate-lines \
+        --show-last-modified
+</code></pre>
+<h3 id="markdown-with-metadata"><a class="header" href="#markdown-with-metadata">Markdown with Metadata</a></h3>
+<p>Metadata appears inline in Markdown format:</p>
+<pre><code class="language-bash"># Markdown with file sizes and line counts
+rustree --output-format markdown \
+        --show-size-bytes \
+        --calculate-lines \
+        --human-friendly
+</code></pre>
+<h3 id="json-processing"><a class="header" href="#json-processing">JSON Processing</a></h3>
+<p>Use JSON output with external tools:</p>
+<pre><code class="language-bash"># Pretty-print JSON
+rustree --output-format json | jq '.'
+
+# Extract specific information
+rustree --output-format json | jq '.nodes[] | select(.type == "file") | .name'
+
+# Get file count
+rustree --output-format json | jq '.summary.files'
+
+# Find large files
+rustree --output-format json --show-size-bytes | \
+  jq '.nodes[] | select(.size &gt; 1000000) | .path'
+</code></pre>
+<h2 id="llm-integration-with-formats"><a class="header" href="#llm-integration-with-formats">LLM Integration with Formats</a></h2>
+<h3 id="combined-json-output"><a class="header" href="#combined-json-output">Combined JSON Output</a></h3>
+<p>When using LLM features with JSON format, both tree and LLM data are included:</p>
+<pre><code class="language-bash"># Tree + LLM analysis in single JSON
+rustree --output-format json \
+        --llm-ask "Analyze this project structure" \
+        --dry-run
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  "tree": {
+    "nodes": [...],
+    "summary": {...}
+  },
+  "llm": {
+    "dry_run": true,
+    "request": {...},
+    "question": "Analyze this project structure"
+  }
+}
+</code></pre>
+<h2 id="practical-examples"><a class="header" href="#practical-examples">Practical Examples</a></h2>
+<h3 id="documentation-generation"><a class="header" href="#documentation-generation">Documentation Generation</a></h3>
+<pre><code class="language-bash"># Clean Markdown for documentation
+rustree docs/ --output-format markdown \
+       --no-summary-report \
+       --depth 3 &gt; docs-structure.md
+
+# HTML for web documentation
+rustree --output-format html \
+        --html-base-href https://docs.example.com \
+        --html-intro-file ./templates/docs-header.html \
+        --depth 2 &gt; docs-index.html
+</code></pre>
+<h3 id="data-processing"><a class="header" href="#data-processing">Data Processing</a></h3>
+<pre><code class="language-bash"># Generate data for analysis
+rustree --output-format json \
+        --show-size-bytes \
+        --calculate-lines &gt; project-data.json
+
+# Process with jq
+cat project-data.json | jq '.nodes[] | select(.lines &gt; 100)'
+</code></pre>
+<h3 id="web-publishing"><a class="header" href="#web-publishing">Web Publishing</a></h3>
+<pre><code class="language-bash"># Complete web page with navigation
+rustree src/ --output-format html \
+       --html-base-href https://github.com/user/repo/tree/main/src \
+       --html-intro-file ./web/header.html \
+       --html-outro-file ./web/footer.html \
+       --show-size-bytes --human-friendly &gt; src-browser.html
+</code></pre>
+<h3 id="archival-and-reporting"><a class="header" href="#archival-and-reporting">Archival and Reporting</a></h3>
+<pre><code class="language-bash"># Comprehensive project snapshot
+rustree --output-format json \
+        --show-size-bytes \
+        --show-last-modified \
+        --calculate-lines \
+        --calculate-words &gt; "snapshot-$(date +%Y%m%d).json"
+
+# Human-readable report
+rustree --output-format markdown \
+        --show-size-bytes --human-friendly \
+        --calculate-lines \
+        --sort-by size -r &gt; project-report.md
+</code></pre>
+<h2 id="format-compatibility"><a class="header" href="#format-compatibility">Format Compatibility</a></h2>
+<h3 id="cross-format-workflows"><a class="header" href="#cross-format-workflows">Cross-Format Workflows</a></h3>
+<pre><code class="language-bash"># Generate in multiple formats
+rustree --output-format json &gt; data.json
+rustree --output-format markdown &gt; structure.md  
+rustree --output-format html &gt; browser.html
+
+# Convert between formats using external tools
+rustree --output-format json | jq -r '.nodes[].path' &gt; file-list.txt
+</code></pre>
+<h3 id="integration-with-external-tools"><a class="header" href="#integration-with-external-tools">Integration with External Tools</a></h3>
+<pre><code class="language-bash"># Feed to other analysis tools
+rustree --output-format json | python analyze-structure.py
+
+# Generate reports
+rustree --output-format markdown | pandoc -o report.pdf
+
+# Create web assets
+rustree --output-format html --html-no-links | \
+  sed 's/&lt;pre&gt;/&lt;pre class="tree-view"&gt;/' &gt; styled-tree.html
+</code></pre>
+<h2 id="quick-reference-6"><a class="header" href="#quick-reference-6">Quick Reference</a></h2>
+<h3 id="format-options"><a class="header" href="#format-options">Format Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--output-format text</code></td><td>Default tree-like text output</td></tr>
+<tr><td><code>--output-format markdown</code></td><td>Markdown list format</td></tr>
+<tr><td><code>--output-format json</code></td><td>Structured JSON data</td></tr>
+<tr><td><code>--output-format html</code></td><td>Web-ready HTML</td></tr>
+</tbody></table>
+</div>
+<h3 id="summary-control"><a class="header" href="#summary-control">Summary Control</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--no-summary-report</code></td><td>Omit the summary line from output</td></tr>
+</tbody></table>
+</div>
+<h3 id="html-specific-options"><a class="header" href="#html-specific-options">HTML-Specific Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--html-base-href &lt;URL&gt;</code></td><td>Base URL for generated hyperlinks</td></tr>
+<tr><td><code>--html-strip-first-component</code></td><td>Remove first path component from links</td></tr>
+<tr><td><code>--html-no-links</code></td><td>Disable hyperlink generation</td></tr>
+<tr><td><code>--html-intro-file &lt;FILE&gt;</code></td><td>Custom HTML header template</td></tr>
+<tr><td><code>--html-outro-file &lt;FILE&gt;</code></td><td>Custom HTML footer template</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples-5"><a class="header" href="#examples-5">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed output format scenarios and integration examples.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="llm-integration"><a class="header" href="#llm-integration">LLM Integration</a></h1>
+<p>RusTree includes powerful AI integration capabilities, allowing you to analyze project structures using Large Language Models (LLMs). You can either export formatted queries for external tools or directly interact with LLM services.</p>
+<h2 id="quick-start"><a class="header" href="#quick-start">Quick Start</a></h2>
+<h3 id="basic-llm-query"><a class="header" href="#basic-llm-query">Basic LLM Query</a></h3>
+<p>Ask a question directly to an LLM service:</p>
+<pre><code class="language-bash"># Basic analysis with OpenAI (default provider)
+rustree --llm-ask "What's the architecture of this project?"
+
+# With environment variable for API key
+export OPENAI_API_KEY="your-api-key"
+rustree --llm-ask "Analyze the code organization"
+</code></pre>
+<h3 id="generate-api-key-template"><a class="header" href="#generate-api-key-template">Generate API Key Template</a></h3>
+<p>Set up your environment variables:</p>
+<pre><code class="language-bash"># Generate .env template
+rustree --llm-generate-env &gt; .env
+
+# Edit the .env file to add your API keys
+# Then source it: source .env
+</code></pre>
+<h2 id="llm-providers"><a class="header" href="#llm-providers">LLM Providers</a></h2>
+<h3 id="openai-default"><a class="header" href="#openai-default">OpenAI (Default)</a></h3>
+<pre><code class="language-bash"># Default OpenAI usage
+rustree --llm-ask "Describe this project structure"
+
+# Specify model explicitly
+rustree --llm-ask "Code review analysis" --llm-model gpt-4
+
+# Use GPT-3.5 for faster/cheaper analysis
+rustree --llm-ask "Quick overview" --llm-model gpt-3.5-turbo
+</code></pre>
+<p><strong>Environment variable:</strong> <code>OPENAI_API_KEY</code></p>
+<h3 id="anthropic-claude"><a class="header" href="#anthropic-claude">Anthropic (Claude)</a></h3>
+<pre><code class="language-bash"># Use Claude for analysis
+rustree --llm-ask "What patterns do you see?" --llm-provider anthropic
+
+# Specify Claude model
+rustree --llm-ask "Security review" \
+        --llm-provider anthropic \
+        --llm-model claude-3-sonnet-20240229
+</code></pre>
+<p><strong>Environment variable:</strong> <code>ANTHROPIC_API_KEY</code></p>
+<h3 id="cohere"><a class="header" href="#cohere">Cohere</a></h3>
+<pre><code class="language-bash"># Use Cohere for analysis
+rustree --llm-ask "Summarize the codebase" --llm-provider cohere
+
+# Specify Cohere model
+rustree --llm-ask "Architecture analysis" \
+        --llm-provider cohere \
+        --llm-model command-r
+</code></pre>
+<p><strong>Environment variable:</strong> <code>COHERE_API_KEY</code></p>
+<h3 id="openrouter-multi-provider"><a class="header" href="#openrouter-multi-provider">OpenRouter (Multi-Provider)</a></h3>
+<pre><code class="language-bash"># Use OpenRouter for access to multiple models
+rustree --llm-ask "Compare this with best practices" \
+        --llm-provider openrouter
+
+# Use specific model through OpenRouter
+rustree --llm-ask "Performance analysis" \
+        --llm-provider openrouter \
+        --llm-model anthropic/claude-3-haiku
+</code></pre>
+<p><strong>Environment variable:</strong> <code>OPENROUTER_API_KEY</code></p>
+<h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration Options</a></h2>
+<h3 id="api-key-management"><a class="header" href="#api-key-management">API Key Management</a></h3>
+<p>Multiple ways to provide API keys:</p>
+<pre><code class="language-bash"># Command line (not recommended for security)
+rustree --llm-ask "Question" --llm-api-key "your-key"
+
+# Environment variable (recommended)
+export OPENAI_API_KEY="your-key"
+rustree --llm-ask "Question"
+
+# .env file (recommended for development)
+echo 'OPENAI_API_KEY=your-key' &gt;&gt; .env
+rustree --llm-ask "Question"
+</code></pre>
+<h3 id="response-control"><a class="header" href="#response-control">Response Control</a></h3>
+<h4 id="temperature"><a class="header" href="#temperature">Temperature</a></h4>
+<p>Control response randomness (0.0 = deterministic, 2.0 = very random):</p>
+<pre><code class="language-bash"># Precise, deterministic analysis
+rustree --llm-ask "Security audit" --llm-temperature 0.1
+
+# Balanced analysis (default: 0.7)
+rustree --llm-ask "Code review"
+
+# Creative, varied analysis  
+rustree --llm-ask "Suggest improvements" --llm-temperature 1.2
+</code></pre>
+<h4 id="response-length"><a class="header" href="#response-length">Response Length</a></h4>
+<p>Control maximum response length:</p>
+<pre><code class="language-bash"># Brief response
+rustree --llm-ask "Quick summary" --llm-max-tokens 200
+
+# Standard response (default: 1000)
+rustree --llm-ask "Analyze architecture"
+
+# Detailed analysis
+rustree --llm-ask "Comprehensive review" --llm-max-tokens 3000
+</code></pre>
+<h3 id="custom-endpoints"><a class="header" href="#custom-endpoints">Custom Endpoints</a></h3>
+<p>Use custom or self-hosted endpoints:</p>
+<pre><code class="language-bash"># Custom OpenAI-compatible endpoint
+rustree --llm-ask "Analysis" \
+        --llm-endpoint "https://api.custom.com/v1"
+
+# Local AI service
+rustree --llm-ask "Local analysis" \
+        --llm-endpoint "http://localhost:8080/v1"
+</code></pre>
+<h2 id="export-for-external-tools"><a class="header" href="#export-for-external-tools">Export for External Tools</a></h2>
+<h3 id="generate-formatted-queries"><a class="header" href="#generate-formatted-queries">Generate Formatted Queries</a></h3>
+<p>Create formatted queries for external LLM tools:</p>
+<pre><code class="language-bash"># Export for external tools
+rustree --llm-export "What are the main components?"
+
+# Pipe to external LLM tools
+rustree --llm-export "Code quality assessment" | claude-cli
+rustree --llm-export "Security review" | ollama run mistral
+rustree --llm-export "Performance analysis" &gt; analysis-prompt.txt
+</code></pre>
+<h3 id="export-vs-direct-query"><a class="header" href="#export-vs-direct-query">Export vs Direct Query</a></h3>
+<ul>
+<li><strong><code>--llm-export</code></strong>: Formats output for external tools, preserves original behavior</li>
+<li><strong><code>--llm-ask</code></strong>: Direct integration with LLM services</li>
+</ul>
+<h2 id="request-preview-and-debugging"><a class="header" href="#request-preview-and-debugging">Request Preview and Debugging</a></h2>
+<h3 id="dry-run-mode"><a class="header" href="#dry-run-mode">Dry Run Mode</a></h3>
+<p>Preview requests without making API calls:</p>
+<pre><code class="language-bash"># Preview what would be sent (no cost)
+rustree --llm-ask "Analyze architecture" --dry-run
+
+# Human-readable preview format
+rustree --llm-ask "Security review" --dry-run --human-friendly
+
+# Preview with specific settings
+rustree --llm-ask "Performance analysis" \
+        --llm-provider anthropic \
+        --llm-model claude-3-haiku \
+        --llm-temperature 0.3 \
+        --dry-run --human-friendly
+</code></pre>
+<h3 id="token-estimation"><a class="header" href="#token-estimation">Token Estimation</a></h3>
+<p>Dry run mode provides rough token estimates:</p>
+<pre><code class="language-bash">rustree --llm-ask "Detailed analysis" \
+        --llm-max-tokens 2000 \
+        --dry-run
+</code></pre>
+<p><strong>Note:</strong> Token estimates use a 4:1 character-to-token ratio and are approximate. Actual usage may vary significantly.</p>
+<h2 id="combining-with-tree-features"><a class="header" href="#combining-with-tree-features">Combining with Tree Features</a></h2>
+<h3 id="filtered-analysis"><a class="header" href="#filtered-analysis">Filtered Analysis</a></h3>
+<p>Analyze specific parts of your project:</p>
+<pre><code class="language-bash"># Analyze only source code
+rustree --llm-ask "Review the code quality" \
+        --filter-include "*.rs" \
+        --filter-exclude "**/target/**"
+
+# Focus on documentation
+rustree --llm-ask "How well documented is this?" \
+        --filter-include "*.md" "README*"
+
+# Analyze configuration
+rustree --llm-ask "Review configuration setup" \
+        --filter-include "*.toml" "*.yml" "*.json"
+</code></pre>
+<h3 id="depth-limited-analysis"><a class="header" href="#depth-limited-analysis">Depth-Limited Analysis</a></h3>
+<p>Control scope for large projects:</p>
+<pre><code class="language-bash"># High-level architecture analysis
+rustree --llm-ask "What's the overall structure?" \
+        --depth 2 --directory-only
+
+# Detailed module analysis
+rustree --llm-ask "Analyze module organization" \
+        --depth 4 --filter-include "src/**"
+</code></pre>
+<h3 id="metadata-enhanced-analysis"><a class="header" href="#metadata-enhanced-analysis">Metadata-Enhanced Analysis</a></h3>
+<p>Include file metadata in analysis:</p>
+<pre><code class="language-bash"># Size-aware analysis
+rustree --llm-ask "Which files seem overly large?" \
+        --show-size-bytes --human-friendly \
+        --sort-by size --reverse-sort
+
+# Complexity analysis
+rustree --llm-ask "Identify complex modules" \
+        --calculate-lines --calculate-words \
+        --sort-by lines --reverse-sort
+
+# Recent changes analysis
+rustree --llm-ask "What was recently modified?" \
+        --show-last-modified \
+        --sort-by mtime --reverse-sort
+</code></pre>
+<h2 id="advanced-use-cases"><a class="header" href="#advanced-use-cases">Advanced Use Cases</a></h2>
+<h3 id="multi-step-analysis"><a class="header" href="#multi-step-analysis">Multi-Step Analysis</a></h3>
+<pre><code class="language-bash"># Step 1: Preview and refine
+rustree --llm-ask "Initial assessment" --dry-run --human-friendly
+
+# Step 2: Export for review
+rustree --llm-export "Refined question" &gt; prompt-for-review.txt
+
+# Step 3: Direct analysis
+rustree --llm-ask "Focused analysis based on preview" \
+        --llm-temperature 0.3 \
+        --llm-max-tokens 1500
+
+# Step 4: Compare with external tools
+rustree --llm-export "Cross-check analysis" | external-llm-tool
+</code></pre>
+<h3 id="different-providers-for-different-tasks"><a class="header" href="#different-providers-for-different-tasks">Different Providers for Different Tasks</a></h3>
+<pre><code class="language-bash"># Quick overview with fast model
+rustree --llm-ask "Project overview" \
+        --llm-provider openai \
+        --llm-model gpt-3.5-turbo
+
+# Detailed security analysis with advanced model
+rustree --llm-ask "Comprehensive security review" \
+        --llm-provider anthropic \
+        --llm-model claude-3-sonnet \
+        --llm-temperature 0.2
+
+# Creative improvement suggestions
+rustree --llm-ask "How would you reorganize this?" \
+        --llm-provider cohere \
+        --llm-temperature 1.0
+</code></pre>
+<h3 id="json-output-with-llm"><a class="header" href="#json-output-with-llm">JSON Output with LLM</a></h3>
+<p>Combine structured data with AI analysis:</p>
+<pre><code class="language-bash"># Get both tree data and analysis in JSON
+rustree --output-format json \
+        --llm-ask "Analyze the structure" \
+        --dry-run | jq '.'
+
+# Process tree data, then analyze
+rustree --output-format json --show-size-bytes &gt; data.json
+rustree --llm-ask "Based on this data, what optimization opportunities exist?" \
+        --from-tree-file data.json
+</code></pre>
+<h2 id="workflow-examples"><a class="header" href="#workflow-examples">Workflow Examples</a></h2>
+<h3 id="code-review-workflow"><a class="header" href="#code-review-workflow">Code Review Workflow</a></h3>
+<pre><code class="language-bash"># 1. Get overview
+rustree --llm-ask "What type of project is this?" --depth 2
+
+# 2. Analyze structure
+rustree --llm-ask "How is the code organized?" \
+        --filter-include "src/**" --depth 3
+
+# 3. Check for issues
+rustree --llm-ask "Are there any potential problems?" \
+        --show-size-bytes --calculate-lines \
+        --sort-by size --reverse-sort
+
+# 4. Get suggestions
+rustree --llm-ask "What improvements would you suggest?" \
+        --llm-temperature 0.8 --llm-max-tokens 2000
+</code></pre>
+<h3 id="documentation-analysis"><a class="header" href="#documentation-analysis">Documentation Analysis</a></h3>
+<pre><code class="language-bash"># Analyze documentation coverage
+rustree --llm-ask "How well documented is this project?" \
+        --filter-include "*.md" "*.txt" "README*" \
+        --calculate-words
+
+# Compare docs to code
+rustree --llm-ask "Does the documentation match the code structure?" \
+        --filter-include "*.md" "*.rs" \
+        --depth 3
+</code></pre>
+<h3 id="performance-analysis"><a class="header" href="#performance-analysis">Performance Analysis</a></h3>
+<pre><code class="language-bash"># Find potential performance issues
+rustree --llm-ask "What might cause performance problems?" \
+        --show-size-bytes --human-friendly \
+        --calculate-lines \
+        --min-file-size 10K
+
+# Analyze module complexity
+rustree --llm-ask "Which modules are most complex?" \
+        --apply-function dir-stats \
+        --directory-only \
+        --sort-by custom --reverse-sort
+</code></pre>
+<h2 id="error-handling-and-troubleshooting"><a class="header" href="#error-handling-and-troubleshooting">Error Handling and Troubleshooting</a></h2>
+<h3 id="api-key-issues"><a class="header" href="#api-key-issues">API Key Issues</a></h3>
+<pre><code class="language-bash"># Check if API key is configured
+rustree --llm-ask "test" --dry-run
+
+# Generate template for missing keys
+rustree --llm-generate-env
+</code></pre>
+<h3 id="rate-limiting"><a class="header" href="#rate-limiting">Rate Limiting</a></h3>
+<p>If you hit rate limits:</p>
+<ul>
+<li>Use <code>--dry-run</code> to test without API calls</li>
+<li>Reduce <code>--llm-max-tokens</code> for smaller requests</li>
+<li>Use filtering to reduce tree size</li>
+<li>Switch to different provider/model</li>
+</ul>
+<h3 id="network-issues"><a class="header" href="#network-issues">Network Issues</a></h3>
+<pre><code class="language-bash"># Test connectivity with dry run
+rustree --llm-ask "test connection" --dry-run
+
+# Use custom endpoint if needed
+rustree --llm-ask "test" --llm-endpoint "https://alternative-endpoint.com"
+</code></pre>
+<h2 id="quick-reference-7"><a class="header" href="#quick-reference-7">Quick Reference</a></h2>
+<h3 id="core-options"><a class="header" href="#core-options">Core Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--llm-ask &lt;QUESTION&gt;</code></td><td>Ask question directly to LLM service</td></tr>
+<tr><td><code>--llm-export &lt;QUESTION&gt;</code></td><td>Export formatted query for external tools</td></tr>
+<tr><td><code>--llm-provider &lt;PROVIDER&gt;</code></td><td>Choose provider (openai, anthropic, cohere, openrouter)</td></tr>
+<tr><td><code>--llm-model &lt;MODEL&gt;</code></td><td>Specify model name</td></tr>
+<tr><td><code>--llm-api-key &lt;KEY&gt;</code></td><td>Provide API key via command line</td></tr>
+</tbody></table>
+</div>
+<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--llm-endpoint &lt;URL&gt;</code></td><td>Custom endpoint URL</td></tr>
+<tr><td><code>--llm-temperature &lt;FLOAT&gt;</code></td><td>Response randomness (0.0-2.0, default: 0.7)</td></tr>
+<tr><td><code>--llm-max-tokens &lt;INT&gt;</code></td><td>Maximum response tokens (default: 1000)</td></tr>
+<tr><td><code>--llm-generate-env</code></td><td>Generate .env template</td></tr>
+</tbody></table>
+</div>
+<h3 id="debugging"><a class="header" href="#debugging">Debugging</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--dry-run</code></td><td>Preview request without sending it</td></tr>
+<tr><td><code>--human-friendly</code></td><td>Format dry-run output in readable markdown</td></tr>
+</tbody></table>
+</div>
+<h3 id="environment-variables"><a class="header" href="#environment-variables">Environment Variables</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Variable</th><th>Provider</th></tr></thead><tbody>
+<tr><td><code>OPENAI_API_KEY</code></td><td>OpenAI</td></tr>
+<tr><td><code>ANTHROPIC_API_KEY</code></td><td>Anthropic (Claude)</td></tr>
+<tr><td><code>COHERE_API_KEY</code></td><td>Cohere</td></tr>
+<tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples-6"><a class="header" href="#examples-6">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed LLM integration scenarios and real-world use cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="diff-and-comparison"><a class="header" href="#diff-and-comparison">Diff and Comparison</a></h1>
+<p>RusTree includes powerful directory comparison capabilities to track changes over time. The diff feature can detect additions, removals, modifications, moves/renames, and type changes between directory snapshots.</p>
+<h2 id="basic-diff-operations"><a class="header" href="#basic-diff-operations">Basic Diff Operations</a></h2>
+<h3 id="create-and-compare-snapshots"><a class="header" href="#create-and-compare-snapshots">Create and Compare Snapshots</a></h3>
+<p>First, create a baseline snapshot in JSON format:</p>
+<pre><code class="language-bash"># Save current state as baseline
+rustree --output-format json &gt; baseline.json
+
+# Later, after making changes, compare current state with baseline
+rustree --diff baseline.json
+</code></pre>
+<h3 id="compare-two-snapshots"><a class="header" href="#compare-two-snapshots">Compare Two Snapshots</a></h3>
+<p>Compare two saved snapshots without scanning the current directory:</p>
+<pre><code class="language-bash"># Compare two specific snapshots
+rustree --diff new_snapshot.json --from-tree-file old_snapshot.json
+</code></pre>
+<h3 id="input-sources"><a class="header" href="#input-sources">Input Sources</a></h3>
+<p>The diff feature supports various input sources:</p>
+<pre><code class="language-bash"># Compare with current directory (default)
+rustree --diff baseline.json
+
+# Compare two files
+rustree --diff new.json --from-tree-file old.json
+
+# Compare against different directory
+rustree --diff baseline.json /path/to/other/directory
+</code></pre>
+<h2 id="change-types"><a class="header" href="#change-types">Change Types</a></h2>
+<p>RusTree detects several types of changes:</p>
+<ul>
+<li><strong>Added</strong> <code>[+]</code> - New files or directories</li>
+<li><strong>Removed</strong> <code>[-]</code> - Deleted files or directories</li>
+<li><strong>Modified</strong> <code>[M]</code> - Files with changed content, size, or timestamps</li>
+<li><strong>Moved</strong> <code>[→]</code> - Files or directories that were moved/renamed</li>
+<li><strong>Type Changed</strong> <code>[T]</code> - Entries that changed type (file to directory, etc.)</li>
+<li><strong>Unchanged</strong> <code>[=]</code> - No changes (shown only with <code>--show-unchanged</code>)</li>
+</ul>
+<h2 id="diff-output-formats"><a class="header" href="#diff-output-formats">Diff Output Formats</a></h2>
+<h3 id="text-format-default-1"><a class="header" href="#text-format-default-1">Text Format (Default)</a></h3>
+<p>Shows changes in a tree structure with change markers:</p>
+<pre><code class="language-bash">rustree --diff baseline.json
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>project/
+├── [+] new_file.rs
+├── [M] README.md
+├── [-] old_config.toml
+├── [→] src/main.rs (moved from lib.rs)
+└── src/
+    └── [T] data (file → directory)
+
+Changes: 2 added, 1 removed, 1 modified, 1 moved, 1 type changed
+</code></pre>
+<h3 id="markdown-format-1"><a class="header" href="#markdown-format-1">Markdown Format</a></h3>
+<p>Generate markdown reports for documentation:</p>
+<pre><code class="language-bash">rustree --diff baseline.json --output-format markdown &gt; changes.md
+</code></pre>
+<h3 id="json-format-1"><a class="header" href="#json-format-1">JSON Format</a></h3>
+<p>Structured data for programmatic processing:</p>
+<pre><code class="language-bash">rustree --diff baseline.json --output-format json &gt; diff_report.json
+</code></pre>
+<h3 id="html-format-1"><a class="header" href="#html-format-1">HTML Format</a></h3>
+<p>Interactive viewing in web browsers:</p>
+<pre><code class="language-bash">rustree --diff baseline.json --output-format html &gt; diff_report.html
+</code></pre>
+<h2 id="filtering-changes"><a class="header" href="#filtering-changes">Filtering Changes</a></h2>
+<h3 id="show-specific-change-types"><a class="header" href="#show-specific-change-types">Show Specific Change Types</a></h3>
+<p>Display only certain types of changes:</p>
+<pre><code class="language-bash"># Show only additions and removals
+rustree --diff baseline.json --show-only added,removed
+
+# Show only modifications
+rustree --diff baseline.json --show-only modified
+
+# Show moves and type changes
+rustree --diff baseline.json --show-only moved,type_changed
+</code></pre>
+<p>Available change types:</p>
+<ul>
+<li><code>added</code> - New files/directories</li>
+<li><code>removed</code> - Deleted files/directories</li>
+<li><code>modified</code> - Changed files</li>
+<li><code>moved</code> - Moved/renamed files/directories</li>
+<li><code>type_changed</code> - Type changes (file ↔ directory)</li>
+</ul>
+<h3 id="show-unchanged-files"><a class="header" href="#show-unchanged-files">Show Unchanged Files</a></h3>
+<p>Include unchanged files in the output:</p>
+<pre><code class="language-bash"># Show all files, including unchanged ones
+rustree --diff baseline.json --show-unchanged
+</code></pre>
+<p>This provides a complete picture showing what changed and what didn't.</p>
+<h3 id="statistics-only"><a class="header" href="#statistics-only">Statistics Only</a></h3>
+<p>Show only summary statistics without the detailed tree:</p>
+<pre><code class="language-bash"># Summary statistics only
+rustree --diff baseline.json --stats-only
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>Changes Summary:
+- 5 files added
+- 2 files removed
+- 3 files modified
+- 1 file moved
+- 0 type changes
+Total: 11 changes detected
+</code></pre>
+<h2 id="move-detection"><a class="header" href="#move-detection">Move Detection</a></h2>
+<h3 id="move-detection-settings"><a class="header" href="#move-detection-settings">Move Detection Settings</a></h3>
+<p>Control how aggressively RusTree detects file moves:</p>
+<pre><code class="language-bash"># Default move detection (80% similarity)
+rustree --diff baseline.json
+
+# Strict move detection (95% similarity)
+rustree --diff baseline.json --move-threshold 0.95
+
+# Loose move detection (50% similarity)
+rustree --diff baseline.json --move-threshold 0.5
+
+# Disable move detection entirely
+rustree --diff baseline.json --ignore-moves
+</code></pre>
+<h3 id="how-move-detection-works"><a class="header" href="#how-move-detection-works">How Move Detection Works</a></h3>
+<p>RusTree uses content similarity to detect moves:</p>
+<ul>
+<li>Compares file sizes and content hashes</li>
+<li>Calculates similarity scores between files</li>
+<li>Files above the threshold are considered moves</li>
+<li>Without move detection, moves appear as separate add/remove operations</li>
+</ul>
+<h3 id="move-threshold-guidelines"><a class="header" href="#move-threshold-guidelines">Move Threshold Guidelines</a></h3>
+<ul>
+<li><strong>0.9-1.0</strong>: Very strict - only nearly identical files</li>
+<li><strong>0.7-0.9</strong>: Balanced - good for most use cases (default: 0.8)</li>
+<li><strong>0.5-0.7</strong>: Loose - catches more potential moves but may have false positives</li>
+<li><strong>Below 0.5</strong>: Very loose - likely to produce incorrect move detection</li>
+</ul>
+<h2 id="change-thresholds"><a class="header" href="#change-thresholds">Change Thresholds</a></h2>
+<h3 id="size-based-filtering-1"><a class="header" href="#size-based-filtering-1">Size-Based Filtering</a></h3>
+<p>Only report changes above certain size thresholds:</p>
+<pre><code class="language-bash"># Only report size changes of 1MB or more
+rustree --diff baseline.json --size-threshold 1M
+
+# Report changes above 100KB
+rustree --diff baseline.json --size-threshold 100K
+
+# Use with size units (K, M, G)
+rustree --diff baseline.json --size-threshold 512K
+</code></pre>
+<h3 id="time-based-filtering"><a class="header" href="#time-based-filtering">Time-Based Filtering</a></h3>
+<p>Only report changes above time thresholds:</p>
+<pre><code class="language-bash"># Only show files changed more than 1 hour ago
+rustree --diff baseline.json --time-threshold 3600
+
+# Files changed more than 1 day ago
+rustree --diff baseline.json --time-threshold 86400
+</code></pre>
+<p>Time threshold is in seconds since the timestamp difference.</p>
+<h2 id="integration-with-other-features-4"><a class="header" href="#integration-with-other-features-4">Integration with Other Features</a></h2>
+<h3 id="combining-with-filtering-1"><a class="header" href="#combining-with-filtering-1">Combining with Filtering</a></h3>
+<p>Apply standard filtering to focus diff analysis:</p>
+<pre><code class="language-bash"># Diff only source code changes
+rustree --diff baseline.json \
+        --filter-include "*.rs" "*.toml" \
+        --filter-exclude "**/target/**"
+
+# Track documentation changes
+rustree --diff baseline.json \
+        --filter-include "*.md" "README*" \
+        --depth 3
+
+# Use pattern files for complex filtering
+rustree --diff baseline.json \
+        --filter-include-from src-patterns.txt \
+        --filter-exclude-from ignore-patterns.txt
+</code></pre>
+<h3 id="metadata-in-diff"><a class="header" href="#metadata-in-diff">Metadata in Diff</a></h3>
+<p>Include metadata to understand change impact:</p>
+<pre><code class="language-bash"># Show size changes
+rustree --diff baseline.json \
+        --show-size-bytes --human-friendly
+
+# Include modification times
+rustree --diff baseline.json \
+        --show-last-modified
+
+# Full metadata analysis
+rustree --diff baseline.json \
+        --show-size-bytes \
+        --show-last-modified \
+        --calculate-lines \
+        --human-friendly
+</code></pre>
+<h3 id="sorting-diff-results"><a class="header" href="#sorting-diff-results">Sorting Diff Results</a></h3>
+<p>Sort changes by various criteria:</p>
+<pre><code class="language-bash"># Sort by size (largest changes first)
+rustree --diff baseline.json \
+        --show-size-bytes \
+        --sort-by size --reverse-sort
+
+# Sort by modification time (most recent first)
+rustree --diff baseline.json \
+        --show-last-modified \
+        --sort-by mtime --reverse-sort
+
+# Group directories first
+rustree --diff baseline.json --dirs-first
+</code></pre>
+<h2 id="llm-analysis-of-changes"><a class="header" href="#llm-analysis-of-changes">LLM Analysis of Changes</a></h2>
+<h3 id="ai-powered-change-analysis"><a class="header" href="#ai-powered-change-analysis">AI-Powered Change Analysis</a></h3>
+<p>Combine diff with LLM analysis:</p>
+<pre><code class="language-bash"># Analyze the impact of changes
+rustree --diff baseline.json \
+        --llm-ask "What are the most significant changes and their potential impact?"
+
+# Security-focused change review
+rustree --diff baseline.json \
+        --filter-include "*.rs" "*.toml" \
+        --llm-ask "Are there any security concerns in these changes?"
+
+# Performance impact analysis
+rustree --diff baseline.json \
+        --show-size-bytes \
+        --llm-ask "Could these changes affect performance?"
+</code></pre>
+<h2 id="practical-workflows"><a class="header" href="#practical-workflows">Practical Workflows</a></h2>
+<h3 id="development-monitoring"><a class="header" href="#development-monitoring">Development Monitoring</a></h3>
+<pre><code class="language-bash"># Save snapshot before starting feature
+rustree --output-format json &gt; feature-start.json
+
+# During development, check progress
+rustree --diff feature-start.json --stats-only
+
+# Before commit, review all changes
+rustree --diff feature-start.json \
+        --filter-include "src/**" "tests/**" \
+        --show-size-bytes
+</code></pre>
+<h3 id="release-tracking"><a class="header" href="#release-tracking">Release Tracking</a></h3>
+<pre><code class="language-bash"># Compare releases
+rustree --diff v1.0-snapshot.json --from-tree-file v1.1-snapshot.json
+
+# Track major changes between versions
+rustree --diff v1.0-snapshot.json \
+        --show-only added,removed \
+        --filter-include "src/**"
+
+# Generate release notes
+rustree --diff v1.0-snapshot.json \
+        --output-format markdown \
+        --show-size-bytes &gt; release-changes.md
+</code></pre>
+<h3 id="build-monitoring"><a class="header" href="#build-monitoring">Build Monitoring</a></h3>
+<pre><code class="language-bash"># Before build
+rustree --output-format json &gt; pre-build.json
+
+# After build - see generated artifacts
+rustree --diff pre-build.json \
+        --filter-include "target/**" "build/**" \
+        --show-only added \
+        --show-size-bytes --human-friendly
+</code></pre>
+<h3 id="system-administration"><a class="header" href="#system-administration">System Administration</a></h3>
+<pre><code class="language-bash"># Daily system monitoring
+DATE=$(date +%Y%m%d)
+YESTERDAY=$(date -d yesterday +%Y%m%d)
+
+# Monitor important directories
+rustree --diff "system-$YESTERDAY.json" /etc \
+        --filter-exclude "*.log" "*.tmp" \
+        --show-last-modified
+
+# Track configuration changes
+rustree --diff baseline-config.json /etc/nginx \
+        --show-only modified,added,removed
+</code></pre>
+<h2 id="automation-and-scripting"><a class="header" href="#automation-and-scripting">Automation and Scripting</a></h2>
+<h3 id="automated-change-detection"><a class="header" href="#automated-change-detection">Automated Change Detection</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Daily change monitoring script
+
+PROJECT_DIR="/path/to/project"
+DATE=$(date +%Y%m%d)
+YESTERDAY=$(date -d yesterday +%Y%m%d)
+
+# Generate today's snapshot
+rustree --output-format json "$PROJECT_DIR" &gt; "snapshot-$DATE.json"
+
+# Compare with yesterday if exists
+if [ -f "snapshot-$YESTERDAY.json" ]; then
+    echo "Changes since yesterday:"
+    rustree --diff "snapshot-$YESTERDAY.json" "$PROJECT_DIR" \
+            --filter-exclude "*.log" "*.tmp" \
+            --show-size-bytes --stats-only
+
+    # Alert on significant changes
+    CHANGES=$(rustree --diff "snapshot-$YESTERDAY.json" "$PROJECT_DIR" --stats-only | grep -c "files added\|files removed")
+    if [ "$CHANGES" -gt 5 ]; then
+        echo "ALERT: Significant changes detected!"
+    fi
+fi
+</code></pre>
+<h3 id="cicd-integration"><a class="header" href="#cicd-integration">CI/CD Integration</a></h3>
+<pre><code class="language-bash"># In CI pipeline
+BUILD_ID=$(git rev-parse --short HEAD)
+BASE_BRANCH="main"
+
+# Create snapshot
+rustree --output-format json &gt; "build-$BUILD_ID.json"
+
+# Compare with main branch baseline
+if [ -f "baseline-$BASE_BRANCH.json" ]; then
+    # Generate change report for review
+    rustree --diff "baseline-$BASE_BRANCH.json" \
+            --output-format markdown \
+            --filter-include "src/**" "tests/**" \
+            --show-size-bytes &gt; "changes-$BUILD_ID.md"
+
+    # Check for structural changes
+    rustree --diff "baseline-$BASE_BRANCH.json" \
+            --show-only added,removed \
+            --stats-only
+fi
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="large-directory-performance"><a class="header" href="#large-directory-performance">Large Directory Performance</a></h3>
+<p>For large projects, optimize diff performance:</p>
+<pre><code class="language-bash"># Use depth limits
+rustree --diff baseline.json --depth 3
+
+# Focus on specific areas
+rustree --diff baseline.json src/ tests/
+
+# Use filtering to reduce scope
+rustree --diff baseline.json \
+        --filter-include "*.rs" \
+        --filter-exclude "**/target/**" \
+        --prune-empty-directories
+</code></pre>
+<h3 id="debugging-issues"><a class="header" href="#debugging-issues">Debugging Issues</a></h3>
+<pre><code class="language-bash"># Verify snapshot contents
+rustree --output-format json . | jq '.nodes | length'
+
+# Check path normalization issues
+rustree --diff baseline.json --full-path
+
+# Test move detection settings
+rustree --diff baseline.json --move-threshold 0.1  # Very loose
+rustree --diff baseline.json --ignore-moves        # Disable moves
+</code></pre>
+<h2 id="quick-reference-8"><a class="header" href="#quick-reference-8">Quick Reference</a></h2>
+<h3 id="core-diff-options"><a class="header" href="#core-diff-options">Core Diff Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--diff &lt;FILE&gt;</code></td><td>Compare current directory with snapshot file</td></tr>
+<tr><td><code>--from-tree-file &lt;FILE&gt;</code></td><td>Use file as source instead of current directory</td></tr>
+<tr><td><code>--show-only &lt;TYPES&gt;</code></td><td>Show only specific change types</td></tr>
+<tr><td><code>--show-unchanged</code></td><td>Include unchanged files in output</td></tr>
+<tr><td><code>--stats-only</code></td><td>Show only summary statistics</td></tr>
+</tbody></table>
+</div>
+<h3 id="move-detection-1"><a class="header" href="#move-detection-1">Move Detection</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--ignore-moves</code></td><td>Disable move/rename detection</td></tr>
+<tr><td><code>--move-threshold &lt;FLOAT&gt;</code></td><td>Similarity threshold for moves (0.0-1.0, default: 0.8)</td></tr>
+</tbody></table>
+</div>
+<h3 id="change-filtering"><a class="header" href="#change-filtering">Change Filtering</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--size-threshold &lt;BYTES&gt;</code></td><td>Only report size changes above threshold</td></tr>
+<tr><td><code>--time-threshold &lt;SECONDS&gt;</code></td><td>Only report time changes above threshold</td></tr>
+</tbody></table>
+</div>
+<h3 id="change-types-1"><a class="header" href="#change-types-1">Change Types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Marker</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>added</code></td><td><code>[+]</code></td><td>New files or directories</td></tr>
+<tr><td><code>removed</code></td><td><code>[-]</code></td><td>Deleted files or directories</td></tr>
+<tr><td><code>modified</code></td><td><code>[M]</code></td><td>Changed files</td></tr>
+<tr><td><code>moved</code></td><td><code>[→]</code></td><td>Moved or renamed files/directories</td></tr>
+<tr><td><code>type_changed</code></td><td><code>[T]</code></td><td>Type change (file ↔ directory)</td></tr>
+<tr><td><code>unchanged</code></td><td><code>[=]</code></td><td>No changes (with <code>--show-unchanged</code>)</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples-7"><a class="header" href="#examples-7">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more detailed diff scenarios and real-world use cases.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h1>
+<p>RusTree supports configuration files to save your preferred settings and avoid repetitive command-line arguments. This page covers configuration file usage, utilities, and advanced options.</p>
+<h2 id="configuration-files"><a class="header" href="#configuration-files">Configuration Files</a></h2>
+<h3 id="automatic-discovery"><a class="header" href="#automatic-discovery">Automatic Discovery</a></h3>
+<p>RusTree automatically looks for configuration files in several locations:</p>
+<ol>
+<li><strong>Project-specific</strong>: <code>.rustree/config.toml</code> in current directory and parent directories</li>
+<li><strong>Global user config</strong>: <code>~/.config/rustree/config.toml</code> (Linux/macOS) or <code>%APPDATA%\rustree\config.toml</code> (Windows)</li>
+<li><strong>Custom config files</strong>: Specified via <code>--config-file</code></li>
+</ol>
+<h3 id="configuration-file-format"><a class="header" href="#configuration-file-format">Configuration File Format</a></h3>
+<p>Configuration files use TOML format with sections corresponding to CLI option groups:</p>
+<pre><code class="language-toml"># Example .rustree/config.toml
+
+[input_source]
+root_display_name = "MyProject"
+
+[listing]
+max_depth = 3
+show_hidden = true
+
+[filtering]
+ignore_patterns = ["target/", "node_modules/", "*.log"]
+match_patterns = ["*.rs", "*.toml", "*.md"]
+use_gitignore_rules = true
+case_insensitive_filter = false
+
+[metadata]
+show_size_bytes = true
+show_last_modified = true
+calculate_lines = true
+
+[sorting]
+sort_by = "size"
+reverse_sort = true
+dirs_first = true
+
+[misc]
+output_format = "text"
+no_summary_report = false
+</code></pre>
+<h2 id="generate-configuration-template"><a class="header" href="#generate-configuration-template">Generate Configuration Template</a></h2>
+<h3 id="create-template-file"><a class="header" href="#create-template-file">Create Template File</a></h3>
+<p>Generate a fully commented configuration template:</p>
+<pre><code class="language-bash"># Generate template and save to file
+rustree --generate-config &gt; .rustree/config.toml
+
+# View template without saving
+rustree --generate-config
+
+# Generate in project directory
+mkdir -p .rustree
+rustree --generate-config &gt; .rustree/config.toml
+</code></pre>
+<p>The generated template includes all available options with comments explaining their purpose.</p>
+<h2 id="custom-configuration-files"><a class="header" href="#custom-configuration-files">Custom Configuration Files</a></h2>
+<h3 id="specify-configuration-files"><a class="header" href="#specify-configuration-files">Specify Configuration Files</a></h3>
+<p>Load specific configuration files:</p>
+<pre><code class="language-bash"># Load single custom config
+rustree --config-file ./my-config.toml
+
+# Load multiple configs (later ones override earlier ones)
+rustree --config-file ./base-config.toml --config-file ./project-config.toml
+
+# Combine with CLI options (CLI options override config)
+rustree --config-file ./config.toml --depth 2 --show-size-bytes
+</code></pre>
+<h3 id="disable-configuration-discovery"><a class="header" href="#disable-configuration-discovery">Disable Configuration Discovery</a></h3>
+<p>Skip automatic configuration file discovery:</p>
+<pre><code class="language-bash"># Ignore all config files
+rustree --no-config
+
+# Use only CLI options and built-in defaults
+rustree --no-config --show-size-bytes --depth 3
+</code></pre>
+<h2 id="configuration-precedence"><a class="header" href="#configuration-precedence">Configuration Precedence</a></h2>
+<p>Settings are applied in this order (later overrides earlier):</p>
+<ol>
+<li><strong>Built-in defaults</strong></li>
+<li><strong>Global user config</strong> (<code>~/.config/rustree/config.toml</code>)</li>
+<li><strong>Project configs</strong> (<code>.rustree/config.toml</code>, searching up from current directory)</li>
+<li><strong>Custom config files</strong> (via <code>--config-file</code>, in order specified)</li>
+<li><strong>Command-line options</strong></li>
+</ol>
+<h3 id="example-precedence"><a class="header" href="#example-precedence">Example Precedence</a></h3>
+<pre><code class="language-bash"># This command:
+rustree --config-file custom.toml --depth 5
+
+# Results in:
+# 1. Built-in defaults
+# 2. ~/.config/rustree/config.toml (if exists)
+# 3. .rustree/config.toml (if found in current/parent dirs)
+# 4. custom.toml
+# 5. --depth 5 (overrides any depth setting from configs)
+</code></pre>
+<h2 id="configuration-sections"><a class="header" href="#configuration-sections">Configuration Sections</a></h2>
+<h3 id="input-source-options"><a class="header" href="#input-source-options">Input Source Options</a></h3>
+<pre><code class="language-toml">[input_source]
+root_display_name = "MyProject"  # Custom name for root directory
+root_is_directory = true         # Whether root should be treated as directory
+</code></pre>
+<h3 id="listing-options"><a class="header" href="#listing-options">Listing Options</a></h3>
+<pre><code class="language-toml">[listing]
+max_depth = 3                    # Maximum traversal depth
+show_hidden = false              # Include hidden files/directories
+</code></pre>
+<h3 id="filtering-options"><a class="header" href="#filtering-options">Filtering Options</a></h3>
+<pre><code class="language-toml">[filtering]
+ignore_patterns = [              # Files/dirs to exclude
+    "target/",
+    "node_modules/", 
+    "*.log",
+    "*.tmp"
+]
+match_patterns = [               # Files/dirs to include (if specified)
+    "*.rs",
+    "*.toml", 
+    "*.md"
+]
+use_gitignore_rules = true       # Respect .gitignore files
+case_insensitive_filter = false  # Case-insensitive pattern matching
+min_file_size = "1K"             # Minimum file size (with units)
+max_file_size = "10M"            # Maximum file size (with units)
+prune_empty_directories = true   # Remove empty directories
+</code></pre>
+<h3 id="metadata-options"><a class="header" href="#metadata-options">Metadata Options</a></h3>
+<pre><code class="language-toml">[metadata]
+show_size_bytes = true           # Display file sizes
+show_last_modified = true        # Display modification times
+calculate_lines = false          # Count lines in text files
+calculate_words = false          # Count words in text files
+
+# Apply function configuration
+apply_function = "cat"           # Built-in function to apply
+# apply_function_cmd = "wc -l"   # External command to apply
+apply_include_patterns = ["*.rs"] # Apply function only to these patterns
+apply_exclude_patterns = ["*test*"] # Don't apply function to these patterns
+</code></pre>
+<h3 id="sorting-options"><a class="header" href="#sorting-options">Sorting Options</a></h3>
+<pre><code class="language-toml">[sorting]
+sort_by = "name"                 # Sort key (name, size, mtime, etc.)
+reverse_sort = false             # Reverse sort order
+dirs_first = false               # Show directories before files
+files_first = false              # Show files before directories
+</code></pre>
+<h3 id="miscellaneous-options"><a class="header" href="#miscellaneous-options">Miscellaneous Options</a></h3>
+<pre><code class="language-toml">[misc]
+output_format = "text"           # Output format (text, markdown, json, html)
+no_summary_report = false        # Omit summary line
+human_friendly = false           # Human-readable sizes
+</code></pre>
+<h2 id="verbose-configuration-display"><a class="header" href="#verbose-configuration-display">Verbose Configuration Display</a></h2>
+<h3 id="view-merged-configuration"><a class="header" href="#view-merged-configuration">View Merged Configuration</a></h3>
+<p>See exactly what configuration RusTree will use:</p>
+<pre><code class="language-bash"># Show merged configuration before execution
+rustree --verbose
+
+# Combine with other options to see their effect
+rustree --verbose --config-file custom.toml --depth 2
+</code></pre>
+<p>This displays:</p>
+<ul>
+<li>All configuration sources found</li>
+<li>Final merged configuration values</li>
+<li>Command-line overrides applied</li>
+</ul>
+<p><strong>Example output:</strong></p>
+<pre><code>Configuration loaded from:
+  - Built-in defaults
+  - ~/.config/rustree/config.toml
+  - ./.rustree/config.toml
+  - Command line: --depth 2
+
+Final configuration:
+[listing]
+max_depth = 2                    # from command line
+show_hidden = true               # from ./.rustree/config.toml
+
+[filtering] 
+ignore_patterns = ["target/"]    # from ~/.config/rustree/config.toml
+...
+
+[Running rustree with above configuration]
+</code></pre>
+<h2 id="shell-completions"><a class="header" href="#shell-completions">Shell Completions</a></h2>
+<h3 id="generate-completion-scripts"><a class="header" href="#generate-completion-scripts">Generate Completion Scripts</a></h3>
+<p>RusTree can generate shell completion scripts:</p>
+<pre><code class="language-bash"># Bash completions
+rustree --generate-completions bash &gt; ~/.local/share/bash-completion/completions/rustree
+
+# Zsh completions  
+rustree --generate-completions zsh &gt; ~/.zfunc/_rustree
+
+# Fish completions
+rustree --generate-completions fish &gt; ~/.config/fish/completions/rustree.fish
+
+# PowerShell completions
+rustree --generate-completions powershell &gt; rustree_completions.ps1
+
+# Elvish completions
+rustree --generate-completions elvish &gt; rustree_completions.elv
+</code></pre>
+<h3 id="install-completions"><a class="header" href="#install-completions">Install Completions</a></h3>
+<p>After generating completions, you may need to reload your shell or source the completion files.</p>
+<h2 id="project-specific-configuration"><a class="header" href="#project-specific-configuration">Project-Specific Configuration</a></h2>
+<h3 id="per-project-settings"><a class="header" href="#per-project-settings">Per-Project Settings</a></h3>
+<p>Create project-specific configurations:</p>
+<pre><code class="language-bash"># In your project root
+mkdir -p .rustree
+
+# Generate base config
+rustree --generate-config &gt; .rustree/config.toml
+
+# Edit for project needs
+# For example, a Rust project might use:
+</code></pre>
+<pre><code class="language-toml">[filtering]
+ignore_patterns = ["target/", "Cargo.lock"]
+match_patterns = ["*.rs", "*.toml"]
+use_gitignore_rules = true
+
+[metadata]
+show_size_bytes = true
+calculate_lines = true
+
+[sorting]
+sort_by = "lines"
+reverse_sort = true
+</code></pre>
+<h3 id="team-configuration"><a class="header" href="#team-configuration">Team Configuration</a></h3>
+<p>Share configuration across team members:</p>
+<pre><code class="language-bash"># Commit project config to version control
+git add .rustree/config.toml
+git commit -m "Add RusTree project configuration"
+
+# Team members automatically get the config
+git pull
+rustree  # Uses project config automatically
+</code></pre>
+<h2 id="environment-specific-configurations"><a class="header" href="#environment-specific-configurations">Environment-Specific Configurations</a></h2>
+<h3 id="development-vs-production"><a class="header" href="#development-vs-production">Development vs Production</a></h3>
+<p>Use different configs for different environments:</p>
+<pre><code class="language-bash"># Development config with detailed output
+rustree --config-file .rustree/dev-config.toml
+
+# Production config with minimal output
+rustree --config-file .rustree/prod-config.toml
+
+# CI/CD config for automated reporting
+rustree --config-file .rustree/ci-config.toml --output-format json
+</code></pre>
+<h3 id="user-specific-overrides"><a class="header" href="#user-specific-overrides">User-Specific Overrides</a></h3>
+<p>Combine global and project configs with user preferences:</p>
+<pre><code class="language-bash"># User's global config provides defaults
+# ~/.config/rustree/config.toml
+
+# Project config provides project-specific settings  
+# .rustree/config.toml
+
+# User overrides with personal config for this project
+rustree --config-file ~/.rustree-overrides.toml
+</code></pre>
+<h2 id="configuration-examples"><a class="header" href="#configuration-examples">Configuration Examples</a></h2>
+<h3 id="source-code-analysis"><a class="header" href="#source-code-analysis">Source Code Analysis</a></h3>
+<pre><code class="language-toml"># .rustree/source-analysis.toml
+[filtering]
+match_patterns = ["*.rs", "*.js", "*.py", "*.java", "*.cpp"]
+ignore_patterns = ["**/target/**", "**/node_modules/**", "**/__pycache__/**"]
+use_gitignore_rules = true
+
+[metadata]
+show_size_bytes = true
+calculate_lines = true
+calculate_words = true
+
+[sorting]
+sort_by = "lines" 
+reverse_sort = true
+
+[misc]
+output_format = "markdown"
+</code></pre>
+<h3 id="documentation-review-1"><a class="header" href="#documentation-review-1">Documentation Review</a></h3>
+<pre><code class="language-toml"># .rustree/docs-config.toml
+[filtering]
+match_patterns = ["*.md", "*.txt", "README*", "*.rst"]
+ignore_patterns = ["**/target/**", "**/build/**"]
+
+[metadata]
+show_size_bytes = true
+calculate_words = true
+
+[sorting]
+sort_by = "words"
+reverse_sort = true
+
+[misc]
+output_format = "markdown"
+no_summary_report = true
+</code></pre>
+<h3 id="quick-overview"><a class="header" href="#quick-overview">Quick Overview</a></h3>
+<pre><code class="language-toml"># .rustree/quick.toml
+[listing]
+max_depth = 2
+
+[filtering]
+ignore_patterns = [".*", "**/target/**", "**/node_modules/**"]
+
+[sorting]
+dirs_first = true
+
+[misc]
+no_summary_report = true
+</code></pre>
+<h2 id="troubleshooting-configuration"><a class="header" href="#troubleshooting-configuration">Troubleshooting Configuration</a></h2>
+<h3 id="common-issues"><a class="header" href="#common-issues">Common Issues</a></h3>
+<p><strong>Config not loading:</strong></p>
+<pre><code class="language-bash"># Check what configs are found
+rustree --verbose
+
+# Verify config file syntax
+rustree --config-file problematic-config.toml --verbose
+</code></pre>
+<p><strong>Option conflicts:</strong></p>
+<pre><code class="language-bash"># See final merged configuration
+rustree --verbose
+
+# Test with no config to isolate CLI options
+rustree --no-config --your-options-here
+</code></pre>
+<p><strong>Path issues:</strong></p>
+<pre><code class="language-bash"># Check current directory for .rustree/config.toml
+ls -la .rustree/
+
+# Check global config location
+ls -la ~/.config/rustree/
+</code></pre>
+<h2 id="quick-reference-9"><a class="header" href="#quick-reference-9">Quick Reference</a></h2>
+<h3 id="configuration-management-1"><a class="header" href="#configuration-management-1">Configuration Management</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--config-file &lt;FILE&gt;</code></td><td>Load specific configuration file</td></tr>
+<tr><td><code>--no-config</code></td><td>Ignore all configuration files</td></tr>
+<tr><td><code>--generate-config</code></td><td>Generate configuration template</td></tr>
+<tr><td><code>--verbose</code></td><td>Show merged configuration before execution</td></tr>
+</tbody></table>
+</div>
+<h3 id="shell-completions-1"><a class="header" href="#shell-completions-1">Shell Completions</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--generate-completions &lt;SHELL&gt;</code></td><td>Generate completion script for shell</td></tr>
+</tbody></table>
+</div>
+<h3 id="supported-shells"><a class="header" href="#supported-shells">Supported Shells</a></h3>
+<ul>
+<li><code>bash</code> - Bash shell completions</li>
+<li><code>zsh</code> - Zsh shell completions</li>
+<li><code>fish</code> - Fish shell completions</li>
+<li><code>powershell</code> - PowerShell completions</li>
+<li><code>elvish</code> - Elvish shell completions</li>
+</ul>
+<h3 id="configuration-file-locations"><a class="header" href="#configuration-file-locations">Configuration File Locations</a></h3>
+<ol>
+<li><strong>Project</strong>: <code>.rustree/config.toml</code> (current and parent directories)</li>
+<li><strong>Global</strong>: <code>~/.config/rustree/config.toml</code> (Linux/macOS)</li>
+<li><strong>Global</strong>: <code>%APPDATA%\rustree\config.toml</code> (Windows)</li>
+<li><strong>Custom</strong>: Via <code>--config-file</code></li>
+</ol>
+<h2 id="examples-8"><a class="header" href="#examples-8">Examples</a></h2>
+<p>See the <a href="cli_usage/./examples.html">Examples</a> page for more configuration scenarios and real-world setups.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="command-line-options"><a class="header" href="#command-line-options">Command-Line Options</a></h1>
 <p>This page details all available command-line options for <code>rustree</code>.</p>
 <p>The basic syntax is:
@@ -486,7 +3180,7 @@ rustree --sort-by size --reverse-sort
 </ul>
 </li>
 </ul>
-<h2 id="content-analysis"><a class="header" href="#content-analysis">Content Analysis</a></h2>
+<h2 id="content-analysis-1"><a class="header" href="#content-analysis-1">Content Analysis</a></h2>
 <ul>
 <li>
 <p><code>--calculate-lines</code></p>
@@ -665,7 +3359,7 @@ use.</p>
 </ul>
 </li>
 </ul>
-<h2 id="output-formatting"><a class="header" href="#output-formatting">Output Formatting</a></h2>
+<h2 id="output-formatting-1"><a class="header" href="#output-formatting-1">Output Formatting</a></h2>
 <ul>
 <li><code>--output-format &lt;FORMAT&gt;</code>
 <ul>
@@ -754,7 +3448,7 @@ use.</p>
 </ul>
 </li>
 </ul>
-<h2 id="llm-integration"><a class="header" href="#llm-integration">LLM Integration</a></h2>
+<h2 id="llm-integration-1"><a class="header" href="#llm-integration-1">LLM Integration</a></h2>
 <ul>
 <li>
 <p><code>--llm-export &lt;QUESTION&gt;</code></p>
@@ -928,7 +3622,7 @@ rustree --diff old.json --output-format markdown &gt; changes.md
 # Combine with LLM analysis
 rustree --diff baseline.json --llm-ask "What are the most significant changes?"
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="examples-9"><a class="header" href="#examples-9">Examples</a></h2>
 <p>Here are some practical examples of how to use <code>rustree</code> from the command line.</p>
 <ol>
 <li>
@@ -1675,7 +4369,7 @@ __2 directories, 25 files, 2,800 total lines total__
 <p>Note: The enhanced summary report automatically detects which metadata types are being displayed and includes appropriate totals. No additional flags are needed - the aggregation happens automatically when metadata options like <code>--calculate-lines</code>, <code>--calculate-words</code>, or <code>--show-size-bytes</code> are used.</p>
 <h2 id="tree-diff-examples"><a class="header" href="#tree-diff-examples">Tree Diff Examples</a></h2>
 <p>RusTree includes powerful directory comparison capabilities to track changes over time. These examples show how to use the diff feature for various workflows.</p>
-<h3 id="basic-diff-operations"><a class="header" href="#basic-diff-operations">Basic Diff Operations</a></h3>
+<h3 id="basic-diff-operations-1"><a class="header" href="#basic-diff-operations-1">Basic Diff Operations</a></h3>
 <ol start="57">
 <li>
 <p><strong>Create a baseline snapshot and compare current state:</strong></p>
@@ -1897,7 +4591,7 @@ rustree --diff baseline.json \
 </code></pre>
 </li>
 </ol>
-<h3 id="automation-and-scripting"><a class="header" href="#automation-and-scripting">Automation and Scripting</a></h3>
+<h3 id="automation-and-scripting-1"><a class="header" href="#automation-and-scripting-1">Automation and Scripting</a></h3>
 <ol start="73">
 <li>
 <p><strong>Automated change detection scripts:</strong></p>
@@ -2048,7 +4742,7 @@ rustree = "0.1.0" # Replace with the desired version
 <li><a href="./library_usage/concepts.html#format_nodes"><code>format_nodes()</code></a>: A function to format a <code>Vec&lt;NodeInfo&gt;</code> into a string representation (e.g., text tree, Markdown).</li>
 <li>Enums for options like <a href="./library_usage/concepts.html#sortkey"><code>SortKey</code></a>, <a href="./library_usage/concepts.html#liboutputformat"><code>LibOutputFormat</code></a>, etc.</li>
 </ul>
-<h2 id="sub-sections-1"><a class="header" href="#sub-sections-1">Sub-sections:</a></h2>
+<h2 id="sub-sections"><a class="header" href="#sub-sections">Sub-sections:</a></h2>
 <ul>
 <li><a href="./library_usage/concepts.html">Core Concepts</a>: Detailed explanation of the main types and functions.</li>
 <li><a href="./library_usage/examples.html">Examples</a>: Code examples demonstrating how to use the library.</li>
@@ -2227,11 +4921,11 @@ fn display_tree(nodes: &amp;[NodeInfo], format: LibOutputFormat, config: &amp;Ru
 </ul>
 <p>All these types are available through the <code>rustree</code> crate's public API, even though they are now defined in <code>src/core/options/</code>.</p>
 <p>Refer to the API documentation (generated by <code>cargo doc</code>) for the full details of these types and their variants/fields.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="apply-functions"><a class="header" href="#apply-functions">Apply Functions</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="apply-functions-1"><a class="header" href="#apply-functions-1">Apply Functions</a></h1>
 <p>Apply functions are a powerful feature in rustree that allow you to execute custom operations on files during directory traversal. This guide provides comprehensive documentation on how to use each apply function type and their associated filtering patterns.</p>
 <h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
 <p>Apply functions work by processing file contents or executing external commands on selected files. The results are then displayed in a dedicated "File Contents" section of the output. You can control which files are processed using include and exclude patterns.</p>
-<h3 id="basic-usage-1"><a class="header" href="#basic-usage-1">Basic Usage</a></h3>
+<h3 id="basic-usage-2"><a class="header" href="#basic-usage-2">Basic Usage</a></h3>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use rustree::{RustreeLibConfig, MetadataOptions, FilteringOptions, ApplyFunction, BuiltInFunction};
@@ -2248,8 +4942,8 @@ let config = RustreeLibConfig {
     ..Default::default()
 };
 <span class="boring">}</span></code></pre></pre>
-<h2 id="built-in-functions"><a class="header" href="#built-in-functions">Built-in Functions</a></h2>
-<h3 id="cat-function"><a class="header" href="#cat-function">Cat Function</a></h3>
+<h2 id="built-in-functions-2"><a class="header" href="#built-in-functions-2">Built-in Functions</a></h2>
+<h3 id="cat-function-1"><a class="header" href="#cat-function-1">Cat Function</a></h3>
 <p>The <code>Cat</code> function displays the complete contents of text files, similar to the Unix <code>cat</code> command.</p>
 <h4 id="usage-example"><a class="header" href="#usage-example">Usage Example</a></h4>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
@@ -2351,7 +5045,7 @@ rustree --apply-function "grep -c TODO" --apply-include "**/*.rs"
 <p>Apply functions use sophisticated pattern matching to determine which files to process. This system supports both include and exclude patterns with glob syntax.</p>
 <h3 id="include-patterns-apply_include_patterns"><a class="header" href="#include-patterns-apply_include_patterns">Include Patterns (<code>apply_include_patterns</code>)</a></h3>
 <p>Include patterns specify which files should have the apply function executed on them. If include patterns are specified, <strong>only</strong> files matching these patterns will be processed.</p>
-<h4 id="examples-1"><a class="header" href="#examples-1">Examples</a></h4>
+<h4 id="examples-10"><a class="header" href="#examples-10">Examples</a></h4>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Single pattern
@@ -2368,7 +5062,7 @@ apply_include_patterns: Some(vec!["*.rs|*.toml|*.md".to_string()])
 <span class="boring">}</span></code></pre></pre>
 <h3 id="exclude-patterns-apply_exclude_patterns"><a class="header" href="#exclude-patterns-apply_exclude_patterns">Exclude Patterns (<code>apply_exclude_patterns</code>)</a></h3>
 <p>Exclude patterns specify files that should be skipped, even if they match include patterns. Exclude patterns take precedence over include patterns.</p>
-<h4 id="examples-2"><a class="header" href="#examples-2">Examples</a></h4>
+<h4 id="examples-11"><a class="header" href="#examples-11">Examples</a></h4>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Exclude test files
@@ -2479,7 +5173,7 @@ FilteringOptions {
     ..Default::default()
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="case-sensitivity"><a class="header" href="#case-sensitivity">Case Sensitivity</a></h3>
+<h3 id="case-sensitivity-1"><a class="header" href="#case-sensitivity-1">Case Sensitivity</a></h3>
 <p>Pattern matching respects the <code>case_insensitive_filter</code> option:</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -2501,7 +5195,7 @@ FilteringOptions {
 // Pattern: "/home/user/project/src/*.rs"
 // Matches: /home/user/project/src/main.rs, /home/user/project/src/lib.rs
 <span class="boring">}</span></code></pre></pre>
-<h2 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h2>
+<h2 id="error-handling-1"><a class="header" href="#error-handling-1">Error Handling</a></h2>
 <p>Apply functions handle various error conditions gracefully:</p>
 <h3 id="file-access-errors"><a class="header" href="#file-access-errors">File Access Errors</a></h3>
 <ul>
@@ -2520,7 +5214,7 @@ FilteringOptions {
 <li><strong>Invalid glob patterns</strong>: Configuration error returned immediately</li>
 <li><strong>Empty pattern lists</strong>: Treated as "match nothing" for includes, "exclude nothing" for excludes</li>
 </ul>
-<h2 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h2>
+<h2 id="performance-considerations-3"><a class="header" href="#performance-considerations-3">Performance Considerations</a></h2>
 <h3 id="pattern-optimization"><a class="header" href="#pattern-optimization">Pattern Optimization</a></h3>
 <ul>
 <li>Use specific patterns rather than overly broad ones</li>
@@ -2564,7 +5258,7 @@ let review_config = RustreeLibConfig {
     ..Default::default()
 };
 <span class="boring">}</span></code></pre></pre>
-<h3 id="documentation-generation"><a class="header" href="#documentation-generation">Documentation Generation</a></h3>
+<h3 id="documentation-generation-1"><a class="header" href="#documentation-generation-1">Documentation Generation</a></h3>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Extract all TODO comments
@@ -2628,7 +5322,7 @@ pub struct ExternalFunction {
     pub args: Vec&lt;String&gt;,
 }
 <span class="boring">}</span></code></pre></pre>
-<h3 id="configuration-options"><a class="header" href="#configuration-options">Configuration Options</a></h3>
+<h3 id="configuration-options-1"><a class="header" href="#configuration-options-1">Configuration Options</a></h3>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// Metadata options for apply functions
@@ -3067,7 +5761,7 @@ fn main() -&gt; Result&lt;(), RustreeError&gt; {
 <div style="break-before: page; page-break-before: always;"></div><h1 id="architecture"><a class="header" href="#architecture">Architecture</a></h1>
 <p>This section provides an overview of RusTree's internal architecture.</p>
 <p>Understanding the architecture can be helpful if you plan to contribute to RusTree or want a deeper understanding of how it works.</p>
-<h2 id="sub-sections-2"><a class="header" href="#sub-sections-2">Sub-sections:</a></h2>
+<h2 id="sub-sections-1"><a class="header" href="#sub-sections-1">Sub-sections:</a></h2>
 <ul>
 <li><a href="./architecture/overview.html">Overview</a>: A high-level look at the components and data flow.</li>
 <li><a href="./architecture/modules.html">Core Modules</a>: Details about the main modules within the <code>rustree</code> library.</li>

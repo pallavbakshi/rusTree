@@ -1,0 +1,608 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Diff and Comparison - RusTree Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">RusTree Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/pallavbakshi/rusTree" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/pallavbakshi/rusTree/edit/master/docs/src/cli_usage/diff_and_comparison.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="diff-and-comparison"><a class="header" href="#diff-and-comparison">Diff and Comparison</a></h1>
+<p>RusTree includes powerful directory comparison capabilities to track changes over time. The diff feature can detect additions, removals, modifications, moves/renames, and type changes between directory snapshots.</p>
+<h2 id="basic-diff-operations"><a class="header" href="#basic-diff-operations">Basic Diff Operations</a></h2>
+<h3 id="create-and-compare-snapshots"><a class="header" href="#create-and-compare-snapshots">Create and Compare Snapshots</a></h3>
+<p>First, create a baseline snapshot in JSON format:</p>
+<pre><code class="language-bash"># Save current state as baseline
+rustree --output-format json &gt; baseline.json
+
+# Later, after making changes, compare current state with baseline
+rustree --diff baseline.json
+</code></pre>
+<h3 id="compare-two-snapshots"><a class="header" href="#compare-two-snapshots">Compare Two Snapshots</a></h3>
+<p>Compare two saved snapshots without scanning the current directory:</p>
+<pre><code class="language-bash"># Compare two specific snapshots
+rustree --diff new_snapshot.json --from-tree-file old_snapshot.json
+</code></pre>
+<h3 id="input-sources"><a class="header" href="#input-sources">Input Sources</a></h3>
+<p>The diff feature supports various input sources:</p>
+<pre><code class="language-bash"># Compare with current directory (default)
+rustree --diff baseline.json
+
+# Compare two files
+rustree --diff new.json --from-tree-file old.json
+
+# Compare against different directory
+rustree --diff baseline.json /path/to/other/directory
+</code></pre>
+<h2 id="change-types"><a class="header" href="#change-types">Change Types</a></h2>
+<p>RusTree detects several types of changes:</p>
+<ul>
+<li><strong>Added</strong> <code>[+]</code> - New files or directories</li>
+<li><strong>Removed</strong> <code>[-]</code> - Deleted files or directories</li>
+<li><strong>Modified</strong> <code>[M]</code> - Files with changed content, size, or timestamps</li>
+<li><strong>Moved</strong> <code>[→]</code> - Files or directories that were moved/renamed</li>
+<li><strong>Type Changed</strong> <code>[T]</code> - Entries that changed type (file to directory, etc.)</li>
+<li><strong>Unchanged</strong> <code>[=]</code> - No changes (shown only with <code>--show-unchanged</code>)</li>
+</ul>
+<h2 id="diff-output-formats"><a class="header" href="#diff-output-formats">Diff Output Formats</a></h2>
+<h3 id="text-format-default"><a class="header" href="#text-format-default">Text Format (Default)</a></h3>
+<p>Shows changes in a tree structure with change markers:</p>
+<pre><code class="language-bash">rustree --diff baseline.json
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>project/
+├── [+] new_file.rs
+├── [M] README.md
+├── [-] old_config.toml
+├── [→] src/main.rs (moved from lib.rs)
+└── src/
+    └── [T] data (file → directory)
+
+Changes: 2 added, 1 removed, 1 modified, 1 moved, 1 type changed
+</code></pre>
+<h3 id="markdown-format"><a class="header" href="#markdown-format">Markdown Format</a></h3>
+<p>Generate markdown reports for documentation:</p>
+<pre><code class="language-bash">rustree --diff baseline.json --output-format markdown &gt; changes.md
+</code></pre>
+<h3 id="json-format"><a class="header" href="#json-format">JSON Format</a></h3>
+<p>Structured data for programmatic processing:</p>
+<pre><code class="language-bash">rustree --diff baseline.json --output-format json &gt; diff_report.json
+</code></pre>
+<h3 id="html-format"><a class="header" href="#html-format">HTML Format</a></h3>
+<p>Interactive viewing in web browsers:</p>
+<pre><code class="language-bash">rustree --diff baseline.json --output-format html &gt; diff_report.html
+</code></pre>
+<h2 id="filtering-changes"><a class="header" href="#filtering-changes">Filtering Changes</a></h2>
+<h3 id="show-specific-change-types"><a class="header" href="#show-specific-change-types">Show Specific Change Types</a></h3>
+<p>Display only certain types of changes:</p>
+<pre><code class="language-bash"># Show only additions and removals
+rustree --diff baseline.json --show-only added,removed
+
+# Show only modifications
+rustree --diff baseline.json --show-only modified
+
+# Show moves and type changes
+rustree --diff baseline.json --show-only moved,type_changed
+</code></pre>
+<p>Available change types:</p>
+<ul>
+<li><code>added</code> - New files/directories</li>
+<li><code>removed</code> - Deleted files/directories</li>
+<li><code>modified</code> - Changed files</li>
+<li><code>moved</code> - Moved/renamed files/directories</li>
+<li><code>type_changed</code> - Type changes (file ↔ directory)</li>
+</ul>
+<h3 id="show-unchanged-files"><a class="header" href="#show-unchanged-files">Show Unchanged Files</a></h3>
+<p>Include unchanged files in the output:</p>
+<pre><code class="language-bash"># Show all files, including unchanged ones
+rustree --diff baseline.json --show-unchanged
+</code></pre>
+<p>This provides a complete picture showing what changed and what didn't.</p>
+<h3 id="statistics-only"><a class="header" href="#statistics-only">Statistics Only</a></h3>
+<p>Show only summary statistics without the detailed tree:</p>
+<pre><code class="language-bash"># Summary statistics only
+rustree --diff baseline.json --stats-only
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>Changes Summary:
+- 5 files added
+- 2 files removed
+- 3 files modified
+- 1 file moved
+- 0 type changes
+Total: 11 changes detected
+</code></pre>
+<h2 id="move-detection"><a class="header" href="#move-detection">Move Detection</a></h2>
+<h3 id="move-detection-settings"><a class="header" href="#move-detection-settings">Move Detection Settings</a></h3>
+<p>Control how aggressively RusTree detects file moves:</p>
+<pre><code class="language-bash"># Default move detection (80% similarity)
+rustree --diff baseline.json
+
+# Strict move detection (95% similarity)
+rustree --diff baseline.json --move-threshold 0.95
+
+# Loose move detection (50% similarity)
+rustree --diff baseline.json --move-threshold 0.5
+
+# Disable move detection entirely
+rustree --diff baseline.json --ignore-moves
+</code></pre>
+<h3 id="how-move-detection-works"><a class="header" href="#how-move-detection-works">How Move Detection Works</a></h3>
+<p>RusTree uses content similarity to detect moves:</p>
+<ul>
+<li>Compares file sizes and content hashes</li>
+<li>Calculates similarity scores between files</li>
+<li>Files above the threshold are considered moves</li>
+<li>Without move detection, moves appear as separate add/remove operations</li>
+</ul>
+<h3 id="move-threshold-guidelines"><a class="header" href="#move-threshold-guidelines">Move Threshold Guidelines</a></h3>
+<ul>
+<li><strong>0.9-1.0</strong>: Very strict - only nearly identical files</li>
+<li><strong>0.7-0.9</strong>: Balanced - good for most use cases (default: 0.8)</li>
+<li><strong>0.5-0.7</strong>: Loose - catches more potential moves but may have false positives</li>
+<li><strong>Below 0.5</strong>: Very loose - likely to produce incorrect move detection</li>
+</ul>
+<h2 id="change-thresholds"><a class="header" href="#change-thresholds">Change Thresholds</a></h2>
+<h3 id="size-based-filtering"><a class="header" href="#size-based-filtering">Size-Based Filtering</a></h3>
+<p>Only report changes above certain size thresholds:</p>
+<pre><code class="language-bash"># Only report size changes of 1MB or more
+rustree --diff baseline.json --size-threshold 1M
+
+# Report changes above 100KB
+rustree --diff baseline.json --size-threshold 100K
+
+# Use with size units (K, M, G)
+rustree --diff baseline.json --size-threshold 512K
+</code></pre>
+<h3 id="time-based-filtering"><a class="header" href="#time-based-filtering">Time-Based Filtering</a></h3>
+<p>Only report changes above time thresholds:</p>
+<pre><code class="language-bash"># Only show files changed more than 1 hour ago
+rustree --diff baseline.json --time-threshold 3600
+
+# Files changed more than 1 day ago
+rustree --diff baseline.json --time-threshold 86400
+</code></pre>
+<p>Time threshold is in seconds since the timestamp difference.</p>
+<h2 id="integration-with-other-features"><a class="header" href="#integration-with-other-features">Integration with Other Features</a></h2>
+<h3 id="combining-with-filtering"><a class="header" href="#combining-with-filtering">Combining with Filtering</a></h3>
+<p>Apply standard filtering to focus diff analysis:</p>
+<pre><code class="language-bash"># Diff only source code changes
+rustree --diff baseline.json \
+        --filter-include "*.rs" "*.toml" \
+        --filter-exclude "**/target/**"
+
+# Track documentation changes
+rustree --diff baseline.json \
+        --filter-include "*.md" "README*" \
+        --depth 3
+
+# Use pattern files for complex filtering
+rustree --diff baseline.json \
+        --filter-include-from src-patterns.txt \
+        --filter-exclude-from ignore-patterns.txt
+</code></pre>
+<h3 id="metadata-in-diff"><a class="header" href="#metadata-in-diff">Metadata in Diff</a></h3>
+<p>Include metadata to understand change impact:</p>
+<pre><code class="language-bash"># Show size changes
+rustree --diff baseline.json \
+        --show-size-bytes --human-friendly
+
+# Include modification times
+rustree --diff baseline.json \
+        --show-last-modified
+
+# Full metadata analysis
+rustree --diff baseline.json \
+        --show-size-bytes \
+        --show-last-modified \
+        --calculate-lines \
+        --human-friendly
+</code></pre>
+<h3 id="sorting-diff-results"><a class="header" href="#sorting-diff-results">Sorting Diff Results</a></h3>
+<p>Sort changes by various criteria:</p>
+<pre><code class="language-bash"># Sort by size (largest changes first)
+rustree --diff baseline.json \
+        --show-size-bytes \
+        --sort-by size --reverse-sort
+
+# Sort by modification time (most recent first)
+rustree --diff baseline.json \
+        --show-last-modified \
+        --sort-by mtime --reverse-sort
+
+# Group directories first
+rustree --diff baseline.json --dirs-first
+</code></pre>
+<h2 id="llm-analysis-of-changes"><a class="header" href="#llm-analysis-of-changes">LLM Analysis of Changes</a></h2>
+<h3 id="ai-powered-change-analysis"><a class="header" href="#ai-powered-change-analysis">AI-Powered Change Analysis</a></h3>
+<p>Combine diff with LLM analysis:</p>
+<pre><code class="language-bash"># Analyze the impact of changes
+rustree --diff baseline.json \
+        --llm-ask "What are the most significant changes and their potential impact?"
+
+# Security-focused change review
+rustree --diff baseline.json \
+        --filter-include "*.rs" "*.toml" \
+        --llm-ask "Are there any security concerns in these changes?"
+
+# Performance impact analysis
+rustree --diff baseline.json \
+        --show-size-bytes \
+        --llm-ask "Could these changes affect performance?"
+</code></pre>
+<h2 id="practical-workflows"><a class="header" href="#practical-workflows">Practical Workflows</a></h2>
+<h3 id="development-monitoring"><a class="header" href="#development-monitoring">Development Monitoring</a></h3>
+<pre><code class="language-bash"># Save snapshot before starting feature
+rustree --output-format json &gt; feature-start.json
+
+# During development, check progress
+rustree --diff feature-start.json --stats-only
+
+# Before commit, review all changes
+rustree --diff feature-start.json \
+        --filter-include "src/**" "tests/**" \
+        --show-size-bytes
+</code></pre>
+<h3 id="release-tracking"><a class="header" href="#release-tracking">Release Tracking</a></h3>
+<pre><code class="language-bash"># Compare releases
+rustree --diff v1.0-snapshot.json --from-tree-file v1.1-snapshot.json
+
+# Track major changes between versions
+rustree --diff v1.0-snapshot.json \
+        --show-only added,removed \
+        --filter-include "src/**"
+
+# Generate release notes
+rustree --diff v1.0-snapshot.json \
+        --output-format markdown \
+        --show-size-bytes &gt; release-changes.md
+</code></pre>
+<h3 id="build-monitoring"><a class="header" href="#build-monitoring">Build Monitoring</a></h3>
+<pre><code class="language-bash"># Before build
+rustree --output-format json &gt; pre-build.json
+
+# After build - see generated artifacts
+rustree --diff pre-build.json \
+        --filter-include "target/**" "build/**" \
+        --show-only added \
+        --show-size-bytes --human-friendly
+</code></pre>
+<h3 id="system-administration"><a class="header" href="#system-administration">System Administration</a></h3>
+<pre><code class="language-bash"># Daily system monitoring
+DATE=$(date +%Y%m%d)
+YESTERDAY=$(date -d yesterday +%Y%m%d)
+
+# Monitor important directories
+rustree --diff "system-$YESTERDAY.json" /etc \
+        --filter-exclude "*.log" "*.tmp" \
+        --show-last-modified
+
+# Track configuration changes
+rustree --diff baseline-config.json /etc/nginx \
+        --show-only modified,added,removed
+</code></pre>
+<h2 id="automation-and-scripting"><a class="header" href="#automation-and-scripting">Automation and Scripting</a></h2>
+<h3 id="automated-change-detection"><a class="header" href="#automated-change-detection">Automated Change Detection</a></h3>
+<pre><code class="language-bash">#!/bin/bash
+# Daily change monitoring script
+
+PROJECT_DIR="/path/to/project"
+DATE=$(date +%Y%m%d)
+YESTERDAY=$(date -d yesterday +%Y%m%d)
+
+# Generate today's snapshot
+rustree --output-format json "$PROJECT_DIR" &gt; "snapshot-$DATE.json"
+
+# Compare with yesterday if exists
+if [ -f "snapshot-$YESTERDAY.json" ]; then
+    echo "Changes since yesterday:"
+    rustree --diff "snapshot-$YESTERDAY.json" "$PROJECT_DIR" \
+            --filter-exclude "*.log" "*.tmp" \
+            --show-size-bytes --stats-only
+
+    # Alert on significant changes
+    CHANGES=$(rustree --diff "snapshot-$YESTERDAY.json" "$PROJECT_DIR" --stats-only | grep -c "files added\|files removed")
+    if [ "$CHANGES" -gt 5 ]; then
+        echo "ALERT: Significant changes detected!"
+    fi
+fi
+</code></pre>
+<h3 id="cicd-integration"><a class="header" href="#cicd-integration">CI/CD Integration</a></h3>
+<pre><code class="language-bash"># In CI pipeline
+BUILD_ID=$(git rev-parse --short HEAD)
+BASE_BRANCH="main"
+
+# Create snapshot
+rustree --output-format json &gt; "build-$BUILD_ID.json"
+
+# Compare with main branch baseline
+if [ -f "baseline-$BASE_BRANCH.json" ]; then
+    # Generate change report for review
+    rustree --diff "baseline-$BASE_BRANCH.json" \
+            --output-format markdown \
+            --filter-include "src/**" "tests/**" \
+            --show-size-bytes &gt; "changes-$BUILD_ID.md"
+
+    # Check for structural changes
+    rustree --diff "baseline-$BASE_BRANCH.json" \
+            --show-only added,removed \
+            --stats-only
+fi
+</code></pre>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="large-directory-performance"><a class="header" href="#large-directory-performance">Large Directory Performance</a></h3>
+<p>For large projects, optimize diff performance:</p>
+<pre><code class="language-bash"># Use depth limits
+rustree --diff baseline.json --depth 3
+
+# Focus on specific areas
+rustree --diff baseline.json src/ tests/
+
+# Use filtering to reduce scope
+rustree --diff baseline.json \
+        --filter-include "*.rs" \
+        --filter-exclude "**/target/**" \
+        --prune-empty-directories
+</code></pre>
+<h3 id="debugging-issues"><a class="header" href="#debugging-issues">Debugging Issues</a></h3>
+<pre><code class="language-bash"># Verify snapshot contents
+rustree --output-format json . | jq '.nodes | length'
+
+# Check path normalization issues
+rustree --diff baseline.json --full-path
+
+# Test move detection settings
+rustree --diff baseline.json --move-threshold 0.1  # Very loose
+rustree --diff baseline.json --ignore-moves        # Disable moves
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="core-diff-options"><a class="header" href="#core-diff-options">Core Diff Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--diff &lt;FILE&gt;</code></td><td>Compare current directory with snapshot file</td></tr>
+<tr><td><code>--from-tree-file &lt;FILE&gt;</code></td><td>Use file as source instead of current directory</td></tr>
+<tr><td><code>--show-only &lt;TYPES&gt;</code></td><td>Show only specific change types</td></tr>
+<tr><td><code>--show-unchanged</code></td><td>Include unchanged files in output</td></tr>
+<tr><td><code>--stats-only</code></td><td>Show only summary statistics</td></tr>
+</tbody></table>
+</div>
+<h3 id="move-detection-1"><a class="header" href="#move-detection-1">Move Detection</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--ignore-moves</code></td><td>Disable move/rename detection</td></tr>
+<tr><td><code>--move-threshold &lt;FLOAT&gt;</code></td><td>Similarity threshold for moves (0.0-1.0, default: 0.8)</td></tr>
+</tbody></table>
+</div>
+<h3 id="change-filtering"><a class="header" href="#change-filtering">Change Filtering</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--size-threshold &lt;BYTES&gt;</code></td><td>Only report size changes above threshold</td></tr>
+<tr><td><code>--time-threshold &lt;SECONDS&gt;</code></td><td>Only report time changes above threshold</td></tr>
+</tbody></table>
+</div>
+<h3 id="change-types-1"><a class="header" href="#change-types-1">Change Types</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Type</th><th>Marker</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>added</code></td><td><code>[+]</code></td><td>New files or directories</td></tr>
+<tr><td><code>removed</code></td><td><code>[-]</code></td><td>Deleted files or directories</td></tr>
+<tr><td><code>modified</code></td><td><code>[M]</code></td><td>Changed files</td></tr>
+<tr><td><code>moved</code></td><td><code>[→]</code></td><td>Moved or renamed files/directories</td></tr>
+<tr><td><code>type_changed</code></td><td><code>[T]</code></td><td>Type change (file ↔ directory)</td></tr>
+<tr><td><code>unchanged</code></td><td><code>[=]</code></td><td>No changes (with <code>--show-unchanged</code>)</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>See the <a href="./examples.html">Examples</a> page for more detailed diff scenarios and real-world use cases.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../cli_usage/llm_integration.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../cli_usage/configuration.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../cli_usage/llm_integration.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../cli_usage/configuration.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Output Formats - RusTree Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">RusTree Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/pallavbakshi/rusTree" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/pallavbakshi/rusTree/edit/master/docs/src/cli_usage/output_formats.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="output-formats"><a class="header" href="#output-formats">Output Formats</a></h1>
+<p>RusTree supports multiple output formats to suit different use cases, from human-readable text to structured data formats and web-ready HTML. This page covers all output format options and customization.</p>
+<h2 id="available-formats"><a class="header" href="#available-formats">Available Formats</a></h2>
+<h3 id="text-format-default"><a class="header" href="#text-format-default">Text Format (Default)</a></h3>
+<p>The default tree-like text output:</p>
+<pre><code class="language-bash"># Default text format
+rustree
+
+# Explicit text format
+rustree --output-format text
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── README.md
+├── src/
+│   ├── main.rs
+│   └── lib.rs
+└── tests/
+    └── integration.rs
+
+2 directories, 4 files
+</code></pre>
+<h3 id="markdown-format"><a class="header" href="#markdown-format">Markdown Format</a></h3>
+<p>List-based Markdown output suitable for documentation:</p>
+<pre><code class="language-bash"># Markdown format
+rustree --output-format markdown
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code class="language-markdown"># my_project
+
+* README.md
+* src/
+  * main.rs
+  * lib.rs
+* tests/
+  * integration.rs
+
+__2 directories, 4 files total__
+</code></pre>
+<h3 id="json-format"><a class="header" href="#json-format">JSON Format</a></h3>
+<p>Structured JSON data for programmatic processing:</p>
+<pre><code class="language-bash"># JSON format
+rustree --output-format json
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code class="language-json">{
+  "nodes": [
+    {
+      "path": "./README.md",
+      "name": "README.md",
+      "type": "file",
+      "depth": 1,
+      "size": 1024
+    },
+    {
+      "path": "./src",
+      "name": "src",
+      "type": "directory", 
+      "depth": 1
+    }
+  ],
+  "summary": {
+    "directories": 2,
+    "files": 4,
+    "total_size": 5120
+  }
+}
+</code></pre>
+<h3 id="html-format"><a class="header" href="#html-format">HTML Format</a></h3>
+<p>Web-ready HTML with optional hyperlinks and customization:</p>
+<pre><code class="language-bash"># Basic HTML format
+rustree --output-format html
+
+# HTML with hyperlinks
+rustree --output-format html --html-base-href https://example.com/repo
+</code></pre>
+<h2 id="summary-report-control"><a class="header" href="#summary-report-control">Summary Report Control</a></h2>
+<h3 id="disable-summary"><a class="header" href="#disable-summary">Disable Summary</a></h3>
+<p>Remove the summary line from output:</p>
+<pre><code class="language-bash"># No summary report
+rustree --no-summary-report
+
+# Useful for clean Markdown documentation
+rustree --output-format markdown --no-summary-report &gt; structure.md
+</code></pre>
+<h3 id="enhanced-summary-with-metadata"><a class="header" href="#enhanced-summary-with-metadata">Enhanced Summary with Metadata</a></h3>
+<p>When using metadata options, the summary automatically includes totals:</p>
+<pre><code class="language-bash"># Enhanced summary with aggregated metadata
+rustree --calculate-lines --calculate-words --show-size-bytes
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code>my_project/
+├── [1024B] [L: 50] [W: 250] README.md
+└── src/
+    └── [2048B] [L: 100] [W: 500] main.rs
+
+1 directory, 2 files, 150 total lines, 750 total words, 3.1 KB total
+</code></pre>
+<h2 id="html-customization"><a class="header" href="#html-customization">HTML Customization</a></h2>
+<h3 id="base-url-for-links"><a class="header" href="#base-url-for-links">Base URL for Links</a></h3>
+<p>Create clickable links in HTML output:</p>
+<pre><code class="language-bash"># Add base URL to all links
+rustree --output-format html --html-base-href https://github.com/user/repo/blob/main
+
+# Local file links
+rustree --output-format html --html-base-href file:///path/to/project
+</code></pre>
+<h3 id="strip-path-components"><a class="header" href="#strip-path-components">Strip Path Components</a></h3>
+<p>Remove leading path components from links:</p>
+<pre><code class="language-bash"># Scan subdirectory but link to parent paths
+rustree src/ --output-format html \
+       --html-base-href https://example.com \
+       --html-strip-first-component
+</code></pre>
+<p>This is useful when scanning a subdirectory but wanting links to be relative to the parent.</p>
+<h3 id="disable-links"><a class="header" href="#disable-links">Disable Links</a></h3>
+<p>Generate HTML without hyperlinks:</p>
+<pre><code class="language-bash"># Plain HTML without &lt;a&gt; tags
+rustree --output-format html --html-no-links
+</code></pre>
+<h3 id="custom-html-templates"><a class="header" href="#custom-html-templates">Custom HTML Templates</a></h3>
+<h4 id="custom-header"><a class="header" href="#custom-header">Custom Header</a></h4>
+<p>Replace the default HTML header:</p>
+<pre><code class="language-bash"># Use custom intro HTML
+rustree --output-format html --html-intro-file ./templates/header.html
+
+# Suppress header entirely
+rustree --output-format html --html-intro-file /dev/null
+</code></pre>
+<h4 id="custom-footer"><a class="header" href="#custom-footer">Custom Footer</a></h4>
+<p>Replace the default HTML footer:</p>
+<pre><code class="language-bash"># Use custom outro HTML  
+rustree --output-format html --html-outro-file ./templates/footer.html
+
+# Suppress footer entirely
+rustree --output-format html --html-outro-file /dev/null
+</code></pre>
+<h2 id="format-specific-features"><a class="header" href="#format-specific-features">Format-Specific Features</a></h2>
+<h3 id="json-with-metadata"><a class="header" href="#json-with-metadata">JSON with Metadata</a></h3>
+<p>JSON format includes all collected metadata:</p>
+<pre><code class="language-bash"># Rich JSON with full metadata
+rustree --output-format json \
+        --show-size-bytes \
+        --calculate-lines \
+        --show-last-modified
+</code></pre>
+<h3 id="markdown-with-metadata"><a class="header" href="#markdown-with-metadata">Markdown with Metadata</a></h3>
+<p>Metadata appears inline in Markdown format:</p>
+<pre><code class="language-bash"># Markdown with file sizes and line counts
+rustree --output-format markdown \
+        --show-size-bytes \
+        --calculate-lines \
+        --human-friendly
+</code></pre>
+<h3 id="json-processing"><a class="header" href="#json-processing">JSON Processing</a></h3>
+<p>Use JSON output with external tools:</p>
+<pre><code class="language-bash"># Pretty-print JSON
+rustree --output-format json | jq '.'
+
+# Extract specific information
+rustree --output-format json | jq '.nodes[] | select(.type == "file") | .name'
+
+# Get file count
+rustree --output-format json | jq '.summary.files'
+
+# Find large files
+rustree --output-format json --show-size-bytes | \
+  jq '.nodes[] | select(.size &gt; 1000000) | .path'
+</code></pre>
+<h2 id="llm-integration-with-formats"><a class="header" href="#llm-integration-with-formats">LLM Integration with Formats</a></h2>
+<h3 id="combined-json-output"><a class="header" href="#combined-json-output">Combined JSON Output</a></h3>
+<p>When using LLM features with JSON format, both tree and LLM data are included:</p>
+<pre><code class="language-bash"># Tree + LLM analysis in single JSON
+rustree --output-format json \
+        --llm-ask "Analyze this project structure" \
+        --dry-run
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  "tree": {
+    "nodes": [...],
+    "summary": {...}
+  },
+  "llm": {
+    "dry_run": true,
+    "request": {...},
+    "question": "Analyze this project structure"
+  }
+}
+</code></pre>
+<h2 id="practical-examples"><a class="header" href="#practical-examples">Practical Examples</a></h2>
+<h3 id="documentation-generation"><a class="header" href="#documentation-generation">Documentation Generation</a></h3>
+<pre><code class="language-bash"># Clean Markdown for documentation
+rustree docs/ --output-format markdown \
+       --no-summary-report \
+       --depth 3 &gt; docs-structure.md
+
+# HTML for web documentation
+rustree --output-format html \
+        --html-base-href https://docs.example.com \
+        --html-intro-file ./templates/docs-header.html \
+        --depth 2 &gt; docs-index.html
+</code></pre>
+<h3 id="data-processing"><a class="header" href="#data-processing">Data Processing</a></h3>
+<pre><code class="language-bash"># Generate data for analysis
+rustree --output-format json \
+        --show-size-bytes \
+        --calculate-lines &gt; project-data.json
+
+# Process with jq
+cat project-data.json | jq '.nodes[] | select(.lines &gt; 100)'
+</code></pre>
+<h3 id="web-publishing"><a class="header" href="#web-publishing">Web Publishing</a></h3>
+<pre><code class="language-bash"># Complete web page with navigation
+rustree src/ --output-format html \
+       --html-base-href https://github.com/user/repo/tree/main/src \
+       --html-intro-file ./web/header.html \
+       --html-outro-file ./web/footer.html \
+       --show-size-bytes --human-friendly &gt; src-browser.html
+</code></pre>
+<h3 id="archival-and-reporting"><a class="header" href="#archival-and-reporting">Archival and Reporting</a></h3>
+<pre><code class="language-bash"># Comprehensive project snapshot
+rustree --output-format json \
+        --show-size-bytes \
+        --show-last-modified \
+        --calculate-lines \
+        --calculate-words &gt; "snapshot-$(date +%Y%m%d).json"
+
+# Human-readable report
+rustree --output-format markdown \
+        --show-size-bytes --human-friendly \
+        --calculate-lines \
+        --sort-by size -r &gt; project-report.md
+</code></pre>
+<h2 id="format-compatibility"><a class="header" href="#format-compatibility">Format Compatibility</a></h2>
+<h3 id="cross-format-workflows"><a class="header" href="#cross-format-workflows">Cross-Format Workflows</a></h3>
+<pre><code class="language-bash"># Generate in multiple formats
+rustree --output-format json &gt; data.json
+rustree --output-format markdown &gt; structure.md  
+rustree --output-format html &gt; browser.html
+
+# Convert between formats using external tools
+rustree --output-format json | jq -r '.nodes[].path' &gt; file-list.txt
+</code></pre>
+<h3 id="integration-with-external-tools"><a class="header" href="#integration-with-external-tools">Integration with External Tools</a></h3>
+<pre><code class="language-bash"># Feed to other analysis tools
+rustree --output-format json | python analyze-structure.py
+
+# Generate reports
+rustree --output-format markdown | pandoc -o report.pdf
+
+# Create web assets
+rustree --output-format html --html-no-links | \
+  sed 's/&lt;pre&gt;/&lt;pre class="tree-view"&gt;/' &gt; styled-tree.html
+</code></pre>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<h3 id="format-options"><a class="header" href="#format-options">Format Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--output-format text</code></td><td>Default tree-like text output</td></tr>
+<tr><td><code>--output-format markdown</code></td><td>Markdown list format</td></tr>
+<tr><td><code>--output-format json</code></td><td>Structured JSON data</td></tr>
+<tr><td><code>--output-format html</code></td><td>Web-ready HTML</td></tr>
+</tbody></table>
+</div>
+<h3 id="summary-control"><a class="header" href="#summary-control">Summary Control</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--no-summary-report</code></td><td>Omit the summary line from output</td></tr>
+</tbody></table>
+</div>
+<h3 id="html-specific-options"><a class="header" href="#html-specific-options">HTML-Specific Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--html-base-href &lt;URL&gt;</code></td><td>Base URL for generated hyperlinks</td></tr>
+<tr><td><code>--html-strip-first-component</code></td><td>Remove first path component from links</td></tr>
+<tr><td><code>--html-no-links</code></td><td>Disable hyperlink generation</td></tr>
+<tr><td><code>--html-intro-file &lt;FILE&gt;</code></td><td>Custom HTML header template</td></tr>
+<tr><td><code>--html-outro-file &lt;FILE&gt;</code></td><td>Custom HTML footer template</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>See the <a href="./examples.html">Examples</a> page for more detailed output format scenarios and integration examples.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../cli_usage/sorting_and_ordering.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../cli_usage/llm_integration.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../cli_usage/sorting_and_ordering.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../cli_usage/llm_integration.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

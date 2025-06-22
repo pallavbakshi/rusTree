@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Overview - RusTree Documentation</title>
+        <title>Listing and Traversal - RusTree Documentation</title>
 
 
         <!-- Custom HTML head -->
@@ -143,7 +143,7 @@
                         <a href="https://github.com/pallavbakshi/rusTree" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
-                        <a href="https://github.com/pallavbakshi/rusTree/edit/master/docs/src/architecture/overview.md" title="Suggest an edit" aria-label="Suggest an edit">
+                        <a href="https://github.com/pallavbakshi/rusTree/edit/master/docs/src/cli_usage/listing_and_traversal.md" title="Suggest an edit" aria-label="Suggest an edit">
                             <i id="git-edit-button" class="fa fa-edit"></i>
                         </a>
 
@@ -172,108 +172,150 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="architectural-overview"><a class="header" href="#architectural-overview">Architectural Overview</a></h2>
-<p>RusTree is designed with a modular approach, separating concerns into different components. The primary data flow for the library is as follows:</p>
-<ol>
-<li>
-<p><strong>Configuration (<code>RustreeLibConfig</code> from <code>src/config/tree_options.rs</code>)</strong>: The process starts with a configuration object that dictates how the tree traversal, analysis, and formatting should occur. <code>RustreeLibConfig</code> is composed of sub-structs like <code>ListingOptions</code>, <code>FilteringOptions</code> (including <code>prune_empty_directories</code>), <code>MetadataOptions</code> (controlling reporting of mtime, ctime, crtime, etc.), and <code>SortingOptions</code> (specifying sort keys like <code>Name</code>, <code>Version</code>, <code>MTime</code>, <code>ChangeTime</code>, <code>CreateTime</code>, <code>None</code>, and behaviors like <code>files_before_directories</code>).</p>
-</li>
-<li>
-<p><strong>Walking (<code>core::walker</code>)</strong>:</p>
+                        <h1 id="listing-and-traversal"><a class="header" href="#listing-and-traversal">Listing and Traversal</a></h1>
+<p>This page covers options that control how RusTree traverses directories and what elements of the tree structure it displays.</p>
+<h2 id="tree-depth-control"><a class="header" href="#tree-depth-control">Tree Depth Control</a></h2>
+<h3 id="maximum-depth"><a class="header" href="#maximum-depth">Maximum Depth</a></h3>
+<p>Control how deep RusTree descends into subdirectories:</p>
+<pre><code class="language-bash"># Show only direct children (depth 1)
+rustree -L 1
+
+# Scan up to 3 levels deep
+rustree --depth 3 ./project
+
+# No depth limit (default behavior)
+rustree ./project
+</code></pre>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-bash"># Quick project overview
+rustree -L 2 ~/my_project
+
+# Detailed but limited scan
+rustree --depth 4 --show-size-bytes ./src
+</code></pre>
+<h2 id="hidden-files-and-directories"><a class="header" href="#hidden-files-and-directories">Hidden Files and Directories</a></h2>
+<h3 id="including-hidden-files"><a class="header" href="#including-hidden-files">Including Hidden Files</a></h3>
+<p>By default, RusTree ignores files and directories starting with a dot (<code>.</code>). Use <code>-a</code> to include them:</p>
+<pre><code class="language-bash"># Show hidden files and directories
+rustree -a
+
+# Long form
+rustree --include-hidden
+
+# Combine with other options
+rustree -a -L 2 -s
+</code></pre>
+<p><strong>Important:</strong> When using pattern matching (<code>-P</code>), you need <code>-a</code> for patterns like <code>*</code> to match hidden files. Patterns that explicitly start with <code>.</code> (like <code>.*</code>) will match hidden files regardless.</p>
+<pre><code class="language-bash"># This WON'T match .hidden_file
+rustree -P "*"
+
+# This WILL match .hidden_file  
+rustree -a -P "*"
+
+# This WILL match .hidden_file (explicit dot pattern)
+rustree -P ".*"
+</code></pre>
+<h2 id="directory-vs-file-display"><a class="header" href="#directory-vs-file-display">Directory vs File Display</a></h2>
+<h3 id="directory-only-mode"><a class="header" href="#directory-only-mode">Directory-Only Mode</a></h3>
+<p>Show only directories, excluding all files:</p>
+<pre><code class="language-bash"># Show directory structure only
+rustree -d
+
+# Long form
+rustree --directory-only
+
+# Combine with depth and metadata
+rustree -d -L 3 -s ./workspace
+</code></pre>
+<p>This is useful for understanding the overall organization of large projects without being overwhelmed by individual files.</p>
+<h3 id="full-path-display"><a class="header" href="#full-path-display">Full Path Display</a></h3>
+<p>Show the complete relative path for each entry:</p>
+<pre><code class="language-bash"># Display full paths
+rustree -f
+
+# Long form  
+rustree --full-path
+</code></pre>
+<p><strong>Example output:</strong></p>
+<pre><code>my_project/
+├── README.md
+├── src/
+│   ├── src/main.rs        # Shows full path from root
+│   ├── src/lib.rs
+│   └── src/utils/
+│       └── src/utils/helper.rs
+└── tests/
+    └── tests/integration_test.rs
+</code></pre>
+<p>This is particularly useful when you need to know exact file locations, especially for documentation or when working with tools that need full paths.</p>
+<h2 id="path-arguments"><a class="header" href="#path-arguments">Path Arguments</a></h2>
+<h3 id="scanning-multiple-paths"><a class="header" href="#scanning-multiple-paths">Scanning Multiple Paths</a></h3>
+<p>RusTree can scan a specific directory by providing it as an argument:</p>
+<pre><code class="language-bash"># Scan a specific directory
+rustree ~/Documents
+
+# Scan relative path
+rustree ./src
+
+# Scan with options
+rustree -a -L 2 /etc/nginx
+</code></pre>
+<h3 id="current-directory"><a class="header" href="#current-directory">Current Directory</a></h3>
+<p>When no path is specified, RusTree scans the current directory:</p>
+<pre><code class="language-bash"># These are equivalent
+rustree
+rustree .
+rustree ./
+</code></pre>
+<h2 id="combining-traversal-options"><a class="header" href="#combining-traversal-options">Combining Traversal Options</a></h2>
+<h3 id="common-combinations"><a class="header" href="#common-combinations">Common Combinations</a></h3>
+<pre><code class="language-bash"># Project structure overview
+rustree -d -L 2 --full-path ./my_project
+
+# Hidden configuration files
+rustree -a -P ".*" /etc
+
+# Detailed source code structure  
+rustree -f --include-hidden --depth 4 ./src
+
+# Quick directory tree with sizes
+rustree -d -s -L 3 ~/workspace
+</code></pre>
+<h3 id="performance-considerations"><a class="header" href="#performance-considerations">Performance Considerations</a></h3>
+<p>For large directories, consider:</p>
 <ul>
-<li>The <code>walk_directory</code> function (in <code>core::walker::filesystem</code>) uses the <code>ignore</code> crate to traverse the file system.</li>
-<li>It respects configuration settings from <code>RustreeLibConfig</code>:
+<li>Using <code>--depth</code> to limit traversal depth</li>
+<li>Using <code>--directory-only</code> to skip files when analyzing structure</li>
+<li>Combining with <a href="./filtering_and_patterns.html">filtering</a> to focus on relevant content</li>
+</ul>
+<h2 id="integration-with-other-features"><a class="header" href="#integration-with-other-features">Integration with Other Features</a></h2>
+<p>Traversal options work seamlessly with other RusTree features:</p>
 <ul>
-<li><code>config.listing.max_depth</code>, <code>config.listing.show_hidden</code>.</li>
-<li><code>config.filtering.use_gitignore_rules</code> and <code>config.filtering.gitignore_file</code> for gitignore rules (handled by the <code>ignore</code> crate).</li>
-<li><code>config.filtering.ignore_patterns</code> (CLI <code>-I</code>) are compiled by <code>core::filter::pattern</code> and used by the <code>ignore</code> crate's <code>WalkBuilder::filter_entry()</code> to prune the walk.</li>
-<li><code>config.filtering.case_insensitive_filter</code> controls case sensitivity for all pattern matching.</li>
+<li><strong><a href="./filtering_and_patterns.html">Filtering</a></strong>: Control which files are included based on patterns</li>
+<li><strong><a href="./metadata_and_analysis.html">Metadata</a></strong>: Add file information to the traversal output</li>
+<li><strong><a href="./sorting_and_ordering.html">Sorting</a></strong>: Control how entries are ordered in the tree</li>
+<li><strong><a href="./output_formats.html">Output Formats</a></strong>: Change how the traversal results are displayed</li>
 </ul>
-</li>
-<li>After the <code>ignore</code> crate yields an entry, further filtering is applied by the walker using <code>core::filter::pattern::entry_matches_glob_patterns</code>:
-<ul>
-<li><code>config.filtering.match_patterns</code> (CLI <code>-P</code>): Files and symlinks must match these patterns. Directories are generally kept if they might contain matching children.</li>
-</ul>
-</li>
-<li>For each qualifying entry, it gathers initial metadata (mtime, ctime, crtime based on <code>config.metadata</code> and platform capabilities). Symlinks are resolved. The <code>list_directories_only</code> filter is NOT applied at this stage.</li>
-</ul>
-</li>
-<li>
-<p><strong>Metadata Collection &amp; Analysis (<code>core::metadata</code>)</strong>:</p>
-<ul>
-<li>As the walker processes entries, it invokes functions from <code>core::metadata</code> based on <code>config.metadata</code>.</li>
-<li><code>core::metadata::size_calculator</code>: Calculates line counts and word counts for files.</li>
-<li><code>core::metadata::file_info</code>: Applies built-in functions (from <code>config::metadata::BuiltInFunction</code>) to file content using <code>apply_builtin_to_file</code>.</li>
-<li>The results are stored in <code>NodeInfo</code> objects (defined in <code>core::tree::node</code>). This step is skipped for directories for file-specific analyses.</li>
-</ul>
-</li>
-<li>
-<p><strong>Node Representation (<code>NodeInfo</code> from <code>core::tree::node</code>)</strong>:</p>
-<ul>
-<li>Each qualifying file system entry is represented by a <code>NodeInfo</code> struct. This struct holds its path, name, effective <code>node_type</code>, depth, metadata (size, mtime, change_time, create_time), and any analysis results.</li>
-<li>The walker produces a <code>Vec&lt;NodeInfo&gt;</code>.</li>
-</ul>
-</li>
-<li>
-<p><strong>Pruning (<code>lib.rs</code>, using <code>core::tree::manipulator</code>)</strong>:</p>
-<ul>
-<li>If <code>config.filtering.prune_empty_directories</code> is <code>true</code>, the <code>Vec&lt;NodeInfo&gt;</code> is processed to remove empty directories.</li>
-<li>This involves building a temporary tree, pruning nodes where a directory contains no files and no non-empty subdirectories, and then flattening the tree back.</li>
-<li>This step occurs <em>after</em> all initial walking and filtering, but <em>before</em> the <code>list_directories_only</code> filter and sorting.</li>
-</ul>
-</li>
-<li>
-<p><strong><code>list_directories_only</code> Filtering (<code>lib.rs</code>)</strong>:</p>
-<ul>
-<li>If <code>config.listing.list_directories_only</code> is <code>true</code>, the <code>Vec&lt;NodeInfo&gt;</code> (potentially already pruned) is further filtered to retain only entries with <code>NodeType::Directory</code>.</li>
-<li>This ensures that pruning decisions are made based on the full content of directories before they are potentially removed by this filter.</li>
-</ul>
-</li>
-<li>
-<p><strong>Sorting (<code>core::sorter</code>)</strong>:</p>
-<ul>
-<li>If <code>config.sorting.sort_by</code> specifies a <code>SortKey</code>, the <code>sort_nodes_with_options</code> function (in <code>core::sorter::strategies</code>) sorts the (potentially pruned and filtered) <code>Vec&lt;NodeInfo&gt;</code>.</li>
-<li>Sorting involves building a temporary tree, sorting sibling nodes at each level using comparison logic from <code>core::sorter::comparators</code> (which respects <code>config.sorting.reverse_sort</code> and <code>config.sorting.files_before_directories</code>), and then flattening the tree back.</li>
-<li>Default size sorting is now largest first, with files/symlinks grouped before directories. Version sorting is more intelligent. If <code>SortKey::None</code> is used, directory traversal order is preserved.</li>
-</ul>
-</li>
-<li>
-<p><strong>Formatting (<code>core::formatter</code>)</strong>:</p>
-<ul>
-<li>The processed (sorted or unsorted) <code>Vec&lt;NodeInfo&gt;</code> is passed to a formatter.</li>
-<li>The <code>TreeFormatter</code> trait defines the interface. Formatters use <code>core::metadata::file_info::format_node_metadata</code> for consistent metadata display.</li>
-<li><code>TextTreeFormatter</code>: Generates plain text, <code>tree</code>-like output.</li>
-<li><code>MarkdownFormatter</code>: Generates a Markdown list.</li>
-<li>The formatter produces the final string output, considering configuration like <code>config.input_source.root_display_name</code>. The choice of formatter is determined by <code>LibOutputFormat</code> (from <code>config::output_format</code>).</li>
-</ul>
-</li>
-</ol>
-<h3 id="cli-layer"><a class="header" href="#cli-layer">CLI Layer</a></h3>
-<p>The command-line interface (<code>src/cli/</code>) acts as a wrapper around the core library:</p>
-<ul>
-<li><strong>Argument Parsing (<code>cli::args</code>)</strong>: Uses <code>clap</code> to parse arguments.</li>
-<li><strong>Mapping (<code>cli::mapping</code>)</strong>: The <code>map_cli_to_lib_config</code> function translates <code>CliArgs</code> into <code>RustreeLibConfig</code> (e.g., setting <code>sorting.sort_by</code>, <code>sorting.files_before_directories</code>, <code>metadata.show_last_modified</code>).</li>
-<li><strong>Orchestration (<code>main.rs</code>)</strong>:
-<ol>
-<li>Parses CLI args.</li>
-<li>Maps CLI args to library config.</li>
-<li>Calls <code>rustree::get_tree_nodes()</code>.</li>
-<li>Calls <code>rustree::format_nodes()</code>.</li>
-<li>Prints the output.</li>
-</ol>
-</li>
-</ul>
-<p>This separation allows the core library to be used independently.</p>
+<h2 id="quick-reference"><a class="header" href="#quick-reference">Quick Reference</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Option</th><th>Short</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--depth &lt;N&gt;</code></td><td><code>-L &lt;N&gt;</code></td><td>Limit traversal to N levels deep</td></tr>
+<tr><td><code>--include-hidden</code></td><td><code>-a</code></td><td>Include hidden files/directories (starting with <code>.</code>)</td></tr>
+<tr><td><code>--directory-only</code></td><td><code>-d</code></td><td>Show directories only, exclude files</td></tr>
+<tr><td><code>--full-path</code></td><td><code>-f</code></td><td>Display complete relative paths for all entries</td></tr>
+</tbody></table>
+</div>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<p>See the <a href="./examples.html">Examples</a> page for more detailed usage scenarios and combinations with other features.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../architecture.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../cli_usage/getting_started.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../architecture/modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../cli_usage/filtering_and_patterns.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -283,11 +325,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../architecture.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../cli_usage/getting_started.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../architecture/modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../cli_usage/filtering_and_patterns.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
