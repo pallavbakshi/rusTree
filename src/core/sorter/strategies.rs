@@ -71,12 +71,12 @@ pub fn sort_nodes_with_context(
     // original behaviour for callers that *do* set `reverse_sort = true` while
     // giving the context-based API its desired default.
 
-    if let Some(crate::core::options::SortKey::Size) = sorting_ctx.sorting.sort_by {
-        if !sorting_ctx.sorting.reverse_sort {
-            let mut adjusted = sorting_ctx.sorting.clone();
-            adjusted.reverse_sort = true; // Flip to get ascending order
-            return sort_nodes_with_options(nodes, &adjusted);
-        }
+    if let Some(crate::core::options::SortKey::Size) = sorting_ctx.sorting.sort_by
+        && !sorting_ctx.sorting.reverse_sort
+    {
+        let mut adjusted = sorting_ctx.sorting.clone();
+        adjusted.reverse_sort = true; // Flip to get ascending order
+        return sort_nodes_with_options(nodes, &adjusted);
     }
 
     // Delegate to the canonical implementation first so that the tree

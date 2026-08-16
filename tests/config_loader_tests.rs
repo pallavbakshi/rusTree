@@ -51,7 +51,7 @@ fn precedence_explicit_overrides_project_and_global() {
     }
     std::env::set_current_dir(&project_dir).unwrap();
 
-    let (partial, _src) = load_merged_config(&[explicit_file.clone()], true).unwrap();
+    let (partial, _src) = load_merged_config(std::slice::from_ref(&explicit_file), true).unwrap();
     let mut cfg = RustreeLibConfig::default();
     partial.merge_into(&mut cfg);
 

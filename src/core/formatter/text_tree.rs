@@ -75,10 +75,10 @@ impl TreeFormatter for TextTreeFormatter {
         let mut output = String::new();
 
         // Handle root display name with optional size prefix
-        if formatting_ctx.metadata.show_size_bytes {
-            if let Some(size) = formatting_ctx.input_source.root_node_size {
-                write!(output, "[{:>7}B] ", size)?;
-            }
+        if formatting_ctx.metadata.show_size_bytes
+            && let Some(size) = formatting_ctx.input_source.root_node_size
+        {
+            write!(output, "[{:>7}B] ", size)?;
             // If show_size_bytes is true but root_node_size is None (e.g. metadata error for root),
             // we could print a placeholder like "[       B] ", but original tree doesn't show
             // anything for the root if its size isn't available/applicable.
@@ -112,10 +112,10 @@ impl TreeFormatter for TextTreeFormatter {
                 // Collect relevant ancestor paths: from child-of-scan-root up to direct parent
                 for _anc_idx in 0..(node.depth - 1) {
                     if let Some(ancestor_node_path) = p_iter.next() {
-                        if let Some(ref scan_root) = scan_root_path_opt {
-                            if ancestor_node_path == scan_root {
-                                break; // Stop if ancestor is the scan root itself
-                            }
+                        if let Some(ref scan_root) = scan_root_path_opt
+                            && ancestor_node_path == scan_root
+                        {
+                            break; // Stop if ancestor is the scan root itself
                         }
                         ancestor_paths_to_check.push(ancestor_node_path.to_path_buf());
                     } else {

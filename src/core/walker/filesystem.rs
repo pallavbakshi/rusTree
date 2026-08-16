@@ -115,18 +115,18 @@ pub fn walk_directory_with_options(
     }
 
     // Apply -I patterns using filter_entry to prune the walk
-    if let Some(ref patterns_vec) = final_compiled_ignore_patterns {
-        if !patterns_vec.is_empty() {
-            let patterns_for_closure = patterns_vec.clone();
-            // Clone canonical_root_path for the closure, as it needs to own its captured variables or have 'static lifetime
-            let root_path_for_closure = canonical_root_path.clone();
-            walker_builder.filter_entry(move |entry| {
-                if entry.depth() == 0 {
-                    return true;
-                }
-                !entry_matches_glob_patterns(entry, &patterns_for_closure, &root_path_for_closure)
-            });
-        }
+    if let Some(ref patterns_vec) = final_compiled_ignore_patterns
+        && !patterns_vec.is_empty()
+    {
+        let patterns_for_closure = patterns_vec.clone();
+        // Clone canonical_root_path for the closure, as it needs to own its captured variables or have 'static lifetime
+        let root_path_for_closure = canonical_root_path.clone();
+        walker_builder.filter_entry(move |entry| {
+            if entry.depth() == 0 {
+                return true;
+            }
+            !entry_matches_glob_patterns(entry, &patterns_for_closure, &root_path_for_closure)
+        });
     }
 
     for entry_result in walker_builder.build() {
@@ -273,51 +273,46 @@ pub fn walk_directory_with_options(
                 .map(|apply_fn| matches!(apply_fn, crate::core::options::ApplyFunction::BuiltIn(_)))
                 .unwrap_or(false);
 
-            if metadata_opts.calculate_line_count
+            if (metadata_opts.calculate_line_count
                 || metadata_opts.calculate_word_count
-                || needs_builtin_content
+                || needs_builtin_content)
+                && let Ok(content) = fs::read_to_string(&node.path)
             {
-                if let Ok(content) = fs::read_to_string(&node.path) {
-                    if metadata_opts.calculate_line_count {
-                        node.line_count = Some(size_calculator::count_lines_from_string(&content));
-                    }
-                    if metadata_opts.calculate_word_count {
-                        node.word_count = Some(size_calculator::count_words_from_string(&content));
-                    }
-
-                    if let Some(crate::core::options::ApplyFunction::BuiltIn(func_type)) =
-                        &metadata_opts.apply_function
-                    {
-                        if is_file_function(func_type)
-                            && should_apply_function_to_file_with_options(
-                                &node,
-                                listing_opts,
-                                filtering_opts,
-                                &canonical_root_path,
-                            )
-                        {
-                            node.custom_function_output =
-                                Some(file_info::apply_builtin_to_file(&node.path, func_type));
-                        }
-                    }
+                if metadata_opts.calculate_line_count {
+                    node.line_count = Some(size_calculator::count_lines_from_string(&content));
                 }
-            }
+                if metadata_opts.calculate_word_count {
+                    node.word_count = Some(size_calculator::count_words_from_string(&content));
+                }
 
-            // === 2. External command processing (does not require file content)
-            if node.custom_function_output.is_none() {
-                if let Some(crate::core::options::ApplyFunction::External(ext_fn)) =
+                if let Some(crate::core::options::ApplyFunction::BuiltIn(func_type)) =
                     &metadata_opts.apply_function
-                {
-                    if should_apply_function_to_file_with_options(
+                    && is_file_function(func_type)
+                    && should_apply_function_to_file_with_options(
                         &node,
                         listing_opts,
                         filtering_opts,
                         &canonical_root_path,
-                    ) {
-                        node.custom_function_output =
-                            Some(file_info::apply_external_to_file(&node.path, ext_fn));
-                    }
+                    )
+                {
+                    node.custom_function_output =
+                        Some(file_info::apply_builtin_to_file(&node.path, func_type));
                 }
+            }
+
+            // === 2. External command processing (does not require file content)
+            if node.custom_function_output.is_none()
+                && let Some(crate::core::options::ApplyFunction::External(ext_fn)) =
+                    &metadata_opts.apply_function
+                && should_apply_function_to_file_with_options(
+                    &node,
+                    listing_opts,
+                    filtering_opts,
+                    &canonical_root_path,
+                )
+            {
+                node.custom_function_output =
+                    Some(file_info::apply_external_to_file(&node.path, ext_fn));
             }
         }
         intermediate_nodes.push(node);
@@ -346,18 +341,16 @@ fn should_apply_function_to_file_with_options(
     };
 
     // Check apply_exclude_patterns first - if it matches, skip
-    if let Some(exclude_patterns) = &filtering_opts.apply_exclude_patterns {
-        if !exclude_patterns.is_empty() {
-            if let Ok(Some(patterns)) = compile_glob_patterns(
-                &Some(exclude_patterns.clone()),
-                filtering_opts.case_insensitive_filter,
-                listing_opts.show_hidden,
-            ) {
-                if entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root) {
-                    return false; // Skip this node
-                }
-            }
-        }
+    if let Some(exclude_patterns) = &filtering_opts.apply_exclude_patterns
+        && !exclude_patterns.is_empty()
+        && let Ok(Some(patterns)) = compile_glob_patterns(
+            &Some(exclude_patterns.clone()),
+            filtering_opts.case_insensitive_filter,
+            listing_opts.show_hidden,
+        )
+        && entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root)
+    {
+        return false; // Skip this node
     }
 
     // Check apply_include_patterns - if specified, node must match

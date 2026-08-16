@@ -335,16 +335,16 @@ fn apply_post_processing(
             match node.size {
                 None => true, // unknown size – keep the entry
                 Some(size) => {
-                    if let Some(min) = min_opt {
-                        if size < min {
-                            return false;
-                        }
+                    if let Some(min) = min_opt
+                        && size < min
+                    {
+                        return false;
                     }
 
-                    if let Some(max) = max_opt {
-                        if size > max {
-                            return false;
-                        }
+                    if let Some(max) = max_opt
+                        && size > max
+                    {
+                        return false;
                     }
 
                     true
@@ -363,10 +363,10 @@ fn apply_post_processing(
             .map_err(RustreeError::TreeBuildError)?;
 
         // Apply directory functions if configured
-        if let Some(ApplyFunction::BuiltIn(apply_func)) = &config.metadata.apply_function {
-            if is_directory_function(apply_func) {
-                apply_directory_functions_to_tree(&mut temp_roots, apply_func, config, walk_root);
-            }
+        if let Some(ApplyFunction::BuiltIn(apply_func)) = &config.metadata.apply_function
+            && is_directory_function(apply_func)
+        {
+            apply_directory_functions_to_tree(&mut temp_roots, apply_func, config, walk_root);
         }
 
         // Prune empty directories if requested
@@ -799,16 +799,16 @@ fn apply_post_processing_with_contexts(
             match node.size {
                 None => true, // unknown size – keep the entry
                 Some(size) => {
-                    if let Some(min) = min_opt {
-                        if size < min {
-                            return false;
-                        }
+                    if let Some(min) = min_opt
+                        && size < min
+                    {
+                        return false;
                     }
 
-                    if let Some(max) = max_opt {
-                        if size > max {
-                            return false;
-                        }
+                    if let Some(max) = max_opt
+                        && size > max
+                    {
+                        return false;
                     }
 
                     true
@@ -830,15 +830,14 @@ fn apply_post_processing_with_contexts(
         // Apply directory functions if configured
         if let Some(ApplyFunction::BuiltIn(apply_func)) =
             &processing_ctx.walking.metadata.apply_function
+            && is_directory_function(apply_func)
         {
-            if is_directory_function(apply_func) {
-                apply_directory_functions_to_tree_ctx(
-                    &mut temp_roots,
-                    apply_func,
-                    processing_ctx,
-                    walk_root,
-                );
-            }
+            apply_directory_functions_to_tree_ctx(
+                &mut temp_roots,
+                apply_func,
+                processing_ctx,
+                walk_root,
+            );
         }
 
         // Prune empty directories if requested
@@ -928,18 +927,16 @@ fn should_apply_function_to_node_ctx(
     };
 
     // Check apply_exclude_patterns first - if it matches, skip
-    if let Some(exclude_patterns) = &processing_ctx.walking.filtering.apply_exclude_patterns {
-        if !exclude_patterns.is_empty() {
-            if let Ok(Some(patterns)) = compile_glob_patterns(
-                &Some(exclude_patterns.clone()),
-                processing_ctx.walking.filtering.case_insensitive_filter,
-                processing_ctx.walking.listing.show_hidden,
-            ) {
-                if entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root) {
-                    return false; // Skip this node
-                }
-            }
-        }
+    if let Some(exclude_patterns) = &processing_ctx.walking.filtering.apply_exclude_patterns
+        && !exclude_patterns.is_empty()
+        && let Ok(Some(patterns)) = compile_glob_patterns(
+            &Some(exclude_patterns.clone()),
+            processing_ctx.walking.filtering.case_insensitive_filter,
+            processing_ctx.walking.listing.show_hidden,
+        )
+        && entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root)
+    {
+        return false; // Skip this node
     }
 
     // Check apply_include_patterns - if specified, node must match
@@ -1037,18 +1034,16 @@ fn should_apply_function_to_node(
     };
 
     // Check apply_exclude_patterns first - if it matches, skip
-    if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns {
-        if !exclude_patterns.is_empty() {
-            if let Ok(Some(patterns)) = compile_glob_patterns(
-                &Some(exclude_patterns.clone()),
-                config.filtering.case_insensitive_filter,
-                config.listing.show_hidden,
-            ) {
-                if entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root) {
-                    return false; // Skip this node
-                }
-            }
-        }
+    if let Some(exclude_patterns) = &config.filtering.apply_exclude_patterns
+        && !exclude_patterns.is_empty()
+        && let Ok(Some(patterns)) = compile_glob_patterns(
+            &Some(exclude_patterns.clone()),
+            config.filtering.case_insensitive_filter,
+            config.listing.show_hidden,
+        )
+        && entry_matches_path_with_patterns_relative(&node.path, &patterns, walk_root)
+    {
+        return false; // Skip this node
     }
 
     // Check apply_include_patterns - if specified, node must match
@@ -1502,15 +1497,15 @@ pub fn validate_contexts(
         ));
     }
 
-    if let Some(sort_ctx) = sorting_ctx {
-        if let Err(sorting_errors) = sort_ctx.validate() {
-            errors.add_error(ContextValidationError::new(
-                "sorting",
-                "invalid",
-                sorting_errors,
-                ContextType::Sorting,
-            ));
-        }
+    if let Some(sort_ctx) = sorting_ctx
+        && let Err(sorting_errors) = sort_ctx.validate()
+    {
+        errors.add_error(ContextValidationError::new(
+            "sorting",
+            "invalid",
+            sorting_errors,
+            ContextType::Sorting,
+        ));
     }
 
     // Cross-context validation
@@ -1535,13 +1530,12 @@ pub fn validate_contexts(
     if let (Some(walking_depth), Some(formatting_depth)) = (
         walking_ctx.listing.max_depth,
         formatting_ctx.listing.max_depth,
-    ) {
-        if formatting_depth > walking_depth {
-            errors.add_error(ContextValidationError::inconsistent_depth(
-                walking_depth as u32,
-                formatting_depth as u32,
-            ));
-        }
+    ) && formatting_depth > walking_depth
+    {
+        errors.add_error(ContextValidationError::inconsistent_depth(
+            walking_depth as u32,
+            formatting_depth as u32,
+        ));
     }
 
     if errors.has_errors() {

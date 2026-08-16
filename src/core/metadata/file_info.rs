@@ -72,22 +72,22 @@ pub fn format_node_metadata(
     }
 
     // Time metadata: applies to all node types if configured
-    if formatting_ctx.metadata.show_last_modified {
-        if let Some(formatted) = format_timestamp(node.mtime, "MTime", style) {
-            metadata_parts.push(formatted);
-        }
+    if formatting_ctx.metadata.show_last_modified
+        && let Some(formatted) = format_timestamp(node.mtime, "MTime", style)
+    {
+        metadata_parts.push(formatted);
     }
 
-    if formatting_ctx.metadata.report_change_time {
-        if let Some(formatted) = format_timestamp(node.change_time, "CTime", style) {
-            metadata_parts.push(formatted);
-        }
+    if formatting_ctx.metadata.report_change_time
+        && let Some(formatted) = format_timestamp(node.change_time, "CTime", style)
+    {
+        metadata_parts.push(formatted);
     }
 
-    if formatting_ctx.metadata.report_creation_time {
-        if let Some(formatted) = format_timestamp(node.create_time, "BTime", style) {
-            metadata_parts.push(formatted);
-        }
+    if formatting_ctx.metadata.report_creation_time
+        && let Some(formatted) = format_timestamp(node.create_time, "BTime", style)
+    {
+        metadata_parts.push(formatted);
     }
 
     // File-specific metadata: only show if the node is a file

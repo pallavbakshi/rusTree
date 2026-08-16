@@ -151,31 +151,30 @@ impl AsyncWalkingContext {
 
     /// Validate the context configuration
     pub fn validate(&self) -> Result<(), String> {
-        if let Some(max_depth) = self.listing.max_depth {
-            if max_depth == 0 {
-                return Err("max_depth cannot be 0".to_string());
-            }
+        if let Some(max_depth) = self.listing.max_depth
+            && max_depth == 0
+        {
+            return Err("max_depth cannot be 0".to_string());
         }
 
-        if let Some(min_size) = self.filtering.min_file_size {
-            if let Some(max_size) = self.filtering.max_file_size {
-                if min_size > max_size {
-                    return Err("min_file_size cannot be greater than max_file_size".to_string());
-                }
-            }
+        if let Some(min_size) = self.filtering.min_file_size
+            && let Some(max_size) = self.filtering.max_file_size
+            && min_size > max_size
+        {
+            return Err("min_file_size cannot be greater than max_file_size".to_string());
         }
 
         // Check for empty patterns
-        if let Some(ref patterns) = self.filtering.ignore_patterns {
-            if patterns.iter().any(|p| p.trim().is_empty()) {
-                return Err("ignore_patterns cannot contain empty strings".to_string());
-            }
+        if let Some(ref patterns) = self.filtering.ignore_patterns
+            && patterns.iter().any(|p| p.trim().is_empty())
+        {
+            return Err("ignore_patterns cannot contain empty strings".to_string());
         }
 
-        if let Some(ref patterns) = self.filtering.match_patterns {
-            if patterns.iter().any(|p| p.trim().is_empty()) {
-                return Err("match_patterns cannot contain empty strings".to_string());
-            }
+        if let Some(ref patterns) = self.filtering.match_patterns
+            && patterns.iter().any(|p| p.trim().is_empty())
+        {
+            return Err("match_patterns cannot contain empty strings".to_string());
         }
 
         Ok(())

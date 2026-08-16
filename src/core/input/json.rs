@@ -88,12 +88,12 @@ impl JsonTreeParser {
 
         if is_synthetic_root {
             // This is RusTree's synthetic root wrapper - process children directly without adding this node
-            if let Some(contents) = node.get("contents") {
-                if let Some(children_array) = contents.as_array() {
-                    for child in children_array {
-                        // Children of synthetic root should start at depth 1 to match filesystem scanner
-                        Self::parse_node(child, PathBuf::new(), 1, result)?;
-                    }
+            if let Some(contents) = node.get("contents")
+                && let Some(children_array) = contents.as_array()
+            {
+                for child in children_array {
+                    // Children of synthetic root should start at depth 1 to match filesystem scanner
+                    Self::parse_node(child, PathBuf::new(), 1, result)?;
                 }
             }
             return Ok(());
@@ -129,13 +129,12 @@ impl JsonTreeParser {
         result.push(node_info);
 
         // Process children if this is a directory
-        if node_type == NodeType::Directory {
-            if let Some(contents) = node.get("contents") {
-                if let Some(children_array) = contents.as_array() {
-                    for child in children_array {
-                        Self::parse_node(child, current_path.clone(), depth + 1, result)?;
-                    }
-                }
+        if node_type == NodeType::Directory
+            && let Some(contents) = node.get("contents")
+            && let Some(children_array) = contents.as_array()
+        {
+            for child in children_array {
+                Self::parse_node(child, current_path.clone(), depth + 1, result)?;
             }
         }
 

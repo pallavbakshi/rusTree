@@ -211,12 +211,11 @@ pub fn compare_siblings_with_options(
     // when the user simply asked for an alphabetical listing).  We therefore
     // restrict the explicit directory/file ordering to size-based sorts.
 
-    if *key != SortKey::None {
-        if let Some(type_ordering) =
+    if *key != SortKey::None
+        && let Some(type_ordering) =
             apply_directory_file_ordering(a, b, &options.directory_file_order)
-        {
-            return type_ordering;
-        }
+    {
+        return type_ordering;
     }
 
     // If same types or Default ordering, proceed with sort key comparison

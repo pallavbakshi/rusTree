@@ -47,10 +47,10 @@ impl TreePromptFormatter {
         }
 
         // Add configuration context
-        if tree_config.listing.max_depth.is_some() {
+        if let Some(max_depth) = tree_config.listing.max_depth {
             info.push_str(&format!(
                 "Note: Tree depth limited to {} levels\n",
-                tree_config.listing.max_depth.unwrap()
+                max_depth
             ));
         }
 
@@ -154,27 +154,24 @@ impl TreePromptFormatter {
     fn format_config_context(tree_config: &RustreeLibConfig) -> String {
         let mut info = String::new();
 
-        if tree_config.listing.max_depth.is_some() {
-            info.push_str(&format!(
-                "Analysis depth: {} levels\n",
-                tree_config.listing.max_depth.unwrap()
-            ));
+        if let Some(max_depth) = tree_config.listing.max_depth {
+            info.push_str(&format!("Analysis depth: {} levels\n", max_depth));
         }
 
         if tree_config.listing.list_directories_only {
             info.push_str("Scope: Directories only\n");
         }
 
-        if let Some(ref patterns) = tree_config.filtering.match_patterns {
-            if !patterns.is_empty() {
-                info.push_str(&format!("Include filters: {:?}\n", patterns));
-            }
+        if let Some(ref patterns) = tree_config.filtering.match_patterns
+            && !patterns.is_empty()
+        {
+            info.push_str(&format!("Include filters: {:?}\n", patterns));
         }
 
-        if let Some(ref patterns) = tree_config.filtering.ignore_patterns {
-            if !patterns.is_empty() {
-                info.push_str(&format!("Exclude filters: {:?}\n", patterns));
-            }
+        if let Some(ref patterns) = tree_config.filtering.ignore_patterns
+            && !patterns.is_empty()
+        {
+            info.push_str(&format!("Exclude filters: {:?}\n", patterns));
         }
 
         if !info.is_empty() {

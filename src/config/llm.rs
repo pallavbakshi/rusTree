@@ -89,10 +89,10 @@ impl LlmOptions {
         }
 
         // Validate max tokens
-        if let Some(max_tokens) = llm_args.llm_max_tokens {
-            if max_tokens == 0 || max_tokens > 32_000 {
-                return Err(LlmConfigError::InvalidMaxTokens { tokens: max_tokens });
-            }
+        if let Some(max_tokens) = llm_args.llm_max_tokens
+            && (max_tokens == 0 || max_tokens > 32_000)
+        {
+            return Err(LlmConfigError::InvalidMaxTokens { tokens: max_tokens });
         }
 
         Ok(Self {
