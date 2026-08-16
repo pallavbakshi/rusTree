@@ -273,17 +273,17 @@ fn format_change_list_item(
     }
 
     // Add size if available and requested
-    if config.metadata.show_size_bytes && !change.is_directory() {
-        if let Some(current) = &change.current {
-            if let Some(size) = current.size {
-                let size_str = if config.misc.human_friendly {
-                    format_human_size(size)
-                } else {
-                    format!("{} B", size)
-                };
-                write!(output, " ({})", size_str)?;
-            }
-        }
+    if config.metadata.show_size_bytes
+        && !change.is_directory()
+        && let Some(current) = &change.current
+        && let Some(size) = current.size
+    {
+        let size_str = if config.misc.human_friendly {
+            format_human_size(size)
+        } else {
+            format!("{} B", size)
+        };
+        write!(output, " ({})", size_str)?;
     }
 
     writeln!(output)?;

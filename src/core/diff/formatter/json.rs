@@ -80,20 +80,19 @@ fn format_change_json(change: &Change) -> Value {
         if let Some(size) = current.size {
             obj["size"] = json!(size);
         }
-        if let Some(mtime) = current.mtime {
-            if let Ok(duration) = mtime.duration_since(std::time::UNIX_EPOCH) {
-                obj["modified"] = json!(duration.as_secs());
-            }
+        if let Some(mtime) = current.mtime
+            && let Ok(duration) = mtime.duration_since(std::time::UNIX_EPOCH)
+        {
+            obj["modified"] = json!(duration.as_secs());
         }
     }
 
     // Add previous node info for removed items
-    if let Some(previous) = &change.previous {
-        if change.current.is_none() {
-            if let Some(size) = previous.size {
-                obj["previous_size"] = json!(size);
-            }
-        }
+    if let Some(previous) = &change.previous
+        && change.current.is_none()
+        && let Some(size) = previous.size
+    {
+        obj["previous_size"] = json!(size);
     }
 
     // Add change-specific details
@@ -179,10 +178,10 @@ fn format_unchanged_json(change: &Change) -> Value {
         if let Some(size) = current.size {
             obj["size"] = json!(size);
         }
-        if let Some(mtime) = current.mtime {
-            if let Ok(duration) = mtime.duration_since(std::time::UNIX_EPOCH) {
-                obj["last_modified"] = json!(duration.as_secs());
-            }
+        if let Some(mtime) = current.mtime
+            && let Ok(duration) = mtime.duration_since(std::time::UNIX_EPOCH)
+        {
+            obj["last_modified"] = json!(duration.as_secs());
         }
     }
 

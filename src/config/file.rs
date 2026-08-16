@@ -290,19 +290,19 @@ pub fn load_merged(
 
     // 3. Global
     if include_defaults {
-        if let Some(p) = global_file() {
-            if let Ok(cfg) = load_toml(&p) {
-                cfg.merge_into_config(&mut merged);
-                sources.push(p);
-            }
+        if let Some(p) = global_file()
+            && let Ok(cfg) = load_toml(&p)
+        {
+            cfg.merge_into_config(&mut merged);
+            sources.push(p);
         }
 
         // 2. Project
-        if let Some(p) = project_file() {
-            if let Ok(cfg) = load_toml(&p) {
-                cfg.merge_into_config(&mut merged);
-                sources.push(p);
-            }
+        if let Some(p) = project_file()
+            && let Ok(cfg) = load_toml(&p)
+        {
+            cfg.merge_into_config(&mut merged);
+            sources.push(p);
         }
     }
 

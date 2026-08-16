@@ -346,10 +346,9 @@ fn normalize_path_for_diff(path: &Path, comparison_root: &Path) -> PathBuf {
     if let (Ok(canonical_path), Ok(canonical_root)) = (
         std::fs::canonicalize(path),
         std::fs::canonicalize(comparison_root),
-    ) {
-        if let Ok(relative_path) = canonical_path.strip_prefix(canonical_root) {
-            return relative_path.to_path_buf();
-        }
+    ) && let Ok(relative_path) = canonical_path.strip_prefix(canonical_root)
+    {
+        return relative_path.to_path_buf();
     }
 
     // Fallback: return the original path
@@ -368,14 +367,14 @@ fn build_children_cache(node_map: &HashMap<PathBuf, NodeInfo>) -> HashMap<PathBu
     let mut children_cache: HashMap<PathBuf, Vec<PathBuf>> = HashMap::new();
 
     for path in node_map.keys() {
-        if let Some(parent) = path.parent() {
-            if parent != path {
-                // Avoid self-references
-                children_cache
-                    .entry(parent.to_path_buf())
-                    .or_default()
-                    .push(path.clone());
-            }
+        if let Some(parent) = path.parent()
+            && parent != path
+        {
+            // Avoid self-references
+            children_cache
+                .entry(parent.to_path_buf())
+                .or_default()
+                .push(path.clone());
         }
     }
 

@@ -78,41 +78,41 @@ impl OwnedFormattingContext {
         }
 
         // Validate HTML options when HTML links are enabled
-        if self.html.include_links {
-            if let Some(ref base_href) = self.html.base_href {
-                if base_href.trim().is_empty() {
-                    return Err("base_href cannot be empty when specified".to_string());
-                }
+        if self.html.include_links
+            && let Some(ref base_href) = self.html.base_href
+        {
+            if base_href.trim().is_empty() {
+                return Err("base_href cannot be empty when specified".to_string());
+            }
 
-                // Basic URL validation - should start with http:// or https:// or be relative
-                if !base_href.starts_with("http://")
-                    && !base_href.starts_with("https://")
-                    && !base_href.starts_with("/")
-                    && !base_href.starts_with("./")
-                    && !base_href.starts_with("../")
-                {
-                    return Err("base_href should be a valid URL or relative path".to_string());
-                }
+            // Basic URL validation - should start with http:// or https:// or be relative
+            if !base_href.starts_with("http://")
+                && !base_href.starts_with("https://")
+                && !base_href.starts_with("/")
+                && !base_href.starts_with("./")
+                && !base_href.starts_with("../")
+            {
+                return Err("base_href should be a valid URL or relative path".to_string());
             }
         }
 
         // Validate custom HTML files exist if specified
-        if let Some(ref intro_file) = self.html.custom_intro {
-            if !intro_file.exists() {
-                return Err(format!(
-                    "custom_intro file does not exist: {}",
-                    intro_file.display()
-                ));
-            }
+        if let Some(ref intro_file) = self.html.custom_intro
+            && !intro_file.exists()
+        {
+            return Err(format!(
+                "custom_intro file does not exist: {}",
+                intro_file.display()
+            ));
         }
 
-        if let Some(ref outro_file) = self.html.custom_outro {
-            if !outro_file.exists() {
-                return Err(format!(
-                    "custom_outro file does not exist: {}",
-                    outro_file.display()
-                ));
-            }
+        if let Some(ref outro_file) = self.html.custom_outro
+            && !outro_file.exists()
+        {
+            return Err(format!(
+                "custom_outro file does not exist: {}",
+                outro_file.display()
+            ));
         }
 
         Ok(())

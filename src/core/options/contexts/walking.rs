@@ -130,25 +130,24 @@ impl OwnedWalkingContext {
     /// provides helpful error messages for fixing configuration issues.
     pub fn validate(&self) -> Result<(), ContextValidationError> {
         // Validate max_depth
-        if let Some(max_depth) = self.listing.max_depth {
-            if max_depth == 0 {
-                return Err(ContextValidationError::invalid_max_depth(
-                    0,
-                    ContextType::Walking,
-                ));
-            }
+        if let Some(max_depth) = self.listing.max_depth
+            && max_depth == 0
+        {
+            return Err(ContextValidationError::invalid_max_depth(
+                0,
+                ContextType::Walking,
+            ));
         }
 
         // Validate file size constraints
         if let (Some(min), Some(max)) = (self.filtering.min_file_size, self.filtering.max_file_size)
+            && min > max
         {
-            if min > max {
-                return Err(ContextValidationError::invalid_file_size_range(
-                    min,
-                    max,
-                    ContextType::Walking,
-                ));
-            }
+            return Err(ContextValidationError::invalid_file_size_range(
+                min,
+                max,
+                ContextType::Walking,
+            ));
         }
 
         // Validate patterns are not empty strings

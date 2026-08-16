@@ -234,16 +234,17 @@ fn format_change_tree(
     }
 
     // Add size info if requested
-    if config.metadata.show_size_bytes && !is_dir {
-        if let Some(current) = &change.current {
-            if let Some(size) = current.size {
-                let size_str = if config.misc.human_friendly {
-                    format_human_size(size)
-                } else {
-                    format!("{} B", size)
-                };
-                write!(output, " ({})", size_str)?;
-            }
+    if config.metadata.show_size_bytes
+        && !is_dir
+        && let Some(current) = &change.current
+    {
+        if let Some(size) = current.size {
+            let size_str = if config.misc.human_friendly {
+                format_human_size(size)
+            } else {
+                format!("{} B", size)
+            };
+            write!(output, " ({})", size_str)?;
         }
 
         // Show size change for modified files

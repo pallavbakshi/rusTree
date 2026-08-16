@@ -232,10 +232,10 @@ pub struct ProcessingContextDiff {
 impl ProcessingContextDiff {
     /// Check if any changes require a complete rebuild from scratch
     pub fn requires_complete_rebuild(&self) -> bool {
-        if let Some(ref walking_diff) = self.walking {
-            if walking_diff.requires_directory_rescan() {
-                return true;
-            }
+        if let Some(ref walking_diff) = self.walking
+            && walking_diff.requires_directory_rescan()
+        {
+            return true;
         }
         self.sorting_added || self.sorting_removed
     }

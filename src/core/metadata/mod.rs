@@ -56,22 +56,16 @@ impl MetadataAggregator {
         for node in nodes {
             // Aggregate built-in metadata for files
             if node.node_type == NodeType::File {
-                if should_aggregate_size {
-                    if let Some(size) = node.size {
-                        *aggregator.size_total.get_or_insert(0) += size;
-                    }
+                if should_aggregate_size && let Some(size) = node.size {
+                    *aggregator.size_total.get_or_insert(0) += size;
                 }
 
-                if should_aggregate_lines {
-                    if let Some(lines) = node.line_count {
-                        *aggregator.line_total.get_or_insert(0) += lines;
-                    }
+                if should_aggregate_lines && let Some(lines) = node.line_count {
+                    *aggregator.line_total.get_or_insert(0) += lines;
                 }
 
-                if should_aggregate_words {
-                    if let Some(words) = node.word_count {
-                        *aggregator.word_total.get_or_insert(0) += words;
-                    }
+                if should_aggregate_words && let Some(words) = node.word_count {
+                    *aggregator.word_total.get_or_insert(0) += words;
                 }
             }
 
@@ -110,22 +104,16 @@ impl MetadataAggregator {
         for node in nodes {
             // Aggregate built-in metadata for files
             if node.node_type == NodeType::File {
-                if should_aggregate_size {
-                    if let Some(size) = node.size {
-                        *aggregator.size_total.get_or_insert(0) += size;
-                    }
+                if should_aggregate_size && let Some(size) = node.size {
+                    *aggregator.size_total.get_or_insert(0) += size;
                 }
 
-                if should_aggregate_lines {
-                    if let Some(lines) = node.line_count {
-                        *aggregator.line_total.get_or_insert(0) += lines;
-                    }
+                if should_aggregate_lines && let Some(lines) = node.line_count {
+                    *aggregator.line_total.get_or_insert(0) += lines;
                 }
 
-                if should_aggregate_words {
-                    if let Some(words) = node.word_count {
-                        *aggregator.word_total.get_or_insert(0) += words;
-                    }
+                if should_aggregate_words && let Some(words) = node.word_count {
+                    *aggregator.word_total.get_or_insert(0) += words;
                 }
             }
 
@@ -195,20 +183,20 @@ impl MetadataAggregator {
                 BuiltInFunction::DirStats => {
                     let parts: Vec<&str> = output.split(',').collect();
                     if parts.len() == 3 {
-                        if let Some(file_part) = parts[0].strip_suffix('f') {
-                            if let Ok(count) = file_part.parse::<usize>() {
-                                *self.file_count_from_function.get_or_insert(0) += count;
-                            }
+                        if let Some(file_part) = parts[0].strip_suffix('f')
+                            && let Ok(count) = file_part.parse::<usize>()
+                        {
+                            *self.file_count_from_function.get_or_insert(0) += count;
                         }
-                        if let Some(dir_part) = parts[1].strip_suffix('d') {
-                            if let Ok(count) = dir_part.parse::<usize>() {
-                                *self.dir_count_from_function.get_or_insert(0) += count;
-                            }
+                        if let Some(dir_part) = parts[1].strip_suffix('d')
+                            && let Ok(count) = dir_part.parse::<usize>()
+                        {
+                            *self.dir_count_from_function.get_or_insert(0) += count;
                         }
-                        if let Some(size_part) = parts[2].strip_suffix('B') {
-                            if let Ok(size) = size_part.parse::<u64>() {
-                                *self.size_from_function.get_or_insert(0) += size;
-                            }
+                        if let Some(size_part) = parts[2].strip_suffix('B')
+                            && let Ok(size) = size_part.parse::<u64>()
+                        {
+                            *self.size_from_function.get_or_insert(0) += size;
                         }
                     }
                 }
@@ -234,10 +222,10 @@ impl MetadataAggregator {
         }
 
         // Function-based totals (built-in directory functions & external)
-        if let Some(size) = self.size_from_function {
-            if self.size_total.is_none() {
-                parts.push(format!("{} total (from function)", format_size(size)));
-            }
+        if let Some(size) = self.size_from_function
+            && self.size_total.is_none()
+        {
+            parts.push(format!("{} total (from function)", format_size(size)));
         }
 
         if let Some(bytes) = self.custom_bytes_total.filter(|b| *b > 0) {

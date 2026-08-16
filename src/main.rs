@@ -213,12 +213,11 @@ async fn main() -> ExitCode {
 /// Detects `rustree help <section>` style invocation before clap parsing.
 fn detect_section_help() -> Option<String> {
     let mut args = std::env::args().skip(1); // skip bin name
-    if let Some(first) = args.next() {
-        if first == "help" {
-            if let Some(section) = args.next() {
-                return Some(section);
-            }
-        }
+    if let Some(first) = args.next()
+        && first == "help"
+        && let Some(section) = args.next()
+    {
+        return Some(section);
     }
     None
 }
@@ -421,19 +420,19 @@ async fn handle_llm_query(
 
         let mut args = cli_args.llm.clone();
         if let Some(llm_p) = partial.llm {
-            if args.llm_provider == "openai" {
-                if let Some(p) = llm_p.provider {
-                    args.llm_provider = p;
-                }
+            if args.llm_provider == "openai"
+                && let Some(p) = llm_p.provider
+            {
+                args.llm_provider = p;
             }
             if args.llm_model.is_none() {
                 args.llm_model = llm_p.model;
             }
             if args.llm_api_key.is_none() {
-                if let Some(env_var) = llm_p.api_key_env {
-                    if let Ok(val) = std::env::var(&env_var) {
-                        args.llm_api_key = Some(val);
-                    }
+                if let Some(env_var) = llm_p.api_key_env
+                    && let Ok(val) = std::env::var(&env_var)
+                {
+                    args.llm_api_key = Some(val);
                 }
                 if args.llm_api_key.is_none() {
                     args.llm_api_key = llm_p.api_key;
